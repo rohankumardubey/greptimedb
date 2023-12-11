@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["blob","single"],"struct":["InvertedIndexBlobWriter"],"trait":["InvertedIndexWriter"]};

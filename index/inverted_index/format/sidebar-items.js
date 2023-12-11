@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["FOOTER_PAYLOAD_SIZE_SIZE","MIN_BLOB_SIZE"],"mod":["reader"]};
+window.SIDEBAR_ITEMS = {"constant":["FOOTER_PAYLOAD_SIZE_SIZE","MIN_BLOB_SIZE"],"mod":["reader","writer"]};

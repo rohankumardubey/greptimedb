@@ -54,6 +54,7 @@
 <a href="#54" id="54">54</a>
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
+<a href="#57" id="57">57</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -83,10 +84,10 @@
 //!
 //! An inverted index comprises a collection of bitmaps, a null bitmap, and a finite state transducer (FST) indicating tag values&#39; positions:
 //!
-//! `bitmap₀ bitmap₁ bitmap₂ ... bitmapₙ null_bitmap fst`
+//! `null_bitmap bitmap₀ bitmap₁ bitmap₂ ... bitmapₙ fst`
 //!
-//! - `bitmapᵢ`: Bitset indicating the presence of tag values within a row group.
 //! - `null_bitmap`: Bitset tracking the presence of null values within the tag column.
+//! - `bitmapᵢ`: Bitset indicating the presence of tag values within a row group.
 //! - `fst`: Finite State Transducer providing an ordered map of bytes, representing the tag values.
 //!
 //! ## Footer Details
@@ -107,6 +108,7 @@
 //! [RFC]: https://github.com/GreptimeTeam/greptimedb/blob/develop/docs/rfcs/2023-11-03-inverted-index.md
 
 </span><span class="kw">pub mod </span>reader;
+<span class="kw">pub mod </span>writer;
 
 <span class="kw">const </span>FOOTER_PAYLOAD_SIZE_SIZE: u64 = <span class="number">4</span>;
 <span class="kw">const </span>MIN_BLOB_SIZE: u64 = FOOTER_PAYLOAD_SIZE_SIZE;
