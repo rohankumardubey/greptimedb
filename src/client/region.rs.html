@@ -284,7 +284,7 @@
 <span class="kw">use </span>common_meta::datanode_manager::{AffectedRows, Datanode};
 <span class="kw">use </span>common_meta::error::{<span class="self">self </span><span class="kw">as </span>meta_error, <span class="prelude-ty">Result </span><span class="kw">as </span>MetaResult};
 <span class="kw">use </span>common_recordbatch::error::ExternalSnafu;
-<span class="kw">use </span>common_recordbatch::{RecordBatchStreamAdaptor, SendableRecordBatchStream};
+<span class="kw">use </span>common_recordbatch::{RecordBatchStreamWrapper, SendableRecordBatchStream};
 <span class="kw">use </span>common_telemetry::error;
 <span class="kw">use </span>prost::Message;
 <span class="kw">use </span>snafu::{location, Location, OptionExt, ResultExt};
@@ -397,7 +397,7 @@
                 <span class="kw">yield </span><span class="prelude-val">Ok</span>(record_batch);
             }
         }));
-        <span class="kw">let </span>record_batch_stream = RecordBatchStreamAdaptor {
+        <span class="kw">let </span>record_batch_stream = RecordBatchStreamWrapper {
             schema,
             stream,
             output_ordering: <span class="prelude-val">None</span>,

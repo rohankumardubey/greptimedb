@@ -389,7 +389,7 @@
 <span class="kw">use </span>common_grpc::flight::{FlightDecoder, FlightMessage};
 <span class="kw">use </span>common_query::Output;
 <span class="kw">use </span>common_recordbatch::error::ExternalSnafu;
-<span class="kw">use </span>common_recordbatch::RecordBatchStreamAdaptor;
+<span class="kw">use </span>common_recordbatch::RecordBatchStreamWrapper;
 <span class="kw">use </span>common_telemetry::logging;
 <span class="kw">use </span>common_telemetry::tracing_context::W3cTrace;
 <span class="kw">use </span>futures_util::StreamExt;
@@ -677,7 +677,7 @@
                         <span class="kw">yield </span><span class="prelude-val">Ok</span>(record_batch);
                     }
                 }));
-                <span class="kw">let </span>record_batch_stream = RecordBatchStreamAdaptor {
+                <span class="kw">let </span>record_batch_stream = RecordBatchStreamWrapper {
                     schema,
                     stream,
                     output_ordering: <span class="prelude-val">None</span>,

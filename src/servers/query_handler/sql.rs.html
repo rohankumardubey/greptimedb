@@ -205,16 +205,16 @@
     ) -&gt; std::result::Result&lt;bool, <span class="self">Self</span>::Error&gt;;
 }
 
-<span class="kw">pub struct </span>ServerSqlQueryHandlerAdaptor&lt;E&gt;(SqlQueryHandlerRef&lt;E&gt;);
+<span class="kw">pub struct </span>ServerSqlQueryHandlerAdapter&lt;E&gt;(SqlQueryHandlerRef&lt;E&gt;);
 
-<span class="kw">impl</span>&lt;E&gt; ServerSqlQueryHandlerAdaptor&lt;E&gt; {
+<span class="kw">impl</span>&lt;E&gt; ServerSqlQueryHandlerAdapter&lt;E&gt; {
     <span class="kw">pub fn </span>arc(handler: SqlQueryHandlerRef&lt;E&gt;) -&gt; Arc&lt;<span class="self">Self</span>&gt; {
         Arc::new(<span class="self">Self</span>(handler))
     }
 }
 
 <span class="attr">#[async_trait]
-</span><span class="kw">impl</span>&lt;E&gt; SqlQueryHandler <span class="kw">for </span>ServerSqlQueryHandlerAdaptor&lt;E&gt;
+</span><span class="kw">impl</span>&lt;E&gt; SqlQueryHandler <span class="kw">for </span>ServerSqlQueryHandlerAdapter&lt;E&gt;
 <span class="kw">where
     </span>E: ErrorExt + Send + Sync + <span class="lifetime">&#39;static</span>,
 {

@@ -231,8 +231,8 @@
 <span class="kw">use </span>servers::mysql::server::{MysqlServer, MysqlSpawnConfig, MysqlSpawnRef};
 <span class="kw">use </span>servers::opentsdb::OpentsdbServer;
 <span class="kw">use </span>servers::postgres::PostgresServer;
-<span class="kw">use </span>servers::query_handler::grpc::ServerGrpcQueryHandlerAdaptor;
-<span class="kw">use </span>servers::query_handler::sql::ServerSqlQueryHandlerAdaptor;
+<span class="kw">use </span>servers::query_handler::grpc::ServerGrpcQueryHandlerAdapter;
+<span class="kw">use </span>servers::query_handler::sql::ServerSqlQueryHandlerAdapter;
 <span class="kw">use </span>servers::server::{Server, ServerHandler, ServerHandlers};
 <span class="kw">use </span>snafu::ResultExt;
 
@@ -276,7 +276,7 @@
             };
             <span class="kw">let </span>grpc_server = GrpcServer::new(
                 <span class="prelude-val">Some</span>(grpc_config),
-                <span class="prelude-val">Some</span>(ServerGrpcQueryHandlerAdaptor::arc(instance.clone())),
+                <span class="prelude-val">Some</span>(ServerGrpcQueryHandlerAdapter::arc(instance.clone())),
                 <span class="prelude-val">Some</span>(instance.clone()),
                 <span class="prelude-val">None</span>,
                 <span class="prelude-val">None</span>,
@@ -294,8 +294,8 @@
 
             <span class="kw">let </span><span class="kw-2">mut </span>http_server_builder = HttpServerBuilder::new(http_options.clone());
             <span class="kw">let _ </span>= http_server_builder
-                .with_sql_handler(ServerSqlQueryHandlerAdaptor::arc(instance.clone()))
-                .with_grpc_handler(ServerGrpcQueryHandlerAdaptor::arc(instance.clone()));
+                .with_sql_handler(ServerSqlQueryHandlerAdapter::arc(instance.clone()))
+                .with_grpc_handler(ServerGrpcQueryHandlerAdapter::arc(instance.clone()));
 
             <span class="kw">if let </span><span class="prelude-val">Some</span>(user_provider) = user_provider.clone() {
                 <span class="kw">let _ </span>= http_server_builder.with_user_provider(user_provider);
@@ -343,7 +343,7 @@
             <span class="kw">let </span>mysql_server = MysqlServer::create_server(
                 mysql_io_runtime,
                 Arc::new(MysqlSpawnRef::new(
-                    ServerSqlQueryHandlerAdaptor::arc(instance.clone()),
+                    ServerSqlQueryHandlerAdapter::arc(instance.clone()),
                     user_provider.clone(),
                 )),
                 Arc::new(MysqlSpawnConfig::new(
@@ -373,7 +373,7 @@
             );
 
             <span class="kw">let </span>pg_server = Box::new(PostgresServer::new(
-                ServerSqlQueryHandlerAdaptor::arc(instance.clone()),
+                ServerSqlQueryHandlerAdapter::arc(instance.clone()),
                 opts.tls.clone(),
                 pg_io_runtime,
                 user_provider.clone(),

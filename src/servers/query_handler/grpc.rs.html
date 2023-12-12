@@ -99,16 +99,16 @@
     ) -&gt; std::result::Result&lt;Output, <span class="self">Self</span>::Error&gt;;
 }
 
-<span class="kw">pub struct </span>ServerGrpcQueryHandlerAdaptor&lt;E&gt;(GrpcQueryHandlerRef&lt;E&gt;);
+<span class="kw">pub struct </span>ServerGrpcQueryHandlerAdapter&lt;E&gt;(GrpcQueryHandlerRef&lt;E&gt;);
 
-<span class="kw">impl</span>&lt;E&gt; ServerGrpcQueryHandlerAdaptor&lt;E&gt; {
+<span class="kw">impl</span>&lt;E&gt; ServerGrpcQueryHandlerAdapter&lt;E&gt; {
     <span class="kw">pub fn </span>arc(handler: GrpcQueryHandlerRef&lt;E&gt;) -&gt; Arc&lt;<span class="self">Self</span>&gt; {
         Arc::new(<span class="self">Self</span>(handler))
     }
 }
 
 <span class="attr">#[async_trait]
-</span><span class="kw">impl</span>&lt;E&gt; GrpcQueryHandler <span class="kw">for </span>ServerGrpcQueryHandlerAdaptor&lt;E&gt;
+</span><span class="kw">impl</span>&lt;E&gt; GrpcQueryHandler <span class="kw">for </span>ServerGrpcQueryHandlerAdapter&lt;E&gt;
 <span class="kw">where
     </span>E: ErrorExt + Send + Sync + <span class="lifetime">&#39;static</span>,
 {

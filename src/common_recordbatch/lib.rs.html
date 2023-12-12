@@ -534,16 +534,16 @@
 }
 
 <span class="doccomment">/// Adapt a [Stream] of [RecordBatch] to a [RecordBatchStream].
-</span><span class="kw">pub struct </span>RecordBatchStreamAdaptor&lt;S&gt; {
+</span><span class="kw">pub struct </span>RecordBatchStreamWrapper&lt;S&gt; {
     <span class="kw">pub </span>schema: SchemaRef,
     <span class="kw">pub </span>stream: S,
     <span class="kw">pub </span>output_ordering: <span class="prelude-ty">Option</span>&lt;Vec&lt;OrderOption&gt;&gt;,
 }
 
-<span class="kw">impl</span>&lt;S&gt; RecordBatchStreamAdaptor&lt;S&gt; {
-    <span class="doccomment">/// Creates a RecordBatchStreamAdaptor without output ordering requirement.
-    </span><span class="kw">pub fn </span>new(schema: SchemaRef, stream: S) -&gt; RecordBatchStreamAdaptor&lt;S&gt; {
-        RecordBatchStreamAdaptor {
+<span class="kw">impl</span>&lt;S&gt; RecordBatchStreamWrapper&lt;S&gt; {
+    <span class="doccomment">/// Creates a [RecordBatchStreamWrapper] without output ordering requirement.
+    </span><span class="kw">pub fn </span>new(schema: SchemaRef, stream: S) -&gt; RecordBatchStreamWrapper&lt;S&gt; {
+        RecordBatchStreamWrapper {
             schema,
             stream,
             output_ordering: <span class="prelude-val">None</span>,
@@ -552,7 +552,7 @@
 }
 
 <span class="kw">impl</span>&lt;S: Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;RecordBatch&gt;&gt; + Unpin&gt; RecordBatchStream
-    <span class="kw">for </span>RecordBatchStreamAdaptor&lt;S&gt;
+    <span class="kw">for </span>RecordBatchStreamWrapper&lt;S&gt;
 {
     <span class="kw">fn </span>schema(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; SchemaRef {
         <span class="self">self</span>.schema.clone()
@@ -563,7 +563,7 @@
     }
 }
 
-<span class="kw">impl</span>&lt;S: Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;RecordBatch&gt;&gt; + Unpin&gt; Stream <span class="kw">for </span>RecordBatchStreamAdaptor&lt;S&gt; {
+<span class="kw">impl</span>&lt;S: Stream&lt;Item = <span class="prelude-ty">Result</span>&lt;RecordBatch&gt;&gt; + Unpin&gt; Stream <span class="kw">for </span>RecordBatchStreamWrapper&lt;S&gt; {
     <span class="kw">type </span>Item = <span class="prelude-ty">Result</span>&lt;RecordBatch&gt;;
 
     <span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, ctx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {

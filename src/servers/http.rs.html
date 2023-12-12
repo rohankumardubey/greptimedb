@@ -1743,8 +1743,8 @@
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::error::Error;
-    <span class="kw">use </span><span class="kw">crate</span>::query_handler::grpc::{GrpcQueryHandler, ServerGrpcQueryHandlerAdaptor};
-    <span class="kw">use </span><span class="kw">crate</span>::query_handler::sql::{ServerSqlQueryHandlerAdaptor, SqlQueryHandler};
+    <span class="kw">use </span><span class="kw">crate</span>::query_handler::grpc::{GrpcQueryHandler, ServerGrpcQueryHandlerAdapter};
+    <span class="kw">use </span><span class="kw">crate</span>::query_handler::sql::{ServerSqlQueryHandlerAdapter, SqlQueryHandler};
 
     <span class="kw">struct </span>DummyInstance {
         _tx: mpsc::Sender&lt;(String, Vec&lt;u8&gt;)&gt;,
@@ -1810,8 +1810,8 @@
 
     <span class="kw">fn </span>make_test_app(tx: mpsc::Sender&lt;(String, Vec&lt;u8&gt;)&gt;) -&gt; Router {
         <span class="kw">let </span>instance = Arc::new(DummyInstance { _tx: tx });
-        <span class="kw">let </span>sql_instance = ServerSqlQueryHandlerAdaptor::arc(instance.clone());
-        <span class="kw">let </span>grpc_instance = ServerGrpcQueryHandlerAdaptor::arc(instance);
+        <span class="kw">let </span>sql_instance = ServerSqlQueryHandlerAdapter::arc(instance.clone());
+        <span class="kw">let </span>grpc_instance = ServerGrpcQueryHandlerAdapter::arc(instance);
         <span class="kw">let </span>server = HttpServerBuilder::new(HttpOptions::default())
             .with_sql_handler(sql_instance)
             .with_grpc_handler(grpc_instance)

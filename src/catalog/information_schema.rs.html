@@ -201,7 +201,7 @@
 
 <span class="kw">use </span>common_catalog::consts::INFORMATION_SCHEMA_NAME;
 <span class="kw">use </span>common_error::ext::BoxedError;
-<span class="kw">use </span>common_recordbatch::{RecordBatchStreamAdaptor, SendableRecordBatchStream};
+<span class="kw">use </span>common_recordbatch::{RecordBatchStreamWrapper, SendableRecordBatchStream};
 <span class="kw">use </span>datatypes::schema::SchemaRef;
 <span class="kw">use </span>futures_util::StreamExt;
 <span class="kw">use </span>snafu::ResultExt;
@@ -352,7 +352,7 @@
                 <span class="prelude-val">None </span>=&gt; batch,
             });
 
-        <span class="kw">let </span>stream = RecordBatchStreamAdaptor {
+        <span class="kw">let </span>stream = RecordBatchStreamWrapper {
             schema: projected_schema,
             stream: Box::pin(stream),
             output_ordering: <span class="prelude-val">None</span>,

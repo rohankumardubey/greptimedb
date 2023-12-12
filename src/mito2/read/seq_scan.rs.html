@@ -352,7 +352,7 @@
 <span class="kw">use </span>async_stream::try_stream;
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_recordbatch::error::ExternalSnafu;
-<span class="kw">use </span>common_recordbatch::{RecordBatch, RecordBatchStreamAdaptor, SendableRecordBatchStream};
+<span class="kw">use </span>common_recordbatch::{RecordBatch, RecordBatchStreamWrapper, SendableRecordBatchStream};
 <span class="kw">use </span>common_telemetry::{debug, error};
 <span class="kw">use </span>common_time::range::TimestampRange;
 <span class="kw">use </span>snafu::ResultExt;
@@ -496,7 +496,7 @@
             <span class="comment">// Update metrics.
             </span>READ_STAGE_ELAPSED.with_label_values(<span class="kw-2">&amp;</span>[<span class="string">&quot;total&quot;</span>]).observe(metrics.scan_cost.as_secs_f64());
         };
-        <span class="kw">let </span>stream = Box::pin(RecordBatchStreamAdaptor::new(
+        <span class="kw">let </span>stream = Box::pin(RecordBatchStreamWrapper::new(
             <span class="self">self</span>.mapper.output_schema(),
             Box::pin(stream),
         ));

@@ -368,7 +368,7 @@
 <span class="kw">use </span>common_recordbatch::adapter::DfRecordBatchStreamAdapter;
 <span class="kw">use </span>common_recordbatch::error::ExternalSnafu;
 <span class="kw">use </span>common_recordbatch::{
-    DfSendableRecordBatchStream, RecordBatch, RecordBatchStreamAdaptor, SendableRecordBatchStream,
+    DfSendableRecordBatchStream, RecordBatch, RecordBatchStreamWrapper, SendableRecordBatchStream,
 };
 <span class="kw">use </span>common_telemetry::tracing;
 <span class="kw">use </span>common_telemetry::tracing_context::TracingContext;
@@ -560,7 +560,7 @@
             }
         }));
 
-        <span class="prelude-val">Ok</span>(Box::pin(RecordBatchStreamAdaptor {
+        <span class="prelude-val">Ok</span>(Box::pin(RecordBatchStreamWrapper {
             schema: <span class="self">self</span>.schema.clone(),
             stream,
             output_ordering: <span class="prelude-val">None</span>,
