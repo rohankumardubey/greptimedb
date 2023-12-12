@@ -252,6 +252,8 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -270,7 +272,7 @@
 <span class="kw">use </span>sqlparser::ast::Ident;
 <span class="kw">use </span>sqlparser::dialect::Dialect;
 <span class="kw">use </span>sqlparser::keywords::Keyword;
-<span class="kw">use </span>sqlparser::parser::{Parser, ParserError};
+<span class="kw">use </span>sqlparser::parser::{Parser, ParserError, ParserOptions};
 <span class="kw">use </span>sqlparser::tokenizer::{Token, TokenWithLocation};
 
 <span class="kw">use </span><span class="kw">crate</span>::ast::{Expr, ObjectName};
@@ -291,6 +293,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>stmts: Vec&lt;Statement&gt; = Vec::new();
 
         <span class="kw">let </span>parser = Parser::new(dialect)
+            .with_options(ParserOptions::new().with_trailing_commas(<span class="bool-val">true</span>))
             .try_with_sql(sql)
             .context(SyntaxSnafu)<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>parser_ctx = ParserContext { sql, parser };
@@ -321,6 +324,7 @@
 
     <span class="kw">pub fn </span>parse_function(sql: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str, dialect: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Dialect) -&gt; <span class="prelude-ty">Result</span>&lt;Expr&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>parser = Parser::new(dialect)
+            .with_options(ParserOptions::new().with_trailing_commas(<span class="bool-val">true</span>))
             .try_with_sql(sql)
             .context(SyntaxSnafu)<span class="question-mark">?</span>;
 
