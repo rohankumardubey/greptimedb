@@ -263,6 +263,16 @@
 <a href="#263" id="263">263</a>
 <a href="#264" id="264">264</a>
 <a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -281,6 +291,7 @@
 <span class="kw">use </span>std::fmt::Display;
 
 <span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>store_api::storage::RegionId;
 <span class="kw">use </span>table::metadata::TableId;
 
 <span class="kw">use </span><span class="kw">super</span>::DeserializedValueWithBytes;
@@ -315,7 +326,8 @@
         }
     }
 
-    <span class="kw">pub fn </span>update(<span class="kw-2">&amp;</span><span class="self">self</span>, region_routes: Vec&lt;RegionRoute&gt;) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// Returns a new version [TableRouteValue] with `region_routes`.
+    </span><span class="kw">pub fn </span>update(<span class="kw-2">&amp;</span><span class="self">self</span>, region_routes: Vec&lt;RegionRoute&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             region_routes,
             version: <span class="self">self</span>.version + <span class="number">1</span>,
@@ -328,6 +340,14 @@
     </span><span class="attr">#[cfg(any(tets, feature = <span class="string">&quot;testing&quot;</span>))]
     </span><span class="kw">pub fn </span>version(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
         <span class="self">self</span>.version
+    }
+
+    <span class="doccomment">/// Returns the corresponding [RegionRoute].
+    </span><span class="kw">pub fn </span>region_route(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) -&gt; <span class="prelude-ty">Option</span>&lt;RegionRoute&gt; {
+        <span class="self">self</span>.region_routes
+            .iter()
+            .find(|route| route.region.id == region_id)
+            .cloned()
     }
 }
 

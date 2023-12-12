@@ -804,6 +804,7 @@
 <a href="#804" id="804">804</a>
 <a href="#805" id="805">805</a>
 <a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -850,6 +851,7 @@
 
     <span class="attr">#[tokio::test(flavor = <span class="string">&quot;multi_thread&quot;</span>)]
     </span><span class="kw">async fn </span>test_distributed_handle_ddl_request() {
+        common_telemetry::init_default_ut_logging();
         <span class="kw">let </span>instance =
             tests::create_distributed_instance(<span class="string">&quot;test_distributed_handle_ddl_request&quot;</span>).<span class="kw">await</span>;
 

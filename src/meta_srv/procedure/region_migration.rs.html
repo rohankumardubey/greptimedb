@@ -681,6 +681,7 @@
 <span class="kw">use </span>common_meta::key::table_route::TableRouteValue;
 <span class="kw">use </span>common_meta::key::{DeserializedValueWithBytes, TableMetadataManagerRef};
 <span class="kw">use </span>common_meta::peer::Peer;
+<span class="kw">use </span>common_meta::region_keeper::{MemoryRegionKeeperRef, OperatingRegionGuard};
 <span class="kw">use </span>common_meta::ClusterId;
 <span class="kw">use </span>common_procedure::error::{
     Error <span class="kw">as </span>ProcedureError, FromJsonSnafu, <span class="prelude-ty">Result </span><span class="kw">as </span>ProcedureResult, ToJsonSnafu,
@@ -694,7 +695,6 @@
 <span class="kw">use </span><span class="self">self</span>::migration_start::RegionMigrationStart;
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, Error, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::procedure::utils::region_lock_key;
-<span class="kw">use </span><span class="kw">crate</span>::region::lease_keeper::{OpeningRegionGuard, OpeningRegionKeeperRef};
 <span class="kw">use </span><span class="kw">crate</span>::service::mailbox::{BroadcastChannel, MailboxRef};
 
 <span class="doccomment">/// It&#39;s shared in each step and available even after recovering.
@@ -733,7 +733,7 @@
     /// `opening_region_guard` should be consumed after
     /// the corresponding [RegionRoute](common_meta::rpc::router::RegionRoute) of the opening region
     /// was written into [TableRouteValue](common_meta::key::table_route::TableRouteValue).
-    </span>opening_region_guard: <span class="prelude-ty">Option</span>&lt;OpeningRegionGuard&gt;,
+    </span>opening_region_guard: <span class="prelude-ty">Option</span>&lt;OperatingRegionGuard&gt;,
     <span class="doccomment">/// `table_route` is stored via previous steps for future use.
     </span>table_route: <span class="prelude-ty">Option</span>&lt;DeserializedValueWithBytes&lt;TableRouteValue&gt;&gt;,
     <span class="doccomment">/// `table_info` is stored via previous steps for future use.
@@ -775,7 +775,7 @@
 </span><span class="kw">pub struct </span>ContextFactoryImpl {
     volatile_ctx: VolatileContext,
     table_metadata_manager: TableMetadataManagerRef,
-    opening_region_keeper: OpeningRegionKeeperRef,
+    opening_region_keeper: MemoryRegionKeeperRef,
     mailbox: MailboxRef,
     server_addr: String,
 }
@@ -800,7 +800,7 @@
     persistent_ctx: PersistentContext,
     volatile_ctx: VolatileContext,
     table_metadata_manager: TableMetadataManagerRef,
-    opening_region_keeper: OpeningRegionKeeperRef,
+    opening_region_keeper: MemoryRegionKeeperRef,
     mailbox: MailboxRef,
     server_addr: String,
 }

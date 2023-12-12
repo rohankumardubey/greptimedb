@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["mito","utils"],"struct":["OpeningRegionGuard","OpeningRegionKeeper","RegionLeaseKeeper"],"type":["OpeningRegionKeeperRef","RegionLeaseKeeperRef"]};
+window.SIDEBAR_ITEMS = {"fn":["renew_region_lease_via_region_route"],"struct":["RegionLeaseKeeper","RenewRegionLeasesResponse"],"type":["RegionLeaseKeeperRef"]};

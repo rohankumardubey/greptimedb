@@ -146,6 +146,8 @@
 <a href="#146" id="146">146</a>
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -168,6 +170,7 @@
 <span class="kw">use </span>common_meta::cache_invalidator::DummyCacheInvalidator;
 <span class="kw">use </span>common_meta::ddl_manager::DdlManager;
 <span class="kw">use </span>common_meta::key::TableMetadataManager;
+<span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeper;
 <span class="kw">use </span>common_procedure::options::ProcedureConfig;
 <span class="kw">use </span>common_telemetry::logging::LoggingOptions;
 <span class="kw">use </span>datanode::config::DatanodeOptions;
@@ -263,6 +266,7 @@
                 Arc::new(DummyCacheInvalidator),
                 table_metadata_manager,
                 Arc::new(StandaloneTableMetadataCreator::new(kv_backend.clone())),
+                Arc::new(MemoryRegionKeeper::default()),
             )
             .unwrap(),
         );

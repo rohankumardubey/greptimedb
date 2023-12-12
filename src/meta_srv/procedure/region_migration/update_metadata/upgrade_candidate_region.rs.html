@@ -667,6 +667,7 @@
 
     <span class="kw">use </span>common_meta::key::test_utils::new_test_table_info;
     <span class="kw">use </span>common_meta::peer::Peer;
+    <span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeper;
     <span class="kw">use </span>common_meta::rpc::router::{Region, RegionRoute, RegionStatus};
     <span class="kw">use </span>store_api::storage::RegionId;
 
@@ -675,7 +676,6 @@
     <span class="kw">use </span><span class="kw">crate</span>::procedure::region_migration::test_util::{<span class="self">self</span>, TestingEnv};
     <span class="kw">use </span><span class="kw">crate</span>::procedure::region_migration::update_metadata::UpdateMetadata;
     <span class="kw">use </span><span class="kw">crate</span>::procedure::region_migration::{ContextFactory, PersistentContext, State};
-    <span class="kw">use </span><span class="kw">crate</span>::region::lease_keeper::OpeningRegionKeeper;
 
     <span class="kw">fn </span>new_persistent_context() -&gt; PersistentContext {
         test_util::new_persistent_context(<span class="number">1</span>, <span class="number">2</span>, RegionId::new(<span class="number">1024</span>, <span class="number">1</span>))
@@ -794,7 +794,7 @@
         <span class="kw">let </span>env = TestingEnv::new();
         <span class="kw">let </span>persistent_context = new_persistent_context();
         <span class="kw">let </span><span class="kw-2">mut </span>ctx = env.context_factory().new_context(persistent_context);
-        <span class="kw">let </span>opening_keeper = OpeningRegionKeeper::default();
+        <span class="kw">let </span>opening_keeper = MemoryRegionKeeper::default();
 
         <span class="kw">let </span>table_id = <span class="number">1024</span>;
         <span class="kw">let </span>table_info = new_test_table_info(table_id, <span class="macro">vec!</span>[<span class="number">1</span>]).into();
@@ -941,7 +941,7 @@
         <span class="kw">let </span>env = TestingEnv::new();
         <span class="kw">let </span>persistent_context = new_persistent_context();
         <span class="kw">let </span><span class="kw-2">mut </span>ctx = env.context_factory().new_context(persistent_context);
-        <span class="kw">let </span>opening_keeper = OpeningRegionKeeper::default();
+        <span class="kw">let </span>opening_keeper = MemoryRegionKeeper::default();
 
         <span class="kw">let </span>table_id = <span class="number">1024</span>;
         <span class="kw">let </span>table_info = new_test_table_info(table_id, <span class="macro">vec!</span>[<span class="number">1</span>]).into();

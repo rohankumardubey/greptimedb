@@ -396,6 +396,10 @@
 <a href="#396" id="396">396</a>
 <a href="#397" id="397">397</a>
 <a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -424,6 +428,7 @@
 <span class="kw">use </span>common_meta::key::{TableMetadataManager, TableMetadataManagerRef};
 <span class="kw">use </span>common_meta::kv_backend::memory::MemoryKvBackend;
 <span class="kw">use </span>common_meta::kv_backend::{KvBackendRef, ResettableKvBackendRef};
+<span class="kw">use </span>common_meta::region_keeper::{MemoryRegionKeeper, MemoryRegionKeeperRef};
 <span class="kw">use </span>common_meta::sequence::Sequence;
 <span class="kw">use </span>common_meta::state_store::KvStateStore;
 <span class="kw">use </span>common_procedure::local::{LocalManager, ManagerConfig};
@@ -453,7 +458,6 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::procedure::region_failover::RegionFailoverManager;
 <span class="kw">use </span><span class="kw">crate</span>::pubsub::PublishRef;
-<span class="kw">use </span><span class="kw">crate</span>::region::lease_keeper::OpeningRegionKeeper;
 <span class="kw">use </span><span class="kw">crate</span>::selector::lease_based::LeaseBasedSelector;
 <span class="kw">use </span><span class="kw">crate</span>::service::mailbox::MailboxRef;
 <span class="kw">use </span><span class="kw">crate</span>::service::store::cached_kv::{CheckLeader, LeaderCachedKvBackend};
@@ -609,6 +613,8 @@
             ))
         });
 
+        <span class="kw">let </span>opening_region_keeper = Arc::new(MemoryRegionKeeper::default());
+
         <span class="kw">let </span>ddl_manager = build_ddl_manager(
             <span class="kw-2">&amp;</span>options,
             datanode_manager,
@@ -616,8 +622,8 @@
             <span class="kw-2">&amp;</span>mailbox,
             <span class="kw-2">&amp;</span>table_metadata_manager,
             table_metadata_allocator,
+            <span class="kw-2">&amp;</span>opening_region_keeper,
         )<span class="question-mark">?</span>;
-        <span class="kw">let </span>opening_region_keeper = Arc::new(OpeningRegionKeeper::default());
 
         <span class="kw">let </span>handler_group = <span class="kw">match </span>handler_group {
             <span class="prelude-val">Some</span>(handler_group) =&gt; handler_group,
@@ -705,7 +711,7 @@
             )
             .<span class="kw">await</span>,
             plugins: plugins.unwrap_or_else(Plugins::default),
-            opening_region_keeper,
+            memory_region_keeper: opening_region_keeper,
         })
     }
 }
@@ -748,6 +754,7 @@
     mailbox: <span class="kw-2">&amp;</span>MailboxRef,
     table_metadata_manager: <span class="kw-2">&amp;</span>TableMetadataManagerRef,
     table_metadata_allocator: TableMetadataAllocatorRef,
+    memory_region_keeper: <span class="kw-2">&amp;</span>MemoryRegionKeeperRef,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;DdlManagerRef&gt; {
     <span class="kw">let </span>datanode_clients = datanode_clients.unwrap_or_else(|| {
         <span class="kw">let </span>datanode_client_channel_config = ChannelConfig::new()
@@ -774,6 +781,7 @@
             cache_invalidator,
             table_metadata_manager.clone(),
             table_metadata_allocator,
+            memory_region_keeper.clone(),
         )
         .context(error::InitDdlManagerSnafu)<span class="question-mark">?</span>,
     ))

@@ -208,6 +208,8 @@
 <a href="#208" id="208">208</a>
 <a href="#209" id="209">209</a>
 <a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -325,6 +327,7 @@
     <span class="kw">use </span>common_meta::key::TableMetadataManager;
     <span class="kw">use </span>common_meta::kv_backend::memory::MemoryKvBackend;
     <span class="kw">use </span>common_meta::peer::Peer;
+    <span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeper;
     <span class="kw">use </span>common_meta::rpc::router::RegionRoute;
     <span class="kw">use </span>common_meta::sequence::Sequence;
     <span class="kw">use </span>datatypes::prelude::ConcreteDataType;
@@ -415,6 +418,7 @@
                 },
             )),
             table_metadata_manager: Arc::new(TableMetadataManager::new(kv_backend)),
+            memory_region_keeper: Arc::new(MemoryRegionKeeper::new()),
         }
     }
 }

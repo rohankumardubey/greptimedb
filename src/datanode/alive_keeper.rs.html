@@ -525,34 +525,6 @@
 <a href="#525" id="525">525</a>
 <a href="#526" id="526">526</a>
 <a href="#527" id="527">527</a>
-<a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
-<a href="#530" id="530">530</a>
-<a href="#531" id="531">531</a>
-<a href="#532" id="532">532</a>
-<a href="#533" id="533">533</a>
-<a href="#534" id="534">534</a>
-<a href="#535" id="535">535</a>
-<a href="#536" id="536">536</a>
-<a href="#537" id="537">537</a>
-<a href="#538" id="538">538</a>
-<a href="#539" id="539">539</a>
-<a href="#540" id="540">540</a>
-<a href="#541" id="541">541</a>
-<a href="#542" id="542">542</a>
-<a href="#543" id="543">543</a>
-<a href="#544" id="544">544</a>
-<a href="#545" id="545">545</a>
-<a href="#546" id="546">546</a>
-<a href="#547" id="547">547</a>
-<a href="#548" id="548">548</a>
-<a href="#549" id="549">549</a>
-<a href="#550" id="550">550</a>
-<a href="#551" id="551">551</a>
-<a href="#552" id="552">552</a>
-<a href="#553" id="553">553</a>
-<a href="#554" id="554">554</a>
-<a href="#555" id="555">555</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -568,7 +540,6 @@
 // limitations under the License.
 
 </span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, Ordering};
 <span class="kw">use </span>std::sync::Arc;
 
@@ -595,20 +566,14 @@
 <span class="kw">use </span><span class="kw">crate</span>::event_listener::{RegionServerEvent, RegionServerEventReceiver};
 <span class="kw">use </span><span class="kw">crate</span>::region_server::RegionServer;
 
-<span class="kw">const </span>MAX_CLOSE_RETRY_TIMES: usize = <span class="number">10</span>;
-
-<span class="doccomment">/// [RegionAliveKeeper] manages all `CountdownTaskHandles`.
+<span class="doccomment">/// [RegionAliveKeeper] manages all [CountdownTaskHandle]s.
 ///
-/// [RegionAliveKeeper] starts a `CountdownTask` for each region. When deadline is reached,
-/// the region will be closed.
+/// [RegionAliveKeeper] starts a [CountdownTask] for each region. When the deadline is reached,
+/// the status of region be set to &quot;readonly&quot;, ensures there is no side-effect in the entity system.
 ///
-/// The deadline is controlled by Metasrv. It works like &quot;lease&quot; for regions: a Datanode submits its
-/// opened regions to Metasrv, in heartbeats. If Metasrv decides some region could be resided in this
-/// Datanode, it will &quot;extend&quot; the region&#39;s &quot;lease&quot;, with a deadline for [RegionAliveKeeper] to
-/// countdown.
-///
-/// On each lease extension, [RegionAliveKeeper] will reset the deadline to the corresponding time, and
-/// set region&#39;s status to &quot;writable&quot;.
+/// The deadline is controlled by the meta server. Datanode will send its opened regions info to meta sever
+/// via heartbeat. If the meta server decides some region could be resided in this Datanode,
+/// it will renew the lease of region, a deadline of [CountdownTask] will be reset.
 </span><span class="kw">pub struct </span>RegionAliveKeeper {
     region_server: RegionServer,
     tasks: Arc&lt;Mutex&lt;HashMap&lt;RegionId, Arc&lt;CountdownTaskHandle&gt;&gt;&gt;&gt;,
@@ -616,14 +581,15 @@
     started: Arc&lt;AtomicBool&gt;,
 
     <span class="doccomment">/// The epoch when [RegionAliveKeeper] is created. It&#39;s used to get a monotonically non-decreasing
-    /// elapsed time when submitting heartbeats to Metasrv (because [Instant] is monotonically
-    /// non-decreasing). The heartbeat request will carry the duration since this epoch, and the
+    /// elapsed time when submitting heartbeats to the meta server (because [Instant] is monotonically
+    /// non-decreasing). The heartbeat requests will carry the duration since this epoch, and the
     /// duration acts like an &quot;invariant point&quot; for region&#39;s keep alive lease.
     </span>epoch: Instant,
 }
 
 <span class="kw">impl </span>RegionAliveKeeper {
-    <span class="kw">pub fn </span>new(region_server: RegionServer, heartbeat_interval_millis: u64) -&gt; <span class="self">Self </span>{
+    <span class="doccomment">/// Returns an empty [RegionAliveKeeper].
+    </span><span class="kw">pub fn </span>new(region_server: RegionServer, heartbeat_interval_millis: u64) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             region_server,
             tasks: Arc::new(Mutex::new(HashMap::new())),
@@ -637,26 +603,16 @@
         <span class="self">self</span>.tasks.lock().<span class="kw">await</span>.get(<span class="kw-2">&amp;</span>region_id).cloned()
     }
 
-    <span class="kw">pub async fn </span>register_region(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) {
+    <span class="doccomment">/// Add the countdown task for a specific region.
+    /// It will be ignored if the task exists.
+    </span><span class="kw">pub async fn </span>register_region(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) {
         <span class="kw">if </span><span class="self">self</span>.find_handle(region_id).<span class="kw">await</span>.is_some() {
             <span class="kw">return</span>;
         }
 
-        <span class="kw">let </span>tasks = Arc::downgrade(<span class="kw-2">&amp;</span><span class="self">self</span>.tasks);
-        <span class="kw">let </span>on_task_finished = <span class="kw">async move </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(x) = tasks.upgrade() {
-                <span class="kw">let _ </span>= x.lock().<span class="kw">await</span>.remove(<span class="kw-2">&amp;</span>region_id);
-            } <span class="comment">// Else the countdown task handles map could be dropped because the keeper is dropped.
-        </span>};
         <span class="kw">let </span>handle = Arc::new(CountdownTaskHandle::new(
             <span class="self">self</span>.region_server.clone(),
             region_id,
-            <span class="kw">move </span>|result: <span class="prelude-ty">Option</span>&lt;bool&gt;| {
-                <span class="macro">info!</span>(
-                    <span class="string">&quot;Deregister region: {region_id} after countdown task finished, result: {result:?}&quot;</span>,
-                );
-                on_task_finished
-            },
         ));
 
         <span class="kw">let </span><span class="kw-2">mut </span>handles = <span class="self">self</span>.tasks.lock().<span class="kw">await</span>;
@@ -673,13 +629,15 @@
         }
     }
 
-    <span class="kw">pub async fn </span>deregister_region(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) {
+    <span class="doccomment">/// Removes the countdown task for a specific region.
+    </span><span class="kw">pub async fn </span>deregister_region(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) {
         <span class="kw">if </span><span class="self">self</span>.tasks.lock().<span class="kw">await</span>.remove(<span class="kw-2">&amp;</span>region_id).is_some() {
             <span class="macro">info!</span>(<span class="string">&quot;Deregister alive countdown for region {region_id}&quot;</span>)
         }
     }
 
-    <span class="kw">async fn </span>keep_lived(<span class="kw-2">&amp;</span><span class="self">self</span>, regions: <span class="kw-2">&amp;</span>[GrantedRegion], deadline: Instant) {
+    <span class="doccomment">/// Renews the lease of regions to `deadline`.
+    </span><span class="kw">async fn </span>renew_region_leases(<span class="kw-2">&amp;</span><span class="self">self</span>, regions: <span class="kw-2">&amp;</span>[GrantedRegion], deadline: Instant) {
         <span class="kw">for </span>region <span class="kw">in </span>regions {
             <span class="kw">let </span>(role, region_id) = (region.role().into(), RegionId::from(region.region_id));
             <span class="kw">if let </span><span class="prelude-val">Some</span>(handle) = <span class="self">self</span>.find_handle(region_id).<span class="kw">await </span>{
@@ -690,6 +648,25 @@
                 </span>);
                 <span class="comment">// Else the region alive keeper might be triggered by lagging messages, we can safely ignore it.
             </span>}
+        }
+    }
+
+    <span class="kw">async fn </span>close_staled_region(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) {
+        <span class="macro">info!</span>(<span class="string">&quot;Closing staled region: {region_id}&quot;</span>);
+        <span class="kw">let </span>request = RegionRequest::Close(RegionCloseRequest {});
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self</span>.region_server.handle_request(region_id, request).<span class="kw">await </span>{
+            <span class="kw">if </span>e.status_code() != StatusCode::RegionNotFound {
+                <span class="kw">let _ </span>= <span class="self">self</span>.region_server.set_writable(region_id, <span class="bool-val">false</span>);
+                <span class="macro">error!</span>(e; <span class="string">&quot;Failed to close staled region {}, set region to readonly.&quot;</span>,region_id);
+            }
+        }
+    }
+
+    <span class="doccomment">/// Closes staled regions.
+    </span><span class="kw">async fn </span>close_staled_regions(<span class="kw-2">&amp;</span><span class="self">self</span>, regions: <span class="kw-2">&amp;</span>[u64]) {
+        <span class="kw">for </span>region_id <span class="kw">in </span>regions {
+            <span class="self">self</span>.close_staled_region(RegionId::from_u64(<span class="kw-2">*</span>region_id))
+                .<span class="kw">await</span>;
         }
     }
 
@@ -798,7 +775,11 @@
         <span class="kw">let </span>start_instant = <span class="self">self</span>.epoch + Duration::from_millis(region_lease.duration_since_epoch);
         <span class="kw">let </span>deadline = start_instant + Duration::from_secs(region_lease.lease_seconds);
 
-        <span class="self">self</span>.keep_lived(<span class="kw-2">&amp;</span>region_lease.regions, deadline).<span class="kw">await</span>;
+        <span class="self">self</span>.renew_region_leases(<span class="kw-2">&amp;</span>region_lease.regions, deadline)
+            .<span class="kw">await</span>;
+        <span class="self">self</span>.close_staled_regions(<span class="kw-2">&amp;</span>region_lease.closeable_region_ids)
+            .<span class="kw">await</span>;
+
         <span class="prelude-val">Ok</span>(HandleControl::Continue)
     }
 }
@@ -824,19 +805,7 @@
 
 <span class="kw">impl </span>CountdownTaskHandle {
     <span class="doccomment">/// Creates a new [CountdownTaskHandle] and starts the countdown task.
-    /// # Params
-    /// - `on_task_finished`: a callback to be invoked when the task is finished. Note that it will not
-    ///   be invoked if the task is cancelled (by dropping the handle). This is because we want something
-    ///   meaningful to be done when the task is finished, e.g. deregister the handle from the map.
-    ///   While dropping the handle does not necessarily mean the task is finished.
-    </span><span class="kw">fn </span>new&lt;Fut&gt;(
-        region_server: RegionServer,
-        region_id: RegionId,
-        on_task_finished: <span class="kw">impl </span>FnOnce(<span class="prelude-ty">Option</span>&lt;bool&gt;) -&gt; Fut + Send + <span class="lifetime">&#39;static</span>,
-    ) -&gt; <span class="self">Self
-    </span><span class="kw">where
-        </span>Fut: Future&lt;Output = ()&gt; + Send,
-    {
+    </span><span class="kw">fn </span>new(region_server: RegionServer, region_id: RegionId) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>(tx, rx) = mpsc::channel(<span class="number">1024</span>);
 
         <span class="kw">let </span><span class="kw-2">mut </span>countdown_task = CountdownTask {
@@ -845,8 +814,7 @@
             rx,
         };
         <span class="kw">let </span>handler = common_runtime::spawn_bg(<span class="kw">async move </span>{
-            <span class="kw">let </span>result = countdown_task.run().<span class="kw">await</span>;
-            on_task_finished(result).<span class="kw">await</span>;
+            countdown_task.run().<span class="kw">await</span>;
         });
 
         <span class="self">Self </span>{
@@ -856,7 +824,9 @@
         }
     }
 
-    <span class="kw">async fn </span>start(<span class="kw-2">&amp;</span><span class="self">self</span>, heartbeat_interval_millis: u64) {
+    <span class="doccomment">/// Starts the [CountdownTask],
+    /// it will be ignored if the task started.
+    </span><span class="kw">async fn </span>start(<span class="kw-2">&amp;</span><span class="self">self</span>, heartbeat_interval_millis: u64) {
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self
             </span>.tx
             .send(CountdownCommand::Start(heartbeat_interval_millis))
@@ -909,8 +879,7 @@
 }
 
 <span class="kw">impl </span>CountdownTask {
-    <span class="comment">// returns true if region closed successfully
-    </span><span class="kw">async fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;bool&gt; {
+    <span class="kw">async fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="comment">// 30 years. See `Instant::far_future`.
         </span><span class="kw">let </span>far_future = Instant::now() + Duration::from_secs(<span class="number">86400 </span>* <span class="number">365 </span>* <span class="number">30</span>);
 
@@ -918,38 +887,31 @@
         // &quot;start countdown&quot; command will be sent from heartbeat task).
         </span><span class="kw">let </span>countdown = tokio::time::sleep_until(far_future);
         <span class="macro">tokio::pin!</span>(countdown);
-
         <span class="kw">let </span>region_id = <span class="self">self</span>.region_id;
+
+        <span class="kw">let </span><span class="kw-2">mut </span>started = <span class="bool-val">false</span>;
         <span class="kw">loop </span>{
             <span class="macro">tokio::select! </span>{
                 command = <span class="self">self</span>.rx.recv() =&gt; {
                     <span class="kw">match </span>command {
                         <span class="prelude-val">Some</span>(CountdownCommand::Start(heartbeat_interval_millis)) =&gt; {
-                            <span class="comment">// Set first deadline in 4 heartbeats (roughly after 20 seconds from now if heartbeat
-                            // interval is set to default 5 seconds), to make Datanode and Metasrv more tolerable to
-                            // network or other jitters during startup.
-                            </span><span class="kw">let </span>first_deadline = Instant::now() + Duration::from_millis(heartbeat_interval_millis) * <span class="number">4</span>;
-                            countdown.set(tokio::time::sleep_until(first_deadline));
+                            <span class="kw">if </span>!started {
+                                <span class="comment">// Set first deadline in 4 heartbeats (roughly after 12 seconds from now if heartbeat
+                                // interval is set to default 3 seconds), to make Datanode and Metasrv more tolerable to
+                                // network or other jitters during startup.
+                                </span><span class="kw">let </span>first_deadline = Instant::now() + Duration::from_millis(heartbeat_interval_millis) * <span class="number">4</span>;
+                                countdown.set(tokio::time::sleep_until(first_deadline));
+                                started = <span class="bool-val">true</span>;
+                            }
                         },
                         <span class="prelude-val">Some</span>(CountdownCommand::Reset((role, deadline))) =&gt; {
-                            <span class="comment">// The first-time granted regions might be ignored because the `first_deadline` is larger than the `region_lease_timeout`.
-                            // Therefore, we set writable at the outside.
-                            // TODO(weny): Considers setting `first_deadline` to `region_lease_timeout`.
-                            </span><span class="kw">let _ </span>= <span class="self">self</span>.region_server.set_writable(<span class="self">self</span>.region_id, role.writable());
-
-                            <span class="kw">if </span>countdown.deadline() &lt; deadline {
-                                <span class="macro">trace!</span>(
-                                    <span class="string">&quot;Reset deadline of region {region_id} to approximately {} seconds later&quot;</span>,
-                                    (deadline - Instant::now()).as_secs_f32(),
-                                );
-                                countdown.set(tokio::time::sleep_until(deadline));
-                            }
-                            <span class="comment">// Else the countdown could be either:
-                            // - not started yet;
-                            // - during startup protection;
-                            // - received a lagging heartbeat message.
-                            // All can be safely ignored.
-                        </span>},
+                            <span class="kw">let _ </span>= <span class="self">self</span>.region_server.set_writable(<span class="self">self</span>.region_id, role.writable());
+                            <span class="macro">trace!</span>(
+                                <span class="string">&quot;Reset deadline of region {region_id} to approximately {} seconds later.&quot;</span>,
+                                (deadline - Instant::now()).as_secs_f32(),
+                            );
+                            countdown.set(tokio::time::sleep_until(deadline));
+                        },
                         <span class="prelude-val">None </span>=&gt; {
                             <span class="macro">info!</span>(
                                 <span class="string">&quot;The handle of countdown task for region {region_id}\
@@ -964,147 +926,129 @@
                     }
                 }
                 () = <span class="kw-2">&amp;mut </span>countdown =&gt; {
-                    <span class="kw">let </span>result = <span class="self">self</span>.close_region().<span class="kw">await</span>;
-                    <span class="macro">info!</span>(
-                        <span class="string">&quot;Region {region_id} is closed, result: {result:?}. \
-                        RegionAliveKeeper out.&quot;</span>,
-                    );
-                    <span class="kw">return </span><span class="prelude-val">Some</span>(result);
+                    <span class="macro">warn!</span>(<span class="string">&quot;The region {region_id} lease is expired, set region to readonly.&quot;</span>);
+                    <span class="kw">let _ </span>= <span class="self">self</span>.region_server.set_writable(<span class="self">self</span>.region_id, <span class="bool-val">false</span>);
+                    <span class="comment">// resets the countdown.
+                    </span><span class="kw">let </span>far_future = Instant::now() + Duration::from_secs(<span class="number">86400 </span>* <span class="number">365 </span>* <span class="number">30</span>);
+                    countdown.as_mut().reset(far_future);
                 }
             }
         }
-        <span class="prelude-val">None
-    </span>}
-
-    <span class="doccomment">/// Returns if the region is closed successfully.
-    </span><span class="kw">async fn </span>close_region(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
-        <span class="kw">for </span>retry <span class="kw">in </span><span class="number">0</span>..MAX_CLOSE_RETRY_TIMES {
-            <span class="kw">let </span>request = RegionRequest::Close(RegionCloseRequest {});
-            <span class="kw">match </span><span class="self">self
-                </span>.region_server
-                .handle_request(<span class="self">self</span>.region_id, request)
-                .<span class="kw">await
-            </span>{
-                <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="bool-val">true</span>,
-                <span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.status_code() == StatusCode::RegionNotFound =&gt; <span class="kw">return </span><span class="bool-val">true</span>,
-                <span class="comment">// If region is failed to close, immediately retry. Maybe we should panic instead?
-                </span><span class="prelude-val">Err</span>(e) =&gt; <span class="macro">error!</span>(e;
-                    <span class="string">&quot;Retry {retry}, failed to close region {}. \
-                    For the integrity of data, retry closing and retry without wait.&quot;</span>,
-                    <span class="self">self</span>.region_id,
-                ),
-            }
-        }
-        <span class="bool-val">false
-    </span>}
+    }
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
-    <span class="kw">use </span>api::v1::meta::RegionRole;
+
+    <span class="kw">use </span>mito2::config::MitoConfig;
+    <span class="kw">use </span>mito2::test_util::{CreateRequestBuilder, TestEnv};
+    <span class="kw">use </span>store_api::region_engine::RegionEngine;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::tests::mock_region_server;
 
     <span class="attr">#[tokio::test(flavor = <span class="string">&quot;multi_thread&quot;</span>)]
     </span><span class="kw">async fn </span>region_alive_keeper() {
-        <span class="kw">let </span>region_server = mock_region_server();
-        <span class="kw">let </span>alive_keeper = Arc::new(RegionAliveKeeper::new(region_server, <span class="number">300</span>));
-        <span class="kw">let </span>region_id = RegionId::new(<span class="number">1</span>, <span class="number">2</span>);
+        common_telemetry::init_default_ut_logging();
+        <span class="kw">let </span><span class="kw-2">mut </span>region_server = mock_region_server();
+        <span class="kw">let </span><span class="kw-2">mut </span>engine_env = TestEnv::with_prefix(<span class="string">&quot;region-alive-keeper&quot;</span>);
+        <span class="kw">let </span>engine = Arc::new(engine_env.create_engine(MitoConfig::default()).<span class="kw">await</span>);
+        region_server.register_engine(engine.clone());
 
-        <span class="comment">// register a region before starting
+        <span class="kw">let </span>alive_keeper = Arc::new(RegionAliveKeeper::new(region_server.clone(), <span class="number">100</span>));
+
+        <span class="kw">let </span>region_id = RegionId::new(<span class="number">1024</span>, <span class="number">1</span>);
+        <span class="kw">let </span>builder = CreateRequestBuilder::new();
+        region_server
+            .handle_request(region_id, RegionRequest::Create(builder.build()))
+            .<span class="kw">await
+            </span>.unwrap();
+        region_server.set_writable(region_id, <span class="bool-val">true</span>).unwrap();
+
+        <span class="comment">// Register a region before starting.
         </span>alive_keeper.register_region(region_id).<span class="kw">await</span>;
         <span class="macro">assert!</span>(alive_keeper.find_handle(region_id).<span class="kw">await</span>.is_some());
 
+        <span class="macro">info!</span>(<span class="string">&quot;Start the keeper&quot;</span>);
         alive_keeper.start(<span class="prelude-val">None</span>).<span class="kw">await</span>.unwrap();
 
-        <span class="comment">// started alive keeper should assign deadline to this region
+        <span class="comment">// The started alive keeper should assign deadline to this region.
         </span><span class="kw">let </span>deadline = alive_keeper.deadline(region_id).<span class="kw">await</span>.unwrap();
         <span class="macro">assert!</span>(deadline &gt;= Instant::now());
+        <span class="macro">assert_eq!</span>(engine.role(region_id).unwrap(), RegionRole::Leader);
 
-        <span class="comment">// extend lease then sleep
+        <span class="macro">info!</span>(<span class="string">&quot;Wait for lease expired&quot;</span>);
+        <span class="comment">// Sleep to wait lease expired.
+        </span>tokio::time::sleep(Duration::from_millis(<span class="number">500</span>)).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(alive_keeper.find_handle(region_id).<span class="kw">await</span>.is_some());
+        <span class="macro">assert_eq!</span>(engine.role(region_id).unwrap(), RegionRole::Follower);
+
+        <span class="macro">info!</span>(<span class="string">&quot;Renew the region lease&quot;</span>);
+        <span class="comment">// Renew lease then sleep.
         </span>alive_keeper
-            .keep_lived(
+            .renew_region_leases(
                 <span class="kw-2">&amp;</span>[GrantedRegion {
                     region_id: region_id.as_u64(),
-                    role: RegionRole::Leader.into(),
+                    role: api::v1::meta::RegionRole::Leader.into(),
                 }],
-                Instant::now() + Duration::from_millis(<span class="number">500</span>),
+                Instant::now() + Duration::from_millis(<span class="number">200</span>),
             )
             .<span class="kw">await</span>;
-        tokio::time::sleep(Duration::from_millis(<span class="number">500</span>)).<span class="kw">await</span>;
+        tokio::time::sleep(Duration::from_millis(<span class="number">100</span>)).<span class="kw">await</span>;
         <span class="macro">assert!</span>(alive_keeper.find_handle(region_id).<span class="kw">await</span>.is_some());
         <span class="kw">let </span>deadline = alive_keeper.deadline(region_id).<span class="kw">await</span>.unwrap();
         <span class="macro">assert!</span>(deadline &gt;= Instant::now());
+        <span class="macro">assert_eq!</span>(engine.role(region_id).unwrap(), RegionRole::Leader);
 
-        <span class="comment">// sleep to wait lease expired
-        </span>tokio::time::sleep(Duration::from_millis(<span class="number">1000</span>)).<span class="kw">await</span>;
-        <span class="macro">assert!</span>(alive_keeper.find_handle(region_id).<span class="kw">await</span>.is_none());
+        <span class="macro">info!</span>(<span class="string">&quot;Wait for lease expired&quot;</span>);
+        <span class="comment">// Sleep to wait lease expired.
+        </span>tokio::time::sleep(Duration::from_millis(<span class="number">200</span>)).<span class="kw">await</span>;
+        <span class="macro">assert!</span>(alive_keeper.find_handle(region_id).<span class="kw">await</span>.is_some());
+        <span class="macro">assert_eq!</span>(engine.role(region_id).unwrap(), RegionRole::Follower);
+
+        <span class="kw">let </span>deadline = alive_keeper.deadline(region_id).<span class="kw">await</span>.unwrap();
+        <span class="macro">assert!</span>(deadline &gt; Instant::now() + Duration::from_secs(<span class="number">86400 </span>* <span class="number">365 </span>* <span class="number">29</span>));
     }
 
     <span class="attr">#[tokio::test(flavor = <span class="string">&quot;multi_thread&quot;</span>)]
     </span><span class="kw">async fn </span>countdown_task() {
         <span class="kw">let </span>region_server = mock_region_server();
 
-        <span class="kw">let </span>(tx, rx) = oneshot::channel();
+        <span class="kw">let </span>countdown_handle = CountdownTaskHandle::new(region_server, RegionId::new(<span class="number">9999</span>, <span class="number">2</span>));
 
-        <span class="kw">let </span>countdown_handle = CountdownTaskHandle::new(
-            region_server,
-            RegionId::new(<span class="number">9999</span>, <span class="number">2</span>),
-            |result: <span class="prelude-ty">Option</span>&lt;bool&gt;| <span class="kw">async move </span>{
-                tx.send((Instant::now(), result)).unwrap();
-            },
-        );
-
-        <span class="comment">// if countdown task is not started, its deadline is set to far future
+        <span class="comment">// If countdown task is not started, its deadline is set to far future.
         </span><span class="macro">assert!</span>(
             countdown_handle.deadline().<span class="kw">await</span>.unwrap()
                 &gt; Instant::now() + Duration::from_secs(<span class="number">86400 </span>* <span class="number">365 </span>* <span class="number">29</span>)
         );
 
-        <span class="comment">// the first deadline should be set to 4 * heartbeat_interval_millis
-        // we assert it to be greater than 3 * heartbeat_interval_millis to avoid flaky test
+        <span class="comment">// The first deadline should be set to 4 * heartbeat_interval_millis.
+        // We assert it to be greater than 3 * heartbeat_interval_millis to avoid flaky test.
         </span><span class="kw">let </span>heartbeat_interval_millis = <span class="number">100</span>;
         countdown_handle.start(heartbeat_interval_millis).<span class="kw">await</span>;
         <span class="macro">assert!</span>(
             countdown_handle.deadline().<span class="kw">await</span>.unwrap()
                 &gt; Instant::now() + Duration::from_millis(heartbeat_interval_millis * <span class="number">3</span>)
         );
+        tokio::time::sleep(Duration::from_millis(heartbeat_interval_millis * <span class="number">5</span>)).<span class="kw">await</span>;
 
-        <span class="comment">// reset deadline
-        // a nearer deadline will be ignored
-        </span>countdown_handle
-            .reset_deadline(
-                RegionRole::Leader.into(),
-                Instant::now() + Duration::from_millis(heartbeat_interval_millis),
-            )
-            .<span class="kw">await</span>;
+        <span class="comment">// No effect.
+        </span>countdown_handle.start(heartbeat_interval_millis).<span class="kw">await</span>;
         <span class="macro">assert!</span>(
             countdown_handle.deadline().<span class="kw">await</span>.unwrap()
-                &gt; Instant::now() + Duration::from_millis(heartbeat_interval_millis * <span class="number">3</span>)
+                &gt; Instant::now() + Duration::from_secs(<span class="number">86400 </span>* <span class="number">365 </span>* <span class="number">29</span>)
         );
 
-        <span class="comment">// only a farther deadline will be accepted
+        <span class="comment">// Reset deadline.
         </span>countdown_handle
             .reset_deadline(
-                RegionRole::Leader.into(),
+                RegionRole::Leader,
                 Instant::now() + Duration::from_millis(heartbeat_interval_millis * <span class="number">5</span>),
             )
             .<span class="kw">await</span>;
         <span class="macro">assert!</span>(
             countdown_handle.deadline().<span class="kw">await</span>.unwrap()
                 &gt; Instant::now() + Duration::from_millis(heartbeat_interval_millis * <span class="number">4</span>)
-        );
-
-        <span class="comment">// wait for countdown task to finish
-        </span><span class="kw">let </span>before_await = Instant::now();
-        <span class="kw">let </span>(finish_instant, result) = rx.<span class="kw">await</span>.unwrap();
-        <span class="comment">// it returns `RegionNotFound`
-        </span><span class="macro">assert_eq!</span>(result, <span class="prelude-val">Some</span>(<span class="bool-val">true</span>));
-        <span class="comment">// this task should be finished after 5 * heartbeat_interval_millis
-        // we assert 4 times here
-        </span><span class="macro">assert!</span>(
-            finish_instant &gt; before_await + Duration::from_millis(heartbeat_interval_millis * <span class="number">4</span>)
         );
     }
 }

@@ -463,6 +463,7 @@
 <span class="kw">use </span>common_meta::ddl::DdlTaskExecutorRef;
 <span class="kw">use </span>common_meta::key::TableMetadataManagerRef;
 <span class="kw">use </span>common_meta::kv_backend::{KvBackendRef, ResettableKvBackend, ResettableKvBackendRef};
+<span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeperRef;
 <span class="kw">use </span>common_meta::sequence::SequenceRef;
 <span class="kw">use </span>common_procedure::options::ProcedureConfig;
 <span class="kw">use </span>common_procedure::ProcedureManagerRef;
@@ -484,7 +485,6 @@
 <span class="kw">use </span><span class="kw">crate</span>::handler::HeartbeatHandlerGroup;
 <span class="kw">use </span><span class="kw">crate</span>::lock::DistLockRef;
 <span class="kw">use </span><span class="kw">crate</span>::pubsub::{PublishRef, SubscribeManagerRef};
-<span class="kw">use </span><span class="kw">crate</span>::region::lease_keeper::OpeningRegionKeeperRef;
 <span class="kw">use </span><span class="kw">crate</span>::selector::{Selector, SelectorType};
 <span class="kw">use </span><span class="kw">crate</span>::service::mailbox::MailboxRef;
 <span class="kw">use </span><span class="kw">crate</span>::service::store::cached_kv::LeaderCachedKvBackend;
@@ -671,7 +671,7 @@
     mailbox: MailboxRef,
     ddl_executor: DdlTaskExecutorRef,
     table_metadata_manager: TableMetadataManagerRef,
-    opening_region_keeper: OpeningRegionKeeperRef,
+    memory_region_keeper: MemoryRegionKeeperRef,
     greptimedb_telemetry_task: Arc&lt;GreptimeDBTelemetryTask&gt;,
 
     plugins: Plugins,
@@ -834,8 +834,8 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.table_metadata_manager
     }
 
-    <span class="kw">pub fn </span>opening_region_keeper(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>OpeningRegionKeeperRef {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.opening_region_keeper
+    <span class="kw">pub fn </span>memory_region_keeper(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>MemoryRegionKeeperRef {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.memory_region_keeper
     }
 
     <span class="kw">pub fn </span>publish(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;PublishRef&gt; {

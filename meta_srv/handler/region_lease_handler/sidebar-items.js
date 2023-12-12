@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["flip_role","grant"],"struct":["RegionLeaseHandler"]};
+window.SIDEBAR_ITEMS = {"struct":["RegionLeaseHandler"]};
