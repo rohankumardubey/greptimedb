@@ -250,7 +250,7 @@ lowercase unless the query uses quotes. For example,</p>
     provided_schema: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/sync/struct.Arc.html" title="struct alloc::sync::Arc">Arc</a>&lt;Schema, <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/alloc/struct.Global.html" title="struct alloc::alloc::Global">Global</a>&gt;&gt;,
     sql_definition: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>, DataFusionError&gt;</h4></section></summary><div class="docblock"><p>Registers a [<code>ListingTable</code>] that can assemble multiple files
-from locations in an <a href="object_store::ObjectStore"><code>ObjectStore</code></a> instance into a single
+from locations in an <a href="../../object_store/trait.ObjectStore.html" title="trait object_store::ObjectStore"><code>ObjectStore</code></a> instance into a single
 table.</p>
 <p>This method is <code>async</code> because it might need to resolve the schema.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.register_csv" class="method"><h4 class="code-header">pub async fn <a href="#method.register_csv" class="fn">register_csv</a>(
