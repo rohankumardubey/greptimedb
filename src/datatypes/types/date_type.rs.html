@@ -133,6 +133,12 @@
 <a href="#133" id="133">133</a>
 <a href="#134" id="134">134</a>
 <a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -240,7 +246,8 @@
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="attr">#[test]
+    <span class="comment">// $TZ doesn&#39;t take effort
+    </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_date_cast() {
         std::env::set_var(<span class="string">&quot;TZ&quot;</span>, <span class="string">&quot;Asia/Shanghai&quot;</span>);
         <span class="comment">// timestamp -&gt; date
@@ -248,8 +255,13 @@
         <span class="kw">let </span>date = ConcreteDataType::date_datatype().try_cast(ts).unwrap();
         <span class="macro">assert_eq!</span>(date, Value::Date(Date::from_str(<span class="string">&quot;2000-01-01&quot;</span>).unwrap()));
 
-        <span class="comment">// this case bind with local timezone.
+        <span class="comment">// this case bind with Zulu timezone.
         </span><span class="kw">let </span>ts = Value::Timestamp(Timestamp::from_str(<span class="string">&quot;2000-01-02 07:59:59&quot;</span>).unwrap());
+        <span class="kw">let </span>date = ConcreteDataType::date_datatype().try_cast(ts).unwrap();
+        <span class="macro">assert_eq!</span>(date, Value::Date(Date::from_str(<span class="string">&quot;2000-01-02&quot;</span>).unwrap()));
+
+        <span class="comment">// while this case is offsetted to Asia/Shanghai.
+        </span><span class="kw">let </span>ts = Value::Timestamp(Timestamp::from_str(<span class="string">&quot;2000-01-02 07:59:59+08:00&quot;</span>).unwrap());
         <span class="kw">let </span>date = ConcreteDataType::date_datatype().try_cast(ts).unwrap();
         <span class="macro">assert_eq!</span>(date, Value::Date(Date::from_str(<span class="string">&quot;2000-01-01&quot;</span>).unwrap()));
 

@@ -273,6 +273,8 @@
 <a href="#273" id="273">273</a>
 <a href="#274" id="274">274</a>
 <a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -502,7 +504,8 @@
         );
     }
 
-    <span class="attr">#[test]
+    <span class="comment">// $TZ doesn&#39;t take effort
+    </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_timestamp_cast() {
         std::env::set_var(<span class="string">&quot;TZ&quot;</span>, <span class="string">&quot;Asia/Shanghai&quot;</span>);
         <span class="comment">// String -&gt; TimestampSecond
@@ -510,7 +513,8 @@
         <span class="kw">let </span>ts = ConcreteDataType::timestamp_second_datatype()
             .try_cast(s)
             .unwrap();
-        <span class="macro">assert_eq!</span>(ts, Value::Timestamp(Timestamp::new_second(<span class="number">1609434123</span>)));
+        <span class="comment">// 1609462923 is 2021-01-01T01:02:03Z
+        </span><span class="macro">assert_eq!</span>(ts, Value::Timestamp(Timestamp::new_second(<span class="number">1609462923</span>)));
         <span class="comment">// String cast failed
         </span><span class="kw">let </span>s = Value::String(<span class="string">&quot;12345&quot;</span>.to_string().into());
         <span class="kw">let </span>ts = ConcreteDataType::timestamp_second_datatype().try_cast(s);
