@@ -143,6 +143,11 @@
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -170,15 +175,19 @@
 <span class="kw">use </span>snafu::ResultExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{HyperSnafu, InvalidUtf8ValueSnafu};
-<span class="kw">use </span><span class="kw">crate</span>::http::{ApiState, JsonResponse};
+<span class="kw">use </span><span class="kw">crate</span>::http::{ApiState, GreptimedbV1Response, JsonResponse, ResponseFormat};
 
 <span class="macro">macro_rules! </span>json_err {
     (<span class="macro-nonterminal">$e</span>: expr) =&gt; {{
-        <span class="kw">return </span>Json(JsonResponse::with_error(<span class="macro-nonterminal">$e</span>));
+        <span class="kw">return </span>Json(JsonResponse::with_error(<span class="macro-nonterminal">$e</span>, ResponseFormat::GreptimedbV1));
     }};
 
     (<span class="macro-nonterminal">$msg</span>: expr, <span class="macro-nonterminal">$code</span>: expr) =&gt; {{
-        <span class="kw">return </span>Json(JsonResponse::with_error_message(<span class="macro-nonterminal">$msg</span>.to_string(), <span class="macro-nonterminal">$code</span>));
+        <span class="kw">return </span>Json(JsonResponse::with_error_message(
+            <span class="macro-nonterminal">$msg</span>.to_string(),
+            <span class="macro-nonterminal">$code</span>,
+            ResponseFormat::GreptimedbV1,
+        ));
     }};
 }
 
@@ -225,7 +234,7 @@
             .insert_script(query_ctx, name.unwrap(), <span class="kw-2">&amp;</span>script)
             .<span class="kw">await
         </span>{
-            <span class="prelude-val">Ok</span>(()) =&gt; JsonResponse::with_output(<span class="prelude-val">None</span>),
+            <span class="prelude-val">Ok</span>(()) =&gt; GreptimedbV1Response::with_output(<span class="macro">vec!</span>[]).into(),
             <span class="prelude-val">Err</span>(e) =&gt; <span class="macro">json_err!</span>(
                 <span class="macro">format!</span>(<span class="string">&quot;Insert script error: {}&quot;</span>, e.output_msg()),
                 e.status_code()
@@ -278,7 +287,8 @@
         <span class="kw">let </span>output = script_handler
             .execute_script(query_ctx, name.unwrap(), params.params)
             .<span class="kw">await</span>;
-        <span class="kw">let </span>resp = JsonResponse::from_output(<span class="macro">vec!</span>[output]).<span class="kw">await</span>;
+        <span class="kw">let </span>resp =
+            JsonResponse::from_output(<span class="macro">vec!</span>[output], ResponseFormat::GreptimedbV1, <span class="prelude-val">None</span>).<span class="kw">await</span>;
 
         Json(resp.with_execution_time(start.elapsed().as_millis()))
     } <span class="kw">else </span>{
