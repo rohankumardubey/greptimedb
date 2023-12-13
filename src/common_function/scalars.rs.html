@@ -21,11 +21,6 @@
 <a href="#21" id="21">21</a>
 <a href="#22" id="22">22</a>
 <a href="#23" id="23">23</a>
-<a href="#24" id="24">24</a>
-<a href="#25" id="25">25</a>
-<a href="#26" id="26">26</a>
-<a href="#27" id="27">27</a>
-<a href="#28" id="28">28</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -41,17 +36,12 @@
 // limitations under the License.
 
 </span><span class="kw">pub mod </span>aggregate;
-<span class="kw">mod </span>date;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>date;
 <span class="kw">pub mod </span>expression;
-<span class="kw">pub mod </span>function;
-<span class="kw">pub mod </span>function_registry;
 <span class="kw">pub mod </span>math;
 <span class="kw">pub mod </span>numpy;
 <span class="attr">#[cfg(test)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>test;
-<span class="kw">mod </span>timestamp;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>timestamp;
 <span class="kw">pub mod </span>udf;
-
-<span class="kw">pub use </span>function::{Function, FunctionRef};
-<span class="kw">pub use </span>function_registry::{FunctionRegistry, FUNCTION_REGISTRY};
 </code></pre></div></section></main></body></html>

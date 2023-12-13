@@ -555,6 +555,7 @@
 <a href="#555" id="555">555</a>
 <a href="#556" id="556">556</a>
 <a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -578,7 +579,8 @@
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>common_error::ext::BoxedError;
-<span class="kw">use </span>common_function::scalars::{Function, FUNCTION_REGISTRY};
+<span class="kw">use </span>common_function::function::Function;
+<span class="kw">use </span>common_function::function_registry::FUNCTION_REGISTRY;
 <span class="kw">use </span>common_query::error::{PyUdfSnafu, UdfTempRecordBatchSnafu};
 <span class="kw">use </span>common_query::prelude::Signature;
 <span class="kw">use </span>common_query::Output;
@@ -707,7 +709,7 @@
 
     <span class="kw">fn </span>eval(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        _func_ctx: common_function::scalars::function::FunctionContext,
+        _func_ctx: common_function::function::FunctionContext,
         columns: <span class="kw-2">&amp;</span>[datatypes::vectors::VectorRef],
     ) -&gt; common_query::error::Result&lt;datatypes::vectors::VectorRef&gt; {
         <span class="comment">// FIXME(discord9): exec_parsed require a RecordBatch(basically a Vector+Schema), where schema can&#39;t pop out from nowhere, right?

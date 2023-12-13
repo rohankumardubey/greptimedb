@@ -322,8 +322,8 @@
 <span class="kw">use </span>datatypes::vectors::PrimitiveVector;
 <span class="kw">use </span>paste::paste;
 
+<span class="kw">use </span><span class="kw">crate</span>::function::{Function, FunctionContext};
 <span class="kw">use </span><span class="kw">crate</span>::scalars::expression::{scalar_binary_op, EvalContext};
-<span class="kw">use </span><span class="kw">crate</span>::scalars::function::{Function, FunctionContext};
 
 <span class="doccomment">/// numpy.clip function, &lt;https://numpy.org/doc/stable/reference/generated/numpy.clip.html&gt;
 </span><span class="attr">#[derive(Clone, Debug, Default)]

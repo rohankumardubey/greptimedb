@@ -1470,9 +1470,9 @@
     </span><span class="kw">use </span>std::sync::Arc;
 
     <span class="kw">use </span>arrow::compute::kernels::{aggregate, boolean};
-    <span class="kw">use </span>common_function::scalars::function::FunctionContext;
+    <span class="kw">use </span>common_function::function::{Function, FunctionContext, FunctionRef};
+    <span class="kw">use </span>common_function::function_registry::FUNCTION_REGISTRY;
     <span class="kw">use </span>common_function::scalars::math::PowFunction;
-    <span class="kw">use </span>common_function::scalars::{Function, FunctionRef, FUNCTION_REGISTRY};
     <span class="kw">use </span>datafusion::arrow::datatypes::DataType <span class="kw">as </span>ArrowDataType;
     <span class="kw">use </span>datafusion::dataframe::DataFrame <span class="kw">as </span>DfDataFrame;
     <span class="kw">use </span>datafusion::physical_plan::expressions;

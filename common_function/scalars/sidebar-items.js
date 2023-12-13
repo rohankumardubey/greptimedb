@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["aggregate","date","expression","function","function_registry","math","numpy","timestamp","udf"]};
+window.SIDEBAR_ITEMS = {"mod":["aggregate","date","expression","math","numpy","timestamp","udf"]};

@@ -143,6 +143,7 @@
 <a href="#143" id="143">143</a>
 <a href="#144" id="144">144</a>
 <a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -167,8 +168,9 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>catalog::CatalogManagerRef;
 <span class="kw">use </span>common_base::Plugins;
+<span class="kw">use </span>common_function::function::FunctionRef;
+<span class="kw">use </span>common_function::function_registry::FUNCTION_REGISTRY;
 <span class="kw">use </span>common_function::scalars::aggregate::AggregateFunctionMetaRef;
-<span class="kw">use </span>common_function::scalars::{FunctionRef, FUNCTION_REGISTRY};
 <span class="kw">use </span>common_query::prelude::ScalarUdf;
 <span class="kw">use </span>common_query::Output;
 <span class="kw">use </span>datatypes::schema::Schema;

@@ -117,6 +117,7 @@
 <a href="#117" id="117">117</a>
 <a href="#118" id="118">118</a>
 <a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -144,8 +145,8 @@
 <span class="kw">use </span>num::traits::Pow;
 <span class="kw">use </span>num_traits::AsPrimitive;
 
+<span class="kw">use </span><span class="kw">crate</span>::function::{Function, FunctionContext};
 <span class="kw">use </span><span class="kw">crate</span>::scalars::expression::{scalar_binary_op, EvalContext};
-<span class="kw">use </span><span class="kw">crate</span>::scalars::function::{Function, FunctionContext};
 
 <span class="attr">#[derive(Clone, Debug, Default)]
 </span><span class="kw">pub struct </span>PowFunction;
@@ -202,6 +203,7 @@
     <span class="kw">use </span>datatypes::vectors::{Float32Vector, Int8Vector};
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::function::FunctionContext;
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_pow_function() {
         <span class="kw">let </span>pow = PowFunction;

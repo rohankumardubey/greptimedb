@@ -151,7 +151,7 @@
 <span class="kw">use </span>datatypes::vectors::Helper;
 <span class="kw">use </span>snafu::ResultExt;
 
-<span class="kw">use </span><span class="kw">crate</span>::scalars::function::{FunctionContext, FunctionRef};
+<span class="kw">use </span><span class="kw">crate</span>::function::{FunctionContext, FunctionRef};
 
 <span class="doccomment">/// Create a ScalarUdf from function.
 </span><span class="kw">pub fn </span>create_udf(func: FunctionRef) -&gt; ScalarUdf {
@@ -200,7 +200,7 @@
     <span class="kw">use </span>datatypes::vectors::{BooleanVector, ConstantVector};
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::scalars::function::Function;
+    <span class="kw">use </span><span class="kw">crate</span>::function::Function;
     <span class="kw">use </span><span class="kw">crate</span>::scalars::test::TestAndFunction;
 
     <span class="attr">#[test]
