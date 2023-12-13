@@ -729,6 +729,62 @@
 <a href="#729" id="729">729</a>
 <a href="#730" id="730">730</a>
 <a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -749,7 +805,7 @@
 <span class="kw">use </span>arrow::array::{
     Array, ArrayData, ArrayRef, BooleanBufferBuilder, Int32BufferBuilder, ListArray,
 };
-<span class="kw">use </span>arrow::buffer::Buffer;
+<span class="kw">use </span>arrow::buffer::{Buffer, NullBuffer};
 <span class="kw">use </span>arrow::datatypes::DataType <span class="kw">as </span>ArrowDataType;
 <span class="kw">use </span>serde_json::Value <span class="kw">as </span>JsonValue;
 
@@ -1012,6 +1068,10 @@
         Arc::new(<span class="self">self</span>.finish())
     }
 
+    <span class="kw">fn </span>to_vector_cloned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; VectorRef {
+        Arc::new(<span class="self">self</span>.finish_cloned())
+    }
+
     <span class="kw">fn </span>try_push_value_ref(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: ValueRef) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(list_ref) = value.as_list()<span class="question-mark">? </span>{
             <span class="kw">match </span>list_ref {
@@ -1077,6 +1137,32 @@
             .add_buffer(offset_buffer)
             .add_child_data(values_data)
             .null_bit_buffer(null_bit_buffer);
+
+        <span class="kw">let </span>array_data = <span class="kw">unsafe </span>{ array_data_builder.build_unchecked() };
+        <span class="kw">let </span>array = ListArray::from(array_data);
+
+        ListVector {
+            array,
+            item_type: <span class="self">self</span>.item_type.clone(),
+        }
+    }
+
+    <span class="comment">// Port from https://github.com/apache/arrow-rs/blob/ef6932f31e243d8545e097569653c8d3f1365b4d/arrow-array/src/builder/generic_list_builder.rs#L302-L325
+    </span><span class="kw">fn </span>finish_cloned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::VectorType {
+        <span class="kw">let </span>len = <span class="self">self</span>.len();
+        <span class="kw">let </span>values_vector = <span class="self">self</span>.values_builder.to_vector_cloned();
+        <span class="kw">let </span>values_arr = values_vector.to_arrow_array();
+        <span class="kw">let </span>values_data = values_arr.to_data();
+
+        <span class="kw">let </span>offset_buffer = Buffer::from_slice_ref(<span class="self">self</span>.offsets_builder.as_slice());
+        <span class="kw">let </span>nulls = <span class="self">self</span>.null_buffer_builder.finish_cloned();
+
+        <span class="kw">let </span>data_type = ConcreteDataType::list_datatype(<span class="self">self</span>.item_type.clone()).as_arrow_type();
+        <span class="kw">let </span>array_data_builder = ArrayData::builder(data_type)
+            .len(len)
+            .add_buffer(offset_buffer)
+            .add_child_data(values_data)
+            .nulls(nulls);
 
         <span class="kw">let </span>array_data = <span class="kw">unsafe </span>{ array_data_builder.build_unchecked() };
         <span class="kw">let </span>array = ListArray::from(array_data);
@@ -1156,6 +1242,12 @@
         <span class="kw">let </span>buf = <span class="self">self</span>.bitmap_builder.take().map(Into::into);
         <span class="self">self</span>.len = <span class="number">0</span>;
         buf
+    }
+
+    <span class="doccomment">/// Builds the [NullBuffer] without resetting the builder.
+    </span><span class="kw">fn </span>finish_cloned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;NullBuffer&gt; {
+        <span class="kw">let </span>buffer = <span class="self">self</span>.bitmap_builder.as_ref()<span class="question-mark">?</span>.finish_cloned();
+        <span class="prelude-val">Some</span>(NullBuffer::new(buffer))
     }
 
     <span class="attr">#[inline]
@@ -1458,6 +1550,26 @@
             </span>},
             iter.nth(<span class="number">1</span>).unwrap().unwrap()
         );
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_list_vector_builder_finish_cloned() {
+        <span class="kw">let </span><span class="kw-2">mut </span>builder =
+            ListVectorBuilder::with_type_capacity(ConcreteDataType::int32_datatype(), <span class="number">2</span>);
+        builder.push(<span class="prelude-val">None</span>);
+        builder.push(<span class="prelude-val">Some</span>(ListValueRef::Ref {
+            val: <span class="kw-2">&amp;</span>ListValue::new(
+                <span class="prelude-val">Some</span>(Box::new(<span class="macro">vec!</span>[
+                    Value::Int32(<span class="number">4</span>),
+                    Value::Null,
+                    Value::Int32(<span class="number">6</span>),
+                ])),
+                ConcreteDataType::int32_datatype(),
+            ),
+        }));
+        <span class="kw">let </span>vector = builder.finish_cloned();
+        <span class="macro">assert_eq!</span>(vector.len(), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(builder.len(), <span class="number">2</span>);
     }
 }
 </code></pre></div></section></main></body></html>

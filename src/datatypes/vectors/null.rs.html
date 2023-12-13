@@ -276,6 +276,20 @@
 <a href="#276" id="276">276</a>
 <a href="#277" id="277">277</a>
 <a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -434,6 +448,10 @@
         vector
     }
 
+    <span class="kw">fn </span>to_vector_cloned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; VectorRef {
+        Arc::new(NullVector::new(<span class="self">self</span>.length))
+    }
+
     <span class="kw">fn </span>try_push_value_ref(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: ValueRef) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="macro">ensure!</span>(
             value.is_null(),
@@ -552,6 +570,16 @@
 
         <span class="kw">let </span>expect: VectorRef = Arc::new(input);
         <span class="macro">assert_eq!</span>(expect, vector);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_null_vector_builder_finish_cloned() {
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = NullType.create_mutable_vector(<span class="number">3</span>);
+        builder.push_null();
+        builder.push_null();
+        <span class="kw">let </span>vector = builder.to_vector_cloned();
+        <span class="macro">assert_eq!</span>(vector.len(), <span class="number">2</span>);
+        <span class="macro">assert_eq!</span>(vector.null_count(), <span class="number">2</span>);
     }
 }
 </code></pre></div></section></main></body></html>

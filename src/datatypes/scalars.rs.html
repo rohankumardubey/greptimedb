@@ -470,6 +470,9 @@
 <a href="#470" id="470">470</a>
 <a href="#471" id="471">471</a>
 <a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -611,8 +614,11 @@
     <span class="doccomment">/// Push a value into the builder.
     </span><span class="kw">fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: <span class="prelude-ty">Option</span>&lt;&lt;<span class="self">Self</span>::VectorType <span class="kw">as </span>ScalarVector&gt;::RefItem&lt;<span class="lifetime">&#39;_</span>&gt;&gt;);
 
-    <span class="doccomment">/// Finish build and return a new vector.
+    <span class="doccomment">/// Build a new vector and reset `self`.
     </span><span class="kw">fn </span>finish(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::VectorType;
+
+    <span class="doccomment">/// Build a new vector without resetting `self`.
+    </span><span class="kw">fn </span>finish_cloned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::VectorType;
 }
 
 <span class="macro">macro_rules! </span>impl_scalar_for_native {

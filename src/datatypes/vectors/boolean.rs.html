@@ -359,6 +359,33 @@
 <a href="#359" id="359">359</a>
 <a href="#360" id="360">360</a>
 <a href="#361" id="361">361</a>
+<a href="#362" id="362">362</a>
+<a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -536,6 +563,10 @@
         Arc::new(<span class="self">self</span>.finish())
     }
 
+    <span class="kw">fn </span>to_vector_cloned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; VectorRef {
+        Arc::new(<span class="self">self</span>.finish_cloned())
+    }
+
     <span class="kw">fn </span>try_push_value_ref(<span class="kw-2">&amp;mut </span><span class="self">self</span>, value: ValueRef) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span>value.as_boolean()<span class="question-mark">? </span>{
             <span class="prelude-val">Some</span>(v) =&gt; <span class="self">self</span>.mutable_array.append_value(v),
@@ -572,6 +603,12 @@
     <span class="kw">fn </span>finish(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="self">Self</span>::VectorType {
         BooleanVector {
             array: <span class="self">self</span>.mutable_array.finish(),
+        }
+    }
+
+    <span class="kw">fn </span>finish_cloned(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::VectorType {
+        BooleanVector {
+            array: <span class="self">self</span>.mutable_array.finish_cloned(),
         }
     }
 }
@@ -718,6 +755,23 @@
 
         <span class="kw">let </span>expect: VectorRef = Arc::new(BooleanVector::from_slice(<span class="kw-2">&amp;</span>[<span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>]));
         <span class="macro">assert_eq!</span>(expect, vector);
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_boolean_vector_builder_finish_cloned() {
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = BooleanVectorBuilder::with_capacity(<span class="number">1024</span>);
+        builder.push(<span class="prelude-val">Some</span>(<span class="bool-val">true</span>));
+        builder.push(<span class="prelude-val">Some</span>(<span class="bool-val">false</span>));
+        builder.push(<span class="prelude-val">Some</span>(<span class="bool-val">true</span>));
+        <span class="kw">let </span>vector = builder.finish_cloned();
+        <span class="macro">assert!</span>(vector.get_data(<span class="number">0</span>).unwrap());
+        <span class="macro">assert_eq!</span>(vector.len(), <span class="number">3</span>);
+        <span class="macro">assert_eq!</span>(builder.len(), <span class="number">3</span>);
+
+        builder.push(<span class="prelude-val">Some</span>(<span class="bool-val">false</span>));
+        <span class="kw">let </span>vector = builder.finish_cloned();
+        <span class="macro">assert!</span>(!vector.get_data(<span class="number">3</span>).unwrap());
+        <span class="macro">assert_eq!</span>(builder.len(), <span class="number">4</span>);
     }
 }
 </code></pre></div></section></main></body></html>

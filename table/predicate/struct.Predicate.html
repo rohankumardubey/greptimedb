@@ -12,7 +12,7 @@ Returns error when failed to convert exprs.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.prune_row_groups" class="method"><a class="src rightside" href="../../src/table/predicate.rs.html#87-120">source</a><h4 class="code-header">pub fn <a href="#method.prune_row_groups" class="fn">prune_row_groups</a>(
     &amp;self,
     row_groups: &amp;[RowGroupMetaData],
-    schema: <a class="type" href="../../datatypes/schema/type.SchemaRef.html" title="type datatypes::schema::SchemaRef">SchemaRef</a>
+    schema: SchemaRef
 ) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>&gt;</h4></section></summary><div class="docblock"><p>Evaluates the predicate against row group metadata.
 Returns a vector of boolean values, among which <code>false</code> means the row group can be skipped.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.prune_primary_key" class="method"><a class="src rightside" href="../../src/table/predicate.rs.html#123-155">source</a><h4 class="code-header">pub fn <a href="#method.prune_primary_key" class="fn">prune_primary_key</a>(&amp;self, primary_key: &amp;RecordBatch) -&gt; <a class="type" href="../error/type.Result.html" title="type table::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>&gt;</h4></section></summary><div class="docblock"><p>Prunes primary keys</p>
