@@ -237,6 +237,7 @@
 <a href="#237" id="237">237</a>
 <a href="#238" id="238">238</a>
 <a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -254,8 +255,9 @@
 </span><span class="kw">use </span>std::fs::File;
 <span class="kw">use </span>std::io::{BufReader, Error, ErrorKind};
 
-<span class="kw">use </span>rustls::{Certificate, PrivateKey, ServerConfig};
+<span class="kw">use </span>rustls::ServerConfig;
 <span class="kw">use </span>rustls_pemfile::{certs, pkcs8_private_keys, rsa_private_keys};
+<span class="kw">use </span>rustls_pki_types::{CertificateDer, PrivateKeyDer};
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>strum::EnumString;
 
@@ -316,19 +318,20 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         }
         <span class="kw">let </span>cert = certs(<span class="kw-2">&amp;mut </span>BufReader::new(File::open(<span class="kw-2">&amp;</span><span class="self">self</span>.cert_path)<span class="question-mark">?</span>))
-            .map_err(|<span class="kw">_</span>| Error::new(ErrorKind::InvalidInput, <span class="string">&quot;invalid cert&quot;</span>))
-            .map(|<span class="kw-2">mut </span>certs| certs.drain(..).map(Certificate).collect())<span class="question-mark">?</span>;
+            .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;CertificateDer&gt;, Error&gt;&gt;()<span class="question-mark">?</span>;
 
         <span class="kw">let </span>key = {
             <span class="kw">let </span><span class="kw-2">mut </span>pkcs8 = pkcs8_private_keys(<span class="kw-2">&amp;mut </span>BufReader::new(File::open(<span class="kw-2">&amp;</span><span class="self">self</span>.key_path)<span class="question-mark">?</span>))
-                .map_err(|<span class="kw">_</span>| Error::new(ErrorKind::InvalidInput, <span class="string">&quot;invalid key&quot;</span>))<span class="question-mark">?</span>;
+                .map(|key| key.map(PrivateKeyDer::from))
+                .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;PrivateKeyDer&gt;, Error&gt;&gt;()<span class="question-mark">?</span>;
             <span class="kw">if </span>!pkcs8.is_empty() {
-                PrivateKey(pkcs8.remove(<span class="number">0</span>))
+                pkcs8.remove(<span class="number">0</span>)
             } <span class="kw">else </span>{
                 <span class="kw">let </span><span class="kw-2">mut </span>rsa = rsa_private_keys(<span class="kw-2">&amp;mut </span>BufReader::new(File::open(<span class="kw-2">&amp;</span><span class="self">self</span>.key_path)<span class="question-mark">?</span>))
-                    .map_err(|<span class="kw">_</span>| Error::new(ErrorKind::InvalidInput, <span class="string">&quot;invalid key&quot;</span>))<span class="question-mark">?</span>;
+                    .map(|key| key.map(PrivateKeyDer::from))
+                    .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;PrivateKeyDer&gt;, Error&gt;&gt;()<span class="question-mark">?</span>;
                 <span class="kw">if </span>!rsa.is_empty() {
-                    PrivateKey(rsa.remove(<span class="number">0</span>))
+                    rsa.remove(<span class="number">0</span>)
                 } <span class="kw">else </span>{
                     <span class="kw">return </span><span class="prelude-val">Err</span>(Error::new(ErrorKind::InvalidInput, <span class="string">&quot;invalid key&quot;</span>));
                 }
@@ -337,7 +340,6 @@
 
         <span class="comment">// TODO(SSebo): with_client_cert_verifier if TlsMode is Required.
         </span><span class="kw">let </span>config = ServerConfig::builder()
-            .with_safe_defaults()
             .with_no_client_auth()
             .with_single_cert(cert, key)
             .map_err(|err| std::io::Error::new(ErrorKind::InvalidInput, err))<span class="question-mark">?</span>;

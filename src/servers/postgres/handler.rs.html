@@ -276,6 +276,10 @@
 <a href="#276" id="276">276</a>
 <a href="#277" id="277">277</a>
 <a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -319,7 +323,11 @@
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>SimpleQueryHandler <span class="kw">for </span>PostgresServerHandler {
-    <span class="kw">async fn </span>do_query&lt;<span class="lifetime">&#39;a</span>, C&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _client: <span class="kw-2">&amp;</span>C, query: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; PgWireResult&lt;Vec&lt;Response&lt;<span class="lifetime">&#39;a</span>&gt;&gt;&gt;
+    <span class="kw">async fn </span>do_query&lt;<span class="lifetime">&#39;a</span>, C&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        _client: <span class="kw-2">&amp;mut </span>C,
+        query: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
+    ) -&gt; PgWireResult&lt;Vec&lt;Response&lt;<span class="lifetime">&#39;a</span>&gt;&gt;&gt;
     <span class="kw">where
         </span>C: ClientInfo + Unpin + Send + Sync,
     {
