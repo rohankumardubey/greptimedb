@@ -382,7 +382,6 @@
     </span><span class="kw">pub fn </span>should_log_error(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="kw">match </span><span class="self">self </span>{
             StatusCode::Unknown
-            | StatusCode::Unsupported
             | StatusCode::Unexpected
             | StatusCode::Internal
             | StatusCode::Cancelled
@@ -391,6 +390,7 @@
             | StatusCode::StorageUnavailable
             | StatusCode::RuntimeResourcesExhausted =&gt; <span class="bool-val">true</span>,
             StatusCode::Success
+            | StatusCode::Unsupported
             | StatusCode::InvalidArguments
             | StatusCode::InvalidSyntax
             | StatusCode::TableAlreadyExists
