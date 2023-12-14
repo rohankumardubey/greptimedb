@@ -114,6 +114,20 @@
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -129,10 +143,16 @@
 // limitations under the License.
 
 </span><span class="kw">mod </span>bench;
-<span class="kw">mod </span>cmd;
+
+<span class="comment">// Wait for https://github.com/GreptimeTeam/greptimedb/issues/2373
+</span><span class="attr">#[allow(unused)]
+</span><span class="kw">mod </span>cmd;
 <span class="kw">mod </span>export;
 <span class="kw">mod </span>helper;
-<span class="kw">mod </span>repl;
+
+<span class="comment">// Wait for https://github.com/GreptimeTeam/greptimedb/issues/2373
+</span><span class="attr">#[allow(unused)]
+</span><span class="kw">mod </span>repl;
 <span class="comment">// TODO(weny): Removes it
 </span><span class="attr">#[allow(deprecated)]
 </span><span class="kw">mod </span>upgrade;
@@ -146,27 +166,35 @@
 
 <span class="kw">use </span><span class="self">self</span>::export::ExportCommand;
 <span class="kw">use </span><span class="kw">crate</span>::error::Result;
-<span class="kw">use </span><span class="kw">crate</span>::options::{Options, TopLevelOptions};
+<span class="kw">use </span><span class="kw">crate</span>::options::{CliOptions, Options};
+<span class="kw">use </span><span class="kw">crate</span>::App;
 
 <span class="attr">#[async_trait]
-</span><span class="kw">pub trait </span>Tool {
+</span><span class="kw">pub trait </span>Tool: Send + Sync {
     <span class="kw">async fn </span>do_work(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 }
 
-<span class="kw">pub enum </span>Instance {
-    Repl(Repl),
-    Tool(Box&lt;<span class="kw">dyn </span>Tool&gt;),
+<span class="kw">pub struct </span>Instance {
+    tool: Box&lt;<span class="kw">dyn </span>Tool&gt;,
 }
 
 <span class="kw">impl </span>Instance {
-    <span class="kw">pub async fn </span>start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">match </span><span class="self">self </span>{
-            Instance::Repl(repl) =&gt; repl.run().<span class="kw">await</span>,
-            Instance::Tool(tool) =&gt; tool.do_work().<span class="kw">await</span>,
-        }
+    <span class="kw">fn </span>new(tool: Box&lt;<span class="kw">dyn </span>Tool&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ tool }
     }
+}
 
-    <span class="kw">pub async fn </span>stop(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+<span class="attr">#[async_trait]
+</span><span class="kw">impl </span>App <span class="kw">for </span>Instance {
+    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
+        <span class="string">&quot;greptime-cli&quot;
+    </span>}
+
+    <span class="kw">async fn </span>start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.tool.do_work().<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>stop(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -182,14 +210,15 @@
         <span class="self">self</span>.cmd.build().<span class="kw">await
     </span>}
 
-    <span class="kw">pub fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, top_level_opts: TopLevelOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
+    <span class="kw">pub fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, cli_options: <span class="kw-2">&amp;</span>CliOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>logging_opts = LoggingOptions::default();
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(dir) = top_level_opts.log_dir {
-            logging_opts.dir = dir;
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(dir) = <span class="kw-2">&amp;</span>cli_options.log_dir {
+            logging_opts.dir = dir.clone();
         }
-        <span class="kw">if </span>top_level_opts.log_level.is_some() {
-            logging_opts.level = top_level_opts.log_level;
-        }
+
+        logging_opts.level = cli_options.log_level.clone();
+
         <span class="prelude-val">Ok</span>(Options::Cli(Box::new(logging_opts)))
     }
 }
@@ -226,8 +255,7 @@
 <span class="kw">impl </span>AttachCommand {
     <span class="attr">#[allow(dead_code)]
     </span><span class="kw">async fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Instance&gt; {
-        <span class="kw">let </span>repl = Repl::try_new(<span class="kw-2">&amp;</span><span class="self">self</span>).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(Instance::Repl(repl))
+        <span class="macro">unimplemented!</span>(<span class="string">&quot;Wait for https://github.com/GreptimeTeam/greptimedb/issues/2373&quot;</span>)
     }
 }
 </code></pre></div></section></main></body></html>

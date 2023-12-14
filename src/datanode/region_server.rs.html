@@ -608,6 +608,17 @@
 <a href="#608" id="608">608</a>
 <a href="#609" id="609">609</a>
 <a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -1009,9 +1020,20 @@
     }
 
     <span class="kw">async fn </span>stop(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">for </span>region <span class="kw">in </span><span class="self">self</span>.region_map.iter() {
-            <span class="kw">let </span>region_id = <span class="kw-2">*</span>region.key();
-            <span class="kw">let </span>engine = region.value();
+        <span class="comment">// Calling async functions while iterating inside the Dashmap could easily cause the Rust
+        // complains &quot;higher-ranked lifetime error&quot;. Rust can&#39;t prove some future is legit.
+        // Possible related issue: https://github.com/rust-lang/rust/issues/102211
+        //
+        // The walkaround is to put the async functions in the `common_runtime::spawn_bg`. Or like
+        // it here, collect the values first then use later separately.
+
+        </span><span class="kw">let </span>regions = <span class="self">self
+            </span>.region_map
+            .iter()
+            .map(|x| (<span class="kw-2">*</span>x.key(), x.value().clone()))
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+
+        <span class="kw">for </span>(region_id, engine) <span class="kw">in </span>regions {
             <span class="kw">let </span>closed = engine
                 .handle_request(region_id, RegionRequest::Close(RegionCloseRequest {}))
                 .<span class="kw">await</span>;

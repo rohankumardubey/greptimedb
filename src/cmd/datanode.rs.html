@@ -483,6 +483,20 @@
 <a href="#483" id="483">483</a>
 <a href="#484" id="484">484</a>
 <a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -500,6 +514,7 @@
 </span><span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::Duration;
 
+<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>catalog::kvbackend::MetaKvBackend;
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>common_telemetry::logging;
@@ -510,14 +525,26 @@
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{MissingConfigSnafu, <span class="prelude-ty">Result</span>, ShutdownDatanodeSnafu, StartDatanodeSnafu};
-<span class="kw">use </span><span class="kw">crate</span>::options::{Options, TopLevelOptions};
+<span class="kw">use </span><span class="kw">crate</span>::options::{CliOptions, Options};
+<span class="kw">use </span><span class="kw">crate</span>::App;
 
 <span class="kw">pub struct </span>Instance {
     datanode: Datanode,
 }
 
 <span class="kw">impl </span>Instance {
-    <span class="kw">pub async fn </span>start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">fn </span>new(datanode: Datanode) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ datanode }
+    }
+}
+
+<span class="attr">#[async_trait]
+</span><span class="kw">impl </span>App <span class="kw">for </span>Instance {
+    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
+        <span class="string">&quot;greptime-datanode&quot;
+    </span>}
+
+    <span class="kw">async fn </span>start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         plugins::start_datanode_plugins(<span class="self">self</span>.datanode.plugins())
             .<span class="kw">await
             </span>.context(StartDatanodeSnafu)<span class="question-mark">?</span>;
@@ -525,7 +552,7 @@
         <span class="self">self</span>.datanode.start().<span class="kw">await</span>.context(StartDatanodeSnafu)
     }
 
-    <span class="kw">pub async fn </span>stop(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>stop(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.datanode
             .shutdown()
             .<span class="kw">await
@@ -544,8 +571,8 @@
         <span class="self">self</span>.subcmd.build(opts).<span class="kw">await
     </span>}
 
-    <span class="kw">pub fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, top_level_opts: TopLevelOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
-        <span class="self">self</span>.subcmd.load_options(top_level_opts)
+    <span class="kw">pub fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, cli_options: <span class="kw-2">&amp;</span>CliOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
+        <span class="self">self</span>.subcmd.load_options(cli_options)
     }
 }
 
@@ -561,9 +588,9 @@
         }
     }
 
-    <span class="kw">fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, top_level_opts: TopLevelOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
+    <span class="kw">fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, cli_options: <span class="kw-2">&amp;</span>CliOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            SubCommand::Start(cmd) =&gt; cmd.load_options(top_level_opts),
+            SubCommand::Start(cmd) =&gt; cmd.load_options(cli_options),
         }
     }
 }
@@ -593,19 +620,19 @@
 }
 
 <span class="kw">impl </span>StartCommand {
-    <span class="kw">fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, top_level_opts: TopLevelOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
+    <span class="kw">fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, cli_options: <span class="kw-2">&amp;</span>CliOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>opts: DatanodeOptions = Options::load_layered_options(
             <span class="self">self</span>.config_file.as_deref(),
             <span class="self">self</span>.env_prefix.as_ref(),
             DatanodeOptions::env_list_keys(),
         )<span class="question-mark">?</span>;
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(dir) = top_level_opts.log_dir {
-            opts.logging.dir = dir;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(dir) = <span class="kw-2">&amp;</span>cli_options.log_dir {
+            opts.logging.dir = dir.clone();
         }
 
-        <span class="kw">if </span>top_level_opts.log_level.is_some() {
-            opts.logging.level = top_level_opts.log_level;
+        <span class="kw">if </span>cli_options.log_level.is_some() {
+            opts.logging.level = cli_options.log_level.clone();
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(addr) = <span class="kw-2">&amp;</span><span class="self">self</span>.rpc_addr {
@@ -689,7 +716,7 @@
             .<span class="kw">await
             </span>.context(StartDatanodeSnafu)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(Instance { datanode })
+        <span class="prelude-val">Ok</span>(Instance::new(datanode))
     }
 }
 
@@ -704,7 +731,7 @@
     <span class="kw">use </span>servers::Mode;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::options::ENV_VAR_SEP;
+    <span class="kw">use </span><span class="kw">crate</span>::options::{CliOptions, ENV_VAR_SEP};
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_from_config_file() {
@@ -759,8 +786,7 @@
             ..Default::default()
         };
 
-        <span class="kw">let </span>Options::Datanode(options) = cmd.load_options(TopLevelOptions::default()).unwrap()
-        <span class="kw">else </span>{
+        <span class="kw">let </span>Options::Datanode(options) = cmd.load_options(<span class="kw-2">&amp;</span>CliOptions::default()).unwrap() <span class="kw">else </span>{
             <span class="macro">unreachable!</span>()
         };
 
@@ -816,7 +842,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_try_from_cmd() {
         <span class="kw">if let </span>Options::Datanode(opt) = StartCommand::default()
-            .load_options(TopLevelOptions::default())
+            .load_options(<span class="kw-2">&amp;</span>CliOptions::default())
             .unwrap()
         {
             <span class="macro">assert_eq!</span>(Mode::Standalone, opt.mode)
@@ -827,7 +853,7 @@
             metasrv_addr: <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="string">&quot;127.0.0.1:3002&quot;</span>.to_string()]),
             ..Default::default()
         })
-        .load_options(TopLevelOptions::default())
+        .load_options(<span class="kw-2">&amp;</span>CliOptions::default())
         .unwrap()
         {
             <span class="macro">assert_eq!</span>(Mode::Distributed, opt.mode)
@@ -837,7 +863,7 @@
             metasrv_addr: <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="string">&quot;127.0.0.1:3002&quot;</span>.to_string()]),
             ..Default::default()
         })
-        .load_options(TopLevelOptions::default())
+        .load_options(<span class="kw-2">&amp;</span>CliOptions::default())
         .is_err());
 
         <span class="comment">// Providing node_id but leave metasrv_addr absent is ok since metasrv_addr has default value
@@ -845,18 +871,21 @@
             node_id: <span class="prelude-val">Some</span>(<span class="number">42</span>),
             ..Default::default()
         })
-        .load_options(TopLevelOptions::default())
+        .load_options(<span class="kw-2">&amp;</span>CliOptions::default())
         .is_ok());
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_top_level_options() {
+    </span><span class="kw">fn </span>test_load_log_options_from_cli() {
         <span class="kw">let </span>cmd = StartCommand::default();
 
         <span class="kw">let </span>options = cmd
-            .load_options(TopLevelOptions {
+            .load_options(<span class="kw-2">&amp;</span>CliOptions {
                 log_dir: <span class="prelude-val">Some</span>(<span class="string">&quot;/tmp/greptimedb/test/logs&quot;</span>.to_string()),
                 log_level: <span class="prelude-val">Some</span>(<span class="string">&quot;debug&quot;</span>.to_string()),
+
+                <span class="attr">#[cfg(feature = <span class="string">&quot;tokio-console&quot;</span>)]
+                </span>tokio_console_addr: <span class="prelude-val">None</span>,
             })
             .unwrap();
 
@@ -939,8 +968,7 @@
                     ..Default::default()
                 };
 
-                <span class="kw">let </span>Options::Datanode(opts) =
-                    command.load_options(TopLevelOptions::default()).unwrap()
+                <span class="kw">let </span>Options::Datanode(opts) = command.load_options(<span class="kw-2">&amp;</span>CliOptions::default()).unwrap()
                 <span class="kw">else </span>{
                     <span class="macro">unreachable!</span>()
                 };

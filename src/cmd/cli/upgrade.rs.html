@@ -649,7 +649,7 @@
             skip_schema_keys: <span class="self">self</span>.skip_schema_keys,
             skip_table_route_keys: <span class="self">self</span>.skip_table_route_keys,
         };
-        <span class="prelude-val">Ok</span>(Instance::Tool(Box::new(tool)))
+        <span class="prelude-val">Ok</span>(Instance::new(Box::new(tool)))
     }
 }
 

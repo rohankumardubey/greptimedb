@@ -366,6 +366,20 @@
 <a href="#366" id="366">366</a>
 <a href="#367" id="367">367</a>
 <a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -382,6 +396,7 @@
 
 </span><span class="kw">use </span>std::time::Duration;
 
+<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>common_telemetry::logging;
 <span class="kw">use </span>meta_srv::bootstrap::MetaSrvInstance;
@@ -389,21 +404,34 @@
 <span class="kw">use </span>snafu::ResultExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>, StartMetaServerSnafu};
-<span class="kw">use </span><span class="kw">crate</span>::options::{Options, TopLevelOptions};
+<span class="kw">use </span><span class="kw">crate</span>::options::{CliOptions, Options};
+<span class="kw">use </span><span class="kw">crate</span>::App;
 
 <span class="kw">pub struct </span>Instance {
     instance: MetaSrvInstance,
 }
 
 <span class="kw">impl </span>Instance {
-    <span class="kw">pub async fn </span>start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">fn </span>new(instance: MetaSrvInstance) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ instance }
+    }
+}
+
+<span class="attr">#[async_trait]
+</span><span class="kw">impl </span>App <span class="kw">for </span>Instance {
+    <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
+        <span class="string">&quot;greptime-metasrv&quot;
+    </span>}
+
+    <span class="kw">async fn </span>start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         plugins::start_meta_srv_plugins(<span class="self">self</span>.instance.plugins())
             .<span class="kw">await
             </span>.context(StartMetaServerSnafu)<span class="question-mark">?</span>;
+
         <span class="self">self</span>.instance.start().<span class="kw">await</span>.context(StartMetaServerSnafu)
     }
 
-    <span class="kw">pub async fn </span>stop(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>stop(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.instance
             .shutdown()
             .<span class="kw">await
@@ -422,8 +450,8 @@
         <span class="self">self</span>.subcmd.build(opts).<span class="kw">await
     </span>}
 
-    <span class="kw">pub fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, top_level_opts: TopLevelOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
-        <span class="self">self</span>.subcmd.load_options(top_level_opts)
+    <span class="kw">pub fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, cli_options: <span class="kw-2">&amp;</span>CliOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
+        <span class="self">self</span>.subcmd.load_options(cli_options)
     }
 }
 
@@ -439,9 +467,9 @@
         }
     }
 
-    <span class="kw">fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, top_level_opts: TopLevelOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
+    <span class="kw">fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, cli_options: <span class="kw-2">&amp;</span>CliOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
         <span class="kw">match </span><span class="self">self </span>{
-            SubCommand::Start(cmd) =&gt; cmd.load_options(top_level_opts),
+            SubCommand::Start(cmd) =&gt; cmd.load_options(cli_options),
         }
     }
 }
@@ -474,19 +502,19 @@
 }
 
 <span class="kw">impl </span>StartCommand {
-    <span class="kw">fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, top_level_opts: TopLevelOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
+    <span class="kw">fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, cli_options: <span class="kw-2">&amp;</span>CliOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>opts: MetaSrvOptions = Options::load_layered_options(
             <span class="self">self</span>.config_file.as_deref(),
             <span class="self">self</span>.env_prefix.as_ref(),
             <span class="prelude-val">None</span>,
         )<span class="question-mark">?</span>;
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(dir) = top_level_opts.log_dir {
-            opts.logging.dir = dir;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(dir) = <span class="kw-2">&amp;</span>cli_options.log_dir {
+            opts.logging.dir = dir.clone();
         }
 
-        <span class="kw">if </span>top_level_opts.log_level.is_some() {
-            opts.logging.level = top_level_opts.log_level;
+        <span class="kw">if </span>cli_options.log_level.is_some() {
+            opts.logging.level = cli_options.log_level.clone();
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(addr) = <span class="kw-2">&amp;</span><span class="self">self</span>.bind_addr {
@@ -550,7 +578,7 @@
             .<span class="kw">await
             </span>.context(error::BuildMetaServerSnafu)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(Instance { instance })
+        <span class="prelude-val">Ok</span>(Instance::new(instance))
     }
 }
 
@@ -574,8 +602,7 @@
             ..Default::default()
         };
 
-        <span class="kw">let </span>Options::Metasrv(options) = cmd.load_options(TopLevelOptions::default()).unwrap()
-        <span class="kw">else </span>{
+        <span class="kw">let </span>Options::Metasrv(options) = cmd.load_options(<span class="kw-2">&amp;</span>CliOptions::default()).unwrap() <span class="kw">else </span>{
             <span class="macro">unreachable!</span>()
         };
         <span class="macro">assert_eq!</span>(<span class="string">&quot;127.0.0.1:3002&quot;</span>.to_string(), options.bind_addr);
@@ -610,8 +637,7 @@
             ..Default::default()
         };
 
-        <span class="kw">let </span>Options::Metasrv(options) = cmd.load_options(TopLevelOptions::default()).unwrap()
-        <span class="kw">else </span>{
+        <span class="kw">let </span>Options::Metasrv(options) = cmd.load_options(<span class="kw-2">&amp;</span>CliOptions::default()).unwrap() <span class="kw">else </span>{
             <span class="macro">unreachable!</span>()
         };
         <span class="macro">assert_eq!</span>(<span class="string">&quot;127.0.0.1:3002&quot;</span>.to_string(), options.bind_addr);
@@ -642,7 +668,7 @@
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_top_level_options() {
+    </span><span class="kw">fn </span>test_load_log_options_from_cli() {
         <span class="kw">let </span>cmd = StartCommand {
             bind_addr: <span class="prelude-val">Some</span>(<span class="string">&quot;127.0.0.1:3002&quot;</span>.to_string()),
             server_addr: <span class="prelude-val">Some</span>(<span class="string">&quot;127.0.0.1:3002&quot;</span>.to_string()),
@@ -652,9 +678,12 @@
         };
 
         <span class="kw">let </span>options = cmd
-            .load_options(TopLevelOptions {
+            .load_options(<span class="kw-2">&amp;</span>CliOptions {
                 log_dir: <span class="prelude-val">Some</span>(<span class="string">&quot;/tmp/greptimedb/test/logs&quot;</span>.to_string()),
                 log_level: <span class="prelude-val">Some</span>(<span class="string">&quot;debug&quot;</span>.to_string()),
+
+                <span class="attr">#[cfg(feature = <span class="string">&quot;tokio-console&quot;</span>)]
+                </span>tokio_console_addr: <span class="prelude-val">None</span>,
             })
             .unwrap();
 
@@ -713,8 +742,7 @@
                     ..Default::default()
                 };
 
-                <span class="kw">let </span>Options::Metasrv(opts) =
-                    command.load_options(TopLevelOptions::default()).unwrap()
+                <span class="kw">let </span>Options::Metasrv(opts) = command.load_options(<span class="kw-2">&amp;</span>CliOptions::default()).unwrap()
                 <span class="kw">else </span>{
                     <span class="macro">unreachable!</span>()
                 };
