@@ -252,16 +252,6 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
-<a href="#258" id="258">258</a>
-<a href="#259" id="259">259</a>
-<a href="#260" id="260">260</a>
-<a href="#261" id="261">261</a>
-<a href="#262" id="262">262</a>
-<a href="#263" id="263">263</a>
-<a href="#264" id="264">264</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -280,8 +270,8 @@
 
 <span class="kw">use </span>arrow_schema::SchemaRef <span class="kw">as </span>ArrowSchemaRef;
 <span class="kw">use </span>common_catalog::consts::{
-    INFORMATION_SCHEMA_COLUMNS_TABLE_ID, INFORMATION_SCHEMA_NAME, SEMANTIC_TYPE_FIELD,
-    SEMANTIC_TYPE_PRIMARY_KEY, SEMANTIC_TYPE_TIME_INDEX,
+    INFORMATION_SCHEMA_COLUMNS_TABLE_ID, SEMANTIC_TYPE_FIELD, SEMANTIC_TYPE_PRIMARY_KEY,
+    SEMANTIC_TYPE_TIME_INDEX,
 };
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_query::physical_plan::TaskContext;
@@ -297,8 +287,7 @@
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
 <span class="kw">use </span>store_api::storage::TableId;
 
-<span class="kw">use </span><span class="kw">super</span>::tables::InformationSchemaTables;
-<span class="kw">use super</span>::{InformationTable, COLUMNS, TABLES};
+<span class="kw">use super</span>::{InformationTable, COLUMNS};
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     CreateRecordBatchSnafu, InternalSnafu, <span class="prelude-ty">Result</span>, UpgradeWeakCatalogManagerRefSnafu,
 };
@@ -366,7 +355,7 @@
             schema,
             futures::stream::once(<span class="kw">async move </span>{
                 builder
-                    .make_tables()
+                    .make_columns()
                     .<span class="kw">await
                     </span>.map(|x| x.into_df_record_batch())
                     .map_err(Into::into)
@@ -412,8 +401,8 @@
         }
     }
 
-    <span class="doccomment">/// Construct the `information_schema.tables` virtual table
-    </span><span class="kw">async fn </span>make_tables(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RecordBatch&gt; {
+    <span class="doccomment">/// Construct the `information_schema.columns` virtual table
+    </span><span class="kw">async fn </span>make_columns(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RecordBatch&gt; {
         <span class="kw">let </span>catalog_name = <span class="self">self</span>.catalog_name.clone();
         <span class="kw">let </span>catalog_manager = <span class="self">self
             </span>.catalog_manager
@@ -427,48 +416,38 @@
             </span>{
                 <span class="kw">continue</span>;
             }
+
             <span class="kw">for </span>table_name <span class="kw">in </span>catalog_manager
                 .table_names(<span class="kw-2">&amp;</span>catalog_name, <span class="kw-2">&amp;</span>schema_name)
                 .<span class="kw">await</span><span class="question-mark">?
             </span>{
-                <span class="kw">let </span>(keys, schema) = <span class="kw">if let </span><span class="prelude-val">Some</span>(table) = catalog_manager
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(table) = catalog_manager
                     .table(<span class="kw-2">&amp;</span>catalog_name, <span class="kw-2">&amp;</span>schema_name, <span class="kw-2">&amp;</span>table_name)
                     .<span class="kw">await</span><span class="question-mark">?
                 </span>{
                     <span class="kw">let </span>keys = <span class="kw-2">&amp;</span>table.table_info().meta.primary_key_indices;
                     <span class="kw">let </span>schema = table.schema();
-                    (keys.clone(), schema)
-                } <span class="kw">else </span>{
-                    <span class="comment">// TODO: this specific branch is only a workaround for FrontendCatalogManager.
-                    </span><span class="kw">if </span>schema_name == INFORMATION_SCHEMA_NAME {
-                        <span class="kw">if </span>table_name == COLUMNS {
-                            (<span class="macro">vec!</span>[], InformationSchemaColumns::schema())
-                        } <span class="kw">else if </span>table_name == TABLES {
-                            (<span class="macro">vec!</span>[], InformationSchemaTables::schema())
-                        } <span class="kw">else </span>{
-                            <span class="kw">continue</span>;
-                        }
-                    } <span class="kw">else </span>{
-                        <span class="kw">continue</span>;
-                    }
-                };
 
-                <span class="kw">for </span>(idx, column) <span class="kw">in </span>schema.column_schemas().iter().enumerate() {
-                    <span class="kw">let </span>semantic_type = <span class="kw">if </span>column.is_time_index() {
-                        SEMANTIC_TYPE_TIME_INDEX
-                    } <span class="kw">else if </span>keys.contains(<span class="kw-2">&amp;</span>idx) {
-                        SEMANTIC_TYPE_PRIMARY_KEY
-                    } <span class="kw">else </span>{
-                        SEMANTIC_TYPE_FIELD
-                    };
-                    <span class="self">self</span>.add_column(
-                        <span class="kw-2">&amp;</span>catalog_name,
-                        <span class="kw-2">&amp;</span>schema_name,
-                        <span class="kw-2">&amp;</span>table_name,
-                        <span class="kw-2">&amp;</span>column.name,
-                        <span class="kw-2">&amp;</span>column.data_type.name(),
-                        semantic_type,
-                    );
+                    <span class="kw">for </span>(idx, column) <span class="kw">in </span>schema.column_schemas().iter().enumerate() {
+                        <span class="kw">let </span>semantic_type = <span class="kw">if </span>column.is_time_index() {
+                            SEMANTIC_TYPE_TIME_INDEX
+                        } <span class="kw">else if </span>keys.contains(<span class="kw-2">&amp;</span>idx) {
+                            SEMANTIC_TYPE_PRIMARY_KEY
+                        } <span class="kw">else </span>{
+                            SEMANTIC_TYPE_FIELD
+                        };
+
+                        <span class="self">self</span>.add_column(
+                            <span class="kw-2">&amp;</span>catalog_name,
+                            <span class="kw-2">&amp;</span>schema_name,
+                            <span class="kw-2">&amp;</span>table_name,
+                            <span class="kw-2">&amp;</span>column.name,
+                            <span class="kw-2">&amp;</span>column.data_type.name(),
+                            semantic_type,
+                        );
+                    }
+                } <span class="kw">else </span>{
+                    <span class="macro">unreachable!</span>();
                 }
             }
         }
@@ -502,6 +481,7 @@
             Arc::new(<span class="self">self</span>.data_types.finish()),
             Arc::new(<span class="self">self</span>.semantic_types.finish()),
         ];
+
         RecordBatch::new(<span class="self">self</span>.schema.clone(), columns).context(CreateRecordBatchSnafu)
     }
 }
@@ -518,7 +498,7 @@
             schema,
             futures::stream::once(<span class="kw">async move </span>{
                 builder
-                    .make_tables()
+                    .make_columns()
                     .<span class="kw">await
                     </span>.map(|x| x.into_df_record_batch())
                     .map_err(Into::into)

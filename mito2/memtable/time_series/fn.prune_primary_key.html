@@ -2,7 +2,7 @@
     codec: &amp;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/sync/struct.Arc.html" title="struct alloc::sync::Arc">Arc</a>&lt;<a class="struct" href="../../row_converter/struct.McmpRowCodec.html" title="struct mito2::row_converter::McmpRowCodec">McmpRowCodec</a>&gt;,
     pk: &amp;[<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u8.html">u8</a>],
     series: &amp;mut <a class="struct" href="struct.Series.html" title="struct mito2::memtable::time_series::Series">Series</a>,
-    builders: &amp;mut [<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="../../../datatypes/vectors/trait.MutableVector.html" title="trait datatypes::vectors::MutableVector">MutableVector</a>&gt;],
+    builders: &amp;mut [<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn MutableVector&gt;],
     pk_schema: SchemaRef,
     predicate: &amp;[<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/sync/struct.Arc.html" title="struct alloc::sync::Arc">Arc</a>&lt;dyn PhysicalExpr&gt;]
 ) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></code></pre></section></div></main></body></html>

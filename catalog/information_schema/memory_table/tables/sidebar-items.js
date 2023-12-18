@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["get_schema_columns","string_column","string_columns"]};

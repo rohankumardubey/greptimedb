@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["COLUMNS","TABLES"],"mod":["columns","tables"],"struct":["InformationSchemaProvider","InformationTableDataSource"],"trait":["InformationTable"],"type":["InformationTableRef"]};
+window.SIDEBAR_ITEMS = {"constant":["COLUMNS","COLUMN_PRIVILEGES","COLUMN_STATISTICS","ENGINES","TABLES"],"macro":["setup_memory_table"],"mod":["columns","memory_table","table_names","tables"],"struct":["InformationSchemaProvider","InformationTableDataSource","MEMORY_TABLES"],"trait":["InformationTable"],"type":["InformationTableRef"]};

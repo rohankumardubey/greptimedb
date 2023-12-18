@@ -279,6 +279,11 @@
 <a href="#279" id="279">279</a>
 <a href="#280" id="280">280</a>
 <a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -319,7 +324,7 @@
     <span class="self">self </span><span class="kw">as </span>catalog_err, ListCatalogsSnafu, ListSchemasSnafu, <span class="prelude-ty">Result </span><span class="kw">as </span>CatalogResult,
     TableMetadataManagerSnafu,
 };
-<span class="kw">use </span><span class="kw">crate</span>::information_schema::{InformationSchemaProvider, COLUMNS, TABLES};
+<span class="kw">use </span><span class="kw">crate</span>::information_schema::InformationSchemaProvider;
 <span class="kw">use </span><span class="kw">crate</span>::CatalogManager;
 
 <span class="doccomment">/// Access all existing catalog, schema and tables.
@@ -362,6 +367,11 @@
             cache_invalidator,
             system_catalog: SystemCatalog {
                 catalog_manager: me.clone(),
+                information_schema_provider: Arc::new(InformationSchemaProvider::new(
+                    <span class="comment">// The catalog name is not used in system_catalog, so let it empty
+                    </span><span class="string">&quot;&quot;</span>.to_string(),
+                    me.clone(),
+                )),
             },
         })
     }
@@ -512,11 +522,11 @@
 // a new catalog is created.
 </span><span class="doccomment">/// Existing system tables:
 /// - public.numbers
-/// - information_schema.tables
-/// - information_schema.columns
+/// - information_schema.{tables}
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">struct </span>SystemCatalog {
     catalog_manager: Weak&lt;KvBackendCatalogManager&gt;,
+    information_schema_provider: Arc&lt;InformationSchemaProvider&gt;,
 }
 
 <span class="kw">impl </span>SystemCatalog {
@@ -526,7 +536,7 @@
 
     <span class="kw">fn </span>table_names(<span class="kw-2">&amp;</span><span class="self">self</span>, schema: <span class="kw-2">&amp;</span>str) -&gt; Vec&lt;String&gt; {
         <span class="kw">if </span>schema == INFORMATION_SCHEMA_NAME {
-            <span class="macro">vec!</span>[TABLES.to_string(), COLUMNS.to_string()]
+            <span class="self">self</span>.information_schema_provider.table_names()
         } <span class="kw">else if </span>schema == DEFAULT_SCHEMA_NAME {
             <span class="macro">vec!</span>[NUMBERS_TABLE_NAME.to_string()]
         } <span class="kw">else </span>{
@@ -540,7 +550,7 @@
 
     <span class="kw">fn </span>table_exist(<span class="kw-2">&amp;</span><span class="self">self</span>, schema: <span class="kw-2">&amp;</span>str, table: <span class="kw-2">&amp;</span>str) -&gt; bool {
         <span class="kw">if </span>schema == INFORMATION_SCHEMA_NAME {
-            table == TABLES || table == COLUMNS
+            <span class="self">self</span>.information_schema_provider.table(table).is_some()
         } <span class="kw">else if </span>schema == DEFAULT_SCHEMA_NAME {
             table == NUMBERS_TABLE_NAME
         } <span class="kw">else </span>{

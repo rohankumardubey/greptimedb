@@ -363,6 +363,7 @@
 <a href="#363" id="363">363</a>
 <a href="#364" id="364">364</a>
 <a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -608,10 +609,11 @@
     }
 
     <span class="kw">fn </span>create_catalog_entry(<span class="self">self</span>: <span class="kw-2">&amp;</span>Arc&lt;<span class="self">Self</span>&gt;, catalog: String) -&gt; SchemaEntries {
-        <span class="kw">let </span>information_schema = InformationSchemaProvider::build(
+        <span class="kw">let </span>information_schema_provider = InformationSchemaProvider::new(
             catalog,
             Arc::downgrade(<span class="self">self</span>) <span class="kw">as </span>Weak&lt;<span class="kw">dyn </span>CatalogManager&gt;,
         );
+        <span class="kw">let </span>information_schema = information_schema_provider.tables().clone();
         <span class="kw">let </span><span class="kw-2">mut </span>catalog = HashMap::new();
         catalog.insert(INFORMATION_SCHEMA_NAME.to_string(), information_schema);
         catalog
