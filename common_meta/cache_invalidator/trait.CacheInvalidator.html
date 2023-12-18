@@ -3,7 +3,7 @@
     fn <a href="#tymethod.invalidate_table_id" class="fn">invalidate_table_id</a>&lt;'life0, 'life1, 'async_trait&gt;(
         &amp;'life0 self,
         ctx: &amp;'life1 <a class="struct" href="struct.Context.html" title="struct common_meta::cache_invalidator::Context">Context</a>,
-        table_id: <a class="type" href="../../table/metadata/type.TableId.html" title="type table::metadata::TableId">TableId</a>
+        table_id: TableId
     ) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../error/type.Result.html" title="type common_meta::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;
        <span class="where">where Self: 'async_trait,
              'life0: 'async_trait,
@@ -19,7 +19,7 @@
 }</code></pre><h2 id="required-methods" class="small-section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><section id="tymethod.invalidate_table_id" class="method"><a class="src rightside" href="../../src/common_meta/cache_invalidator.rs.html#50">source</a><h4 class="code-header">fn <a href="#tymethod.invalidate_table_id" class="fn">invalidate_table_id</a>&lt;'life0, 'life1, 'async_trait&gt;(
     &amp;'life0 self,
     ctx: &amp;'life1 <a class="struct" href="struct.Context.html" title="struct common_meta::cache_invalidator::Context">Context</a>,
-    table_id: <a class="type" href="../../table/metadata/type.TableId.html" title="type table::metadata::TableId">TableId</a>
+    table_id: TableId
 ) -&gt; <a class="struct" href="https://doc.rust-lang.org/nightly/core/pin/struct.Pin.html" title="struct core::pin::Pin">Pin</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn <a class="trait" href="https://doc.rust-lang.org/nightly/core/future/future/trait.Future.html" title="trait core::future::future::Future">Future</a>&lt;Output = <a class="type" href="../error/type.Result.html" title="type common_meta::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.unit.html">()</a>&gt;&gt; + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> + 'async_trait&gt;&gt;<span class="where fmt-newline">where
     Self: 'async_trait,
     'life0: 'async_trait,
