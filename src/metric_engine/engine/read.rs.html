@@ -264,11 +264,11 @@
 <span class="kw">use </span>common_telemetry::{error, info, tracing};
 <span class="kw">use </span>datafusion::logical_expr;
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
+<span class="kw">use </span>store_api::metric_engine_consts::DATA_SCHEMA_TABLE_ID_COLUMN_NAME;
 <span class="kw">use </span>store_api::region_engine::RegionEngine;
 <span class="kw">use </span>store_api::storage::consts::ReservedColumnId;
 <span class="kw">use </span>store_api::storage::{RegionId, ScanRequest};
 
-<span class="kw">use </span><span class="kw">crate</span>::consts::DATA_SCHEMA_TABLE_ID_COLUMN_NAME;
 <span class="kw">use </span><span class="kw">crate</span>::engine::MetricEngineInner;
 <span class="kw">use </span><span class="kw">crate</span>::error::{LogicalRegionNotFoundSnafu, MitoReadOperationSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::utils;

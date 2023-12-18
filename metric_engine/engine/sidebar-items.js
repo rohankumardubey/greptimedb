@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["alter","create","put","read","region_metadata","state"],"struct":["MetricEngine","MetricEngineInner"]};
+window.SIDEBAR_ITEMS = {"constant":["RANDOM_STATE"],"mod":["alter","create","put","read","region_metadata","state"],"struct":["MetricEngine","MetricEngineInner"]};

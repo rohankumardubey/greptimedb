@@ -371,6 +371,93 @@
 <a href="#371" id="371">371</a>
 <a href="#372" id="372">372</a>
 <a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
+<a href="#458" id="458">458</a>
+<a href="#459" id="459">459</a>
+<a href="#460" id="460">460</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -389,8 +476,9 @@
 <span class="kw">use </span>api::v1::region::{
     CreateRequest <span class="kw">as </span>PbCreateRegionRequest, RegionColumnDef, RegionRequest, RegionRequestHeader,
 };
-<span class="kw">use </span>api::v1::{ColumnDef, SemanticType};
+<span class="kw">use </span>api::v1::{ColumnDef, CreateTableExpr, SemanticType};
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>common_catalog::consts::METRIC_ENGINE;
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_procedure::error::{
     ExternalSnafu, FromJsonSnafu, <span class="prelude-ty">Result </span><span class="kw">as </span>ProcedureResult, ToJsonSnafu,
@@ -401,6 +489,7 @@
 <span class="kw">use </span>futures::future::join_all;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>snafu::{ensure, OptionExt, ResultExt};
+<span class="kw">use </span>store_api::metric_engine_consts::LOGICAL_TABLE_METADATA_KEY;
 <span class="kw">use </span>store_api::storage::RegionId;
 <span class="kw">use </span>strum::AsRefStr;
 <span class="kw">use </span>table::engine::TableReference;
@@ -408,7 +497,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::ddl::utils::{handle_operate_region_error, handle_retry_error, region_storage_path};
 <span class="kw">use </span><span class="kw">crate</span>::ddl::DdlContext;
-<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>, TableInfoNotFoundSnafu};
 <span class="kw">use </span><span class="kw">crate</span>::key::table_name::TableNameKey;
 <span class="kw">use </span><span class="kw">crate</span>::metrics;
 <span class="kw">use </span><span class="kw">crate</span>::region_keeper::OperatingRegionGuard;
@@ -495,7 +584,7 @@
         <span class="prelude-val">Ok</span>(Status::executing(<span class="bool-val">true</span>))
     }
 
-    <span class="kw">pub fn </span>create_region_request_template(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;PbCreateRegionRequest&gt; {
+    <span class="kw">pub fn </span>new_region_request_builder(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CreateRequestBuilder&gt; {
         <span class="kw">let </span>create_table_expr = <span class="kw-2">&amp;</span><span class="self">self</span>.creator.data.task.create_table;
 
         <span class="kw">let </span>column_defs = create_table_expr
@@ -545,14 +634,17 @@
             })
             .collect::&lt;<span class="prelude-ty">Result</span>&lt;<span class="kw">_</span>&gt;&gt;()<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(PbCreateRegionRequest {
+        <span class="kw">let </span>template = PbCreateRegionRequest {
             region_id: <span class="number">0</span>,
             engine: create_table_expr.engine.to_string(),
             column_defs,
             primary_key,
             path: String::new(),
             options: create_table_expr.table_options.clone(),
-        })
+        };
+
+        <span class="kw">let </span>builder = CreateRequestBuilder::new_template(<span class="self">self</span>.context.clone(), template);
+        <span class="prelude-val">Ok</span>(builder)
     }
 
     <span class="kw">pub async fn </span>on_datanode_create_regions(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Status&gt; {
@@ -567,7 +659,7 @@
         <span class="kw">let </span>schema = <span class="kw-2">&amp;</span>create_table_expr.schema_name;
         <span class="kw">let </span>storage_path = region_storage_path(catalog, schema);
 
-        <span class="kw">let </span>request_template = <span class="self">self</span>.create_region_request_template()<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>request_builder = <span class="self">self</span>.new_region_request_builder()<span class="question-mark">?</span>;
 
         <span class="kw">let </span>leaders = find_leaders(region_routes);
         <span class="kw">let </span><span class="kw-2">mut </span>create_region_tasks = Vec::with_capacity(leaders.len());
@@ -576,17 +668,20 @@
             <span class="kw">let </span>requester = <span class="self">self</span>.context.datanode_manager.datanode(<span class="kw-2">&amp;</span>datanode).<span class="kw">await</span>;
 
             <span class="kw">let </span>regions = find_leader_regions(region_routes, <span class="kw-2">&amp;</span>datanode);
-            <span class="kw">let </span>requests = regions
-                .iter()
-                .map(|region_number| {
-                    <span class="kw">let </span>region_id = RegionId::new(<span class="self">self</span>.table_id(), <span class="kw-2">*</span>region_number);
+            <span class="kw">let </span><span class="kw-2">mut </span>requests = Vec::with_capacity(regions.len());
+            <span class="kw">for </span>region_number <span class="kw">in </span>regions {
+                <span class="kw">let </span>region_id = RegionId::new(<span class="self">self</span>.table_id(), region_number);
 
-                    <span class="kw">let </span><span class="kw-2">mut </span>create_region_request = request_template.clone();
-                    create_region_request.region_id = region_id.as_u64();
-                    create_region_request.path = storage_path.clone();
-                    PbRegionRequest::Create(create_region_request)
-                })
-                .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+                <span class="kw">let </span>create_region_request = request_builder
+                    .build_one(
+                        <span class="kw-2">&amp;</span><span class="self">self</span>.creator.data.task.create_table,
+                        region_id,
+                        storage_path.clone(),
+                    )
+                    .<span class="kw">await</span><span class="question-mark">?</span>;
+
+                requests.push(PbRegionRequest::Create(create_region_request));
+            }
 
             <span class="kw">for </span>request <span class="kw">in </span>requests {
                 <span class="kw">let </span>request = RegionRequest {
@@ -742,6 +837,85 @@
 <span class="kw">impl </span>CreateTableData {
     <span class="kw">fn </span>table_ref(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TableReference&lt;<span class="lifetime">&#39;_</span>&gt; {
         <span class="self">self</span>.task.table_ref()
+    }
+}
+
+<span class="doccomment">/// Builder for [PbCreateRegionRequest].
+</span><span class="kw">pub struct </span>CreateRequestBuilder {
+    context: DdlContext,
+    template: PbCreateRegionRequest,
+    <span class="doccomment">/// Optional. Only for metric engine.
+    </span>physical_table_id: <span class="prelude-ty">Option</span>&lt;TableId&gt;,
+}
+
+<span class="kw">impl </span>CreateRequestBuilder {
+    <span class="kw">fn </span>new_template(context: DdlContext, template: PbCreateRegionRequest) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            context,
+            template,
+            physical_table_id: <span class="prelude-val">None</span>,
+        }
+    }
+
+    <span class="kw">pub fn </span>template(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>PbCreateRegionRequest {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.template
+    }
+
+    <span class="kw">async fn </span>build_one(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        create_expr: <span class="kw-2">&amp;</span>CreateTableExpr,
+        region_id: RegionId,
+        storage_path: String,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;PbCreateRegionRequest&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>request = <span class="self">self</span>.template.clone();
+
+        request.region_id = region_id.as_u64();
+        request.path = storage_path;
+
+        <span class="kw">if </span><span class="self">self</span>.template.engine == METRIC_ENGINE {
+            <span class="self">self</span>.metric_engine_hook(create_expr, region_id, <span class="kw-2">&amp;mut </span>request)
+                .<span class="kw">await</span><span class="question-mark">?</span>;
+        }
+
+        <span class="prelude-val">Ok</span>(request)
+    }
+
+    <span class="kw">async fn </span>metric_engine_hook(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        create_expr: <span class="kw-2">&amp;</span>CreateTableExpr,
+        region_id: RegionId,
+        request: <span class="kw-2">&amp;mut </span>PbCreateRegionRequest,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(physical_table_name) = request.options.get(LOGICAL_TABLE_METADATA_KEY) {
+            <span class="kw">let </span>table_id = <span class="kw">if let </span><span class="prelude-val">Some</span>(table_id) = <span class="self">self</span>.physical_table_id {
+                table_id
+            } <span class="kw">else </span>{
+                <span class="kw">let </span>table_name_manager = <span class="self">self</span>.context.table_metadata_manager.table_name_manager();
+                <span class="kw">let </span>table_name_key = TableNameKey::new(
+                    <span class="kw-2">&amp;</span>create_expr.catalog_name,
+                    <span class="kw-2">&amp;</span>create_expr.schema_name,
+                    physical_table_name,
+                );
+                <span class="kw">let </span>table_id = table_name_manager
+                    .get(table_name_key)
+                    .<span class="kw">await</span><span class="question-mark">?
+                    </span>.context(TableInfoNotFoundSnafu {
+                        table_name: physical_table_name,
+                    })<span class="question-mark">?
+                    </span>.table_id();
+                <span class="self">self</span>.physical_table_id = <span class="prelude-val">Some</span>(table_id);
+                table_id
+            };
+            <span class="comment">// Concat physical table&#39;s table id and corresponding region number to get
+            // the physical region id.
+            </span><span class="kw">let </span>physical_region_id = RegionId::new(table_id, region_id.region_number());
+            request.options.insert(
+                LOGICAL_TABLE_METADATA_KEY.to_string(),
+                physical_region_id.as_u64().to_string(),
+            );
+        }
+
+        <span class="prelude-val">Ok</span>(())
     }
 }
 </code></pre></div></section></main></body></html>

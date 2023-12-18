@@ -653,15 +653,15 @@
 <span class="kw">use </span>datafusion::prelude::{col, lit};
 <span class="kw">use </span>mito2::engine::MitoEngine;
 <span class="kw">use </span>snafu::ResultExt;
-<span class="kw">use </span>store_api::region_engine::RegionEngine;
-<span class="kw">use </span>store_api::region_request::RegionPutRequest;
-<span class="kw">use </span>store_api::storage::{RegionId, ScanRequest};
-
-<span class="kw">use </span><span class="kw">crate</span>::consts::{
+<span class="kw">use </span>store_api::metric_engine_consts::{
     METADATA_SCHEMA_KEY_COLUMN_INDEX, METADATA_SCHEMA_KEY_COLUMN_NAME,
     METADATA_SCHEMA_TIMESTAMP_COLUMN_NAME, METADATA_SCHEMA_VALUE_COLUMN_INDEX,
     METADATA_SCHEMA_VALUE_COLUMN_NAME,
 };
+<span class="kw">use </span>store_api::region_engine::RegionEngine;
+<span class="kw">use </span>store_api::region_request::RegionPutRequest;
+<span class="kw">use </span>store_api::storage::{RegionId, ScanRequest};
+
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     CollectRecordBatchStreamSnafu, DecodeColumnValueSnafu, DeserializeSemanticTypeSnafu,
     MitoReadOperationSnafu, MitoWriteOperationSnafu, ParseRegionIdSnafu, RegionAlreadyExistsSnafu,

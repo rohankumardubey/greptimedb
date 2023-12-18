@@ -560,6 +560,7 @@
 <a href="#560" id="560">560</a>
 <a href="#561" id="561">561</a>
 <a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -586,18 +587,18 @@
 <span class="kw">use </span>object_store::util::join_dir;
 <span class="kw">use </span>snafu::{ensure, OptionExt, ResultExt};
 <span class="kw">use </span>store_api::metadata::ColumnMetadata;
-<span class="kw">use </span>store_api::region_engine::RegionEngine;
-<span class="kw">use </span>store_api::region_request::{AffectedRows, RegionCreateRequest, RegionRequest};
-<span class="kw">use </span>store_api::storage::consts::ReservedColumnId;
-<span class="kw">use </span>store_api::storage::RegionId;
-
-<span class="kw">use </span><span class="kw">crate</span>::consts::{
+<span class="kw">use </span>store_api::metric_engine_consts::{
     DATA_REGION_SUBDIR, DATA_SCHEMA_TABLE_ID_COLUMN_NAME, DATA_SCHEMA_TSID_COLUMN_NAME,
     LOGICAL_TABLE_METADATA_KEY, METADATA_REGION_SUBDIR, METADATA_SCHEMA_KEY_COLUMN_INDEX,
     METADATA_SCHEMA_KEY_COLUMN_NAME, METADATA_SCHEMA_TIMESTAMP_COLUMN_INDEX,
     METADATA_SCHEMA_TIMESTAMP_COLUMN_NAME, METADATA_SCHEMA_VALUE_COLUMN_INDEX,
     METADATA_SCHEMA_VALUE_COLUMN_NAME, PHYSICAL_TABLE_METADATA_KEY,
 };
+<span class="kw">use </span>store_api::region_engine::RegionEngine;
+<span class="kw">use </span>store_api::region_request::{AffectedRows, RegionCreateRequest, RegionRequest};
+<span class="kw">use </span>store_api::storage::consts::ReservedColumnId;
+<span class="kw">use </span>store_api::storage::RegionId;
+
 <span class="kw">use </span><span class="kw">crate</span>::engine::MetricEngineInner;
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     ConflictRegionOptionSnafu, CreateMitoRegionSnafu, InternalColumnOccupiedSnafu,
@@ -974,8 +975,9 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
+    <span class="kw">use </span>store_api::metric_engine_consts::METRIC_ENGINE_NAME;
+
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::consts::METRIC_ENGINE_NAME;
     <span class="kw">use </span><span class="kw">crate</span>::engine::MetricEngine;
     <span class="kw">use </span><span class="kw">crate</span>::test_util::TestEnv;
 

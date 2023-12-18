@@ -345,6 +345,8 @@
 <a href="#345" id="345">345</a>
 <a href="#346" id="346">346</a>
 <a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -366,11 +368,13 @@
 <span class="kw">use </span>api::v1::{ColumnDataType, ColumnSchema, Row, Rows, SemanticType};
 <span class="kw">use </span>common_telemetry::{error, info};
 <span class="kw">use </span>snafu::OptionExt;
+<span class="kw">use </span>store_api::metric_engine_consts::{
+    DATA_SCHEMA_TABLE_ID_COLUMN_NAME, DATA_SCHEMA_TSID_COLUMN_NAME,
+};
 <span class="kw">use </span>store_api::region_request::{AffectedRows, RegionPutRequest};
 <span class="kw">use </span>store_api::storage::{RegionId, TableId};
 
-<span class="kw">use </span><span class="kw">crate</span>::consts::{DATA_SCHEMA_TABLE_ID_COLUMN_NAME, DATA_SCHEMA_TSID_COLUMN_NAME, RANDOM_STATE};
-<span class="kw">use </span><span class="kw">crate</span>::engine::MetricEngineInner;
+<span class="kw">use </span><span class="kw">crate</span>::engine::{MetricEngineInner, RANDOM_STATE};
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     ColumnNotFoundSnafu, ForbiddenPhysicalAlterSnafu, LogicalRegionNotFoundSnafu, <span class="prelude-ty">Result</span>,
 };

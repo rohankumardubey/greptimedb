@@ -368,6 +368,14 @@
 <a href="#368" id="368">368</a>
 <a href="#369" id="369">369</a>
 <a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -415,6 +423,12 @@
 
     <span class="attr">#[snafu(display(<span class="string">&quot;Invalid result with a txn response: {}&quot;</span>, err_msg))]
     </span>InvalidTxnResult { err_msg: String, location: Location },
+
+    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid engine type: {}&quot;</span>, engine_type))]
+    </span>InvalidEngineType {
+        engine_type: String,
+        location: Location,
+    },
 
     <span class="attr">#[snafu(display(<span class="string">&quot;Failed to connect to Etcd&quot;</span>))]
     </span>ConnectEtcd {
@@ -692,7 +706,9 @@
             | RenameTable { .. }
             | Unsupported { .. } =&gt; StatusCode::Internal,
 
-            PrimaryKeyNotFound { .. } | <span class="kw-2">&amp;</span>EmptyKey { .. } =&gt; StatusCode::InvalidArguments,
+            PrimaryKeyNotFound { .. } | EmptyKey { .. } | InvalidEngineType { .. } =&gt; {
+                StatusCode::InvalidArguments
+            }
 
             TableNotFound { .. } =&gt; StatusCode::TableNotFound,
             TableAlreadyExists { .. } =&gt; StatusCode::TableAlreadyExists,

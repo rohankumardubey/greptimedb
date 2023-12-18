@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["consts","data_region","engine","error","metadata_region","metrics","utils"]};
+window.SIDEBAR_ITEMS = {"mod":["data_region","engine","error","metadata_region","metrics","utils"]};

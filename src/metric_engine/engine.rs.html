@@ -194,6 +194,9 @@
 <a href="#194" id="194">194</a>
 <a href="#195" id="195">195</a>
 <a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -223,15 +226,18 @@
 <span class="kw">use </span>common_recordbatch::SendableRecordBatchStream;
 <span class="kw">use </span>mito2::engine::MitoEngine;
 <span class="kw">use </span>store_api::metadata::RegionMetadataRef;
+<span class="kw">use </span>store_api::metric_engine_consts::METRIC_ENGINE_NAME;
 <span class="kw">use </span>store_api::region_engine::{RegionEngine, RegionRole, SetReadonlyResponse};
 <span class="kw">use </span>store_api::region_request::{AffectedRows, RegionRequest};
 <span class="kw">use </span>store_api::storage::{RegionId, ScanRequest};
 <span class="kw">use </span>tokio::sync::RwLock;
 
 <span class="kw">use </span><span class="self">self</span>::state::MetricEngineState;
-<span class="kw">use </span><span class="kw">crate</span>::consts::METRIC_ENGINE_NAME;
 <span class="kw">use </span><span class="kw">crate</span>::data_region::DataRegion;
 <span class="kw">use </span><span class="kw">crate</span>::metadata_region::MetadataRegion;
+
+<span class="doccomment">/// Fixed random state for generating tsid
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>RANDOM_STATE: ahash::RandomState = ahash::RandomState::with_seeds(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>);
 
 <span class="attr">#[cfg_attr(doc, aquamarine::aquamarine)]
 </span><span class="doccomment">/// # Metric Engine
