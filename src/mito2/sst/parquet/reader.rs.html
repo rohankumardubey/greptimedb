@@ -451,8 +451,6 @@
 <a href="#451" id="451">451</a>
 <a href="#452" id="452">452</a>
 <a href="#453" id="453">453</a>
-<a href="#454" id="454">454</a>
-<a href="#455" id="455">455</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -473,7 +471,6 @@
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::{Duration, Instant};
 
-<span class="kw">use </span>async_compat::{Compat, CompatExt};
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>common_telemetry::debug;
 <span class="kw">use </span>common_time::range::TimestampRange;
@@ -578,8 +575,7 @@
             </span>.object_store
             .reader(<span class="kw-2">&amp;</span>file_path)
             .<span class="kw">await
-            </span>.context(OpenDalSnafu)<span class="question-mark">?
-            </span>.compat();
+            </span>.context(OpenDalSnafu)<span class="question-mark">?</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>reader = BufReader::new(reader);
         <span class="comment">// Loads parquet metadata of the file.
         </span><span class="kw">let </span>parquet_meta = <span class="self">self</span>.read_parquet_metadata(<span class="kw-2">&amp;mut </span>reader, <span class="kw-2">&amp;</span>file_path).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -743,7 +739,7 @@
     <span class="doccomment">/// Metadata of the parquet file.
     </span>parquet_meta: Arc&lt;ParquetMetaData&gt;,
     <span class="doccomment">/// Reader to get data.
-    </span>file_reader: BufReader&lt;Compat&lt;Reader&gt;&gt;,
+    </span>file_reader: BufReader&lt;Reader&gt;,
     <span class="doccomment">/// Projection mask.
     </span>projection: ProjectionMask,
     <span class="doccomment">/// Field levels to read.

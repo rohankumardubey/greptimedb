@@ -614,8 +614,6 @@
 <a href="#614" id="614">614</a>
 <a href="#615" id="615">615</a>
 <a href="#616" id="616">616</a>
-<a href="#617" id="617">617</a>
-<a href="#618" id="618">618</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -634,7 +632,6 @@
 <span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>async_compat::CompatExt;
 <span class="kw">use </span>common_base::readable_size::ReadableSize;
 <span class="kw">use </span>common_datasource::file_format::csv::{CsvConfigBuilder, CsvOpener};
 <span class="kw">use </span>common_datasource::file_format::json::JsonOpener;
@@ -823,8 +820,7 @@
                     .reader(path)
                     .<span class="kw">await
                     </span>.context(error::ReadObjectSnafu { path })<span class="question-mark">?</span>;
-
-                <span class="kw">let </span>buf_reader = BufReader::new(reader.compat());
+                <span class="kw">let </span>buf_reader = BufReader::new(reader);
 
                 <span class="kw">let </span>builder = ParquetRecordBatchStreamBuilder::new(buf_reader)
                     .<span class="kw">await
