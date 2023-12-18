@@ -759,11 +759,6 @@
 <a href="#759" id="759">759</a>
 <a href="#760" id="760">760</a>
 <a href="#761" id="761">761</a>
-<a href="#762" id="762">762</a>
-<a href="#763" id="763">763</a>
-<a href="#764" id="764">764</a>
-<a href="#765" id="765">765</a>
-<a href="#766" id="766">766</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -898,14 +893,15 @@
 <span class="doccomment">/// Parse the `align to` clause and return a UTC timestamp with unit of millisecond,
 /// which is used as the basis for dividing time slot during the align operation.
 /// 1. NOW: align to current execute time
-/// 2. CALENDAR (as Default Option): align to timestamp `0`
 /// 2. Timestamp string: align to specific timestamp
+/// 3. leave empty (as Default Option): align to unix epoch 0
 </span><span class="kw">fn </span>parse_align_to(args: <span class="kw-2">&amp;</span>[Expr], i: usize) -&gt; DFResult&lt;i64&gt; {
     <span class="kw">let </span>s = parse_str_expr(args, i)<span class="question-mark">?</span>;
     <span class="kw">let </span>upper = s.to_uppercase();
     <span class="kw">match </span>upper.as_str() {
         <span class="string">&quot;NOW&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Timestamp::current_millis().value()),
-        <span class="string">&quot;CALENDAR&quot; </span>| <span class="string">&quot;&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="number">0</span>),
+        <span class="comment">// default align to unix epoch 0
+        </span><span class="string">&quot;&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="number">0</span>),
         <span class="kw">_ </span>=&gt; (),
     }
     Timestamp::from_str(s)
@@ -1514,16 +1510,10 @@
         </span><span class="kw">let </span>args = <span class="macro">vec!</span>[Expr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">&quot;NOW&quot;</span>.into())))];
         <span class="kw">let </span>epsinon = parse_align_to(<span class="kw-2">&amp;</span>args, <span class="number">0</span>).unwrap() - Timestamp::current_millis().value();
         <span class="macro">assert!</span>(epsinon.abs() &lt; <span class="number">100</span>);
-        <span class="comment">// test CALENDAR
-        </span><span class="kw">let </span>args = <span class="macro">vec!</span>[
-            Expr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>.into()))),
-            Expr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">&quot;CALENDAR&quot;</span>.into()))),
-        ];
-        <span class="macro">assert!</span>(
-            parse_align_to(<span class="kw-2">&amp;</span>args, <span class="number">0</span>).unwrap() == parse_align_to(<span class="kw-2">&amp;</span>args, <span class="number">1</span>).unwrap()
-                &amp;&amp; parse_align_to(<span class="kw-2">&amp;</span>args, <span class="number">0</span>).unwrap() == <span class="number">0
-        </span>);
-        <span class="comment">// test CALENDAR
+        <span class="comment">// test default
+        </span><span class="kw">let </span>args = <span class="macro">vec!</span>[Expr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>.into())))];
+        <span class="macro">assert!</span>(parse_align_to(<span class="kw-2">&amp;</span>args, <span class="number">0</span>).unwrap() == <span class="number">0</span>);
+        <span class="comment">// test Timestamp
         </span><span class="kw">let </span>args = <span class="macro">vec!</span>[Expr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(
             <span class="string">&quot;1970-01-01T00:00:00+08:00&quot;</span>.into(),
         )))];
