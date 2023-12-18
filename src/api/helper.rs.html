@@ -2042,15 +2042,6 @@
 <a href="#2042" id="2042">2042</a>
 <a href="#2043" id="2043">2043</a>
 <a href="#2044" id="2044">2044</a>
-<a href="#2045" id="2045">2045</a>
-<a href="#2046" id="2046">2046</a>
-<a href="#2047" id="2047">2047</a>
-<a href="#2048" id="2048">2048</a>
-<a href="#2049" id="2049">2049</a>
-<a href="#2050" id="2050">2050</a>
-<a href="#2051" id="2051">2051</a>
-<a href="#2052" id="2052">2052</a>
-<a href="#2053" id="2053">2053</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -2588,11 +2579,8 @@
 
 <span class="doccomment">/// Convert common decimal128 to grpc decimal128 without precision and scale.
 </span><span class="kw">pub fn </span>convert_to_pb_decimal128(v: Decimal128) -&gt; v1::Decimal128 {
-    <span class="kw">let </span>value = v.val();
-    v1::Decimal128 {
-        hi: (value &gt;&gt; <span class="number">64</span>) <span class="kw">as </span>i64,
-        lo: value <span class="kw">as </span>i64,
-    }
+    <span class="kw">let </span>(hi, lo) = v.split_value();
+    v1::Decimal128 { hi, lo }
 }
 
 <span class="kw">pub fn </span>pb_value_to_value_ref&lt;<span class="lifetime">&#39;a</span>&gt;(
@@ -2633,9 +2621,9 @@
         ValueData::TimeMillisecondValue(t) =&gt; ValueRef::Time(Time::new_millisecond(<span class="kw-2">*</span>t)),
         ValueData::TimeMicrosecondValue(t) =&gt; ValueRef::Time(Time::new_microsecond(<span class="kw-2">*</span>t)),
         ValueData::TimeNanosecondValue(t) =&gt; ValueRef::Time(Time::new_nanosecond(<span class="kw-2">*</span>t)),
-        ValueData::IntervalYearMonthValues(v) =&gt; ValueRef::Interval(Interval::from_i32(<span class="kw-2">*</span>v)),
-        ValueData::IntervalDayTimeValues(v) =&gt; ValueRef::Interval(Interval::from_i64(<span class="kw-2">*</span>v)),
-        ValueData::IntervalMonthDayNanoValues(v) =&gt; {
+        ValueData::IntervalYearMonthValue(v) =&gt; ValueRef::Interval(Interval::from_i32(<span class="kw-2">*</span>v)),
+        ValueData::IntervalDayTimeValue(v) =&gt; ValueRef::Interval(Interval::from_i64(<span class="kw-2">*</span>v)),
+        ValueData::IntervalMonthDayNanoValue(v) =&gt; {
             <span class="kw">let </span>interval = Interval::from_month_day_nano(v.months, v.days, v.nanoseconds);
             ValueRef::Interval(interval)
         }
@@ -3039,13 +3027,13 @@
         },
         Value::Interval(v) =&gt; <span class="kw">match </span>v.unit() {
             IntervalUnit::YearMonth =&gt; v1::Value {
-                value_data: <span class="prelude-val">Some</span>(ValueData::IntervalYearMonthValues(v.to_i32())),
+                value_data: <span class="prelude-val">Some</span>(ValueData::IntervalYearMonthValue(v.to_i32())),
             },
             IntervalUnit::DayTime =&gt; v1::Value {
-                value_data: <span class="prelude-val">Some</span>(ValueData::IntervalDayTimeValues(v.to_i64())),
+                value_data: <span class="prelude-val">Some</span>(ValueData::IntervalDayTimeValue(v.to_i64())),
             },
             IntervalUnit::MonthDayNano =&gt; v1::Value {
-                value_data: <span class="prelude-val">Some</span>(ValueData::IntervalMonthDayNanoValues(
+                value_data: <span class="prelude-val">Some</span>(ValueData::IntervalMonthDayNanoValue(
                     convert_i128_to_interval(v.to_i128()),
                 )),
             },
@@ -3064,12 +3052,9 @@
                 value_data: <span class="prelude-val">Some</span>(ValueData::DurationNanosecondValue(v.value())),
             },
         },
-        Value::Decimal128(v) =&gt; {
-            <span class="kw">let </span>(hi, lo) = v.split_value();
-            v1::Value {
-                value_data: <span class="prelude-val">Some</span>(ValueData::Decimal128Value(v1::Decimal128 { hi, lo })),
-            }
-        }
+        Value::Decimal128(v) =&gt; v1::Value {
+            value_data: <span class="prelude-val">Some</span>(ValueData::Decimal128Value(convert_to_pb_decimal128(v))),
+        },
         Value::List(<span class="kw">_</span>) =&gt; <span class="kw">return </span><span class="prelude-val">None</span>,
     };
 
@@ -3104,9 +3089,9 @@
         ValueData::TimeMillisecondValue(<span class="kw">_</span>) =&gt; ColumnDataType::TimeMillisecond,
         ValueData::TimeMicrosecondValue(<span class="kw">_</span>) =&gt; ColumnDataType::TimeMicrosecond,
         ValueData::TimeNanosecondValue(<span class="kw">_</span>) =&gt; ColumnDataType::TimeNanosecond,
-        ValueData::IntervalYearMonthValues(<span class="kw">_</span>) =&gt; ColumnDataType::IntervalYearMonth,
-        ValueData::IntervalDayTimeValues(<span class="kw">_</span>) =&gt; ColumnDataType::IntervalDayTime,
-        ValueData::IntervalMonthDayNanoValues(<span class="kw">_</span>) =&gt; ColumnDataType::IntervalMonthDayNano,
+        ValueData::IntervalYearMonthValue(<span class="kw">_</span>) =&gt; ColumnDataType::IntervalYearMonth,
+        ValueData::IntervalDayTimeValue(<span class="kw">_</span>) =&gt; ColumnDataType::IntervalDayTime,
+        ValueData::IntervalMonthDayNanoValue(<span class="kw">_</span>) =&gt; ColumnDataType::IntervalMonthDayNano,
         ValueData::DurationSecondValue(<span class="kw">_</span>) =&gt; ColumnDataType::DurationSecond,
         ValueData::DurationMillisecondValue(<span class="kw">_</span>) =&gt; ColumnDataType::DurationMillisecond,
         ValueData::DurationMicrosecondValue(<span class="kw">_</span>) =&gt; ColumnDataType::DurationMicrosecond,
@@ -3162,10 +3147,10 @@
                 TimeUnit::Nanosecond =&gt; ValueData::TimeNanosecondValue(v.value()),
             }),
             Value::Interval(v) =&gt; <span class="prelude-val">Some</span>(<span class="kw">match </span>v.unit() {
-                IntervalUnit::YearMonth =&gt; ValueData::IntervalYearMonthValues(v.to_i32()),
-                IntervalUnit::DayTime =&gt; ValueData::IntervalDayTimeValues(v.to_i64()),
+                IntervalUnit::YearMonth =&gt; ValueData::IntervalYearMonthValue(v.to_i32()),
+                IntervalUnit::DayTime =&gt; ValueData::IntervalDayTimeValue(v.to_i64()),
                 IntervalUnit::MonthDayNano =&gt; {
-                    ValueData::IntervalMonthDayNanoValues(convert_i128_to_interval(v.to_i128()))
+                    ValueData::IntervalMonthDayNanoValue(convert_i128_to_interval(v.to_i128()))
                 }
             }),
             Value::Duration(v) =&gt; <span class="prelude-val">Some</span>(<span class="kw">match </span>v.unit() {
@@ -3174,10 +3159,7 @@
                 TimeUnit::Microsecond =&gt; ValueData::DurationMicrosecondValue(v.value()),
                 TimeUnit::Nanosecond =&gt; ValueData::DurationNanosecondValue(v.value()),
             }),
-            Value::Decimal128(v) =&gt; {
-                <span class="kw">let </span>(hi, lo) = v.split_value();
-                <span class="prelude-val">Some</span>(ValueData::Decimal128Value(v1::Decimal128 { hi, lo }))
-            }
+            Value::Decimal128(v) =&gt; <span class="prelude-val">Some</span>(ValueData::Decimal128Value(convert_to_pb_decimal128(v))),
             Value::List(<span class="kw">_</span>) =&gt; <span class="macro">unreachable!</span>(),
         },
     }
