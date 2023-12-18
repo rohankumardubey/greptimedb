@@ -694,6 +694,13 @@
 <a href="#694" id="694">694</a>
 <a href="#695" id="695">695</a>
 <a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -713,6 +720,7 @@
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>clap::Parser;
+<span class="kw">use </span>common_catalog::consts::MIN_USER_TABLE_ID;
 <span class="kw">use </span>common_config::{metadata_store_dir, KvBackendConfig, WalConfig};
 <span class="kw">use </span>common_meta::cache_invalidator::DummyCacheInvalidator;
 <span class="kw">use </span>common_meta::datanode_manager::DatanodeManagerRef;
@@ -721,6 +729,7 @@
 <span class="kw">use </span>common_meta::key::{TableMetadataManager, TableMetadataManagerRef};
 <span class="kw">use </span>common_meta::kv_backend::KvBackendRef;
 <span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeper;
+<span class="kw">use </span>common_meta::sequence::SequenceBuilder;
 <span class="kw">use </span>common_procedure::ProcedureManagerRef;
 <span class="kw">use </span>common_telemetry::info;
 <span class="kw">use </span>common_telemetry::logging::LoggingOptions;
@@ -1060,8 +1069,13 @@
 
         <span class="kw">let </span>datanode_manager = Arc::new(StandaloneDatanodeManager(datanode.region_server()));
 
-        <span class="kw">let </span>table_meta_allocator =
-            Arc::new(StandaloneTableMetadataCreator::new(kv_backend.clone()));
+        <span class="kw">let </span>table_id_sequence = Arc::new(
+            SequenceBuilder::new(<span class="string">&quot;table_id&quot;</span>, kv_backend.clone())
+                .initial(MIN_USER_TABLE_ID <span class="kw">as </span>u64)
+                .step(<span class="number">10</span>)
+                .build(),
+        );
+        <span class="kw">let </span>table_meta_allocator = Arc::new(StandaloneTableMetadataCreator::new(table_id_sequence));
 
         <span class="kw">let </span>ddl_task_executor = <span class="self">Self</span>::create_ddl_task_executor(
             kv_backend.clone(),

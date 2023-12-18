@@ -147,11 +147,6 @@
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -176,10 +171,9 @@
 <span class="kw">use </span>common_meta::datanode_manager::{AffectedRows, Datanode, DatanodeManager, DatanodeRef};
 <span class="kw">use </span>common_meta::ddl::{TableMetadataAllocator, TableMetadataAllocatorContext};
 <span class="kw">use </span>common_meta::error::{<span class="self">self </span><span class="kw">as </span>meta_error, <span class="prelude-ty">Result </span><span class="kw">as </span>MetaResult};
-<span class="kw">use </span>common_meta::kv_backend::KvBackendRef;
 <span class="kw">use </span>common_meta::peer::Peer;
 <span class="kw">use </span>common_meta::rpc::router::{Region, RegionRoute};
-<span class="kw">use </span>common_meta::sequence::{Sequence, SequenceRef};
+<span class="kw">use </span>common_meta::sequence::SequenceRef;
 <span class="kw">use </span>common_recordbatch::SendableRecordBatchStream;
 <span class="kw">use </span>common_telemetry::tracing;
 <span class="kw">use </span>common_telemetry::tracing_context::{FutureExt, TracingContext};
@@ -190,8 +184,6 @@
 <span class="kw">use </span>table::metadata::RawTableInfo;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{InvalidRegionRequestSnafu, InvokeRegionServerSnafu, <span class="prelude-ty">Result</span>};
-
-<span class="kw">const </span>TABLE_ID_SEQ: <span class="kw-2">&amp;</span>str = <span class="string">&quot;table_id&quot;</span>;
 
 <span class="kw">pub struct </span>StandaloneDatanodeManager(<span class="kw">pub </span>RegionServer);
 
@@ -266,10 +258,8 @@
 }
 
 <span class="kw">impl </span>StandaloneTableMetadataCreator {
-    <span class="kw">pub fn </span>new(kv_backend: KvBackendRef) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            table_id_sequence: Arc::new(Sequence::new(TABLE_ID_SEQ, <span class="number">1024</span>, <span class="number">10</span>, kv_backend)),
-        }
+    <span class="kw">pub fn </span>new(table_id_sequence: SequenceRef) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ table_id_sequence }
     }
 }
 

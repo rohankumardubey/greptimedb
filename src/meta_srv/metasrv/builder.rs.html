@@ -400,6 +400,16 @@
 <a href="#400" id="400">400</a>
 <a href="#401" id="401">401</a>
 <a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -420,6 +430,7 @@
 
 <span class="kw">use </span>client::client_manager::DatanodeClients;
 <span class="kw">use </span>common_base::Plugins;
+<span class="kw">use </span>common_catalog::consts::MIN_USER_TABLE_ID;
 <span class="kw">use </span>common_grpc::channel_manager::ChannelConfig;
 <span class="kw">use </span>common_meta::datanode_manager::DatanodeManagerRef;
 <span class="kw">use </span>common_meta::ddl::TableMetadataAllocatorRef;
@@ -429,7 +440,7 @@
 <span class="kw">use </span>common_meta::kv_backend::memory::MemoryKvBackend;
 <span class="kw">use </span>common_meta::kv_backend::{KvBackendRef, ResettableKvBackendRef};
 <span class="kw">use </span>common_meta::region_keeper::{MemoryRegionKeeper, MemoryRegionKeeperRef};
-<span class="kw">use </span>common_meta::sequence::Sequence;
+<span class="kw">use </span>common_meta::sequence::SequenceBuilder;
 <span class="kw">use </span>common_meta::state_store::KvStateStore;
 <span class="kw">use </span>common_procedure::local::{LocalManager, ManagerConfig};
 <span class="kw">use </span>common_procedure::ProcedureManagerRef;
@@ -592,7 +603,7 @@
         <span class="kw">let </span>pushers = Pushers::default();
         <span class="kw">let </span>mailbox = build_mailbox(<span class="kw-2">&amp;</span>kv_backend, <span class="kw-2">&amp;</span>pushers);
         <span class="kw">let </span>procedure_manager = build_procedure_manager(<span class="kw-2">&amp;</span>options, <span class="kw-2">&amp;</span>kv_backend);
-        <span class="kw">let </span>table_id_sequence = Arc::new(Sequence::new(TABLE_ID_SEQ, <span class="number">1024</span>, <span class="number">10</span>, kv_backend.clone()));
+
         <span class="kw">let </span>table_metadata_manager = Arc::new(TableMetadataManager::new(
             leader_cached_kv_backend.clone() <span class="kw">as _</span>,
         ));
@@ -606,10 +617,16 @@
         };
 
         <span class="kw">let </span>table_metadata_allocator = table_metadata_allocator.unwrap_or_else(|| {
+            <span class="kw">let </span>sequence = Arc::new(
+                SequenceBuilder::new(TABLE_ID_SEQ, kv_backend.clone())
+                    .initial(MIN_USER_TABLE_ID <span class="kw">as </span>u64)
+                    .step(<span class="number">10</span>)
+                    .build(),
+            );
             Arc::new(MetaSrvTableMetadataAllocator::new(
                 selector_ctx.clone(),
                 selector.clone(),
-                table_id_sequence.clone(),
+                sequence,
             ))
         });
 
@@ -695,7 +712,6 @@
             kv_backend,
             leader_cached_kv_backend,
             meta_peer_client: meta_peer_client.clone(),
-            table_id_sequence,
             selector,
             handler_group,
             election,
@@ -730,7 +746,11 @@
 }
 
 <span class="kw">fn </span>build_mailbox(kv_backend: <span class="kw-2">&amp;</span>KvBackendRef, pushers: <span class="kw-2">&amp;</span>Pushers) -&gt; MailboxRef {
-    <span class="kw">let </span>mailbox_sequence = Sequence::new(<span class="string">&quot;heartbeat_mailbox&quot;</span>, <span class="number">1</span>, <span class="number">100</span>, kv_backend.clone());
+    <span class="kw">let </span>mailbox_sequence = SequenceBuilder::new(<span class="string">&quot;heartbeat_mailbox&quot;</span>, kv_backend.clone())
+        .initial(<span class="number">1</span>)
+        .step(<span class="number">100</span>)
+        .build();
+
     HeartbeatMailbox::create(pushers.clone(), mailbox_sequence)
 }
 

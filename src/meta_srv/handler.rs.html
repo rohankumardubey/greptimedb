@@ -968,7 +968,7 @@
 
     <span class="kw">use </span>api::v1::meta::{MailboxMessage, RequestHeader, Role, PROTOCOL_VERSION};
     <span class="kw">use </span>common_meta::kv_backend::memory::MemoryKvBackend;
-    <span class="kw">use </span>common_meta::sequence::Sequence;
+    <span class="kw">use </span>common_meta::sequence::SequenceBuilder;
     <span class="kw">use </span>tokio::sync::mpsc;
 
     <span class="kw">use </span><span class="kw">crate</span>::handler::check_leader_handler::CheckLeaderHandler;
@@ -1021,7 +1021,7 @@
             .<span class="kw">await</span>;
 
         <span class="kw">let </span>kv_backend = Arc::new(MemoryKvBackend::new());
-        <span class="kw">let </span>seq = Sequence::new(<span class="string">&quot;test_seq&quot;</span>, <span class="number">0</span>, <span class="number">10</span>, kv_backend);
+        <span class="kw">let </span>seq = SequenceBuilder::new(<span class="string">&quot;test_seq&quot;</span>, kv_backend).build();
         <span class="kw">let </span>mailbox = HeartbeatMailbox::create(handler_group.pushers(), seq);
 
         <span class="kw">let </span>msg = MailboxMessage {

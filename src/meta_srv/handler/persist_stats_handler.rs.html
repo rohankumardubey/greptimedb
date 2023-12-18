@@ -380,7 +380,7 @@
 
     <span class="kw">use </span>common_meta::key::TableMetadataManager;
     <span class="kw">use </span>common_meta::kv_backend::memory::MemoryKvBackend;
-    <span class="kw">use </span>common_meta::sequence::Sequence;
+    <span class="kw">use </span>common_meta::sequence::SequenceBuilder;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::cluster::MetaPeerClientBuilder;
@@ -395,7 +395,7 @@
         <span class="kw">let </span>leader_cached_kv_backend = Arc::new(LeaderCachedKvBackend::with_always_leader(
             kv_backend.clone(),
         ));
-        <span class="kw">let </span>seq = Sequence::new(<span class="string">&quot;test_seq&quot;</span>, <span class="number">0</span>, <span class="number">10</span>, kv_backend.clone());
+        <span class="kw">let </span>seq = SequenceBuilder::new(<span class="string">&quot;test_seq&quot;</span>, kv_backend.clone()).build();
         <span class="kw">let </span>mailbox = HeartbeatMailbox::create(Pushers::default(), seq);
         <span class="kw">let </span>meta_peer_client = MetaPeerClientBuilder::default()
             .election(<span class="prelude-val">None</span>)
