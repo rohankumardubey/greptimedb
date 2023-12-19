@@ -748,6 +748,23 @@
 <a href="#748" id="748">748</a>
 <a href="#749" id="749">749</a>
 <a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -768,6 +785,7 @@
 
 <span class="kw">use </span>common_datasource::compression::CompressionType;
 <span class="kw">use </span>common_telemetry::debug;
+<span class="kw">use </span>futures::future::try_join_all;
 <span class="kw">use </span>futures::TryStreamExt;
 <span class="kw">use </span>lazy_static::lazy_static;
 <span class="kw">use </span>object_store::{util, Entry, ErrorKind, ObjectStore};
@@ -775,6 +793,7 @@
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>snafu::{ensure, ResultExt};
 <span class="kw">use </span>store_api::manifest::ManifestVersion;
+<span class="kw">use </span>tokio::sync::Semaphore;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     CompressObjectSnafu, DecompressObjectSnafu, InvalidScanIndexSnafu, OpenDalSnafu, <span class="prelude-ty">Result</span>,
@@ -791,6 +810,7 @@
 <span class="doccomment">/// Due to backward compatibility, it is possible that the user&#39;s manifest file has not been compressed.
 /// So when we encounter problems, we need to fall back to `FALL_BACK_COMPRESS_TYPE` for processing.
 </span><span class="kw">const </span>FALL_BACK_COMPRESS_TYPE: CompressionType = CompressionType::Uncompressed;
+<span class="kw">const </span>FETCH_MANIFEST_PARALLELISM: usize = <span class="number">16</span>;
 
 <span class="doccomment">/// Returns the [CompressionType] according to whether to compress manifest files.
 </span><span class="attr">#[inline]
@@ -849,35 +869,6 @@
 <span class="attr">#[inline]
 </span><span class="kw">pub fn </span>is_checkpoint_file(file_name: <span class="kw-2">&amp;</span>str) -&gt; bool {
     CHECKPOINT_RE.is_match(file_name)
-}
-
-<span class="kw">pub struct </span>ObjectStoreLogIterator {
-    object_store: ObjectStore,
-    iter: Box&lt;<span class="kw">dyn </span>Iterator&lt;Item = (ManifestVersion, Entry)&gt; + Send + Sync&gt;,
-}
-
-<span class="kw">impl </span>ObjectStoreLogIterator {
-    <span class="kw">pub async fn </span>next_log(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(ManifestVersion, Vec&lt;u8&gt;)&gt;&gt; {
-        <span class="kw">match </span><span class="self">self</span>.iter.next() {
-            <span class="prelude-val">Some</span>((v, entry)) =&gt; {
-                <span class="kw">let </span>compress_type = file_compress_type(entry.name());
-                <span class="kw">let </span>bytes = <span class="self">self
-                    </span>.object_store
-                    .read(entry.path())
-                    .<span class="kw">await
-                    </span>.context(OpenDalSnafu)<span class="question-mark">?</span>;
-                <span class="kw">let </span>data = compress_type
-                    .decode(bytes)
-                    .<span class="kw">await
-                    </span>.context(DecompressObjectSnafu {
-                        compress_type,
-                        path: entry.path(),
-                    })<span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>((v, data)))
-            }
-            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-        }
-    }
 }
 
 <span class="doccomment">/// Key to identify a manifest file.
@@ -947,12 +938,12 @@
             </span>.context(OpenDalSnafu)
     }
 
-    <span class="doccomment">/// Scan the manifest files in the range of [start, end) and return the iterator.
+    <span class="doccomment">/// Scan the manifest files in the range of [start, end) and return all manifest entries.
     </span><span class="kw">pub async fn </span>scan(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         start: ManifestVersion,
         end: ManifestVersion,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ObjectStoreLogIterator&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(ManifestVersion, Entry)&gt;&gt; {
         <span class="macro">ensure!</span>(start &lt;= end, InvalidScanIndexSnafu { start, end });
 
         <span class="kw">let </span><span class="kw-2">mut </span>entries: Vec&lt;(ManifestVersion, Entry)&gt; = <span class="self">self
@@ -970,11 +961,39 @@
 
         entries.sort_unstable_by(|(v1, <span class="kw">_</span>), (v2, <span class="kw">_</span>)| v1.cmp(v2));
 
-        <span class="prelude-val">Ok</span>(ObjectStoreLogIterator {
-            object_store: <span class="self">self</span>.object_store.clone(),
-            iter: Box::new(entries.into_iter()),
-        })
+        <span class="prelude-val">Ok</span>(entries)
     }
+
+    <span class="doccomment">/// Fetch all manifests in concurrent.
+    </span><span class="kw">pub async fn </span>fetch_manifests(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        manifests: <span class="kw-2">&amp;</span>[(u64, Entry)],
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(ManifestVersion, Vec&lt;u8&gt;)&gt;&gt; {
+        <span class="comment">// TODO(weny): Make it configurable.
+        </span><span class="kw">let </span>semaphore = Semaphore::new(FETCH_MANIFEST_PARALLELISM);
+
+        <span class="kw">let </span>tasks = manifests.iter().map(|(v, entry)| <span class="kw">async </span>{
+            <span class="comment">// Safety: semaphore must exist.
+            </span><span class="kw">let </span>_permit = semaphore.acquire().<span class="kw">await</span>.unwrap();
+
+            <span class="kw">let </span>compress_type = file_compress_type(entry.name());
+            <span class="kw">let </span>bytes = <span class="self">self
+                </span>.object_store
+                .read(entry.path())
+                .<span class="kw">await
+                </span>.context(OpenDalSnafu)<span class="question-mark">?</span>;
+            <span class="kw">let </span>data = compress_type
+                .decode(bytes)
+                .<span class="kw">await
+                </span>.context(DecompressObjectSnafu {
+                    compress_type,
+                    path: entry.path(),
+                })<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>((<span class="kw-2">*</span>v, data))
+        });
+
+        try_join_all(tasks).<span class="kw">await
+    </span>}
 
     <span class="doccomment">/// Delete manifest files that version &lt; end.
     /// If keep_last_checkpoint is true, the last checkpoint file will be kept.
@@ -1306,21 +1325,25 @@
                 </span>.unwrap();
         }
 
-        <span class="kw">let </span><span class="kw-2">mut </span>it = log_store.scan(<span class="number">1</span>, <span class="number">4</span>).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>manifests = log_store.scan(<span class="number">1</span>, <span class="number">4</span>).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>manifests = log_store.fetch_manifests(<span class="kw-2">&amp;</span>manifests).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>it = manifests.into_iter();
         <span class="kw">for </span>v <span class="kw">in </span><span class="number">1</span>..<span class="number">4 </span>{
-            <span class="kw">let </span>(version, bytes) = it.next_log().<span class="kw">await</span>.unwrap().unwrap();
+            <span class="kw">let </span>(version, bytes) = it.next().unwrap();
             <span class="macro">assert_eq!</span>(v, version);
             <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;hello, {v}&quot;</span>).as_bytes(), bytes);
         }
-        <span class="macro">assert!</span>(it.next_log().<span class="kw">await</span>.unwrap().is_none());
+        <span class="macro">assert!</span>(it.next().is_none());
 
-        <span class="kw">let </span><span class="kw-2">mut </span>it = log_store.scan(<span class="number">0</span>, <span class="number">11</span>).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>manifests = log_store.scan(<span class="number">0</span>, <span class="number">11</span>).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>manifests = log_store.fetch_manifests(<span class="kw-2">&amp;</span>manifests).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>it = manifests.into_iter();
         <span class="kw">for </span>v <span class="kw">in </span><span class="number">0</span>..<span class="number">5 </span>{
-            <span class="kw">let </span>(version, bytes) = it.next_log().<span class="kw">await</span>.unwrap().unwrap();
+            <span class="kw">let </span>(version, bytes) = it.next().unwrap();
             <span class="macro">assert_eq!</span>(v, version);
             <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;hello, {v}&quot;</span>).as_bytes(), bytes);
         }
-        <span class="macro">assert!</span>(it.next_log().<span class="kw">await</span>.unwrap().is_none());
+        <span class="macro">assert!</span>(it.next().is_none());
 
         <span class="comment">// test checkpoint
         </span><span class="macro">assert!</span>(log_store.load_last_checkpoint().<span class="kw">await</span>.unwrap().is_none());
@@ -1337,18 +1360,24 @@
         </span><span class="kw">let _ </span>= log_store.delete_until(<span class="number">4</span>, <span class="bool-val">true</span>).<span class="kw">await</span>.unwrap();
         <span class="kw">let _ </span>= log_store.load_checkpoint(<span class="number">3</span>).<span class="kw">await</span>.unwrap().unwrap();
         <span class="kw">let _ </span>= log_store.load_last_checkpoint().<span class="kw">await</span>.unwrap().unwrap();
-        <span class="kw">let </span><span class="kw-2">mut </span>it = log_store.scan(<span class="number">0</span>, <span class="number">11</span>).<span class="kw">await</span>.unwrap();
-        <span class="kw">let </span>(version, bytes) = it.next_log().<span class="kw">await</span>.unwrap().unwrap();
+        <span class="kw">let </span>manifests = log_store.scan(<span class="number">0</span>, <span class="number">11</span>).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>manifests = log_store.fetch_manifests(<span class="kw-2">&amp;</span>manifests).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>it = manifests.into_iter();
+
+        <span class="kw">let </span>(version, bytes) = it.next().unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">4</span>, version);
         <span class="macro">assert_eq!</span>(<span class="string">&quot;hello, 4&quot;</span>.as_bytes(), bytes);
-        <span class="macro">assert!</span>(it.next_log().<span class="kw">await</span>.unwrap().is_none());
+        <span class="macro">assert!</span>(it.next().is_none());
 
         <span class="comment">// delete all logs and checkpoints
         </span><span class="kw">let _ </span>= log_store.delete_until(<span class="number">11</span>, <span class="bool-val">false</span>).<span class="kw">await</span>.unwrap();
         <span class="macro">assert!</span>(log_store.load_checkpoint(<span class="number">3</span>).<span class="kw">await</span>.unwrap().is_none());
         <span class="macro">assert!</span>(log_store.load_last_checkpoint().<span class="kw">await</span>.unwrap().is_none());
-        <span class="kw">let </span><span class="kw-2">mut </span>it = log_store.scan(<span class="number">0</span>, <span class="number">11</span>).<span class="kw">await</span>.unwrap();
-        <span class="macro">assert!</span>(it.next_log().<span class="kw">await</span>.unwrap().is_none());
+        <span class="kw">let </span>manifests = log_store.scan(<span class="number">0</span>, <span class="number">11</span>).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>manifests = log_store.fetch_manifests(<span class="kw-2">&amp;</span>manifests).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>it = manifests.into_iter();
+
+        <span class="macro">assert!</span>(it.next().is_none());
     }
 
     <span class="attr">#[tokio::test]
@@ -1390,9 +1419,12 @@
             </span>.unwrap();
 
         <span class="comment">// test data reading
-        </span><span class="kw">let </span><span class="kw-2">mut </span>it = log_store.scan(<span class="number">0</span>, <span class="number">10</span>).<span class="kw">await</span>.unwrap();
+        </span><span class="kw">let </span>manifests = log_store.scan(<span class="number">0</span>, <span class="number">10</span>).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>manifests = log_store.fetch_manifests(<span class="kw-2">&amp;</span>manifests).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>it = manifests.into_iter();
+
         <span class="kw">for </span>v <span class="kw">in </span><span class="number">0</span>..<span class="number">10 </span>{
-            <span class="kw">let </span>(version, bytes) = it.next_log().<span class="kw">await</span>.unwrap().unwrap();
+            <span class="kw">let </span>(version, bytes) = it.next().unwrap();
             <span class="macro">assert_eq!</span>(v, version);
             <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;hello, {v}&quot;</span>).as_bytes(), bytes);
         }
@@ -1406,8 +1438,10 @@
         <span class="comment">// Delete util 10, contain uncompressed/compressed data
         // log 0, 1, 2, 7, 8, 9 will be delete
         </span><span class="macro">assert_eq!</span>(<span class="number">11</span>, log_store.delete_until(<span class="number">10</span>, <span class="bool-val">false</span>).<span class="kw">await</span>.unwrap());
-        <span class="kw">let </span><span class="kw-2">mut </span>it = log_store.scan(<span class="number">0</span>, <span class="number">10</span>).<span class="kw">await</span>.unwrap();
-        <span class="macro">assert!</span>(it.next_log().<span class="kw">await</span>.unwrap().is_none());
+        <span class="kw">let </span>manifests = log_store.scan(<span class="number">0</span>, <span class="number">10</span>).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>manifests = log_store.fetch_manifests(<span class="kw-2">&amp;</span>manifests).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>it = manifests.into_iter();
+        <span class="macro">assert!</span>(it.next().is_none());
     }
 
     <span class="attr">#[tokio::test]
