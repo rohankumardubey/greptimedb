@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["intermediate_rw"],"type":["SortedStream"]};
+window.SIDEBAR_ITEMS = {"mod":["external_provider","external_sort","intermediate_rw","merge_stream"],"struct":["SortOutput"],"trait":["Sorter"],"type":["SortedStream"]};
