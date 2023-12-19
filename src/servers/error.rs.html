@@ -605,6 +605,14 @@
 <a href="#605" id="605">605</a>
 <a href="#606" id="606">606</a>
 <a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -816,6 +824,13 @@
 
     <span class="attr">#[snafu(display(<span class="string">&quot;Failed to decompress prometheus remote request&quot;</span>))]
     </span>DecompressPromRemoteRequest {
+        location: Location,
+        <span class="attr">#[snafu(source)]
+        </span>error: snap::Error,
+    },
+
+    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to compress prometheus remote request&quot;</span>))]
+    </span>CompressPromRemoteRequest {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: snap::Error,
@@ -1051,6 +1066,7 @@
             | InvalidOpentsdbJsonRequest { .. }
             | DecodePromRemoteRequest { .. }
             | DecodeOtlpRequest { .. }
+            | CompressPromRemoteRequest { .. }
             | DecompressPromRemoteRequest { .. }
             | InvalidPromRemoteRequest { .. }
             | InvalidFlightTicket { .. }

@@ -1157,7 +1157,7 @@
     <span class="kw">let </span><span class="kw-2">mut </span>encoder = Encoder::new();
     encoder
         .compress_vec(buf)
-        .context(error::DecompressPromRemoteRequestSnafu)
+        .context(error::CompressPromRemoteRequestSnafu)
 }
 
 <span class="doccomment">/// Mock timeseries for test, it is both used in servers and frontend crate
