@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/query/src/datafusion.rs`."><title>datafusion.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="query" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/query/src/datafusion.rs`."><title>datafusion.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="query" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -734,14 +735,14 @@
 <a href="#734" id="734">734</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -842,7 +843,7 @@
         <span class="macro">ensure!</span>(
             <span class="macro">matches!</span>(dml.op, WriteOp::InsertInto | WriteOp::Delete),
             UnsupportedExprSnafu {
-                name: <span class="macro">format!</span>(<span class="string">&quot;DML op {}&quot;</span>, dml.op),
+                name: <span class="macro">format!</span>(<span class="string">"DML op {}"</span>, dml.op),
             }
         );
 
@@ -877,7 +878,7 @@
                     <span class="self">self</span>.delete(<span class="kw-2">&amp;</span>table_name, <span class="kw-2">&amp;</span>table, column_vectors, query_ctx.clone())
                         .<span class="kw">await</span><span class="question-mark">?
                 </span>}
-                <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;guarded by the &#39;ensure!&#39; at the beginning&quot;</span>),
+                <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"guarded by the 'ensure!' at the beginning"</span>),
             };
             affected_rows += rows;
         }
@@ -885,9 +886,9 @@
     }
 
     <span class="attr">#[tracing::instrument(skip_all)]
-    </span><span class="kw">async fn </span>delete&lt;<span class="lifetime">&#39;a</span>&gt;(
+    </span><span class="kw">async fn </span>delete&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        table_name: <span class="kw-2">&amp;</span>ResolvedTableReference&lt;<span class="lifetime">&#39;a</span>&gt;,
+        table_name: <span class="kw-2">&amp;</span>ResolvedTableReference&lt;<span class="lifetime">'a</span>&gt;,
         table: <span class="kw-2">&amp;</span>TableRef,
         column_vectors: HashMap&lt;String, VectorRef&gt;,
         query_ctx: QueryContextRef,
@@ -928,9 +929,9 @@
     </span>}
 
     <span class="attr">#[tracing::instrument(skip_all)]
-    </span><span class="kw">async fn </span>insert&lt;<span class="lifetime">&#39;a</span>&gt;(
+    </span><span class="kw">async fn </span>insert&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        table_name: <span class="kw-2">&amp;</span>ResolvedTableReference&lt;<span class="lifetime">&#39;a</span>&gt;,
+        table_name: <span class="kw-2">&amp;</span>ResolvedTableReference&lt;<span class="lifetime">'a</span>&gt;,
         column_vectors: HashMap&lt;String, VectorRef&gt;,
         query_ctx: QueryContextRef,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;usize&gt; {
@@ -948,7 +949,7 @@
             .<span class="kw">await
     </span>}
 
-    <span class="kw">async fn </span>find_table(<span class="kw-2">&amp;</span><span class="self">self</span>, table_name: <span class="kw-2">&amp;</span>ResolvedTableReference&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;TableRef&gt; {
+    <span class="kw">async fn </span>find_table(<span class="kw-2">&amp;</span><span class="self">self</span>, table_name: <span class="kw-2">&amp;</span>ResolvedTableReference&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;TableRef&gt; {
         <span class="kw">let </span>catalog_name = table_name.catalog.as_ref();
         <span class="kw">let </span>schema_name = table_name.schema.as_ref();
         <span class="kw">let </span>table_name = table_name.table.as_ref();
@@ -973,7 +974,7 @@
     }
 
     <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;datafusion&quot;
+        <span class="string">"datafusion"
     </span>}
 
     <span class="kw">async fn </span>describe(<span class="kw-2">&amp;</span><span class="self">self</span>, plan: LogicalPlan) -&gt; <span class="prelude-ty">Result</span>&lt;DescribeResult&gt; {
@@ -1000,10 +1001,10 @@
     <span class="doccomment">/// Note in SQL queries, aggregate names are looked up using
     /// lowercase unless the query uses quotes. For example,
     ///
-    /// `SELECT MY_UDAF(x)...` will look for an aggregate named `&quot;my_udaf&quot;`
-    /// `SELECT &quot;my_UDAF&quot;(x)` will look for an aggregate named `&quot;my_UDAF&quot;`
+    /// `SELECT MY_UDAF(x)...` will look for an aggregate named `"my_udaf"`
+    /// `SELECT "my_UDAF"(x)` will look for an aggregate named `"my_UDAF"`
     ///
-    /// So it&#39;s better to make UDAF name lowercase when creating one.
+    /// So it's better to make UDAF name lowercase when creating one.
     </span><span class="kw">fn </span>register_aggregate_function(<span class="kw-2">&amp;</span><span class="self">self</span>, func: AggregateFunctionMetaRef) {
         <span class="self">self</span>.state.register_aggregate_function(func);
     }
@@ -1172,7 +1173,7 @@
             <span class="kw">match </span>op {
                 BinaryOperator::Eq =&gt; <span class="prelude-val">Ok</span>(left.eq(right)),
                 <span class="kw">_ </span>=&gt; UnimplementedSnafu {
-                    operation: <span class="macro">format!</span>(<span class="string">&quot;convert BinaryOperator into datafusion Expr, op: {op}&quot;</span>),
+                    operation: <span class="macro">format!</span>(<span class="string">"convert BinaryOperator into datafusion Expr, op: {op}"</span>),
                 }
                 .fail(),
             }
@@ -1180,13 +1181,13 @@
         Expr::Value(value) =&gt; <span class="kw">match </span>value {
             Value::SingleQuotedString(v) =&gt; <span class="prelude-val">Ok</span>(DfExpr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(v)))),
             <span class="kw">_ </span>=&gt; UnimplementedSnafu {
-                operation: <span class="macro">format!</span>(<span class="string">&quot;convert Expr::Value into datafusion Expr, value: {value}&quot;</span>),
+                operation: <span class="macro">format!</span>(<span class="string">"convert Expr::Value into datafusion Expr, value: {value}"</span>),
             }
             .fail(),
         },
         Expr::Identifier(ident) =&gt; <span class="prelude-val">Ok</span>(DfExpr::Column(Column::from_name(ident.value))),
         <span class="kw">_ </span>=&gt; UnimplementedSnafu {
-            operation: <span class="macro">format!</span>(<span class="string">&quot;convert Expr into datafusion Expr, Expr: {filter}&quot;</span>),
+            operation: <span class="macro">format!</span>(<span class="string">"convert Expr into datafusion Expr, Expr: {filter}"</span>),
         }
         .fail(),
     }
@@ -1197,7 +1198,7 @@
     record_batch: RecordBatch,
     filter: <span class="prelude-ty">Option</span>&lt;Expr&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;Output&gt; {
-    <span class="kw">let </span>table_name = <span class="string">&quot;table_name&quot;</span>;
+    <span class="kw">let </span>table_name = <span class="string">"table_name"</span>;
     <span class="kw">let </span>column_schemas = record_batch.schema.column_schemas().to_vec();
     <span class="kw">let </span>context = SessionContext::new();
     context
@@ -1206,7 +1207,7 @@
         .map_err(BoxedError::new)
         .context(QueryExecutionSnafu)<span class="question-mark">?</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>dataframe = context
-        .sql(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;SELECT * FROM {table_name}&quot;</span>))
+        .sql(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"SELECT * FROM {table_name}"</span>))
         .<span class="kw">await
         </span>.context(error::DatafusionSnafu)
         .map_err(BoxedError::new)
@@ -1278,7 +1279,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_sql_to_plan() {
         <span class="kw">let </span>engine = create_test_engine().<span class="kw">await</span>;
-        <span class="kw">let </span>sql = <span class="string">&quot;select sum(number) from numbers limit 20&quot;</span>;
+        <span class="kw">let </span>sql = <span class="string">"select sum(number) from numbers limit 20"</span>;
 
         <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(sql).unwrap();
         <span class="kw">let </span>plan = engine
@@ -1289,18 +1290,18 @@
 
         <span class="comment">// TODO(sunng87): do not rely on to_string for compare
         </span><span class="macro">assert_eq!</span>(
-            <span class="macro">format!</span>(<span class="string">&quot;{plan:?}&quot;</span>),
-            <span class="string">r#&quot;DfPlan(Limit: skip=0, fetch=20
+            <span class="macro">format!</span>(<span class="string">"{plan:?}"</span>),
+            <span class="string">r#"DfPlan(Limit: skip=0, fetch=20
   Projection: SUM(numbers.number)
     Aggregate: groupBy=[[]], aggr=[[SUM(numbers.number)]]
-      TableScan: numbers)&quot;#
+      TableScan: numbers)"#
         </span>);
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_execute() {
         <span class="kw">let </span>engine = create_test_engine().<span class="kw">await</span>;
-        <span class="kw">let </span>sql = <span class="string">&quot;select sum(number) from numbers limit 20&quot;</span>;
+        <span class="kw">let </span>sql = <span class="string">"select sum(number) from numbers limit 20"</span>;
 
         <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(sql).unwrap();
         <span class="kw">let </span>plan = engine
@@ -1318,7 +1319,7 @@
                 <span class="macro">assert_eq!</span>(numbers[<span class="number">0</span>].num_columns(), <span class="number">1</span>);
                 <span class="macro">assert_eq!</span>(<span class="number">1</span>, numbers[<span class="number">0</span>].schema.num_columns());
                 <span class="macro">assert_eq!</span>(
-                    <span class="string">&quot;SUM(numbers.number)&quot;</span>,
+                    <span class="string">"SUM(numbers.number)"</span>,
                     numbers[<span class="number">0</span>].schema.column_schemas()[<span class="number">0</span>].name
                 );
 
@@ -1345,18 +1346,18 @@
             .unwrap();
         <span class="kw">let </span>table = engine
             .find_table(<span class="kw-2">&amp;</span>ResolvedTableReference {
-                catalog: Borrowed(<span class="string">&quot;greptime&quot;</span>),
-                schema: Borrowed(<span class="string">&quot;public&quot;</span>),
-                table: Borrowed(<span class="string">&quot;numbers&quot;</span>),
+                catalog: Borrowed(<span class="string">"greptime"</span>),
+                schema: Borrowed(<span class="string">"public"</span>),
+                table: Borrowed(<span class="string">"numbers"</span>),
             })
             .<span class="kw">await
             </span>.unwrap();
 
         <span class="kw">let </span>DataFrame::DataFusion(df) = engine.read_table(table).unwrap();
         <span class="kw">let </span>df = df
-            .select_columns(<span class="kw-2">&amp;</span>[<span class="string">&quot;number&quot;</span>])
+            .select_columns(<span class="kw-2">&amp;</span>[<span class="string">"number"</span>])
             .unwrap()
-            .filter(col(<span class="string">&quot;number&quot;</span>).lt(lit(<span class="number">10</span>)))
+            .filter(col(<span class="string">"number"</span>).lt(lit(<span class="number">10</span>)))
             .unwrap();
         <span class="kw">let </span>batches = df.collect().<span class="kw">await</span>.unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, batches.len());
@@ -1374,7 +1375,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_describe() {
         <span class="kw">let </span>engine = create_test_engine().<span class="kw">await</span>;
-        <span class="kw">let </span>sql = <span class="string">&quot;select sum(number) from numbers limit 20&quot;</span>;
+        <span class="kw">let </span>sql = <span class="string">"select sum(number) from numbers limit 20"</span>;
 
         <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(sql).unwrap();
 
@@ -1392,55 +1393,55 @@
         <span class="macro">assert_eq!</span>(
             schema.column_schemas()[<span class="number">0</span>],
             ColumnSchema::new(
-                <span class="string">&quot;SUM(numbers.number)&quot;</span>,
+                <span class="string">"SUM(numbers.number)"</span>,
                 ConcreteDataType::uint64_datatype(),
                 <span class="bool-val">true
             </span>)
         );
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;Limit: skip=0, fetch=20\n  Aggregate: groupBy=[[]], aggr=[[SUM(CAST(numbers.number AS UInt64))]]\n    TableScan: numbers projection=[number]&quot;</span>, <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, logical_plan.display_indent()));
+        <span class="macro">assert_eq!</span>(<span class="string">"Limit: skip=0, fetch=20\n  Aggregate: groupBy=[[]], aggr=[[SUM(CAST(numbers.number AS UInt64))]]\n    TableScan: numbers projection=[number]"</span>, <span class="macro">format!</span>(<span class="string">"{}"</span>, logical_plan.display_indent()));
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_show_tables() {
         <span class="comment">// No filter
         </span><span class="kw">let </span>column_schemas = <span class="macro">vec!</span>[ColumnSchema::new(
-            <span class="string">&quot;Tables&quot;</span>,
+            <span class="string">"Tables"</span>,
             ConcreteDataType::String(StringType),
             <span class="bool-val">false</span>,
         )];
         <span class="kw">let </span>schema = Arc::new(Schema::new(column_schemas));
         <span class="kw">let </span><span class="kw-2">mut </span>builder = StringVectorBuilder::with_capacity(<span class="number">3</span>);
-        builder.push(<span class="prelude-val">Some</span>(<span class="string">&quot;monitor&quot;</span>));
-        builder.push(<span class="prelude-val">Some</span>(<span class="string">&quot;system_metrics&quot;</span>));
+        builder.push(<span class="prelude-val">Some</span>(<span class="string">"monitor"</span>));
+        builder.push(<span class="prelude-val">Some</span>(<span class="string">"system_metrics"</span>));
         <span class="kw">let </span>columns = <span class="macro">vec!</span>[builder.to_vector()];
         <span class="kw">let </span>record_batch = RecordBatch::new(schema, columns).unwrap();
         <span class="kw">let </span>output = execute_show_with_filter(record_batch, <span class="prelude-val">None</span>).<span class="kw">await</span>.unwrap();
         <span class="kw">let </span>Output::RecordBatches(record_batches) = output <span class="kw">else </span>{
             <span class="macro">unreachable!</span>()
         };
-        <span class="kw">let </span>expected = <span class="string">&quot;\
+        <span class="kw">let </span>expected = <span class="string">"\
 +----------------+
 | Tables         |
 +----------------+
 | monitor        |
 | system_metrics |
-+----------------+&quot;</span>;
++----------------+"</span>;
         <span class="macro">assert_eq!</span>(record_batches.pretty_print().unwrap(), expected);
 
         <span class="comment">// Filter
         </span><span class="kw">let </span>column_schemas = <span class="macro">vec!</span>[ColumnSchema::new(
-            <span class="string">&quot;Tables&quot;</span>,
+            <span class="string">"Tables"</span>,
             ConcreteDataType::String(StringType),
             <span class="bool-val">false</span>,
         )];
         <span class="kw">let </span>schema = Arc::new(Schema::new(column_schemas));
         <span class="kw">let </span><span class="kw-2">mut </span>builder = StringVectorBuilder::with_capacity(<span class="number">3</span>);
-        builder.push(<span class="prelude-val">Some</span>(<span class="string">&quot;monitor&quot;</span>));
-        builder.push(<span class="prelude-val">Some</span>(<span class="string">&quot;system_metrics&quot;</span>));
+        builder.push(<span class="prelude-val">Some</span>(<span class="string">"monitor"</span>));
+        builder.push(<span class="prelude-val">Some</span>(<span class="string">"system_metrics"</span>));
         <span class="kw">let </span>columns = <span class="macro">vec!</span>[builder.to_vector()];
         <span class="kw">let </span>record_batch = RecordBatch::new(schema, columns).unwrap();
         <span class="kw">let </span>statement = ParserContext::create_with_dialect(
-            <span class="string">&quot;SHOW TABLES WHERE \&quot;Tables\&quot;=&#39;monitor&#39;&quot;</span>,
+            <span class="string">"SHOW TABLES WHERE \"Tables\"='monitor'"</span>,
             <span class="kw-2">&amp;</span>GreptimeDbDialect {},
         )
         .unwrap()[<span class="number">0</span>]
@@ -1457,12 +1458,12 @@
         <span class="kw">let </span>Output::RecordBatches(record_batches) = output <span class="kw">else </span>{
             <span class="macro">unreachable!</span>()
         };
-        <span class="kw">let </span>expected = <span class="string">&quot;\
+        <span class="kw">let </span>expected = <span class="string">"\
 +---------+
 | Tables  |
 +---------+
 | monitor |
-+---------+&quot;</span>;
++---------+"</span>;
         <span class="macro">assert_eq!</span>(record_batches.pretty_print().unwrap(), expected);
     }
 }

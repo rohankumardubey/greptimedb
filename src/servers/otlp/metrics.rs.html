@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/servers/src/otlp/metrics.rs`."><title>metrics.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="servers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/servers/src/otlp/metrics.rs`."><title>metrics.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="servers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -658,14 +659,14 @@
 <a href="#658" id="658">658</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -690,7 +691,7 @@
 /// better sql usability
 /// - replace `.` and `-` with `_`
 </span><span class="kw">fn </span>normalize_otlp_name(name: <span class="kw-2">&amp;</span>str) -&gt; String {
-    name.to_lowercase().replace(|c| c == <span class="string">&#39;.&#39; </span>|| c == <span class="string">&#39;-&#39;</span>, <span class="string">&quot;_&quot;</span>)
+    name.to_lowercase().replace(|c| c == <span class="string">'.' </span>|| c == <span class="string">'-'</span>, <span class="string">"_"</span>)
 }
 
 <span class="doccomment">/// Convert OpenTelemetry metrics to GreptimeDB insert requests
@@ -725,7 +726,7 @@
     scope_attrs: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Vec&lt;KeyValue&gt;&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>name = <span class="kw-2">&amp;</span>metric.name;
-    <span class="comment">// note that we don&#39;t store description or unit, we might want to deal with
+    <span class="comment">// note that we don't store description or unit, we might want to deal with
     // these fields in the future.
     </span><span class="kw">if let </span><span class="prelude-val">Some</span>(data) = <span class="kw-2">&amp;</span>metric.data {
         <span class="kw">match </span>data {
@@ -822,7 +823,7 @@
 
 <span class="doccomment">/// encode this gauge metric
 ///
-/// note that there can be multiple data points in the request, it&#39;s going to be
+/// note that there can be multiple data points in the request, it's going to be
 /// stored as multiple rows
 </span><span class="kw">fn </span>encode_gauge(
     table_writer: <span class="kw-2">&amp;mut </span>MultiTableData,
@@ -888,7 +889,7 @@
     <span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">const </span>HISTOGRAM_LE_COLUMN: <span class="kw-2">&amp;</span>str = <span class="string">&quot;le&quot;</span>;
+<span class="kw">const </span>HISTOGRAM_LE_COLUMN: <span class="kw-2">&amp;</span>str = <span class="string">"le"</span>;
 
 <span class="doccomment">/// Encode histogram data. This function returns 3 insert requests for 3 tables.
 ///
@@ -910,9 +911,9 @@
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>normalized_name = normalize_otlp_name(name);
 
-    <span class="kw">let </span>bucket_table_name = <span class="macro">format!</span>(<span class="string">&quot;{}_bucket&quot;</span>, normalized_name);
-    <span class="kw">let </span>sum_table_name = <span class="macro">format!</span>(<span class="string">&quot;{}_sum&quot;</span>, normalized_name);
-    <span class="kw">let </span>count_table_name = <span class="macro">format!</span>(<span class="string">&quot;{}_count&quot;</span>, normalized_name);
+    <span class="kw">let </span>bucket_table_name = <span class="macro">format!</span>(<span class="string">"{}_bucket"</span>, normalized_name);
+    <span class="kw">let </span>sum_table_name = <span class="macro">format!</span>(<span class="string">"{}_sum"</span>, normalized_name);
+    <span class="kw">let </span>count_table_name = <span class="macro">format!</span>(<span class="string">"{}_count"</span>, normalized_name);
 
     <span class="kw">let </span>data_points_len = hist.data_points.len();
     <span class="comment">// Note that the row and columns number here is approximate
@@ -1035,7 +1036,7 @@
         <span class="kw">for </span>quantile <span class="kw">in </span><span class="kw-2">&amp;</span>data_point.quantile_values {
             row_writer::write_f64(
                 table,
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;greptime_p{:02}&quot;</span>, quantile.quantile * <span class="number">100f64</span>),
+                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"greptime_p{:02}"</span>, quantile.quantile * <span class="number">100f64</span>),
                 quantile.value,
                 <span class="kw-2">&amp;mut </span>row,
             )<span class="question-mark">?</span>;
@@ -1060,11 +1061,11 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_normalize_otlp_name() {
-        <span class="macro">assert_eq!</span>(normalize_otlp_name(<span class="string">&quot;jvm.memory.free&quot;</span>), <span class="string">&quot;jvm_memory_free&quot;</span>);
-        <span class="macro">assert_eq!</span>(normalize_otlp_name(<span class="string">&quot;jvm-memory-free&quot;</span>), <span class="string">&quot;jvm_memory_free&quot;</span>);
-        <span class="macro">assert_eq!</span>(normalize_otlp_name(<span class="string">&quot;jvm_memory_free&quot;</span>), <span class="string">&quot;jvm_memory_free&quot;</span>);
-        <span class="macro">assert_eq!</span>(normalize_otlp_name(<span class="string">&quot;JVM_MEMORY_FREE&quot;</span>), <span class="string">&quot;jvm_memory_free&quot;</span>);
-        <span class="macro">assert_eq!</span>(normalize_otlp_name(<span class="string">&quot;JVM_memory_FREE&quot;</span>), <span class="string">&quot;jvm_memory_free&quot;</span>);
+        <span class="macro">assert_eq!</span>(normalize_otlp_name(<span class="string">"jvm.memory.free"</span>), <span class="string">"jvm_memory_free"</span>);
+        <span class="macro">assert_eq!</span>(normalize_otlp_name(<span class="string">"jvm-memory-free"</span>), <span class="string">"jvm_memory_free"</span>);
+        <span class="macro">assert_eq!</span>(normalize_otlp_name(<span class="string">"jvm_memory_free"</span>), <span class="string">"jvm_memory_free"</span>);
+        <span class="macro">assert_eq!</span>(normalize_otlp_name(<span class="string">"JVM_MEMORY_FREE"</span>), <span class="string">"jvm_memory_free"</span>);
+        <span class="macro">assert_eq!</span>(normalize_otlp_name(<span class="string">"JVM_memory_FREE"</span>), <span class="string">"jvm_memory_free"</span>);
     }
 
     <span class="kw">fn </span>keyvalue(key: <span class="kw-2">&amp;</span>str, value: <span class="kw-2">&amp;</span>str) -&gt; KeyValue {
@@ -1082,13 +1083,13 @@
 
         <span class="kw">let </span>data_points = <span class="macro">vec!</span>[
             NumberDataPoint {
-                attributes: <span class="macro">vec!</span>[keyvalue(<span class="string">&quot;host&quot;</span>, <span class="string">&quot;testsevrer&quot;</span>)],
+                attributes: <span class="macro">vec!</span>[keyvalue(<span class="string">"host"</span>, <span class="string">"testsevrer"</span>)],
                 time_unix_nano: <span class="number">100</span>,
                 value: <span class="prelude-val">Some</span>(Value::AsInt(<span class="number">100</span>)),
                 ..Default::default()
             },
             NumberDataPoint {
-                attributes: <span class="macro">vec!</span>[keyvalue(<span class="string">&quot;host&quot;</span>, <span class="string">&quot;testserver&quot;</span>)],
+                attributes: <span class="macro">vec!</span>[keyvalue(<span class="string">"host"</span>, <span class="string">"testserver"</span>)],
                 time_unix_nano: <span class="number">105</span>,
                 value: <span class="prelude-val">Some</span>(Value::AsInt(<span class="number">105</span>)),
                 ..Default::default()
@@ -1097,14 +1098,14 @@
         <span class="kw">let </span>gauge = Gauge { data_points };
         encode_gauge(
             <span class="kw-2">&amp;mut </span>tables,
-            <span class="string">&quot;datamon&quot;</span>,
+            <span class="string">"datamon"</span>,
             <span class="kw-2">&amp;</span>gauge,
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">&quot;resource&quot;</span>, <span class="string">&quot;app&quot;</span>)]),
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">&quot;scope&quot;</span>, <span class="string">&quot;otel&quot;</span>)]),
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">"resource"</span>, <span class="string">"app"</span>)]),
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">"scope"</span>, <span class="string">"otel"</span>)]),
         )
         .unwrap();
 
-        <span class="kw">let </span>table = tables.get_or_default_table_data(<span class="string">&quot;datamon&quot;</span>, <span class="number">0</span>, <span class="number">0</span>);
+        <span class="kw">let </span>table = tables.get_or_default_table_data(<span class="string">"datamon"</span>, <span class="number">0</span>, <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(table.num_rows(), <span class="number">2</span>);
         <span class="macro">assert_eq!</span>(table.num_columns(), <span class="number">5</span>);
         <span class="macro">assert_eq!</span>(
@@ -1114,11 +1115,11 @@
                 .map(|c| <span class="kw-2">&amp;</span>c.column_name)
                 .collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>String&gt;&gt;(),
             <span class="macro">vec!</span>[
-                <span class="string">&quot;resource&quot;</span>,
-                <span class="string">&quot;scope&quot;</span>,
-                <span class="string">&quot;host&quot;</span>,
-                <span class="string">&quot;greptime_timestamp&quot;</span>,
-                <span class="string">&quot;greptime_value&quot;
+                <span class="string">"resource"</span>,
+                <span class="string">"scope"</span>,
+                <span class="string">"host"</span>,
+                <span class="string">"greptime_timestamp"</span>,
+                <span class="string">"greptime_value"
             </span>]
         );
     }
@@ -1129,13 +1130,13 @@
 
         <span class="kw">let </span>data_points = <span class="macro">vec!</span>[
             NumberDataPoint {
-                attributes: <span class="macro">vec!</span>[keyvalue(<span class="string">&quot;host&quot;</span>, <span class="string">&quot;testserver&quot;</span>)],
+                attributes: <span class="macro">vec!</span>[keyvalue(<span class="string">"host"</span>, <span class="string">"testserver"</span>)],
                 time_unix_nano: <span class="number">100</span>,
                 value: <span class="prelude-val">Some</span>(Value::AsInt(<span class="number">100</span>)),
                 ..Default::default()
             },
             NumberDataPoint {
-                attributes: <span class="macro">vec!</span>[keyvalue(<span class="string">&quot;host&quot;</span>, <span class="string">&quot;testserver&quot;</span>)],
+                attributes: <span class="macro">vec!</span>[keyvalue(<span class="string">"host"</span>, <span class="string">"testserver"</span>)],
                 time_unix_nano: <span class="number">105</span>,
                 value: <span class="prelude-val">Some</span>(Value::AsInt(<span class="number">0</span>)),
                 ..Default::default()
@@ -1147,14 +1148,14 @@
         };
         encode_sum(
             <span class="kw-2">&amp;mut </span>tables,
-            <span class="string">&quot;datamon&quot;</span>,
+            <span class="string">"datamon"</span>,
             <span class="kw-2">&amp;</span>sum,
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">&quot;resource&quot;</span>, <span class="string">&quot;app&quot;</span>)]),
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">&quot;scope&quot;</span>, <span class="string">&quot;otel&quot;</span>)]),
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">"resource"</span>, <span class="string">"app"</span>)]),
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">"scope"</span>, <span class="string">"otel"</span>)]),
         )
         .unwrap();
 
-        <span class="kw">let </span>table = tables.get_or_default_table_data(<span class="string">&quot;datamon&quot;</span>, <span class="number">0</span>, <span class="number">0</span>);
+        <span class="kw">let </span>table = tables.get_or_default_table_data(<span class="string">"datamon"</span>, <span class="number">0</span>, <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(table.num_rows(), <span class="number">2</span>);
         <span class="macro">assert_eq!</span>(table.num_columns(), <span class="number">5</span>);
         <span class="macro">assert_eq!</span>(
@@ -1164,11 +1165,11 @@
                 .map(|c| <span class="kw-2">&amp;</span>c.column_name)
                 .collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>String&gt;&gt;(),
             <span class="macro">vec!</span>[
-                <span class="string">&quot;resource&quot;</span>,
-                <span class="string">&quot;scope&quot;</span>,
-                <span class="string">&quot;host&quot;</span>,
-                <span class="string">&quot;greptime_timestamp&quot;</span>,
-                <span class="string">&quot;greptime_value&quot;
+                <span class="string">"resource"</span>,
+                <span class="string">"scope"</span>,
+                <span class="string">"host"</span>,
+                <span class="string">"greptime_timestamp"</span>,
+                <span class="string">"greptime_value"
             </span>]
         );
     }
@@ -1178,7 +1179,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>tables = MultiTableData::default();
 
         <span class="kw">let </span>data_points = <span class="macro">vec!</span>[SummaryDataPoint {
-            attributes: <span class="macro">vec!</span>[keyvalue(<span class="string">&quot;host&quot;</span>, <span class="string">&quot;testserver&quot;</span>)],
+            attributes: <span class="macro">vec!</span>[keyvalue(<span class="string">"host"</span>, <span class="string">"testserver"</span>)],
             time_unix_nano: <span class="number">100</span>,
             count: <span class="number">25</span>,
             sum: <span class="number">5400.0</span>,
@@ -1197,14 +1198,14 @@
         <span class="kw">let </span>summary = Summary { data_points };
         encode_summary(
             <span class="kw-2">&amp;mut </span>tables,
-            <span class="string">&quot;datamon&quot;</span>,
+            <span class="string">"datamon"</span>,
             <span class="kw-2">&amp;</span>summary,
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">&quot;resource&quot;</span>, <span class="string">&quot;app&quot;</span>)]),
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">&quot;scope&quot;</span>, <span class="string">&quot;otel&quot;</span>)]),
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">"resource"</span>, <span class="string">"app"</span>)]),
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">"scope"</span>, <span class="string">"otel"</span>)]),
         )
         .unwrap();
 
-        <span class="kw">let </span>table = tables.get_or_default_table_data(<span class="string">&quot;datamon&quot;</span>, <span class="number">0</span>, <span class="number">0</span>);
+        <span class="kw">let </span>table = tables.get_or_default_table_data(<span class="string">"datamon"</span>, <span class="number">0</span>, <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(table.num_rows(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(table.num_columns(), <span class="number">7</span>);
         <span class="macro">assert_eq!</span>(
@@ -1214,13 +1215,13 @@
                 .map(|c| <span class="kw-2">&amp;</span>c.column_name)
                 .collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>String&gt;&gt;(),
             <span class="macro">vec!</span>[
-                <span class="string">&quot;resource&quot;</span>,
-                <span class="string">&quot;scope&quot;</span>,
-                <span class="string">&quot;host&quot;</span>,
-                <span class="string">&quot;greptime_timestamp&quot;</span>,
-                <span class="string">&quot;greptime_p90&quot;</span>,
-                <span class="string">&quot;greptime_p95&quot;</span>,
-                <span class="string">&quot;greptime_count&quot;
+                <span class="string">"resource"</span>,
+                <span class="string">"scope"</span>,
+                <span class="string">"host"</span>,
+                <span class="string">"greptime_timestamp"</span>,
+                <span class="string">"greptime_p90"</span>,
+                <span class="string">"greptime_p95"</span>,
+                <span class="string">"greptime_count"
             </span>]
         );
     }
@@ -1230,7 +1231,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>tables = MultiTableData::default();
 
         <span class="kw">let </span>data_points = <span class="macro">vec!</span>[HistogramDataPoint {
-            attributes: <span class="macro">vec!</span>[keyvalue(<span class="string">&quot;host&quot;</span>, <span class="string">&quot;testserver&quot;</span>)],
+            attributes: <span class="macro">vec!</span>[keyvalue(<span class="string">"host"</span>, <span class="string">"testserver"</span>)],
             time_unix_nano: <span class="number">100</span>,
             start_time_unix_nano: <span class="number">23</span>,
             count: <span class="number">25</span>,
@@ -1248,17 +1249,17 @@
         };
         encode_histogram(
             <span class="kw-2">&amp;mut </span>tables,
-            <span class="string">&quot;histo&quot;</span>,
+            <span class="string">"histo"</span>,
             <span class="kw-2">&amp;</span>histogram,
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">&quot;resource&quot;</span>, <span class="string">&quot;app&quot;</span>)]),
-            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">&quot;scope&quot;</span>, <span class="string">&quot;otel&quot;</span>)]),
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">"resource"</span>, <span class="string">"app"</span>)]),
+            <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[keyvalue(<span class="string">"scope"</span>, <span class="string">"otel"</span>)]),
         )
         .unwrap();
 
         <span class="macro">assert_eq!</span>(<span class="number">3</span>, tables.num_tables());
 
         <span class="comment">// bucket table
-        </span><span class="kw">let </span>bucket_table = tables.get_or_default_table_data(<span class="string">&quot;histo_bucket&quot;</span>, <span class="number">0</span>, <span class="number">0</span>);
+        </span><span class="kw">let </span>bucket_table = tables.get_or_default_table_data(<span class="string">"histo_bucket"</span>, <span class="number">0</span>, <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(bucket_table.num_rows(), <span class="number">5</span>);
         <span class="macro">assert_eq!</span>(bucket_table.num_columns(), <span class="number">6</span>);
         <span class="macro">assert_eq!</span>(
@@ -1268,16 +1269,16 @@
                 .map(|c| <span class="kw-2">&amp;</span>c.column_name)
                 .collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>String&gt;&gt;(),
             <span class="macro">vec!</span>[
-                <span class="string">&quot;resource&quot;</span>,
-                <span class="string">&quot;scope&quot;</span>,
-                <span class="string">&quot;host&quot;</span>,
-                <span class="string">&quot;greptime_timestamp&quot;</span>,
-                <span class="string">&quot;le&quot;</span>,
-                <span class="string">&quot;greptime_value&quot;</span>,
+                <span class="string">"resource"</span>,
+                <span class="string">"scope"</span>,
+                <span class="string">"host"</span>,
+                <span class="string">"greptime_timestamp"</span>,
+                <span class="string">"le"</span>,
+                <span class="string">"greptime_value"</span>,
             ]
         );
 
-        <span class="kw">let </span>sum_table = tables.get_or_default_table_data(<span class="string">&quot;histo_sum&quot;</span>, <span class="number">0</span>, <span class="number">0</span>);
+        <span class="kw">let </span>sum_table = tables.get_or_default_table_data(<span class="string">"histo_sum"</span>, <span class="number">0</span>, <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(sum_table.num_rows(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(sum_table.num_columns(), <span class="number">5</span>);
         <span class="macro">assert_eq!</span>(
@@ -1287,15 +1288,15 @@
                 .map(|c| <span class="kw-2">&amp;</span>c.column_name)
                 .collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>String&gt;&gt;(),
             <span class="macro">vec!</span>[
-                <span class="string">&quot;resource&quot;</span>,
-                <span class="string">&quot;scope&quot;</span>,
-                <span class="string">&quot;host&quot;</span>,
-                <span class="string">&quot;greptime_timestamp&quot;</span>,
-                <span class="string">&quot;greptime_value&quot;</span>,
+                <span class="string">"resource"</span>,
+                <span class="string">"scope"</span>,
+                <span class="string">"host"</span>,
+                <span class="string">"greptime_timestamp"</span>,
+                <span class="string">"greptime_value"</span>,
             ]
         );
 
-        <span class="kw">let </span>count_table = tables.get_or_default_table_data(<span class="string">&quot;histo_count&quot;</span>, <span class="number">0</span>, <span class="number">0</span>);
+        <span class="kw">let </span>count_table = tables.get_or_default_table_data(<span class="string">"histo_count"</span>, <span class="number">0</span>, <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(count_table.num_rows(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(count_table.num_columns(), <span class="number">5</span>);
         <span class="macro">assert_eq!</span>(
@@ -1305,11 +1306,11 @@
                 .map(|c| <span class="kw-2">&amp;</span>c.column_name)
                 .collect::&lt;Vec&lt;<span class="kw-2">&amp;</span>String&gt;&gt;(),
             <span class="macro">vec!</span>[
-                <span class="string">&quot;resource&quot;</span>,
-                <span class="string">&quot;scope&quot;</span>,
-                <span class="string">&quot;host&quot;</span>,
-                <span class="string">&quot;greptime_timestamp&quot;</span>,
-                <span class="string">&quot;greptime_value&quot;</span>,
+                <span class="string">"resource"</span>,
+                <span class="string">"scope"</span>,
+                <span class="string">"host"</span>,
+                <span class="string">"greptime_timestamp"</span>,
+                <span class="string">"greptime_value"</span>,
             ]
         );
     }

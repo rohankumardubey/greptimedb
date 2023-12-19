@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/metric-engine/src/engine/put.rs`."><title>put.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="metric_engine" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/metric-engine/src/engine/put.rs`."><title>put.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="metric_engine" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -349,14 +350,14 @@
 <a href="#349" id="349">349</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -397,7 +398,7 @@
 
         <span class="kw">if </span>is_putting_physical_region {
             <span class="macro">info!</span>(
-                <span class="string">&quot;Metric region received put request {request:?} on physical region {region_id:?}&quot;
+                <span class="string">"Metric region received put request {request:?} on physical region {region_id:?}"
             </span>);
             FORBIDDEN_OPERATION_COUNT.inc();
 
@@ -450,7 +451,7 @@
             .is_logical_region_exists(metadata_region_id, logical_region_id)
             .<span class="kw">await</span><span class="question-mark">?
         </span>{
-            <span class="macro">error!</span>(<span class="string">&quot;Trying to write to an nonexistent region {logical_region_id}&quot;</span>);
+            <span class="macro">error!</span>(<span class="string">"Trying to write to an nonexistent region {logical_region_id}"</span>);
             <span class="kw">return </span>LogicalRegionNotFoundSnafu {
                 region_id: logical_region_id,
             }
@@ -571,7 +572,7 @@
         env.init_metric_region().<span class="kw">await</span>;
 
         <span class="comment">// prepare data
-        </span><span class="kw">let </span>schema = test_util::row_schema_with_tags(<span class="kw-2">&amp;</span>[<span class="string">&quot;job&quot;</span>]);
+        </span><span class="kw">let </span>schema = test_util::row_schema_with_tags(<span class="kw-2">&amp;</span>[<span class="string">"job"</span>]);
         <span class="kw">let </span>rows = test_util::build_rows(<span class="number">1</span>, <span class="number">5</span>);
         <span class="kw">let </span>request = RegionRequest::Put(RegionPutRequest {
             rows: Rows { schema, rows },
@@ -595,7 +596,7 @@
             .<span class="kw">await
             </span>.unwrap();
         <span class="kw">let </span>batches = RecordBatches::try_collect(stream).<span class="kw">await</span>.unwrap();
-        <span class="kw">let </span>expected = <span class="string">&quot;\
+        <span class="kw">let </span>expected = <span class="string">"\
 +-------------------------+----------------+------------+---------------------+-------+
 | greptime_timestamp      | greptime_value | __table_id | __tsid              | job   |
 +-------------------------+----------------+------------+---------------------+-------+
@@ -604,8 +605,8 @@
 | 1970-01-01T00:00:00.002 | 2.0            | 3          | 4844750677434873907 | tag_0 |
 | 1970-01-01T00:00:00.003 | 3.0            | 3          | 4844750677434873907 | tag_0 |
 | 1970-01-01T00:00:00.004 | 4.0            | 3          | 4844750677434873907 | tag_0 |
-+-------------------------+----------------+------------+---------------------+-------+&quot;</span>;
-        <span class="macro">assert_eq!</span>(expected, batches.pretty_print().unwrap(), <span class="string">&quot;physical region&quot;</span>);
++-------------------------+----------------+------------+---------------------+-------+"</span>;
+        <span class="macro">assert_eq!</span>(expected, batches.pretty_print().unwrap(), <span class="string">"physical region"</span>);
 
         <span class="comment">// read data from logical region
         </span><span class="kw">let </span>request = ScanRequest::default();
@@ -615,7 +616,7 @@
             .<span class="kw">await
             </span>.unwrap();
         <span class="kw">let </span>batches = RecordBatches::try_collect(stream).<span class="kw">await</span>.unwrap();
-        <span class="kw">let </span>expected = <span class="string">&quot;\
+        <span class="kw">let </span>expected = <span class="string">"\
 +-------------------------+----------------+-------+
 | greptime_timestamp      | greptime_value | job   |
 +-------------------------+----------------+-------+
@@ -624,8 +625,8 @@
 | 1970-01-01T00:00:00.002 | 2.0            | tag_0 |
 | 1970-01-01T00:00:00.003 | 3.0            | tag_0 |
 | 1970-01-01T00:00:00.004 | 4.0            | tag_0 |
-+-------------------------+----------------+-------+&quot;</span>;
-        <span class="macro">assert_eq!</span>(expected, batches.pretty_print().unwrap(), <span class="string">&quot;logical region&quot;</span>);
++-------------------------+----------------+-------+"</span>;
+        <span class="macro">assert_eq!</span>(expected, batches.pretty_print().unwrap(), <span class="string">"logical region"</span>);
     }
 
     <span class="attr">#[tokio::test]
@@ -636,7 +637,7 @@
 
         <span class="comment">// add columns
         </span><span class="kw">let </span>logical_region_id = env.default_logical_region_id();
-        <span class="kw">let </span>columns = <span class="kw-2">&amp;</span>[<span class="string">&quot;odd&quot;</span>, <span class="string">&quot;even&quot;</span>, <span class="string">&quot;Ev_En&quot;</span>];
+        <span class="kw">let </span>columns = <span class="kw-2">&amp;</span>[<span class="string">"odd"</span>, <span class="string">"even"</span>, <span class="string">"Ev_En"</span>];
         <span class="kw">let </span>alter_request = test_util::alter_logical_region_add_tag_columns(columns);
         engine
             .handle_request(logical_region_id, RegionRequest::Alter(alter_request))
@@ -665,7 +666,7 @@
         <span class="kw">let </span>engine = env.metric();
 
         <span class="kw">let </span>physical_region_id = env.default_physical_region_id();
-        <span class="kw">let </span>schema = test_util::row_schema_with_tags(<span class="kw-2">&amp;</span>[<span class="string">&quot;abc&quot;</span>]);
+        <span class="kw">let </span>schema = test_util::row_schema_with_tags(<span class="kw-2">&amp;</span>[<span class="string">"abc"</span>]);
         <span class="kw">let </span>rows = test_util::build_rows(<span class="number">1</span>, <span class="number">100</span>);
         <span class="kw">let </span>request = RegionRequest::Put(RegionPutRequest {
             rows: Rows { schema, rows },
@@ -684,7 +685,7 @@
         <span class="kw">let </span>engine = env.metric();
 
         <span class="kw">let </span>logical_region_id = RegionId::new(<span class="number">175</span>, <span class="number">8345</span>);
-        <span class="kw">let </span>schema = test_util::row_schema_with_tags(<span class="kw-2">&amp;</span>[<span class="string">&quot;def&quot;</span>]);
+        <span class="kw">let </span>schema = test_util::row_schema_with_tags(<span class="kw-2">&amp;</span>[<span class="string">"def"</span>]);
         <span class="kw">let </span>rows = test_util::build_rows(<span class="number">1</span>, <span class="number">100</span>);
         <span class="kw">let </span>request = RegionRequest::Put(RegionPutRequest {
             rows: Rows { schema, rows },

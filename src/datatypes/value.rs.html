@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/datatypes/src/value.rs`."><title>value.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="datatypes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/datatypes/src/value.rs`."><title>value.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="datatypes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2344,14 +2345,14 @@
 <a href="#2344" id="2344">2344</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -2425,35 +2426,35 @@
 }
 
 <span class="kw">impl </span>Display <span class="kw">for </span>Value {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
-            Value::Null =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.data_type().name()),
-            Value::Boolean(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::UInt8(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::UInt16(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::UInt32(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::UInt64(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::Int8(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::Int16(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::Int32(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::Int64(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::Float32(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::Float64(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::String(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.as_utf8()),
+            Value::Null =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, <span class="self">self</span>.data_type().name()),
+            Value::Boolean(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::UInt8(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::UInt16(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::UInt32(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::UInt64(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::Int8(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::Int16(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::Int32(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::Int64(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::Float32(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::Float64(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::String(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.as_utf8()),
             Value::Binary(v) =&gt; {
                 <span class="kw">let </span>hex = v
                     .iter()
-                    .map(|b| <span class="macro">format!</span>(<span class="string">&quot;{b:02x}&quot;</span>))
+                    .map(|b| <span class="macro">format!</span>(<span class="string">"{b:02x}"</span>))
                     .collect::&lt;Vec&lt;String&gt;&gt;()
-                    .join(<span class="string">&quot;&quot;</span>);
-                <span class="macro">write!</span>(f, <span class="string">&quot;{hex}&quot;</span>)
+                    .join(<span class="string">""</span>);
+                <span class="macro">write!</span>(f, <span class="string">"{hex}"</span>)
             }
-            Value::Date(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::DateTime(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{v}&quot;</span>),
-            Value::Timestamp(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.to_iso8601_string()),
-            Value::Time(t) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, t.to_iso8601_string()),
-            Value::Interval(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.to_iso8601_string()),
-            Value::Duration(d) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{d}&quot;</span>),
+            Value::Date(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::DateTime(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{v}"</span>),
+            Value::Timestamp(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.to_iso8601_string()),
+            Value::Time(t) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, t.to_iso8601_string()),
+            Value::Interval(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.to_iso8601_string()),
+            Value::Duration(d) =&gt; <span class="macro">write!</span>(f, <span class="string">"{d}"</span>),
             Value::List(v) =&gt; {
                 <span class="kw">let </span>default = Box::&lt;Vec&lt;Value&gt;&gt;::default();
                 <span class="kw">let </span>items = v.items().as_ref().unwrap_or(<span class="kw-2">&amp;</span>default);
@@ -2461,10 +2462,10 @@
                     .iter()
                     .map(|i| i.to_string())
                     .collect::&lt;Vec&lt;String&gt;&gt;()
-                    .join(<span class="string">&quot;, &quot;</span>);
-                <span class="macro">write!</span>(f, <span class="string">&quot;{}[{}]&quot;</span>, v.datatype.name(), items)
+                    .join(<span class="string">", "</span>);
+                <span class="macro">write!</span>(f, <span class="string">"{}[{}]"</span>, v.datatype.name(), items)
             }
-            Value::Decimal128(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v),
+            Value::Decimal128(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v),
         }
     }
 }
@@ -2512,7 +2513,7 @@
             Value::Null =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
             Value::List(v) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v)),
             other =&gt; error::CastTypeSnafu {
-                msg: <span class="macro">format!</span>(<span class="string">&quot;Failed to cast {other:?} to list value&quot;</span>),
+                msg: <span class="macro">format!</span>(<span class="string">"Failed to cast {other:?} to list value"</span>),
             }
             .fail(),
         }
@@ -2643,7 +2644,7 @@
             output_type_id == value_type_id || <span class="self">self</span>.is_null(),
             error::ToScalarValueSnafu {
                 reason: <span class="macro">format!</span>(
-                    <span class="string">&quot;expect value to return output_type {output_type_id:?}, actual: {value_type_id:?}&quot;</span>,
+                    <span class="string">"expect value to return output_type {output_type_id:?}, actual: {value_type_id:?}"</span>,
                 ),
             }
         );
@@ -2726,7 +2727,7 @@
 }
 
 <span class="kw">fn </span>new_item_field(data_type: ArrowDataType) -&gt; Field {
-    Field::new(<span class="string">&quot;item&quot;</span>, data_type, <span class="bool-val">false</span>)
+    Field::new(<span class="string">"item"</span>, data_type, <span class="bool-val">false</span>)
 }
 
 <span class="kw">pub fn </span>timestamp_to_scalar_value(unit: TimeUnit, val: <span class="prelude-ty">Option</span>&lt;i64&gt;) -&gt; ScalarValue {
@@ -2771,7 +2772,7 @@
         ScalarValue::Utf8(<span class="prelude-val">Some</span>(s)) =&gt; <span class="kw">match </span>Timestamp::from_str(s) {
             <span class="prelude-val">Ok</span>(t) =&gt; <span class="prelude-val">Some</span>(t),
             <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="macro">logging::error!</span>(e;<span class="string">&quot;Failed to convert string literal {s} to timestamp&quot;</span>);
+                <span class="macro">logging::error!</span>(e;<span class="string">"Failed to convert string literal {s} to timestamp"</span>);
                 <span class="prelude-val">None
             </span>}
         },
@@ -2823,7 +2824,7 @@
                 (<span class="macro-nonterminal">$Type::Duration</span>(v1), <span class="macro-nonterminal">$Type::Duration</span>(v2)) =&gt; v1.cmp(v2),
                 (<span class="macro-nonterminal">$Type::List</span>(v1), <span class="macro-nonterminal">$Type::List</span>(v2)) =&gt; v1.cmp(v2),
                 <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(
-                    <span class="string">&quot;Cannot compare different values {:?} and {:?}&quot;</span>,
+                    <span class="string">"Cannot compare different values {:?} and {:?}"</span>,
                     <span class="macro-nonterminal">$left</span>, <span class="macro-nonterminal">$right
                 </span>),
             }
@@ -2853,7 +2854,7 @@
                 <span class="kw">match </span>from {
                     Value::<span class="macro-nonterminal">$Variant</span>(v) =&gt; <span class="prelude-val">Ok</span>(v.into()),
                     <span class="kw">_ </span>=&gt; TryFromValueSnafu {
-                        reason: <span class="macro">format!</span>(<span class="string">&quot;{:?} is not a {}&quot;</span>, from, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$Type</span>)),
+                        reason: <span class="macro">format!</span>(<span class="string">"{:?} is not a {}"</span>, from, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$Type</span>)),
                     }
                     .fail(),
                 }
@@ -2869,7 +2870,7 @@
                     Value::<span class="macro-nonterminal">$Variant</span>(v) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v.into())),
                     Value::Null =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
                     <span class="kw">_ </span>=&gt; TryFromValueSnafu {
-                        reason: <span class="macro">format!</span>(<span class="string">&quot;{:?} is not a {}&quot;</span>, from, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$Type</span>)),
+                        reason: <span class="macro">format!</span>(<span class="string">"{:?} is not a {}"</span>, from, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$Type</span>)),
                     }
                     .fail(),
                 }
@@ -3040,7 +3041,7 @@
         ))
     }
 
-    <span class="doccomment">/// use &#39;the first item size&#39; * &#39;length of items&#39; to estimate the size.
+    <span class="doccomment">/// use 'the first item size' * 'length of items' to estimate the size.
     /// it could be inaccurate.
     </span><span class="kw">fn </span>estimated_size(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(items) = <span class="kw-2">&amp;</span><span class="self">self</span>.items {
@@ -3068,7 +3069,7 @@
     <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Ordering {
         <span class="macro">assert_eq!</span>(
             <span class="self">self</span>.datatype, other.datatype,
-            <span class="string">&quot;Cannot compare different datatypes!&quot;
+            <span class="string">"Cannot compare different datatypes!"
         </span>);
         <span class="self">self</span>.items.cmp(<span class="kw-2">&amp;</span>other.items)
     }
@@ -3185,8 +3186,8 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;ValueRef&lt;<span class="lifetime">&#39;_</span>&gt;&gt; <span class="kw">for </span>Value {
-    <span class="kw">fn </span>from(value: ValueRef&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;ValueRef&lt;<span class="lifetime">'_</span>&gt;&gt; <span class="kw">for </span>Value {
+    <span class="kw">fn </span>from(value: ValueRef&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span>value {
             ValueRef::Null =&gt; Value::Null,
             ValueRef::Boolean(v) =&gt; Value::Boolean(v),
@@ -3216,7 +3217,7 @@
 
 <span class="doccomment">/// Reference to [Value].
 </span><span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-</span><span class="kw">pub enum </span>ValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub enum </span>ValueRef&lt;<span class="lifetime">'a</span>&gt; {
     Null,
 
     <span class="comment">// Numeric types:
@@ -3236,8 +3237,8 @@
     </span>Decimal128(Decimal128),
 
     <span class="comment">// String types:
-    </span>String(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str),
-    Binary(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]),
+    </span>String(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str),
+    Binary(<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]),
 
     <span class="comment">// Date &amp; Time types:
     </span>Date(Date),
@@ -3248,7 +3249,7 @@
     Interval(Interval),
 
     <span class="comment">// Compound types:
-    </span>List(ListValueRef&lt;<span class="lifetime">&#39;a</span>&gt;),
+    </span>List(ListValueRef&lt;<span class="lifetime">'a</span>&gt;),
 }
 
 <span class="macro">macro_rules! </span>impl_as_for_value_ref {
@@ -3258,7 +3259,7 @@
             ValueRef::<span class="macro-nonterminal">$Variant</span>(v) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="kw-2">*</span>v)),
             other =&gt; error::CastTypeSnafu {
                 msg: <span class="macro">format!</span>(
-                    <span class="string">&quot;Failed to cast value ref {:?} to {}&quot;</span>,
+                    <span class="string">"Failed to cast value ref {:?} to {}"</span>,
                     other,
                     <span class="macro">stringify!</span>(<span class="macro-nonterminal">$Variant</span>)
                 ),
@@ -3268,7 +3269,7 @@
     };
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ValueRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns true if this is null.
     </span><span class="kw">pub fn </span>is_null(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="macro">matches!</span>(<span class="self">self</span>, ValueRef::Null)
@@ -3326,7 +3327,7 @@
             ValueRef::Null =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
             ValueRef::Float32(f) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(f.<span class="number">0</span>)),
             other =&gt; error::CastTypeSnafu {
-                msg: <span class="macro">format!</span>(<span class="string">&quot;Failed to cast value ref {:?} to ValueRef::Float32&quot;</span>, other,),
+                msg: <span class="macro">format!</span>(<span class="string">"Failed to cast value ref {:?} to ValueRef::Float32"</span>, other,),
             }
             .fail(),
         }
@@ -3337,7 +3338,7 @@
             ValueRef::Null =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
             ValueRef::Float64(f) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(f.<span class="number">0</span>)),
             other =&gt; error::CastTypeSnafu {
-                msg: <span class="macro">format!</span>(<span class="string">&quot;Failed to cast value ref {:?} to ValueRef::Float64&quot;</span>, other,),
+                msg: <span class="macro">format!</span>(<span class="string">"Failed to cast value ref {:?} to ValueRef::Float64"</span>, other,),
             }
             .fail(),
         }
@@ -3383,13 +3384,13 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PartialOrd <span class="kw">for </span>ValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PartialOrd <span class="kw">for </span>ValueRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ordering&gt; {
         <span class="prelude-val">Some</span>(<span class="self">self</span>.cmp(other))
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Ord <span class="kw">for </span>ValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Ord <span class="kw">for </span>ValueRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Ordering {
         <span class="macro">impl_ord_for_value_like!</span>(ValueRef, <span class="self">self</span>, other)
     }
@@ -3397,13 +3398,13 @@
 
 <span class="macro">macro_rules! </span>impl_value_ref_from {
     (<span class="macro-nonterminal">$Variant</span>:ident, <span class="macro-nonterminal">$Type</span>:ident) =&gt; {
-        <span class="kw">impl </span>From&lt;<span class="macro-nonterminal">$Type</span>&gt; <span class="kw">for </span>ValueRef&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">impl </span>From&lt;<span class="macro-nonterminal">$Type</span>&gt; <span class="kw">for </span>ValueRef&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">fn </span>from(value: <span class="macro-nonterminal">$Type</span>) -&gt; <span class="self">Self </span>{
                 ValueRef::<span class="macro-nonterminal">$Variant</span>(value.into())
             }
         }
 
-        <span class="kw">impl </span>From&lt;<span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$Type</span>&gt;&gt; <span class="kw">for </span>ValueRef&lt;<span class="lifetime">&#39;_</span>&gt; {
+        <span class="kw">impl </span>From&lt;<span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$Type</span>&gt;&gt; <span class="kw">for </span>ValueRef&lt;<span class="lifetime">'_</span>&gt; {
             <span class="kw">fn </span>from(value: <span class="prelude-ty">Option</span>&lt;<span class="macro-nonterminal">$Type</span>&gt;) -&gt; <span class="self">Self </span>{
                 <span class="kw">match </span>value {
                     <span class="prelude-val">Some</span>(v) =&gt; ValueRef::<span class="macro-nonterminal">$Variant</span>(v.into()),
@@ -3433,19 +3434,19 @@
 <span class="macro">impl_value_ref_from!</span>(Duration, Duration);
 <span class="macro">impl_value_ref_from!</span>(Decimal128, Decimal128);
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; <span class="kw">for </span>ValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>from(string: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; ValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>ValueRef&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>from(string: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; ValueRef&lt;<span class="lifetime">'a</span>&gt; {
         ValueRef::String(string)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]&gt; <span class="kw">for </span>ValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>from(bytes: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[u8]) -&gt; ValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]&gt; <span class="kw">for </span>ValueRef&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>from(bytes: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[u8]) -&gt; ValueRef&lt;<span class="lifetime">'a</span>&gt; {
         ValueRef::Binary(bytes)
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="prelude-ty">Option</span>&lt;ListValueRef&lt;<span class="lifetime">&#39;a</span>&gt;&gt;&gt; <span class="kw">for </span>ValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="prelude-ty">Option</span>&lt;ListValueRef&lt;<span class="lifetime">'a</span>&gt;&gt;&gt; <span class="kw">for </span>ValueRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>from(list: <span class="prelude-ty">Option</span>&lt;ListValueRef&gt;) -&gt; ValueRef {
         <span class="kw">match </span>list {
             <span class="prelude-val">Some</span>(v) =&gt; ValueRef::List(v),
@@ -3460,13 +3461,13 @@
 /// might be avoidable by downcasting and comparing the underlying array slice
 /// if it becomes bottleneck.
 </span><span class="attr">#[derive(Debug, Clone, Copy)]
-</span><span class="kw">pub enum </span>ListValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+</span><span class="kw">pub enum </span>ListValueRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="comment">// TODO(yingwen): Consider replace this by VectorRef.
-    </span>Indexed { vector: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ListVector, idx: usize },
-    Ref { val: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ListValue },
+    </span>Indexed { vector: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ListVector, idx: usize },
+    Ref { val: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>ListValue },
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ListValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ListValueRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Convert self to [Value]. This method would clone the underlying data.
     </span><span class="kw">fn </span>to_value(<span class="self">self</span>) -&gt; Value {
         <span class="kw">match </span><span class="self">self </span>{
@@ -3476,28 +3477,28 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PartialEq <span class="kw">for </span>ListValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PartialEq <span class="kw">for </span>ListValueRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>eq(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; bool {
         <span class="self">self</span>.to_value().eq(<span class="kw-2">&amp;</span>other.to_value())
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Eq <span class="kw">for </span>ListValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {}
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Eq <span class="kw">for </span>ListValueRef&lt;<span class="lifetime">'a</span>&gt; {}
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Ord <span class="kw">for </span>ListValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; Ord <span class="kw">for </span>ListValueRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; Ordering {
         <span class="comment">// Respect the order of `Value` by converting into value before comparison.
         </span><span class="self">self</span>.to_value().cmp(<span class="kw-2">&amp;</span>other.to_value())
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; PartialOrd <span class="kw">for </span>ListValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; PartialOrd <span class="kw">for </span>ListValueRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">fn </span>partial_cmp(<span class="kw-2">&amp;</span><span class="self">self</span>, other: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Ordering&gt; {
         <span class="prelude-val">Some</span>(<span class="self">self</span>.cmp(other))
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; ValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ValueRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Returns the size of the underlying data in bytes,
     /// The size is estimated and only considers the data size.
     </span><span class="kw">pub fn </span>data_size(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
@@ -3612,16 +3613,16 @@
         <span class="macro">assert_eq!</span>(Value::Null, ScalarValue::UInt64(<span class="prelude-val">None</span>).try_into().unwrap());
 
         <span class="macro">assert_eq!</span>(
-            Value::from(<span class="string">&quot;hello&quot;</span>),
-            ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">&quot;hello&quot;</span>.to_string()))
+            Value::from(<span class="string">"hello"</span>),
+            ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">"hello"</span>.to_string()))
                 .try_into()
                 .unwrap()
         );
         <span class="macro">assert_eq!</span>(Value::Null, ScalarValue::Utf8(<span class="prelude-val">None</span>).try_into().unwrap());
 
         <span class="macro">assert_eq!</span>(
-            Value::from(<span class="string">&quot;large_hello&quot;</span>),
-            ScalarValue::LargeUtf8(<span class="prelude-val">Some</span>(<span class="string">&quot;large_hello&quot;</span>.to_string()))
+            Value::from(<span class="string">"large_hello"</span>),
+            ScalarValue::LargeUtf8(<span class="prelude-val">Some</span>(<span class="string">"large_hello"</span>.to_string()))
                 .try_into()
                 .unwrap()
         );
@@ -3631,16 +3632,16 @@
         );
 
         <span class="macro">assert_eq!</span>(
-            Value::from(<span class="string">&quot;world&quot;</span>.as_bytes()),
-            ScalarValue::Binary(<span class="prelude-val">Some</span>(<span class="string">&quot;world&quot;</span>.as_bytes().to_vec()))
+            Value::from(<span class="string">"world"</span>.as_bytes()),
+            ScalarValue::Binary(<span class="prelude-val">Some</span>(<span class="string">"world"</span>.as_bytes().to_vec()))
                 .try_into()
                 .unwrap()
         );
         <span class="macro">assert_eq!</span>(Value::Null, ScalarValue::Binary(<span class="prelude-val">None</span>).try_into().unwrap());
 
         <span class="macro">assert_eq!</span>(
-            Value::from(<span class="string">&quot;large_world&quot;</span>.as_bytes()),
-            ScalarValue::LargeBinary(<span class="prelude-val">Some</span>(<span class="string">&quot;large_world&quot;</span>.as_bytes().to_vec()))
+            Value::from(<span class="string">"large_world"</span>.as_bytes()),
+            ScalarValue::LargeBinary(<span class="prelude-val">Some</span>(<span class="string">"large_world"</span>.as_bytes().to_vec()))
                 .try_into()
                 .unwrap()
         );
@@ -3822,7 +3823,7 @@
         <span class="macro">assert!</span>(result
             .unwrap_err()
             .to_string()
-            .contains(<span class="string">&quot;Unsupported arrow data type, type: Decimal128(0, 0)&quot;</span>));
+            .contains(<span class="string">"Unsupported arrow data type, type: Decimal128(0, 0)"</span>));
     }
 
     <span class="attr">#[test]
@@ -3872,13 +3873,13 @@
             Value::from(f64::MAX)
         );
 
-        <span class="kw">let </span>string_bytes = StringBytes::from(<span class="string">&quot;hello&quot;</span>);
+        <span class="kw">let </span>string_bytes = StringBytes::from(<span class="string">"hello"</span>);
         <span class="macro">assert_eq!</span>(
             Value::String(string_bytes.clone()),
             Value::from(string_bytes)
         );
 
-        <span class="kw">let </span>bytes = Bytes::from(<span class="string">b&quot;world&quot;</span>.as_slice());
+        <span class="kw">let </span>bytes = Bytes::from(<span class="string">b"world"</span>.as_slice());
         <span class="macro">assert_eq!</span>(Value::Binary(bytes.clone()), Value::from(bytes));
     }
 
@@ -3921,11 +3922,11 @@
         );
         check_type_and_value(
             <span class="kw-2">&amp;</span>ConcreteDataType::string_datatype(),
-            <span class="kw-2">&amp;</span>Value::String(StringBytes::from(<span class="string">&quot;hello&quot;</span>)),
+            <span class="kw-2">&amp;</span>Value::String(StringBytes::from(<span class="string">"hello"</span>)),
         );
         check_type_and_value(
             <span class="kw-2">&amp;</span>ConcreteDataType::binary_datatype(),
-            <span class="kw-2">&amp;</span>Value::Binary(Bytes::from(<span class="string">b&quot;world&quot;</span>.as_slice())),
+            <span class="kw-2">&amp;</span>Value::Binary(Bytes::from(<span class="string">b"world"</span>.as_slice())),
         );
         check_type_and_value(
             <span class="kw-2">&amp;</span>ConcreteDataType::list_datatype(ConcreteDataType::int32_datatype()),
@@ -3990,25 +3991,25 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_value_from_string() {
-        <span class="kw">let </span>hello = <span class="string">&quot;hello&quot;</span>.to_string();
+        <span class="kw">let </span>hello = <span class="string">"hello"</span>.to_string();
         <span class="macro">assert_eq!</span>(
             Value::String(StringBytes::from(hello.clone())),
             Value::from(hello)
         );
 
-        <span class="kw">let </span>world = <span class="string">&quot;world&quot;</span>;
+        <span class="kw">let </span>world = <span class="string">"world"</span>;
         <span class="macro">assert_eq!</span>(Value::String(StringBytes::from(world)), Value::from(world));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_value_from_bytes() {
-        <span class="kw">let </span>hello = <span class="string">b&quot;hello&quot;</span>.to_vec();
+        <span class="kw">let </span>hello = <span class="string">b"hello"</span>.to_vec();
         <span class="macro">assert_eq!</span>(
             Value::Binary(Bytes::from(hello.clone())),
             Value::from(hello)
         );
 
-        <span class="kw">let </span>world: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;world&quot;</span>;
+        <span class="kw">let </span>world: <span class="kw-2">&amp;</span>[u8] = <span class="string">b"world"</span>;
         <span class="macro">assert_eq!</span>(Value::Binary(Bytes::from(world)), Value::from(world));
     }
 
@@ -4061,12 +4062,12 @@
             to_json(Value::Float64(<span class="number">125.0</span>.into()))
         );
         <span class="macro">assert_eq!</span>(
-            serde_json::Value::String(String::from(<span class="string">&quot;hello&quot;</span>)),
-            to_json(Value::String(StringBytes::from(<span class="string">&quot;hello&quot;</span>)))
+            serde_json::Value::String(String::from(<span class="string">"hello"</span>)),
+            to_json(Value::String(StringBytes::from(<span class="string">"hello"</span>)))
         );
         <span class="macro">assert_eq!</span>(
-            serde_json::Value::from(<span class="string">b&quot;world&quot;</span>.as_slice()),
-            to_json(Value::Binary(Bytes::from(<span class="string">b&quot;world&quot;</span>.as_slice())))
+            serde_json::Value::from(<span class="string">b"world"</span>.as_slice()),
+            to_json(Value::Binary(Bytes::from(<span class="string">b"world"</span>.as_slice())))
         );
         <span class="macro">assert_eq!</span>(
             serde_json::Value::Number(<span class="number">5000i32</span>.into()),
@@ -4091,7 +4092,7 @@
         );
 
         <span class="kw">let </span>json_value: serde_json::Value =
-            serde_json::from_str(<span class="string">r#&quot;{&quot;items&quot;:[{&quot;Int32&quot;:123}],&quot;datatype&quot;:{&quot;Int32&quot;:{}}}&quot;#</span>).unwrap();
+            serde_json::from_str(<span class="string">r#"{"items":[{"Int32":123}],"datatype":{"Int32":{}}}"#</span>).unwrap();
         <span class="macro">assert_eq!</span>(
             json_value,
             to_json(Value::List(ListValue {
@@ -4151,12 +4152,12 @@
         <span class="macro">check_as_value_ref!</span>(Duration, Duration::new_millisecond(<span class="number">1</span>));
 
         <span class="macro">assert_eq!</span>(
-            ValueRef::String(<span class="string">&quot;hello&quot;</span>),
-            Value::String(<span class="string">&quot;hello&quot;</span>.into()).as_value_ref()
+            ValueRef::String(<span class="string">"hello"</span>),
+            Value::String(<span class="string">"hello"</span>.into()).as_value_ref()
         );
         <span class="macro">assert_eq!</span>(
-            ValueRef::Binary(<span class="string">b&quot;hello&quot;</span>),
-            Value::Binary(<span class="string">&quot;hello&quot;</span>.as_bytes().into()).as_value_ref()
+            ValueRef::Binary(<span class="string">b"hello"</span>),
+            Value::Binary(<span class="string">"hello"</span>.as_bytes().into()).as_value_ref()
         );
 
         <span class="macro">check_as_value_ref!</span>(Date, Date::new(<span class="number">103</span>));
@@ -4193,8 +4194,8 @@
             };
         }
 
-        <span class="macro">check_as_correct!</span>(<span class="string">&quot;hello&quot;</span>, String, as_string);
-        <span class="macro">check_as_correct!</span>(<span class="string">&quot;hello&quot;</span>.as_bytes(), Binary, as_binary);
+        <span class="macro">check_as_correct!</span>(<span class="string">"hello"</span>, String, as_string);
+        <span class="macro">check_as_correct!</span>(<span class="string">"hello"</span>.as_bytes(), Binary, as_binary);
         <span class="macro">check_as_correct!</span>(<span class="bool-val">true</span>, Boolean, as_boolean);
         <span class="macro">check_as_correct!</span>(Date::new(<span class="number">123</span>), Date, as_date);
         <span class="macro">check_as_correct!</span>(DateTime::new(<span class="number">12</span>), DateTime, as_datetime);
@@ -4219,41 +4220,41 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_display() {
-        std::env::set_var(<span class="string">&quot;TZ&quot;</span>, <span class="string">&quot;Asia/Shanghai&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::Null.to_string(), <span class="string">&quot;Null&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::UInt8(<span class="number">8</span>).to_string(), <span class="string">&quot;8&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::UInt16(<span class="number">16</span>).to_string(), <span class="string">&quot;16&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::UInt32(<span class="number">32</span>).to_string(), <span class="string">&quot;32&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::UInt64(<span class="number">64</span>).to_string(), <span class="string">&quot;64&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::Int8(-<span class="number">8</span>).to_string(), <span class="string">&quot;-8&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::Int16(-<span class="number">16</span>).to_string(), <span class="string">&quot;-16&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::Int32(-<span class="number">32</span>).to_string(), <span class="string">&quot;-32&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::Int64(-<span class="number">64</span>).to_string(), <span class="string">&quot;-64&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::Float32((-<span class="number">32.123</span>).into()).to_string(), <span class="string">&quot;-32.123&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::Float64((-<span class="number">64.123</span>).into()).to_string(), <span class="string">&quot;-64.123&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::Float64(OrderedF64::infinity()).to_string(), <span class="string">&quot;inf&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::Float64(OrderedF64::nan()).to_string(), <span class="string">&quot;NaN&quot;</span>);
-        <span class="macro">assert_eq!</span>(Value::String(StringBytes::from(<span class="string">&quot;123&quot;</span>)).to_string(), <span class="string">&quot;123&quot;</span>);
+        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        <span class="macro">assert_eq!</span>(Value::Null.to_string(), <span class="string">"Null"</span>);
+        <span class="macro">assert_eq!</span>(Value::UInt8(<span class="number">8</span>).to_string(), <span class="string">"8"</span>);
+        <span class="macro">assert_eq!</span>(Value::UInt16(<span class="number">16</span>).to_string(), <span class="string">"16"</span>);
+        <span class="macro">assert_eq!</span>(Value::UInt32(<span class="number">32</span>).to_string(), <span class="string">"32"</span>);
+        <span class="macro">assert_eq!</span>(Value::UInt64(<span class="number">64</span>).to_string(), <span class="string">"64"</span>);
+        <span class="macro">assert_eq!</span>(Value::Int8(-<span class="number">8</span>).to_string(), <span class="string">"-8"</span>);
+        <span class="macro">assert_eq!</span>(Value::Int16(-<span class="number">16</span>).to_string(), <span class="string">"-16"</span>);
+        <span class="macro">assert_eq!</span>(Value::Int32(-<span class="number">32</span>).to_string(), <span class="string">"-32"</span>);
+        <span class="macro">assert_eq!</span>(Value::Int64(-<span class="number">64</span>).to_string(), <span class="string">"-64"</span>);
+        <span class="macro">assert_eq!</span>(Value::Float32((-<span class="number">32.123</span>).into()).to_string(), <span class="string">"-32.123"</span>);
+        <span class="macro">assert_eq!</span>(Value::Float64((-<span class="number">64.123</span>).into()).to_string(), <span class="string">"-64.123"</span>);
+        <span class="macro">assert_eq!</span>(Value::Float64(OrderedF64::infinity()).to_string(), <span class="string">"inf"</span>);
+        <span class="macro">assert_eq!</span>(Value::Float64(OrderedF64::nan()).to_string(), <span class="string">"NaN"</span>);
+        <span class="macro">assert_eq!</span>(Value::String(StringBytes::from(<span class="string">"123"</span>)).to_string(), <span class="string">"123"</span>);
         <span class="macro">assert_eq!</span>(
             Value::Binary(Bytes::from(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])).to_string(),
-            <span class="string">&quot;010203&quot;
+            <span class="string">"010203"
         </span>);
-        <span class="macro">assert_eq!</span>(Value::Date(Date::new(<span class="number">0</span>)).to_string(), <span class="string">&quot;1970-01-01&quot;</span>);
+        <span class="macro">assert_eq!</span>(Value::Date(Date::new(<span class="number">0</span>)).to_string(), <span class="string">"1970-01-01"</span>);
         <span class="macro">assert_eq!</span>(
             Value::DateTime(DateTime::new(<span class="number">0</span>)).to_string(),
-            <span class="string">&quot;1970-01-01 08:00:00+0800&quot;
+            <span class="string">"1970-01-01 08:00:00+0800"
         </span>);
         <span class="macro">assert_eq!</span>(
             Value::Timestamp(Timestamp::new(<span class="number">1000</span>, TimeUnit::Millisecond)).to_string(),
-            <span class="string">&quot;1970-01-01 08:00:01+0800&quot;
+            <span class="string">"1970-01-01 08:00:01+0800"
         </span>);
         <span class="macro">assert_eq!</span>(
             Value::Time(Time::new(<span class="number">1000</span>, TimeUnit::Millisecond)).to_string(),
-            <span class="string">&quot;08:00:01+0800&quot;
+            <span class="string">"08:00:01+0800"
         </span>);
         <span class="macro">assert_eq!</span>(
             Value::Duration(Duration::new_millisecond(<span class="number">1000</span>)).to_string(),
-            <span class="string">&quot;1000ms&quot;
+            <span class="string">"1000ms"
         </span>);
         <span class="macro">assert_eq!</span>(
             Value::List(ListValue::new(
@@ -4261,7 +4262,7 @@
                 ConcreteDataType::int8_datatype(),
             ))
             .to_string(),
-            <span class="string">&quot;Int8[1, 2]&quot;
+            <span class="string">"Int8[1, 2]"
         </span>);
         <span class="macro">assert_eq!</span>(
             Value::List(ListValue::new(
@@ -4269,7 +4270,7 @@
                 ConcreteDataType::timestamp_second_datatype(),
             ))
             .to_string(),
-            <span class="string">&quot;TimestampSecond[]&quot;
+            <span class="string">"TimestampSecond[]"
         </span>);
         <span class="macro">assert_eq!</span>(
             Value::List(ListValue::new(
@@ -4277,7 +4278,7 @@
                 ConcreteDataType::timestamp_millisecond_datatype(),
             ))
             .to_string(),
-            <span class="string">&quot;TimestampMillisecond[]&quot;
+            <span class="string">"TimestampMillisecond[]"
         </span>);
         <span class="macro">assert_eq!</span>(
             Value::List(ListValue::new(
@@ -4285,7 +4286,7 @@
                 ConcreteDataType::timestamp_microsecond_datatype(),
             ))
             .to_string(),
-            <span class="string">&quot;TimestampMicrosecond[]&quot;
+            <span class="string">"TimestampMicrosecond[]"
         </span>);
         <span class="macro">assert_eq!</span>(
             Value::List(ListValue::new(
@@ -4293,7 +4294,7 @@
                 ConcreteDataType::timestamp_nanosecond_datatype(),
             ))
             .to_string(),
-            <span class="string">&quot;TimestampNanosecond[]&quot;
+            <span class="string">"TimestampNanosecond[]"
         </span>);
     }
 
@@ -4372,14 +4373,14 @@
                 .unwrap()
         );
         <span class="macro">assert_eq!</span>(
-            ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">&quot;hello&quot;</span>.to_string())),
-            Value::String(StringBytes::from(<span class="string">&quot;hello&quot;</span>))
+            ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">"hello"</span>.to_string())),
+            Value::String(StringBytes::from(<span class="string">"hello"</span>))
                 .try_to_scalar_value(<span class="kw-2">&amp;</span>ConcreteDataType::string_datatype(),)
                 .unwrap()
         );
         <span class="macro">assert_eq!</span>(
-            ScalarValue::LargeBinary(<span class="prelude-val">Some</span>(<span class="string">&quot;world&quot;</span>.as_bytes().to_vec())),
-            Value::Binary(Bytes::from(<span class="string">&quot;world&quot;</span>.as_bytes()))
+            ScalarValue::LargeBinary(<span class="prelude-val">Some</span>(<span class="string">"world"</span>.as_bytes().to_vec())),
+            Value::Binary(Bytes::from(<span class="string">"world"</span>.as_bytes()))
                 .try_to_scalar_value(<span class="kw-2">&amp;</span>ConcreteDataType::binary_datatype())
                 .unwrap()
         );
@@ -4618,8 +4619,8 @@
         check_value_ref_size_eq(<span class="kw-2">&amp;</span>ValueRef::Int64(<span class="number">1</span>), <span class="number">8</span>);
         check_value_ref_size_eq(<span class="kw-2">&amp;</span>ValueRef::Float32(<span class="number">1.0</span>.into()), <span class="number">4</span>);
         check_value_ref_size_eq(<span class="kw-2">&amp;</span>ValueRef::Float64(<span class="number">1.0</span>.into()), <span class="number">8</span>);
-        check_value_ref_size_eq(<span class="kw-2">&amp;</span>ValueRef::String(<span class="string">&quot;greptimedb&quot;</span>), <span class="number">10</span>);
-        check_value_ref_size_eq(<span class="kw-2">&amp;</span>ValueRef::Binary(<span class="string">b&quot;greptimedb&quot;</span>), <span class="number">10</span>);
+        check_value_ref_size_eq(<span class="kw-2">&amp;</span>ValueRef::String(<span class="string">"greptimedb"</span>), <span class="number">10</span>);
+        check_value_ref_size_eq(<span class="kw-2">&amp;</span>ValueRef::Binary(<span class="string">b"greptimedb"</span>), <span class="number">10</span>);
         check_value_ref_size_eq(<span class="kw-2">&amp;</span>ValueRef::Date(Date::new(<span class="number">1</span>)), <span class="number">4</span>);
         check_value_ref_size_eq(<span class="kw-2">&amp;</span>ValueRef::DateTime(DateTime::new(<span class="number">1</span>)), <span class="number">8</span>);
         check_value_ref_size_eq(<span class="kw-2">&amp;</span>ValueRef::Timestamp(Timestamp::new_millisecond(<span class="number">1</span>)), <span class="number">16</span>);
@@ -4633,8 +4634,8 @@
             <span class="kw-2">&amp;</span>ValueRef::List(ListValueRef::Ref {
                 val: <span class="kw-2">&amp;</span>ListValue {
                     items: <span class="prelude-val">Some</span>(Box::new(<span class="macro">vec!</span>[
-                        Value::String(<span class="string">&quot;hello world&quot;</span>.into()),
-                        Value::String(<span class="string">&quot;greptimedb&quot;</span>.into()),
+                        Value::String(<span class="string">"hello world"</span>.into()),
+                        Value::String(<span class="string">"greptimedb"</span>.into()),
                     ])),
                     datatype: ConcreteDataType::string_datatype(),
                 },

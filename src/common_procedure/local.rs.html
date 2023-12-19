@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/common/procedure/src/local.rs`."><title>local.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="common_procedure" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/common/procedure/src/local.rs`."><title>local.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="common_procedure" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1086,14 +1087,14 @@
 <a href="#1086" id="1086">1086</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -1128,14 +1129,14 @@
     ProcedureWithId, Watcher,
 };
 
-<span class="doccomment">/// The expired time of a procedure&#39;s metadata.
+<span class="doccomment">/// The expired time of a procedure's metadata.
 </span><span class="kw">const </span>META_TTL: Duration = Duration::from_secs(<span class="number">60 </span>* <span class="number">10</span>);
 
 <span class="doccomment">/// Shared metadata of a procedure.
 ///
 /// # Note
-/// [Notify] is not a condition variable, we can&#39;t guarantee the waiters are notified
-/// if they didn&#39;t call `notified()` before we signal the notify. So we
+/// [Notify] is not a condition variable, we can't guarantee the waiters are notified
+/// if they didn't call `notified()` before we signal the notify. So we
 /// 1. use dedicated notify for each condition, such as waiting for a lock, waiting
 /// for children;
 /// 2. always use `notify_one` and ensure there are only one waiter.
@@ -1329,7 +1330,7 @@
         <span class="kw">let </span>loaders = <span class="self">self</span>.loaders.lock().unwrap();
         <span class="kw">let </span>loader = loaders.get(<span class="kw-2">&amp;</span>message.type_name).or_else(|| {
             <span class="macro">logging::error!</span>(
-                <span class="string">&quot;Loader not found, procedure_id: {}, type_name: {}&quot;</span>,
+                <span class="string">"Loader not found, procedure_id: {}, type_name: {}"</span>,
                 procedure_id,
                 message.type_name
             );
@@ -1339,7 +1340,7 @@
         <span class="kw">let </span>procedure = loader(<span class="kw-2">&amp;</span>message.data)
             .map_err(|e| {
                 <span class="macro">logging::error!</span>(
-                    <span class="string">&quot;Failed to load procedure data, key: {}, source: {:?}&quot;</span>,
+                    <span class="string">"Failed to load procedure data, key: {}, source: {:?}"</span>,
                     procedure_id,
                     e
                 );
@@ -1410,7 +1411,7 @@
     </span><span class="kw">fn </span>on_procedures_finish(<span class="kw-2">&amp;</span><span class="self">self</span>, procedure_ids: <span class="kw-2">&amp;</span>[ProcedureId]) {
         <span class="self">self</span>.remove_messages(procedure_ids);
 
-        <span class="comment">// Since users need to query the procedure state, so we can&#39;t remove the
+        <span class="comment">// Since users need to query the procedure state, so we can't remove the
         // meta of the procedure directly.
         </span><span class="kw">let </span>now = Instant::now();
         <span class="kw">let </span><span class="kw-2">mut </span>finished_procedures = <span class="self">self</span>.finished_procedures.lock().unwrap();
@@ -1463,7 +1464,7 @@
 <span class="kw">impl </span>Default <span class="kw">for </span>ManagerConfig {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            parent_path: <span class="string">&quot;&quot;</span>.to_string(),
+            parent_path: <span class="string">""</span>.to_string(),
             max_retry_times: <span class="number">3</span>,
             retry_delay: Duration::from_millis(<span class="number">500</span>),
             remove_outdated_meta_task_interval: Duration::from_secs(<span class="number">60 </span>* <span class="number">10</span>),
@@ -1549,7 +1550,7 @@
                 .run()
                 .trace(
                     tracing_context
-                        .attach(<span class="macro">tracing::info_span!</span>(<span class="string">&quot;LocalManager::submit_root_procedure&quot;</span>)),
+                        .attach(<span class="macro">tracing::info_span!</span>(<span class="string">"LocalManager::submit_root_procedure"</span>)),
                 )
                 .<span class="kw">await</span>;
         });
@@ -1559,7 +1560,7 @@
 
     <span class="doccomment">/// Recovers unfinished procedures and reruns them.
     </span><span class="kw">async fn </span>recover(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="macro">logging::info!</span>(<span class="string">&quot;LocalManager start to recover&quot;</span>);
+        <span class="macro">logging::info!</span>(<span class="string">"LocalManager start to recover"</span>);
         <span class="kw">let </span>recover_start = Instant::now();
 
         <span class="kw">let </span>(messages, finished_ids) = <span class="self">self</span>.procedure_store.load_messages().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1577,7 +1578,7 @@
                 };
 
                 <span class="macro">logging::info!</span>(
-                    <span class="string">&quot;Recover root procedure {}-{}, step: {}&quot;</span>,
+                    <span class="string">"Recover root procedure {}-{}, step: {}"</span>,
                     loaded_procedure.procedure.type_name(),
                     procedure_id,
                     loaded_procedure.step
@@ -1588,33 +1589,33 @@
                     loaded_procedure.step,
                     loaded_procedure.procedure,
                 ) {
-                    <span class="macro">logging::error!</span>(e; <span class="string">&quot;Failed to recover procedure {}&quot;</span>, procedure_id);
+                    <span class="macro">logging::error!</span>(e; <span class="string">"Failed to recover procedure {}"</span>, procedure_id);
                 }
             }
         }
 
         <span class="kw">if </span>!finished_ids.is_empty() {
             <span class="macro">logging::info!</span>(
-                <span class="string">&quot;LocalManager try to clean finished procedures, num: {}&quot;</span>,
+                <span class="string">"LocalManager try to clean finished procedures, num: {}"</span>,
                 finished_ids.len()
             );
 
             <span class="kw">for </span>procedure_id <span class="kw">in </span>finished_ids {
                 <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self</span>.procedure_store.delete_procedure(procedure_id).<span class="kw">await </span>{
-                    <span class="macro">logging::error!</span>(e; <span class="string">&quot;Failed to delete procedure {}&quot;</span>, procedure_id);
+                    <span class="macro">logging::error!</span>(e; <span class="string">"Failed to delete procedure {}"</span>, procedure_id);
                 }
             }
         }
 
         <span class="macro">logging::info!</span>(
-            <span class="string">&quot;LocalManager finish recovery, cost: {}ms&quot;</span>,
+            <span class="string">"LocalManager finish recovery, cost: {}ms"</span>,
             recover_start.elapsed().as_millis()
         );
 
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;testing&quot;</span>))]
+    <span class="attr">#[cfg(any(test, feature = <span class="string">"testing"</span>))]
     </span><span class="doccomment">/// Returns true if contains a specified loader.
     </span><span class="kw">pub fn </span>contains_loader(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) -&gt; bool {
         <span class="kw">let </span>loaders = <span class="self">self</span>.manager_ctx.loaders.lock().unwrap();
@@ -1650,7 +1651,7 @@
 
         <span class="self">self</span>.manager_ctx.start();
 
-        <span class="macro">info!</span>(<span class="string">&quot;LocalManager is start.&quot;</span>);
+        <span class="macro">info!</span>(<span class="string">"LocalManager is start."</span>);
 
         <span class="self">self</span>.recover().<span class="kw">await
     </span>}
@@ -1664,7 +1665,7 @@
 
         <span class="self">self</span>.manager_ctx.stop();
 
-        <span class="macro">info!</span>(<span class="string">&quot;LocalManager is stopped.&quot;</span>);
+        <span class="macro">info!</span>(<span class="string">"LocalManager is stopped."</span>);
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -1696,7 +1697,7 @@
 <span class="attr">#[async_trait::async_trait]
 </span><span class="kw">impl </span>TaskFunction&lt;Error&gt; <span class="kw">for </span>RemoveOutdatedMetaFunction {
     <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;ProcedureManager-remove-outdated-meta-task&quot;
+        <span class="string">"ProcedureManager-remove-outdated-meta-task"
     </span>}
 
     <span class="kw">async fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -1808,7 +1809,7 @@
     <span class="attr">#[async_trait]
     </span><span class="kw">impl </span>Procedure <span class="kw">for </span>ProcedureToLoad {
         <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-            <span class="string">&quot;ProcedureToLoad&quot;
+            <span class="string">"ProcedureToLoad"
         </span>}
 
         <span class="kw">async fn </span>execute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _ctx: <span class="kw-2">&amp;</span>Context) -&gt; <span class="prelude-ty">Result</span>&lt;Status&gt; {
@@ -1843,9 +1844,9 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_register_loader() {
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;register&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"register"</span>);
         <span class="kw">let </span>config = ManagerConfig {
-            parent_path: <span class="string">&quot;data/&quot;</span>.to_string(),
+            parent_path: <span class="string">"data/"</span>.to_string(),
             max_retry_times: <span class="number">3</span>,
             retry_delay: Duration::from_millis(<span class="number">500</span>),
             ..Default::default()
@@ -1855,21 +1856,21 @@
         manager.manager_ctx.start();
 
         manager
-            .register_loader(<span class="string">&quot;ProcedureToLoad&quot;</span>, ProcedureToLoad::loader())
+            .register_loader(<span class="string">"ProcedureToLoad"</span>, ProcedureToLoad::loader())
             .unwrap();
         <span class="comment">// Register duplicate loader.
         </span><span class="kw">let </span>err = manager
-            .register_loader(<span class="string">&quot;ProcedureToLoad&quot;</span>, ProcedureToLoad::loader())
+            .register_loader(<span class="string">"ProcedureToLoad"</span>, ProcedureToLoad::loader())
             .unwrap_err();
-        <span class="macro">assert!</span>(<span class="macro">matches!</span>(err, Error::LoaderConflict { .. }), <span class="string">&quot;{err}&quot;</span>);
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(err, Error::LoaderConflict { .. }), <span class="string">"{err}"</span>);
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_recover() {
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;recover&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"recover"</span>);
         <span class="kw">let </span>object_store = test_util::new_object_store(<span class="kw-2">&amp;</span>dir);
         <span class="kw">let </span>config = ManagerConfig {
-            parent_path: <span class="string">&quot;data/&quot;</span>.to_string(),
+            parent_path: <span class="string">"data/"</span>.to_string(),
             max_retry_times: <span class="number">3</span>,
             retry_delay: Duration::from_millis(<span class="number">500</span>),
             ..Default::default()
@@ -1879,12 +1880,12 @@
         manager.manager_ctx.start();
 
         manager
-            .register_loader(<span class="string">&quot;ProcedureToLoad&quot;</span>, ProcedureToLoad::loader())
+            .register_loader(<span class="string">"ProcedureToLoad"</span>, ProcedureToLoad::loader())
             .unwrap();
 
         <span class="comment">// Prepare data
         </span><span class="kw">let </span>procedure_store = ProcedureStore::from_object_store(object_store.clone());
-        <span class="kw">let </span>root: BoxedProcedure = Box::new(ProcedureToLoad::new(<span class="string">&quot;test recover manager&quot;</span>));
+        <span class="kw">let </span>root: BoxedProcedure = Box::new(ProcedureToLoad::new(<span class="string">"test recover manager"</span>));
         <span class="kw">let </span>root_id = ProcedureId::random();
         <span class="comment">// Prepare data for the root procedure.
         </span><span class="kw">for </span>step <span class="kw">in </span><span class="number">0</span>..<span class="number">3 </span>{
@@ -1894,7 +1895,7 @@
                 </span>.unwrap();
         }
 
-        <span class="kw">let </span>child: BoxedProcedure = Box::new(ProcedureToLoad::new(<span class="string">&quot;a child procedure&quot;</span>));
+        <span class="kw">let </span>child: BoxedProcedure = Box::new(ProcedureToLoad::new(<span class="string">"a child procedure"</span>));
         <span class="kw">let </span>child_id = ProcedureId::random();
         <span class="comment">// Prepare data for the child procedure
         </span><span class="kw">for </span>step <span class="kw">in </span><span class="number">0</span>..<span class="number">2 </span>{
@@ -1909,16 +1910,16 @@
 
         <span class="comment">// The manager should submit the root procedure.
         </span><span class="kw">let _ </span>= manager.procedure_state(root_id).<span class="kw">await</span>.unwrap().unwrap();
-        <span class="comment">// Since the mocked root procedure actually doesn&#39;t submit subprocedures, so there is no
+        <span class="comment">// Since the mocked root procedure actually doesn't submit subprocedures, so there is no
         // related state.
         </span><span class="macro">assert!</span>(manager.procedure_state(child_id).<span class="kw">await</span>.unwrap().is_none());
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_submit_procedure() {
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;submit&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"submit"</span>);
         <span class="kw">let </span>config = ManagerConfig {
-            parent_path: <span class="string">&quot;data/&quot;</span>.to_string(),
+            parent_path: <span class="string">"data/"</span>.to_string(),
             max_retry_times: <span class="number">3</span>,
             retry_delay: Duration::from_millis(<span class="number">500</span>),
             ..Default::default()
@@ -1935,8 +1936,8 @@
             .is_none());
         <span class="macro">assert!</span>(manager.procedure_watcher(procedure_id).is_none());
 
-        <span class="kw">let </span><span class="kw-2">mut </span>procedure = ProcedureToLoad::new(<span class="string">&quot;submit&quot;</span>);
-        procedure.lock_key = LockKey::single(<span class="string">&quot;test.submit&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>procedure = ProcedureToLoad::new(<span class="string">"submit"</span>);
+        procedure.lock_key = LockKey::single(<span class="string">"test.submit"</span>);
         <span class="macro">assert!</span>(manager
             .submit(ProcedureWithId {
                 id: procedure_id,
@@ -1958,18 +1959,18 @@
         </span><span class="kw">let </span>err = manager
             .submit(ProcedureWithId {
                 id: procedure_id,
-                procedure: Box::new(ProcedureToLoad::new(<span class="string">&quot;submit&quot;</span>)),
+                procedure: Box::new(ProcedureToLoad::new(<span class="string">"submit"</span>)),
             })
             .<span class="kw">await
             </span>.unwrap_err();
-        <span class="macro">assert!</span>(<span class="macro">matches!</span>(err, Error::DuplicateProcedure { .. }), <span class="string">&quot;{err}&quot;</span>);
+        <span class="macro">assert!</span>(<span class="macro">matches!</span>(err, Error::DuplicateProcedure { .. }), <span class="string">"{err}"</span>);
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_state_changed_on_err() {
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;on_err&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"on_err"</span>);
         <span class="kw">let </span>config = ManagerConfig {
-            parent_path: <span class="string">&quot;data/&quot;</span>.to_string(),
+            parent_path: <span class="string">"data/"</span>.to_string(),
             max_retry_times: <span class="number">3</span>,
             retry_delay: Duration::from_millis(<span class="number">500</span>),
             ..Default::default()
@@ -1986,7 +1987,7 @@
         <span class="attr">#[async_trait]
         </span><span class="kw">impl </span>Procedure <span class="kw">for </span>MockProcedure {
             <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-                <span class="string">&quot;MockProcedure&quot;
+                <span class="string">"MockProcedure"
             </span>}
 
             <span class="kw">async fn </span>execute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _ctx: <span class="kw-2">&amp;</span>Context) -&gt; <span class="prelude-ty">Result</span>&lt;Status&gt; {
@@ -2004,7 +2005,7 @@
             }
 
             <span class="kw">fn </span>lock_key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LockKey {
-                LockKey::single(<span class="string">&quot;test.submit&quot;</span>)
+                LockKey::single(<span class="string">"test.submit"</span>)
             }
         }
 
@@ -2030,9 +2031,9 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_procedure_manager_stopped() {
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;procedure_manager_stopped&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"procedure_manager_stopped"</span>);
         <span class="kw">let </span>config = ManagerConfig {
-            parent_path: <span class="string">&quot;data/&quot;</span>.to_string(),
+            parent_path: <span class="string">"data/"</span>.to_string(),
             max_retry_times: <span class="number">3</span>,
             retry_delay: Duration::from_millis(<span class="number">500</span>),
             ..Default::default()
@@ -2040,8 +2041,8 @@
         <span class="kw">let </span>state_store = Arc::new(ObjectStateStore::new(test_util::new_object_store(<span class="kw-2">&amp;</span>dir)));
         <span class="kw">let </span>manager = LocalManager::new(config, state_store);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>procedure = ProcedureToLoad::new(<span class="string">&quot;submit&quot;</span>);
-        procedure.lock_key = LockKey::single(<span class="string">&quot;test.submit&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>procedure = ProcedureToLoad::new(<span class="string">"submit"</span>);
+        procedure.lock_key = LockKey::single(<span class="string">"test.submit"</span>);
         <span class="kw">let </span>procedure_id = ProcedureId::random();
         <span class="macro">assert_matches!</span>(
             manager
@@ -2057,9 +2058,9 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_procedure_manager_restart() {
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;procedure_manager_restart&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"procedure_manager_restart"</span>);
         <span class="kw">let </span>config = ManagerConfig {
-            parent_path: <span class="string">&quot;data/&quot;</span>.to_string(),
+            parent_path: <span class="string">"data/"</span>.to_string(),
             max_retry_times: <span class="number">3</span>,
             retry_delay: Duration::from_millis(<span class="number">500</span>),
             ..Default::default()
@@ -2071,8 +2072,8 @@
         manager.stop().<span class="kw">await</span>.unwrap();
         manager.start().<span class="kw">await</span>.unwrap();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>procedure = ProcedureToLoad::new(<span class="string">&quot;submit&quot;</span>);
-        procedure.lock_key = LockKey::single(<span class="string">&quot;test.submit&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>procedure = ProcedureToLoad::new(<span class="string">"submit"</span>);
+        procedure.lock_key = LockKey::single(<span class="string">"test.submit"</span>);
         <span class="kw">let </span>procedure_id = ProcedureId::random();
         <span class="macro">assert!</span>(manager
             .submit(ProcedureWithId {
@@ -2088,12 +2089,12 @@
             .is_some());
     }
 
-    <span class="attr">#[tokio::test(flavor = <span class="string">&quot;multi_thread&quot;</span>)]
+    <span class="attr">#[tokio::test(flavor = <span class="string">"multi_thread"</span>)]
     </span><span class="kw">async fn </span>test_remove_outdated_meta_task() {
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;remove_outdated_meta_task&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"remove_outdated_meta_task"</span>);
         <span class="kw">let </span>object_store = test_util::new_object_store(<span class="kw-2">&amp;</span>dir);
         <span class="kw">let </span>config = ManagerConfig {
-            parent_path: <span class="string">&quot;data/&quot;</span>.to_string(),
+            parent_path: <span class="string">"data/"</span>.to_string(),
             max_retry_times: <span class="number">3</span>,
             retry_delay: Duration::from_millis(<span class="number">500</span>),
             remove_outdated_meta_task_interval: Duration::from_millis(<span class="number">1</span>),
@@ -2103,8 +2104,8 @@
         <span class="kw">let </span>manager = LocalManager::new(config, state_store);
         manager.manager_ctx.set_running();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>procedure = ProcedureToLoad::new(<span class="string">&quot;submit&quot;</span>);
-        procedure.lock_key = LockKey::single(<span class="string">&quot;test.submit&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>procedure = ProcedureToLoad::new(<span class="string">"submit"</span>);
+        procedure.lock_key = LockKey::single(<span class="string">"test.submit"</span>);
         <span class="kw">let </span>procedure_id = ProcedureId::random();
         <span class="macro">assert!</span>(manager
             .submit(ProcedureWithId {
@@ -2126,8 +2127,8 @@
 
         <span class="comment">// The remove_outdated_meta method has been stopped, so any procedure meta-data will not be automatically removed.
         </span>manager.stop().<span class="kw">await</span>.unwrap();
-        <span class="kw">let </span><span class="kw-2">mut </span>procedure = ProcedureToLoad::new(<span class="string">&quot;submit&quot;</span>);
-        procedure.lock_key = LockKey::single(<span class="string">&quot;test.submit&quot;</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>procedure = ProcedureToLoad::new(<span class="string">"submit"</span>);
+        procedure.lock_key = LockKey::single(<span class="string">"test.submit"</span>);
         <span class="kw">let </span>procedure_id = ProcedureId::random();
 
         manager.manager_ctx.set_running();
@@ -2148,8 +2149,8 @@
             .is_some());
 
         <span class="comment">// After restart
-        </span><span class="kw">let </span><span class="kw-2">mut </span>procedure = ProcedureToLoad::new(<span class="string">&quot;submit&quot;</span>);
-        procedure.lock_key = LockKey::single(<span class="string">&quot;test.submit&quot;</span>);
+        </span><span class="kw">let </span><span class="kw-2">mut </span>procedure = ProcedureToLoad::new(<span class="string">"submit"</span>);
+        procedure.lock_key = LockKey::single(<span class="string">"test.submit"</span>);
         <span class="kw">let </span>procedure_id = ProcedureId::random();
         <span class="macro">assert!</span>(manager
             .submit(ProcedureWithId {

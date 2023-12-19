@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/datatypes/src/data_type.rs`."><title>data_type.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="datatypes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/datatypes/src/data_type.rs`."><title>data_type.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="datatypes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -851,14 +852,14 @@
 <a href="#851" id="851">851</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -934,50 +935,50 @@
 }
 
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>ConcreteDataType {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
-            ConcreteDataType::Null(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::Boolean(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::Int8(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::Int16(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::Int32(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::Int64(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::UInt8(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::UInt16(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::UInt32(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::UInt64(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::Float32(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::Float64(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::Binary(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::String(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::Date(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::DateTime(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
+            ConcreteDataType::Null(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::Boolean(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::Int8(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::Int16(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::Int32(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::Int64(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::UInt8(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::UInt16(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::UInt32(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::UInt64(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::Float32(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::Float64(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::Binary(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::String(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::Date(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::DateTime(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
             ConcreteDataType::Timestamp(t) =&gt; <span class="kw">match </span>t {
-                TimestampType::Second(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-                TimestampType::Millisecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-                TimestampType::Microsecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-                TimestampType::Nanosecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
+                TimestampType::Second(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+                TimestampType::Millisecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+                TimestampType::Microsecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+                TimestampType::Nanosecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
             },
             ConcreteDataType::Time(t) =&gt; <span class="kw">match </span>t {
-                TimeType::Second(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-                TimeType::Millisecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-                TimeType::Microsecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-                TimeType::Nanosecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
+                TimeType::Second(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+                TimeType::Millisecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+                TimeType::Microsecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+                TimeType::Nanosecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
             },
             ConcreteDataType::Interval(i) =&gt; <span class="kw">match </span>i {
-                IntervalType::YearMonth(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-                IntervalType::DayTime(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-                IntervalType::MonthDayNano(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
+                IntervalType::YearMonth(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+                IntervalType::DayTime(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+                IntervalType::MonthDayNano(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
             },
             ConcreteDataType::Duration(d) =&gt; <span class="kw">match </span>d {
-                DurationType::Second(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-                DurationType::Millisecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-                DurationType::Microsecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-                DurationType::Nanosecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
+                DurationType::Second(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+                DurationType::Millisecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+                DurationType::Microsecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+                DurationType::Nanosecond(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
             },
-            ConcreteDataType::Decimal128(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::List(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
-            ConcreteDataType::Dictionary(v) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, v.name()),
+            ConcreteDataType::Decimal128(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::List(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
+            ConcreteDataType::Dictionary(v) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, v.name()),
         }
     }
 }
@@ -1085,7 +1086,7 @@
     /// # Panics
     /// Panic if given arrow data type is not supported.
     </span><span class="kw">pub fn </span>from_arrow_type(dt: <span class="kw-2">&amp;</span>ArrowDataType) -&gt; <span class="self">Self </span>{
-        ConcreteDataType::try_from(dt).expect(<span class="string">&quot;Unimplemented type&quot;</span>)
+        ConcreteDataType::try_from(dt).expect(<span class="string">"Unimplemented type"</span>)
     }
 
     <span class="kw">pub fn </span>is_null(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
@@ -1391,7 +1392,7 @@
     </span><span class="kw">fn </span>test_concrete_type_as_datatype_trait() {
         <span class="kw">let </span>concrete_type = ConcreteDataType::boolean_datatype();
 
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;Boolean&quot;</span>, concrete_type.to_string());
+        <span class="macro">assert_eq!</span>(<span class="string">"Boolean"</span>, concrete_type.to_string());
         <span class="macro">assert_eq!</span>(Value::Boolean(<span class="bool-val">false</span>), concrete_type.default_value());
         <span class="macro">assert_eq!</span>(LogicalTypeId::Boolean, concrete_type.logical_type_id());
         <span class="macro">assert_eq!</span>(ArrowDataType::Boolean, concrete_type.as_arrow_type());
@@ -1461,7 +1462,7 @@
         ));
         <span class="macro">assert_eq!</span>(
             ConcreteDataType::from_arrow_type(<span class="kw-2">&amp;</span>ArrowDataType::List(Arc::new(Field::new(
-                <span class="string">&quot;item&quot;</span>,
+                <span class="string">"item"</span>,
                 ArrowDataType::Int32,
                 <span class="bool-val">true</span>,
             )))),
@@ -1635,45 +1636,45 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_display_concrete_data_type() {
-        <span class="macro">assert_eq!</span>(ConcreteDataType::null_datatype().to_string(), <span class="string">&quot;Null&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::boolean_datatype().to_string(), <span class="string">&quot;Boolean&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::binary_datatype().to_string(), <span class="string">&quot;Binary&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::int8_datatype().to_string(), <span class="string">&quot;Int8&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::int16_datatype().to_string(), <span class="string">&quot;Int16&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::int32_datatype().to_string(), <span class="string">&quot;Int32&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::int64_datatype().to_string(), <span class="string">&quot;Int64&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::uint8_datatype().to_string(), <span class="string">&quot;UInt8&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::uint16_datatype().to_string(), <span class="string">&quot;UInt16&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::uint32_datatype().to_string(), <span class="string">&quot;UInt32&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::uint64_datatype().to_string(), <span class="string">&quot;UInt64&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::float32_datatype().to_string(), <span class="string">&quot;Float32&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::float64_datatype().to_string(), <span class="string">&quot;Float64&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::string_datatype().to_string(), <span class="string">&quot;String&quot;</span>);
-        <span class="macro">assert_eq!</span>(ConcreteDataType::date_datatype().to_string(), <span class="string">&quot;Date&quot;</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::null_datatype().to_string(), <span class="string">"Null"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::boolean_datatype().to_string(), <span class="string">"Boolean"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::binary_datatype().to_string(), <span class="string">"Binary"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::int8_datatype().to_string(), <span class="string">"Int8"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::int16_datatype().to_string(), <span class="string">"Int16"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::int32_datatype().to_string(), <span class="string">"Int32"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::int64_datatype().to_string(), <span class="string">"Int64"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::uint8_datatype().to_string(), <span class="string">"UInt8"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::uint16_datatype().to_string(), <span class="string">"UInt16"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::uint32_datatype().to_string(), <span class="string">"UInt32"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::uint64_datatype().to_string(), <span class="string">"UInt64"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::float32_datatype().to_string(), <span class="string">"Float32"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::float64_datatype().to_string(), <span class="string">"Float64"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::string_datatype().to_string(), <span class="string">"String"</span>);
+        <span class="macro">assert_eq!</span>(ConcreteDataType::date_datatype().to_string(), <span class="string">"Date"</span>);
         <span class="macro">assert_eq!</span>(
             ConcreteDataType::timestamp_millisecond_datatype().to_string(),
-            <span class="string">&quot;TimestampMillisecond&quot;
+            <span class="string">"TimestampMillisecond"
         </span>);
         <span class="macro">assert_eq!</span>(
             ConcreteDataType::time_millisecond_datatype().to_string(),
-            <span class="string">&quot;TimeMillisecond&quot;
+            <span class="string">"TimeMillisecond"
         </span>);
         <span class="macro">assert_eq!</span>(
             ConcreteDataType::interval_month_day_nano_datatype().to_string(),
-            <span class="string">&quot;IntervalMonthDayNano&quot;
+            <span class="string">"IntervalMonthDayNano"
         </span>);
         <span class="macro">assert_eq!</span>(
             ConcreteDataType::duration_second_datatype().to_string(),
-            <span class="string">&quot;DurationSecond&quot;
+            <span class="string">"DurationSecond"
         </span>);
         <span class="macro">assert_eq!</span>(
             ConcreteDataType::decimal128_datatype(<span class="number">10</span>, <span class="number">2</span>).to_string(),
-            <span class="string">&quot;Decimal(10, 2)&quot;
+            <span class="string">"Decimal(10, 2)"
         </span>);
         <span class="comment">// Nested types
         </span><span class="macro">assert_eq!</span>(
             ConcreteDataType::list_datatype(ConcreteDataType::int32_datatype()).to_string(),
-            <span class="string">&quot;List&lt;Int32&gt;&quot;
+            <span class="string">"List&lt;Int32&gt;"
         </span>);
         <span class="macro">assert_eq!</span>(
             ConcreteDataType::list_datatype(ConcreteDataType::Dictionary(DictionaryType::new(
@@ -1681,14 +1682,14 @@
                 ConcreteDataType::string_datatype()
             )))
             .to_string(),
-            <span class="string">&quot;List&lt;Dictionary&lt;Int32, String&gt;&gt;&quot;
+            <span class="string">"List&lt;Dictionary&lt;Int32, String&gt;&gt;"
         </span>);
         <span class="macro">assert_eq!</span>(
             ConcreteDataType::list_datatype(ConcreteDataType::list_datatype(
                 ConcreteDataType::list_datatype(ConcreteDataType::int32_datatype())
             ))
             .to_string(),
-            <span class="string">&quot;List&lt;List&lt;List&lt;Int32&gt;&gt;&gt;&quot;
+            <span class="string">"List&lt;List&lt;List&lt;Int32&gt;&gt;&gt;"
         </span>);
         <span class="macro">assert_eq!</span>(
             ConcreteDataType::dictionary_datatype(
@@ -1696,7 +1697,7 @@
                 ConcreteDataType::string_datatype()
             )
             .to_string(),
-            <span class="string">&quot;Dictionary&lt;Int32, String&gt;&quot;
+            <span class="string">"Dictionary&lt;Int32, String&gt;"
         </span>);
     }
 }

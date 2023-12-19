@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/cmd/src/error.rs`."><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cmd" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/cmd/src/error.rs`."><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cmd" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -285,14 +286,14 @@
 <a href="#285" id="285">285</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -310,166 +311,166 @@
 #[snafu(visibility(<span class="kw">pub</span>))]
 #[stack_trace_debug]
 </span><span class="kw">pub enum </span>Error {
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to create default catalog and schema&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to create default catalog and schema"</span>))]
     </span>InitMetadata {
         location: Location,
         source: common_meta::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to iter stream&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to iter stream"</span>))]
     </span>IterStream {
         location: Location,
         source: common_meta::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to init DDL manager&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to init DDL manager"</span>))]
     </span>InitDdlManager {
         location: Location,
         source: common_meta::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to start procedure manager&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to start procedure manager"</span>))]
     </span>StartProcedureManager {
         location: Location,
         source: common_procedure::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to stop procedure manager&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to stop procedure manager"</span>))]
     </span>StopProcedureManager {
         location: Location,
         source: common_procedure::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to start datanode&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to start datanode"</span>))]
     </span>StartDatanode {
         location: Location,
         source: datanode::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to shutdown datanode&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to shutdown datanode"</span>))]
     </span>ShutdownDatanode {
         location: Location,
         source: datanode::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to start frontend&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to start frontend"</span>))]
     </span>StartFrontend {
         location: Location,
         source: frontend::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to shutdown frontend&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to shutdown frontend"</span>))]
     </span>ShutdownFrontend {
         location: Location,
         source: frontend::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to build meta server&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to build meta server"</span>))]
     </span>BuildMetaServer {
         location: Location,
         source: meta_srv::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to start meta server&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to start meta server"</span>))]
     </span>StartMetaServer {
         location: Location,
         source: meta_srv::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to shutdown meta server&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to shutdown meta server"</span>))]
     </span>ShutdownMetaServer {
         location: Location,
         source: meta_srv::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Missing config, msg: {}&quot;</span>, msg))]
+    <span class="attr">#[snafu(display(<span class="string">"Missing config, msg: {}"</span>, msg))]
     </span>MissingConfig { msg: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Illegal config: {}&quot;</span>, msg))]
+    <span class="attr">#[snafu(display(<span class="string">"Illegal config: {}"</span>, msg))]
     </span>IllegalConfig { msg: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Unsupported selector type: {}&quot;</span>, selector_type))]
+    <span class="attr">#[snafu(display(<span class="string">"Unsupported selector type: {}"</span>, selector_type))]
     </span>UnsupportedSelectorType {
         selector_type: String,
         location: Location,
         source: meta_srv::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid REPL command: {reason}&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid REPL command: {reason}"</span>))]
     </span>InvalidReplCommand { reason: String },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Cannot create REPL&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Cannot create REPL"</span>))]
     </span>ReplCreation {
         <span class="attr">#[snafu(source)]
         </span>error: ReadlineError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Error reading command&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Error reading command"</span>))]
     </span>Readline {
         <span class="attr">#[snafu(source)]
         </span>error: ReadlineError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to request database, sql: {sql}&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to request database, sql: {sql}"</span>))]
     </span>RequestDatabase {
         sql: String,
         location: Location,
         source: client::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to collect RecordBatches&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to collect RecordBatches"</span>))]
     </span>CollectRecordBatches {
         location: Location,
         source: common_recordbatch::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to pretty print Recordbatches&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to pretty print Recordbatches"</span>))]
     </span>PrettyPrintRecordBatches {
         location: Location,
         source: common_recordbatch::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to start Meta client&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to start Meta client"</span>))]
     </span>StartMetaClient {
         location: Location,
         source: meta_client::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to parse SQL: {}&quot;</span>, sql))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to parse SQL: {}"</span>, sql))]
     </span>ParseSql {
         sql: String,
         location: Location,
         source: query::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to plan statement&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to plan statement"</span>))]
     </span>PlanStatement {
         location: Location,
         source: query::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to encode logical plan in substrait&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to encode logical plan in substrait"</span>))]
     </span>SubstraitEncodeLogicalPlan {
         location: Location,
         source: substrait::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to load layered config&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to load layered config"</span>))]
     </span>LoadLayeredConfig {
         <span class="attr">#[snafu(source)]
         </span>error: ConfigError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to start catalog manager&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to start catalog manager"</span>))]
     </span>StartCatalogManager {
         location: Location,
         source: catalog::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to connect to Etcd at {etcd_addr}&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to connect to Etcd at {etcd_addr}"</span>))]
     </span>ConnectEtcd {
         etcd_addr: String,
         <span class="attr">#[snafu(source)]
@@ -477,40 +478,40 @@
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to connect server at {addr}&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to connect server at {addr}"</span>))]
     </span>ConnectServer {
         addr: String,
         source: client::error::Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to serde json&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to serde json"</span>))]
     </span>SerdeJson {
         <span class="attr">#[snafu(source)]
         </span>error: serde_json::error::Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Expect data from output, but got another thing&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Expect data from output, but got another thing"</span>))]
     </span>NotDataFromOutput { location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Empty result from output&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Empty result from output"</span>))]
     </span>EmptyResult { location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to manipulate file&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to manipulate file"</span>))]
     </span>FileIo {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: std::io::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid database name: {}&quot;</span>, database))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid database name: {}"</span>, database))]
     </span>InvalidDatabaseName {
         location: Location,
         database: String,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to create directory {}&quot;</span>, dir))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to create directory {}"</span>, dir))]
     </span>CreateDir {
         dir: String,
         <span class="attr">#[snafu(source)]

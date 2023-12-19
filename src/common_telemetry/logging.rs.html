@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/common/telemetry/src/logging.rs`."><title>logging.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="common_telemetry" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/common/telemetry/src/logging.rs`."><title>logging.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="common_telemetry" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -246,14 +247,14 @@
 <a href="#246" id="246">246</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -279,7 +280,7 @@
 
 <span class="kw">pub use crate</span>::{debug, error, info, trace, warn};
 
-<span class="kw">const </span>DEFAULT_OTLP_ENDPOINT: <span class="kw-2">&amp;</span>str = <span class="string">&quot;http://localhost:4317&quot;</span>;
+<span class="kw">const </span>DEFAULT_OTLP_ENDPOINT: <span class="kw-2">&amp;</span>str = <span class="string">"http://localhost:4317"</span>;
 
 <span class="attr">#[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(default)]
@@ -306,7 +307,7 @@
 <span class="kw">impl </span>Default <span class="kw">for </span>LoggingOptions {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            dir: <span class="string">&quot;/tmp/greptimedb/logs&quot;</span>.to_string(),
+            dir: <span class="string">"/tmp/greptimedb/logs"</span>.to_string(),
             level: <span class="prelude-val">None</span>,
             enable_otlp_tracing: <span class="bool-val">false</span>,
             otlp_endpoint: <span class="prelude-val">None</span>,
@@ -317,7 +318,7 @@
 
 <span class="attr">#[derive(Default)]
 </span><span class="kw">pub struct </span>TracingOptions {
-    <span class="attr">#[cfg(feature = <span class="string">&quot;tokio-console&quot;</span>)]
+    <span class="attr">#[cfg(feature = <span class="string">"tokio-console"</span>)]
     </span><span class="kw">pub </span>tokio_console_addr: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
@@ -329,15 +330,15 @@
     START.call_once(|| {
         <span class="kw">let </span><span class="kw-2">mut </span>g = GLOBAL_UT_LOG_GUARD.as_ref().lock().unwrap();
 
-        <span class="comment">// When running in Github&#39;s actions, env &quot;UNITTEST_LOG_DIR&quot; is set to a directory other
-        // than &quot;/tmp&quot;.
-        // This is to fix the problem that the &quot;/tmp&quot; disk space of action runner&#39;s is small,
+        <span class="comment">// When running in Github's actions, env "UNITTEST_LOG_DIR" is set to a directory other
+        // than "/tmp".
+        // This is to fix the problem that the "/tmp" disk space of action runner's is small,
         // if we write testing logs in it, actions would fail due to disk out of space error.
         </span><span class="kw">let </span>dir =
-            env::var(<span class="string">&quot;UNITTEST_LOG_DIR&quot;</span>).unwrap_or_else(|<span class="kw">_</span>| <span class="string">&quot;/tmp/__unittest_logs&quot;</span>.to_string());
+            env::var(<span class="string">"UNITTEST_LOG_DIR"</span>).unwrap_or_else(|<span class="kw">_</span>| <span class="string">"/tmp/__unittest_logs"</span>.to_string());
 
-        <span class="kw">let </span>level = env::var(<span class="string">&quot;UNITTEST_LOG_LEVEL&quot;</span>).unwrap_or_else(|<span class="kw">_</span>|
-            <span class="string">&quot;debug,hyper=warn,tower=warn,datafusion=warn,reqwest=warn,sqlparser=warn,h2=info,opendal=info&quot;</span>.to_string()
+        <span class="kw">let </span>level = env::var(<span class="string">"UNITTEST_LOG_LEVEL"</span>).unwrap_or_else(|<span class="kw">_</span>|
+            <span class="string">"debug,hyper=warn,tower=warn,datafusion=warn,reqwest=warn,sqlparser=warn,h2=info,opendal=info"</span>.to_string()
         );
         <span class="kw">let </span>opts = LoggingOptions {
             dir: dir.clone(),
@@ -345,20 +346,20 @@
             ..Default::default()
         };
         <span class="kw-2">*</span>g = <span class="prelude-val">Some</span>(init_global_logging(
-            <span class="string">&quot;unittest&quot;</span>,
+            <span class="string">"unittest"</span>,
             <span class="kw-2">&amp;</span>opts,
             TracingOptions::default(),
             <span class="prelude-val">None
         </span>));
 
-        <span class="macro">crate::info!</span>(<span class="string">&quot;logs dir = {}&quot;</span>, dir);
+        <span class="macro">crate::info!</span>(<span class="string">"logs dir = {}"</span>, dir);
     });
 }
 
 <span class="kw">static </span>GLOBAL_UT_LOG_GUARD: Lazy&lt;Arc&lt;Mutex&lt;<span class="prelude-ty">Option</span>&lt;Vec&lt;WorkerGuard&gt;&gt;&gt;&gt;&gt; =
     Lazy::new(|| Arc::new(Mutex::new(<span class="prelude-val">None</span>)));
 
-<span class="kw">const </span>DEFAULT_LOG_TARGETS: <span class="kw-2">&amp;</span>str = <span class="string">&quot;info&quot;</span>;
+<span class="kw">const </span>DEFAULT_LOG_TARGETS: <span class="kw-2">&amp;</span>str = <span class="string">"info"</span>;
 
 <span class="attr">#[allow(clippy::print_stdout)]
 </span><span class="kw">pub fn </span>init_global_logging(
@@ -373,7 +374,7 @@
     <span class="kw">let </span>enable_otlp_tracing = opts.enable_otlp_tracing;
 
     <span class="comment">// Enable log compatible layer to convert log record to tracing span.
-    </span>LogTracer::init().expect(<span class="string">&quot;log tracer must be valid&quot;</span>);
+    </span>LogTracer::init().expect(<span class="string">"log tracer must be valid"</span>);
 
     <span class="comment">// Stdout layer.
     </span><span class="kw">let </span>(stdout_writer, stdout_guard) = tracing_appender::non_blocking(std::io::stdout());
@@ -388,7 +389,7 @@
 
     <span class="comment">// error JSON log layer.
     </span><span class="kw">let </span>err_rolling_appender =
-        RollingFileAppender::new(Rotation::HOURLY, dir, <span class="macro">format!</span>(<span class="string">&quot;{}-{}&quot;</span>, app_name, <span class="string">&quot;err&quot;</span>));
+        RollingFileAppender::new(Rotation::HOURLY, dir, <span class="macro">format!</span>(<span class="string">"{}-{}"</span>, app_name, <span class="string">"err"</span>));
     <span class="kw">let </span>(err_rolling_writer, err_rolling_writer_guard) =
         tracing_appender::non_blocking(err_rolling_appender);
     <span class="kw">let </span>err_file_logging_layer = Layer::new().with_writer(err_rolling_writer);
@@ -405,21 +406,21 @@
         .unwrap_or(DEFAULT_LOG_TARGETS);
     <span class="kw">let </span>filter = targets_string
         .parse::&lt;filter::Targets&gt;()
-        .expect(<span class="string">&quot;error parsing log level string&quot;</span>);
+        .expect(<span class="string">"error parsing log level string"</span>);
     <span class="kw">let </span>sampler = opts
         .tracing_sample_ratio
         .map(Sampler::TraceIdRatioBased)
         .unwrap_or(Sampler::AlwaysOn);
-    <span class="comment">// Must enable &#39;tokio_unstable&#39; cfg to use this feature.
-    // For example: `RUSTFLAGS=&quot;--cfg tokio_unstable&quot; cargo run -F common-telemetry/console -- standalone start`
-    </span><span class="attr">#[cfg(feature = <span class="string">&quot;tokio-console&quot;</span>)]
+    <span class="comment">// Must enable 'tokio_unstable' cfg to use this feature.
+    // For example: `RUSTFLAGS="--cfg tokio_unstable" cargo run -F common-telemetry/console -- standalone start`
+    </span><span class="attr">#[cfg(feature = <span class="string">"tokio-console"</span>)]
     </span><span class="kw">let </span>subscriber = {
         <span class="kw">let </span>tokio_console_layer = <span class="kw">if let </span><span class="prelude-val">Some</span>(tokio_console_addr) = <span class="kw-2">&amp;</span>tracing_opts.tokio_console_addr
         {
             <span class="kw">let </span>addr: std::net::SocketAddr = tokio_console_addr.parse().unwrap_or_else(|e| {
-                <span class="macro">panic!</span>(<span class="string">&quot;Invalid binding address &#39;{tokio_console_addr}&#39; for tokio-console: {e}&quot;</span>);
+                <span class="macro">panic!</span>(<span class="string">"Invalid binding address '{tokio_console_addr}' for tokio-console: {e}"</span>);
             });
-            <span class="macro">println!</span>(<span class="string">&quot;tokio-console listening on {addr}&quot;</span>);
+            <span class="macro">println!</span>(<span class="string">"tokio-console listening on {addr}"</span>);
 
             <span class="prelude-val">Some</span>(
                 console_subscriber::ConsoleLayer::builder()
@@ -441,10 +442,10 @@
             .with(err_file_logging_layer.with_filter(filter::LevelFilter::ERROR))
     };
 
-    <span class="comment">// consume the `tracing_opts`, to avoid &quot;unused&quot; warnings
+    <span class="comment">// consume the `tracing_opts`, to avoid "unused" warnings
     </span><span class="kw">let _ </span>= tracing_opts;
 
-    <span class="attr">#[cfg(not(feature = <span class="string">&quot;tokio-console&quot;</span>))]
+    <span class="attr">#[cfg(not(feature = <span class="string">"tokio-console"</span>))]
     </span><span class="kw">let </span>subscriber = Registry::default()
         .with(filter)
         .with(stdout_logging_layer)
@@ -460,7 +461,7 @@
                 opentelemetry_otlp::new_exporter().tonic().with_endpoint(
                     opts.otlp_endpoint
                         .as_ref()
-                        .map(|e| <span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, e))
+                        .map(|e| <span class="macro">format!</span>(<span class="string">"http://{}"</span>, e))
                         .unwrap_or(DEFAULT_OTLP_ENDPOINT.to_string()),
                 ),
             )
@@ -471,21 +472,21 @@
                         KeyValue::new(resource::SERVICE_NAME, app_name.to_string()),
                         KeyValue::new(
                             resource::SERVICE_INSTANCE_ID,
-                            node_id.unwrap_or(<span class="string">&quot;none&quot;</span>.to_string()),
+                            node_id.unwrap_or(<span class="string">"none"</span>.to_string()),
                         ),
-                        KeyValue::new(resource::SERVICE_VERSION, <span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_VERSION&quot;</span>)),
+                        KeyValue::new(resource::SERVICE_VERSION, <span class="macro">env!</span>(<span class="string">"CARGO_PKG_VERSION"</span>)),
                         KeyValue::new(resource::PROCESS_PID, std::process::id().to_string()),
                     ])),
             )
             .install_batch(opentelemetry_sdk::runtime::Tokio)
-            .expect(<span class="string">&quot;otlp tracer install failed&quot;</span>);
+            .expect(<span class="string">"otlp tracer install failed"</span>);
         <span class="kw">let </span>tracing_layer = <span class="prelude-val">Some</span>(tracing_opentelemetry::layer().with_tracer(tracer));
         <span class="kw">let </span>subscriber = subscriber.with(tracing_layer);
         tracing::subscriber::set_global_default(subscriber)
-            .expect(<span class="string">&quot;error setting global tracing subscriber&quot;</span>);
+            .expect(<span class="string">"error setting global tracing subscriber"</span>);
     } <span class="kw">else </span>{
         tracing::subscriber::set_global_default(subscriber)
-            .expect(<span class="string">&quot;error setting global tracing subscriber&quot;</span>);
+            .expect(<span class="string">"error setting global tracing subscriber"</span>);
     }
 
     guards

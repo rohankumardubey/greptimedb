@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/log-store/src/raft_engine/log_store.rs`."><title>log_store.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="log_store" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/log-store/src/raft_engine/log_store.rs`."><title>log_store.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="log_store" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -638,14 +639,14 @@
 <a href="#638" id="638">638</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -672,7 +673,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::raft_engine::backend::SYSTEM_NAMESPACE;
 <span class="kw">use </span><span class="kw">crate</span>::raft_engine::protos::logstore::{EntryImpl, NamespaceImpl <span class="kw">as </span>Namespace};
 
-<span class="kw">const </span>NAMESPACE_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">&quot;$sys/&quot;</span>;
+<span class="kw">const </span>NAMESPACE_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">"$sys/"</span>;
 
 <span class="kw">pub struct </span>RaftEngineLogStore {
     config: WalConfig,
@@ -687,21 +688,21 @@
 <span class="attr">#[async_trait::async_trait]
 </span><span class="kw">impl </span>TaskFunction&lt;Error&gt; <span class="kw">for </span>PurgeExpiredFilesFunction {
     <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;RaftEngineLogStore-gc-task&quot;
+        <span class="string">"RaftEngineLogStore-gc-task"
     </span>}
 
     <span class="kw">async fn </span>call(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span><span class="self">self</span>.engine.purge_expired_files().context(RaftEngineSnafu) {
             <span class="prelude-val">Ok</span>(res) =&gt; {
                 <span class="comment">// TODO(hl): the retval of purge_expired_files indicates the namespaces need to be compact,
-                // which is useful when monitoring regions failed to flush it&#39;s memtable to SSTs.
+                // which is useful when monitoring regions failed to flush it's memtable to SSTs.
                 </span><span class="macro">info!</span>(
-                    <span class="string">&quot;Successfully purged logstore files, namespaces need compaction: {:?}&quot;</span>,
+                    <span class="string">"Successfully purged logstore files, namespaces need compaction: {:?}"</span>,
                     res
                 );
             }
             <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="macro">error!</span>(e; <span class="string">&quot;Failed to purge files in logstore&quot;</span>);
+                <span class="macro">error!</span>(e; <span class="string">"Failed to purge files in logstore"</span>);
             }
         }
 
@@ -773,10 +774,10 @@
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>RaftEngineLogStore {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        f.debug_struct(<span class="string">&quot;RaftEngineLogsStore&quot;</span>)
-            .field(<span class="string">&quot;config&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config)
-            .field(<span class="string">&quot;started&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.gc_task.started())
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        f.debug_struct(<span class="string">"RaftEngineLogsStore"</span>)
+            .field(<span class="string">"config"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.config)
+            .field(<span class="string">"started"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.gc_task.started())
             .finish()
     }
 }
@@ -791,7 +792,7 @@
         <span class="self">self</span>.gc_task.stop().<span class="kw">await</span>.context(StopGcTaskSnafu)
     }
 
-    <span class="doccomment">/// Append an entry to logstore. Currently of existence of entry&#39;s namespace is not checked.
+    <span class="doccomment">/// Append an entry to logstore. Currently of existence of entry's namespace is not checked.
     </span><span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, e: <span class="self">Self</span>::Entry) -&gt; <span class="prelude-ty">Result</span>&lt;AppendResponse&gt; {
         <span class="macro">ensure!</span>(<span class="self">self</span>.started(), IllegalStateSnafu);
         <span class="kw">let </span>entry_id = e.id;
@@ -845,12 +846,12 @@
     }
 
     <span class="doccomment">/// Create a stream of entries from logstore in the given namespace. The end of stream is
-    /// determined by the current &quot;last index&quot; of the namespace.
+    /// determined by the current "last index" of the namespace.
     </span><span class="kw">async fn </span>read(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         ns: <span class="kw-2">&amp;</span><span class="self">Self</span>::Namespace,
         id: Id,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;SendableEntryStream&lt;<span class="lifetime">&#39;_</span>, <span class="self">Self</span>::Entry, <span class="self">Self</span>::Error&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;SendableEntryStream&lt;<span class="lifetime">'_</span>, <span class="self">Self</span>::Entry, <span class="self">Self</span>::Error&gt;&gt; {
         <span class="macro">ensure!</span>(<span class="self">self</span>.started(), IllegalStateSnafu);
         <span class="kw">let </span>engine = <span class="self">self</span>.engine.clone();
 
@@ -858,7 +859,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>start_index = id.max(engine.first_index(ns.id).unwrap_or(last_index + <span class="number">1</span>));
 
         <span class="macro">info!</span>(
-            <span class="string">&quot;Read logstore, namespace: {}, start: {}, span: {:?}&quot;</span>,
+            <span class="string">"Read logstore, namespace: {}, start: {}, span: {:?}"</span>,
             ns.id(),
             id,
             <span class="self">self</span>.span(ns)
@@ -914,7 +915,7 @@
             IllegalNamespaceSnafu { ns: ns.id }
         );
         <span class="macro">ensure!</span>(<span class="self">self</span>.started(), IllegalStateSnafu);
-        <span class="kw">let </span>key = <span class="macro">format!</span>(<span class="string">&quot;{}{}&quot;</span>, NAMESPACE_PREFIX, ns.id).as_bytes().to_vec();
+        <span class="kw">let </span>key = <span class="macro">format!</span>(<span class="string">"{}{}"</span>, NAMESPACE_PREFIX, ns.id).as_bytes().to_vec();
         <span class="kw">let </span><span class="kw-2">mut </span>batch = LogBatch::with_capacity(<span class="number">1</span>);
         batch
             .put_message::&lt;Namespace&gt;(SYSTEM_NAMESPACE, key, ns)
@@ -932,7 +933,7 @@
             IllegalNamespaceSnafu { ns: ns.id }
         );
         <span class="macro">ensure!</span>(<span class="self">self</span>.started(), IllegalStateSnafu);
-        <span class="kw">let </span>key = <span class="macro">format!</span>(<span class="string">&quot;{}{}&quot;</span>, NAMESPACE_PREFIX, ns.id).as_bytes().to_vec();
+        <span class="kw">let </span>key = <span class="macro">format!</span>(<span class="string">"{}{}"</span>, NAMESPACE_PREFIX, ns.id).as_bytes().to_vec();
         <span class="kw">let </span><span class="kw-2">mut </span>batch = LogBatch::with_capacity(<span class="number">1</span>);
         batch.delete(SYSTEM_NAMESPACE, key);
         <span class="kw">let _ </span>= <span class="self">self
@@ -980,7 +981,7 @@
         <span class="macro">ensure!</span>(<span class="self">self</span>.started(), IllegalStateSnafu);
         <span class="kw">let </span>obsoleted = <span class="self">self</span>.engine.compact_to(namespace.id(), id + <span class="number">1</span>);
         <span class="macro">info!</span>(
-            <span class="string">&quot;Namespace {} obsoleted {} entries, compacted index: {}, span: {:?}&quot;</span>,
+            <span class="string">"Namespace {} obsoleted {} entries, compacted index: {}, span: {:?}"</span>,
             namespace.id(),
             obsoleted,
             id,
@@ -1021,7 +1022,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_open_logstore() {
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;raft-engine-logstore-test&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"raft-engine-logstore-test"</span>);
         <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(
             dir.path().to_str().unwrap().to_string(),
             WalConfig::default(),
@@ -1034,7 +1035,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_manage_namespace() {
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;raft-engine-logstore-test&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"raft-engine-logstore-test"</span>);
         <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(
             dir.path().to_str().unwrap().to_string(),
             WalConfig::default(),
@@ -1060,7 +1061,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_append_and_read() {
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;raft-engine-logstore-test&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"raft-engine-logstore-test"</span>);
         <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(
             dir.path().to_str().unwrap().to_string(),
             WalConfig::default(),
@@ -1090,7 +1091,7 @@
         <span class="macro">assert_eq!</span>((<span class="number">0</span>..cnt).collect::&lt;HashSet&lt;<span class="kw">_</span>&gt;&gt;(), entries);
     }
 
-    <span class="kw">async fn </span>collect_entries(<span class="kw-2">mut </span>s: SendableEntryStream&lt;<span class="lifetime">&#39;_</span>, Entry, Error&gt;) -&gt; Vec&lt;Entry&gt; {
+    <span class="kw">async fn </span>collect_entries(<span class="kw-2">mut </span>s: SendableEntryStream&lt;<span class="lifetime">'_</span>, Entry, Error&gt;) -&gt; Vec&lt;Entry&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>res = <span class="macro">vec!</span>[];
         <span class="kw">while let </span><span class="prelude-val">Some</span>(r) = s.next().<span class="kw">await </span>{
             res.extend(r.unwrap());
@@ -1100,7 +1101,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_reopen() {
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;raft-engine-logstore-reopen-test&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"raft-engine-logstore-reopen-test"</span>);
         {
             <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(
                 dir.path().to_str().unwrap().to_string(),
@@ -1109,7 +1110,7 @@
             .<span class="kw">await
             </span>.unwrap();
             <span class="macro">assert!</span>(logstore
-                .append(Entry::create(<span class="number">1</span>, <span class="number">1</span>, <span class="string">&quot;1&quot;</span>.as_bytes().to_vec()))
+                .append(Entry::create(<span class="number">1</span>, <span class="number">1</span>, <span class="string">"1"</span>.as_bytes().to_vec()))
                 .<span class="kw">await
                 </span>.is_ok());
             <span class="kw">let </span>entries = logstore
@@ -1146,7 +1147,7 @@
             <span class="kw">if </span>entry.file_type().<span class="kw">await</span>.unwrap().is_file() {
                 <span class="kw">let </span>file_name = entry.file_name();
                 <span class="kw">let </span>file_size = entry.metadata().<span class="kw">await</span>.unwrap().len() <span class="kw">as </span>usize;
-                <span class="macro">debug!</span>(<span class="string">&quot;File: {file_name:?}, size: {file_size}&quot;</span>);
+                <span class="macro">debug!</span>(<span class="string">"File: {file_name:?}, size: {file_size}"</span>);
                 size += file_size;
             }
         }
@@ -1156,7 +1157,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_compaction() {
         common_telemetry::init_default_ut_logging();
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;raft-engine-logstore-test&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"raft-engine-logstore-test"</span>);
         <span class="kw">let </span>path = dir.path().to_str().unwrap().to_string();
 
         <span class="kw">let </span>config = WalConfig {
@@ -1169,7 +1170,7 @@
         <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(path, config).<span class="kw">await</span>.unwrap();
         <span class="kw">let </span>namespace = Namespace::with_id(<span class="number">42</span>);
         <span class="kw">for </span>id <span class="kw">in </span><span class="number">0</span>..<span class="number">4096 </span>{
-            <span class="kw">let </span>entry = Entry::create(id, namespace.id(), [<span class="string">b&#39;x&#39;</span>; <span class="number">4096</span>].to_vec());
+            <span class="kw">let </span>entry = Entry::create(id, namespace.id(), [<span class="string">b'x'</span>; <span class="number">4096</span>].to_vec());
             <span class="kw">let _ </span>= logstore.append(entry).<span class="kw">await</span>.unwrap();
         }
 
@@ -1179,7 +1180,7 @@
         tokio::time::sleep(Duration::from_secs(<span class="number">6</span>)).<span class="kw">await</span>;
         <span class="kw">let </span>after_purge = wal_dir_usage(dir.path().to_str().unwrap()).<span class="kw">await</span>;
         <span class="macro">debug!</span>(
-            <span class="string">&quot;Before purge: {}, after purge: {}&quot;</span>,
+            <span class="string">"Before purge: {}, after purge: {}"</span>,
             before_purge, after_purge
         );
         <span class="macro">assert!</span>(before_purge &gt; after_purge);
@@ -1188,7 +1189,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_obsolete() {
         common_telemetry::init_default_ut_logging();
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;raft-engine-logstore-test&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"raft-engine-logstore-test"</span>);
         <span class="kw">let </span>path = dir.path().to_str().unwrap().to_string();
 
         <span class="kw">let </span>config = WalConfig {
@@ -1201,7 +1202,7 @@
         <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(path, config).<span class="kw">await</span>.unwrap();
         <span class="kw">let </span>namespace = Namespace::with_id(<span class="number">42</span>);
         <span class="kw">for </span>id <span class="kw">in </span><span class="number">0</span>..<span class="number">1024 </span>{
-            <span class="kw">let </span>entry = Entry::create(id, namespace.id(), [<span class="string">b&#39;x&#39;</span>; <span class="number">4096</span>].to_vec());
+            <span class="kw">let </span>entry = Entry::create(id, namespace.id(), [<span class="string">b'x'</span>; <span class="number">4096</span>].to_vec());
             <span class="kw">let _ </span>= logstore.append(entry).<span class="kw">await</span>.unwrap();
         }
 
@@ -1217,7 +1218,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_append_batch() {
         common_telemetry::init_default_ut_logging();
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;logstore-append-batch-test&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"logstore-append-batch-test"</span>);
         <span class="kw">let </span>path = dir.path().to_str().unwrap().to_string();
 
         <span class="kw">let </span>config = WalConfig {
@@ -1248,7 +1249,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_append_batch_interleaved() {
         common_telemetry::init_default_ut_logging();
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;logstore-append-batch-test&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"logstore-append-batch-test"</span>);
 
         <span class="kw">let </span>path = dir.path().to_str().unwrap().to_string();
         <span class="kw">let </span>config = WalConfig {
@@ -1261,11 +1262,11 @@
         <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(path, config).<span class="kw">await</span>.unwrap();
 
         <span class="kw">let </span>entries = <span class="macro">vec!</span>[
-            Entry::create(<span class="number">0</span>, <span class="number">0</span>, [<span class="string">b&#39;0&#39;</span>; <span class="number">4096</span>].to_vec()),
-            Entry::create(<span class="number">1</span>, <span class="number">0</span>, [<span class="string">b&#39;0&#39;</span>; <span class="number">4096</span>].to_vec()),
-            Entry::create(<span class="number">0</span>, <span class="number">1</span>, [<span class="string">b&#39;1&#39;</span>; <span class="number">4096</span>].to_vec()),
-            Entry::create(<span class="number">2</span>, <span class="number">0</span>, [<span class="string">b&#39;0&#39;</span>; <span class="number">4096</span>].to_vec()),
-            Entry::create(<span class="number">1</span>, <span class="number">1</span>, [<span class="string">b&#39;1&#39;</span>; <span class="number">4096</span>].to_vec()),
+            Entry::create(<span class="number">0</span>, <span class="number">0</span>, [<span class="string">b'0'</span>; <span class="number">4096</span>].to_vec()),
+            Entry::create(<span class="number">1</span>, <span class="number">0</span>, [<span class="string">b'0'</span>; <span class="number">4096</span>].to_vec()),
+            Entry::create(<span class="number">0</span>, <span class="number">1</span>, [<span class="string">b'1'</span>; <span class="number">4096</span>].to_vec()),
+            Entry::create(<span class="number">2</span>, <span class="number">0</span>, [<span class="string">b'0'</span>; <span class="number">4096</span>].to_vec()),
+            Entry::create(<span class="number">1</span>, <span class="number">1</span>, [<span class="string">b'1'</span>; <span class="number">4096</span>].to_vec()),
         ];
 
         logstore.append_batch(entries).<span class="kw">await</span>.unwrap();

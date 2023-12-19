@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/cmd/src/standalone.rs`."><title>standalone.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cmd" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/cmd/src/standalone.rs`."><title>standalone.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="cmd" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -703,14 +704,14 @@
 <a href="#703" id="703">703</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -881,7 +882,7 @@
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>App <span class="kw">for </span>Instance {
     <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;greptime-standalone&quot;
+        <span class="string">"greptime-standalone"
     </span>}
 
     <span class="kw">async fn </span>start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -911,7 +912,7 @@
             .shutdown()
             .<span class="kw">await
             </span>.context(ShutdownDatanodeSnafu)<span class="question-mark">?</span>;
-        <span class="macro">info!</span>(<span class="string">&quot;Datanode instance stopped.&quot;</span>);
+        <span class="macro">info!</span>(<span class="string">"Datanode instance stopped."</span>);
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -941,7 +942,7 @@
     </span>tls_key_path: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="attr">#[clap(long)]
     </span>user_provider: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="attr">#[clap(long, default_value = <span class="string">&quot;GREPTIMEDB_STANDALONE&quot;</span>)]
+    <span class="attr">#[clap(long, default_value = <span class="string">"GREPTIMEDB_STANDALONE"</span>)]
     </span><span class="kw">pub </span>env_prefix: String,
     <span class="doccomment">/// The working home directory of this standalone instance.
     </span><span class="attr">#[clap(long)]
@@ -986,7 +987,7 @@
             <span class="kw">if </span>addr.eq(<span class="kw-2">&amp;</span>datanode_grpc_addr) {
                 <span class="kw">return </span>IllegalConfigSnafu {
                     msg: <span class="macro">format!</span>(
-                        <span class="string">&quot;gRPC listen address conflicts with datanode reserved gRPC addr: {datanode_grpc_addr}&quot;</span>,
+                        <span class="string">"gRPC listen address conflicts with datanode reserved gRPC addr: {datanode_grpc_addr}"</span>,
                     ),
                 }
                 .fail();
@@ -1045,9 +1046,9 @@
 
         <span class="kw">let </span>dn_opts = opts.datanode.clone();
 
-        <span class="macro">info!</span>(<span class="string">&quot;Standalone start command: {:#?}&quot;</span>, <span class="self">self</span>);
+        <span class="macro">info!</span>(<span class="string">"Standalone start command: {:#?}"</span>, <span class="self">self</span>);
 
-        <span class="macro">info!</span>(<span class="string">&quot;Building standalone instance with {opts:#?}&quot;</span>);
+        <span class="macro">info!</span>(<span class="string">"Building standalone instance with {opts:#?}"</span>);
 
         <span class="comment">// Ensure the data_home directory exists.
         </span>fs::create_dir_all(path::Path::new(<span class="kw-2">&amp;</span>opts.data_home)).context(CreateDirSnafu {
@@ -1070,7 +1071,7 @@
         <span class="kw">let </span>datanode_manager = Arc::new(StandaloneDatanodeManager(datanode.region_server()));
 
         <span class="kw">let </span>table_id_sequence = Arc::new(
-            SequenceBuilder::new(<span class="string">&quot;table_id&quot;</span>, kv_backend.clone())
+            SequenceBuilder::new(<span class="string">"table_id"</span>, kv_backend.clone())
                 .initial(MIN_USER_TABLE_ID <span class="kw">as </span>u64)
                 .step(<span class="number">10</span>)
                 .build(),
@@ -1159,7 +1160,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_try_from_start_command_to_anymap() {
         <span class="kw">let </span><span class="kw-2">mut </span>fe_opts = FrontendOptions {
-            user_provider: <span class="prelude-val">Some</span>(<span class="string">&quot;static_user_provider:cmd:test=test&quot;</span>.to_string()),
+            user_provider: <span class="prelude-val">Some</span>(<span class="string">"static_user_provider:cmd:test=test"</span>.to_string()),
             ..Default::default()
         };
 
@@ -1169,8 +1170,8 @@
         <span class="kw">let </span>provider = plugins.get::&lt;UserProviderRef&gt;().unwrap();
         <span class="kw">let </span>result = provider
             .authenticate(
-                Identity::UserId(<span class="string">&quot;test&quot;</span>, <span class="prelude-val">None</span>),
-                Password::PlainText(<span class="string">&quot;test&quot;</span>.to_string().into()),
+                Identity::UserId(<span class="string">"test"</span>, <span class="prelude-val">None</span>),
+                Password::PlainText(<span class="string">"test"</span>.to_string().into()),
             )
             .<span class="kw">await</span>;
         <span class="kw">let _ </span>= result.unwrap();
@@ -1186,31 +1187,31 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_read_from_config_file() {
         <span class="kw">let </span><span class="kw-2">mut </span>file = create_named_temp_file();
-        <span class="kw">let </span>toml_str = <span class="string">r#&quot;
-            mode = &quot;distributed&quot;
+        <span class="kw">let </span>toml_str = <span class="string">r#"
+            mode = "distributed"
 
             enable_memory_catalog = true
 
             [wal]
-            dir = &quot;/tmp/greptimedb/test/wal&quot;
-            file_size = &quot;1GB&quot;
-            purge_threshold = &quot;50GB&quot;
-            purge_interval = &quot;10m&quot;
+            dir = "/tmp/greptimedb/test/wal"
+            file_size = "1GB"
+            purge_threshold = "50GB"
+            purge_interval = "10m"
             read_batch_size = 128
             sync_write = false
             [storage]
-            data_home = &quot;/tmp/greptimedb/&quot;
-            type = &quot;File&quot;
+            data_home = "/tmp/greptimedb/"
+            type = "File"
 
             [[storage.providers]]
-            type = &quot;Gcs&quot;
-            bucket = &quot;foo&quot;
-            endpoint = &quot;bar&quot;
+            type = "Gcs"
+            bucket = "foo"
+            endpoint = "bar"
 
             [[storage.providers]]
-            type = &quot;S3&quot;
-            access_key_id = &quot;access_key_id&quot;
-            secret_access_key = &quot;secret_access_key&quot;
+            type = "S3"
+            access_key_id = "access_key_id"
+            secret_access_key = "secret_access_key"
 
             [storage.compaction]
             max_inflight_tasks = 3
@@ -1219,21 +1220,21 @@
 
             [storage.manifest]
             checkpoint_margin = 9
-            gc_duration = &#39;7s&#39;
+            gc_duration = '7s'
 
             [http]
-            addr = &quot;127.0.0.1:4000&quot;
-            timeout = &quot;33s&quot;
-            body_limit = &quot;128MB&quot;
+            addr = "127.0.0.1:4000"
+            timeout = "33s"
+            body_limit = "128MB"
 
             [logging]
-            level = &quot;debug&quot;
-            dir = &quot;/tmp/greptimedb/test/logs&quot;
-        &quot;#</span>;
-        <span class="macro">write!</span>(file, <span class="string">&quot;{}&quot;</span>, toml_str).unwrap();
+            level = "debug"
+            dir = "/tmp/greptimedb/test/logs"
+        "#</span>;
+        <span class="macro">write!</span>(file, <span class="string">"{}"</span>, toml_str).unwrap();
         <span class="kw">let </span>cmd = StartCommand {
             config_file: <span class="prelude-val">Some</span>(file.path().to_str().unwrap().to_string()),
-            user_provider: <span class="prelude-val">Some</span>(<span class="string">&quot;static_user_provider:cmd:test=test&quot;</span>.to_string()),
+            user_provider: <span class="prelude-val">Some</span>(<span class="string">"static_user_provider:cmd:test=test"</span>.to_string()),
             ..Default::default()
         };
 
@@ -1244,17 +1245,17 @@
         <span class="kw">let </span>dn_opts = options.datanode;
         <span class="kw">let </span>logging_opts = options.logging;
         <span class="macro">assert_eq!</span>(Mode::Standalone, fe_opts.mode);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;127.0.0.1:4000&quot;</span>.to_string(), fe_opts.http.addr);
+        <span class="macro">assert_eq!</span>(<span class="string">"127.0.0.1:4000"</span>.to_string(), fe_opts.http.addr);
         <span class="macro">assert_eq!</span>(Duration::from_secs(<span class="number">33</span>), fe_opts.http.timeout);
         <span class="macro">assert_eq!</span>(ReadableSize::mb(<span class="number">128</span>), fe_opts.http.body_limit);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;127.0.0.1:4001&quot;</span>.to_string(), fe_opts.grpc.addr);
+        <span class="macro">assert_eq!</span>(<span class="string">"127.0.0.1:4001"</span>.to_string(), fe_opts.grpc.addr);
         <span class="macro">assert!</span>(fe_opts.mysql.enable);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;127.0.0.1:4002&quot;</span>, fe_opts.mysql.addr);
+        <span class="macro">assert_eq!</span>(<span class="string">"127.0.0.1:4002"</span>, fe_opts.mysql.addr);
         <span class="macro">assert_eq!</span>(<span class="number">2</span>, fe_opts.mysql.runtime_size);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">None</span>, fe_opts.mysql.reject_no_database);
         <span class="macro">assert!</span>(fe_opts.influxdb.enable);
 
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;/tmp/greptimedb/test/wal&quot;</span>, dn_opts.wal.dir.unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"/tmp/greptimedb/test/wal"</span>, dn_opts.wal.dir.unwrap());
 
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(
             <span class="kw-2">&amp;</span>dn_opts.storage.store,
@@ -1268,8 +1269,8 @@
         <span class="kw">match </span><span class="kw-2">&amp;</span>dn_opts.storage.providers[<span class="number">1</span>] {
             datanode::config::ObjectStoreConfig::S3(s3_config) =&gt; {
                 <span class="macro">assert_eq!</span>(
-                    <span class="string">&quot;Secret([REDACTED alloc::string::String])&quot;</span>.to_string(),
-                    <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, s3_config.access_key_id)
+                    <span class="string">"Secret([REDACTED alloc::string::String])"</span>.to_string(),
+                    <span class="macro">format!</span>(<span class="string">"{:?}"</span>, s3_config.access_key_id)
                 );
             }
             <span class="kw">_ </span>=&gt; {
@@ -1277,23 +1278,23 @@
             }
         }
 
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;debug&quot;</span>, logging_opts.level.as_ref().unwrap());
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;/tmp/greptimedb/test/logs&quot;</span>.to_string(), logging_opts.dir);
+        <span class="macro">assert_eq!</span>(<span class="string">"debug"</span>, logging_opts.level.as_ref().unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"/tmp/greptimedb/test/logs"</span>.to_string(), logging_opts.dir);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_load_log_options_from_cli() {
         <span class="kw">let </span>cmd = StartCommand {
-            user_provider: <span class="prelude-val">Some</span>(<span class="string">&quot;static_user_provider:cmd:test=test&quot;</span>.to_string()),
+            user_provider: <span class="prelude-val">Some</span>(<span class="string">"static_user_provider:cmd:test=test"</span>.to_string()),
             ..Default::default()
         };
 
         <span class="kw">let </span>Options::Standalone(opts) = cmd
             .load_options(<span class="kw-2">&amp;</span>CliOptions {
-                log_dir: <span class="prelude-val">Some</span>(<span class="string">&quot;/tmp/greptimedb/test/logs&quot;</span>.to_string()),
-                log_level: <span class="prelude-val">Some</span>(<span class="string">&quot;debug&quot;</span>.to_string()),
+                log_dir: <span class="prelude-val">Some</span>(<span class="string">"/tmp/greptimedb/test/logs"</span>.to_string()),
+                log_level: <span class="prelude-val">Some</span>(<span class="string">"debug"</span>.to_string()),
 
-                <span class="attr">#[cfg(feature = <span class="string">&quot;tokio-console&quot;</span>)]
+                <span class="attr">#[cfg(feature = <span class="string">"tokio-console"</span>)]
                 </span>tokio_console_addr: <span class="prelude-val">None</span>,
             })
             .unwrap()
@@ -1301,62 +1302,62 @@
             <span class="macro">unreachable!</span>()
         };
 
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;/tmp/greptimedb/test/logs&quot;</span>, opts.logging.dir);
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;debug&quot;</span>, opts.logging.level.unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"/tmp/greptimedb/test/logs"</span>, opts.logging.dir);
+        <span class="macro">assert_eq!</span>(<span class="string">"debug"</span>, opts.logging.level.unwrap());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_config_precedence_order() {
         <span class="kw">let </span><span class="kw-2">mut </span>file = create_named_temp_file();
-        <span class="kw">let </span>toml_str = <span class="string">r#&quot;
-            mode = &quot;standalone&quot;
+        <span class="kw">let </span>toml_str = <span class="string">r#"
+            mode = "standalone"
 
             [http]
-            addr = &quot;127.0.0.1:4000&quot;
+            addr = "127.0.0.1:4000"
 
             [logging]
-            level = &quot;debug&quot;
-        &quot;#</span>;
-        <span class="macro">write!</span>(file, <span class="string">&quot;{}&quot;</span>, toml_str).unwrap();
+            level = "debug"
+        "#</span>;
+        <span class="macro">write!</span>(file, <span class="string">"{}"</span>, toml_str).unwrap();
 
-        <span class="kw">let </span>env_prefix = <span class="string">&quot;STANDALONE_UT&quot;</span>;
+        <span class="kw">let </span>env_prefix = <span class="string">"STANDALONE_UT"</span>;
         temp_env::with_vars(
             [
                 (
                     <span class="comment">// logging.dir = /other/log/dir
                     </span>[
                         env_prefix.to_string(),
-                        <span class="string">&quot;logging&quot;</span>.to_uppercase(),
-                        <span class="string">&quot;dir&quot;</span>.to_uppercase(),
+                        <span class="string">"logging"</span>.to_uppercase(),
+                        <span class="string">"dir"</span>.to_uppercase(),
                     ]
                     .join(ENV_VAR_SEP),
-                    <span class="prelude-val">Some</span>(<span class="string">&quot;/other/log/dir&quot;</span>),
+                    <span class="prelude-val">Some</span>(<span class="string">"/other/log/dir"</span>),
                 ),
                 (
                     <span class="comment">// logging.level = info
                     </span>[
                         env_prefix.to_string(),
-                        <span class="string">&quot;logging&quot;</span>.to_uppercase(),
-                        <span class="string">&quot;level&quot;</span>.to_uppercase(),
+                        <span class="string">"logging"</span>.to_uppercase(),
+                        <span class="string">"level"</span>.to_uppercase(),
                     ]
                     .join(ENV_VAR_SEP),
-                    <span class="prelude-val">Some</span>(<span class="string">&quot;info&quot;</span>),
+                    <span class="prelude-val">Some</span>(<span class="string">"info"</span>),
                 ),
                 (
                     <span class="comment">// http.addr = 127.0.0.1:24000
                     </span>[
                         env_prefix.to_string(),
-                        <span class="string">&quot;http&quot;</span>.to_uppercase(),
-                        <span class="string">&quot;addr&quot;</span>.to_uppercase(),
+                        <span class="string">"http"</span>.to_uppercase(),
+                        <span class="string">"addr"</span>.to_uppercase(),
                     ]
                     .join(ENV_VAR_SEP),
-                    <span class="prelude-val">Some</span>(<span class="string">&quot;127.0.0.1:24000&quot;</span>),
+                    <span class="prelude-val">Some</span>(<span class="string">"127.0.0.1:24000"</span>),
                 ),
             ],
             || {
                 <span class="kw">let </span>command = StartCommand {
                     config_file: <span class="prelude-val">Some</span>(file.path().to_str().unwrap().to_string()),
-                    http_addr: <span class="prelude-val">Some</span>(<span class="string">&quot;127.0.0.1:14000&quot;</span>.to_string()),
+                    http_addr: <span class="prelude-val">Some</span>(<span class="string">"127.0.0.1:14000"</span>.to_string()),
                     env_prefix: env_prefix.to_string(),
                     ..Default::default()
                 };
@@ -1368,13 +1369,13 @@
                 };
 
                 <span class="comment">// Should be read from env, env &gt; default values.
-                </span><span class="macro">assert_eq!</span>(opts.logging.dir, <span class="string">&quot;/other/log/dir&quot;</span>);
+                </span><span class="macro">assert_eq!</span>(opts.logging.dir, <span class="string">"/other/log/dir"</span>);
 
                 <span class="comment">// Should be read from config file, config file &gt; env &gt; default values.
-                </span><span class="macro">assert_eq!</span>(opts.logging.level.as_ref().unwrap(), <span class="string">&quot;debug&quot;</span>);
+                </span><span class="macro">assert_eq!</span>(opts.logging.level.as_ref().unwrap(), <span class="string">"debug"</span>);
 
                 <span class="comment">// Should be read from cli, cli &gt; config file &gt; env &gt; default values.
-                </span><span class="macro">assert_eq!</span>(opts.frontend.http.addr, <span class="string">&quot;127.0.0.1:14000&quot;</span>);
+                </span><span class="macro">assert_eq!</span>(opts.frontend.http.addr, <span class="string">"127.0.0.1:14000"</span>);
                 <span class="macro">assert_eq!</span>(ReadableSize::mb(<span class="number">64</span>), opts.frontend.http.body_limit);
 
                 <span class="comment">// Should be default value.
@@ -1386,7 +1387,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_load_default_standalone_options() {
         <span class="kw">let </span>options: StandaloneOptions =
-            Options::load_layered_options(<span class="prelude-val">None</span>, <span class="string">&quot;GREPTIMEDB_FRONTEND&quot;</span>, <span class="prelude-val">None</span>).unwrap();
+            Options::load_layered_options(<span class="prelude-val">None</span>, <span class="string">"GREPTIMEDB_FRONTEND"</span>, <span class="prelude-val">None</span>).unwrap();
         <span class="kw">let </span>default_options = StandaloneOptions::default();
         <span class="macro">assert_eq!</span>(options.mode, default_options.mode);
         <span class="macro">assert_eq!</span>(options.enable_telemetry, default_options.enable_telemetry);

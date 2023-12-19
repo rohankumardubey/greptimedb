@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/meta-srv/src/procedure/region_migration.rs`."><title>region_migration.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="meta_srv" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/meta-srv/src/procedure/region_migration.rs`."><title>region_migration.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="meta_srv" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -954,14 +955,14 @@
 <a href="#954" id="954">954</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -1002,7 +1003,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::procedure::utils::region_lock_key;
 <span class="kw">use </span><span class="kw">crate</span>::service::mailbox::{BroadcastChannel, MailboxRef};
 
-<span class="doccomment">/// It&#39;s shared in each step and available even after recovering.
+<span class="doccomment">/// It's shared in each step and available even after recovering.
 ///
 /// It will only be updated/stored after the Red node has succeeded.
 ///
@@ -1025,7 +1026,7 @@
     }
 }
 
-<span class="doccomment">/// It&#39;s shared in each step and available in executing (including retrying).
+<span class="doccomment">/// It's shared in each step and available in executing (including retrying).
 ///
 /// It will be dropped if the procedure runner crashes.
 ///
@@ -1199,9 +1200,9 @@
         <span class="kw">let </span>instruction = Instruction::InvalidateTableIdCache(table_id);
 
         <span class="kw">let </span>msg = <span class="kw-2">&amp;</span>MailboxMessage::json_message(
-            <span class="string">&quot;Invalidate Table Cache&quot;</span>,
-            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Metasrv@{}&quot;</span>, <span class="self">self</span>.server_addr()),
-            <span class="string">&quot;Frontend broadcast&quot;</span>,
+            <span class="string">"Invalidate Table Cache"</span>,
+            <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Metasrv@{}"</span>, <span class="self">self</span>.server_addr()),
+            <span class="string">"Frontend broadcast"</span>,
             common_time::util::current_time_millis(),
             <span class="kw-2">&amp;</span>instruction,
         )
@@ -1216,7 +1217,7 @@
 }
 
 <span class="attr">#[async_trait::async_trait]
-#[typetag::serde(tag = <span class="string">&quot;region_migration_state&quot;</span>)]
+#[typetag::serde(tag = <span class="string">"region_migration_state"</span>)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait </span>State: Sync + Send + Debug {
     <span class="doccomment">/// Yields the next [State] and [Status].
     </span><span class="kw">async fn </span>next(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ctx: <span class="kw-2">&amp;mut </span>Context) -&gt; <span class="prelude-ty">Result</span>&lt;(Box&lt;<span class="kw">dyn </span>State&gt;, Status)&gt;;
@@ -1234,9 +1235,9 @@
 
 <span class="doccomment">/// Persistent data of [RegionMigrationProcedure].
 </span><span class="attr">#[derive(Debug, Serialize)]
-</span><span class="kw">pub struct </span>RegionMigrationData&lt;<span class="lifetime">&#39;a</span>&gt; {
-    persistent_ctx: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>PersistentContext,
-    state: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="kw">dyn </span>State,
+</span><span class="kw">pub struct </span>RegionMigrationData&lt;<span class="lifetime">'a</span>&gt; {
+    persistent_ctx: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>PersistentContext,
+    state: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw">dyn </span>State,
 }
 
 <span class="kw">pub struct </span>RegionMigrationProcedure {
@@ -1247,7 +1248,7 @@
 <span class="comment">// TODO(weny): remove it.
 </span><span class="attr">#[allow(dead_code)]
 </span><span class="kw">impl </span>RegionMigrationProcedure {
-    <span class="kw">const </span>TYPE_NAME: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str = <span class="string">&quot;metasrv-procedure::RegionMigration&quot;</span>;
+    <span class="kw">const </span>TYPE_NAME: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str = <span class="string">"metasrv-procedure::RegionMigration"</span>;
 
     <span class="kw">pub fn </span>new(
         persistent_context: PersistentContext,
@@ -1363,7 +1364,7 @@
 
         <span class="kw">let </span>serialized = procedure.dump().unwrap();
 
-        <span class="kw">let </span>expected = <span class="string">r#&quot;{&quot;persistent_ctx&quot;:{&quot;cluster_id&quot;:0,&quot;from_peer&quot;:{&quot;id&quot;:1,&quot;addr&quot;:&quot;&quot;},&quot;to_peer&quot;:{&quot;id&quot;:2,&quot;addr&quot;:&quot;&quot;},&quot;region_id&quot;:4398046511105},&quot;state&quot;:{&quot;region_migration_state&quot;:&quot;RegionMigrationStart&quot;}}&quot;#</span>;
+        <span class="kw">let </span>expected = <span class="string">r#"{"persistent_ctx":{"cluster_id":0,"from_peer":{"id":1,"addr":""},"to_peer":{"id":2,"addr":""},"region_id":4398046511105},"state":{"region_migration_state":"RegionMigrationStart"}}"#</span>;
         <span class="macro">assert_eq!</span>(expected, serialized);
     }
 
@@ -1371,7 +1372,7 @@
     </span><span class="kw">fn </span>test_backward_compatibility() {
         <span class="kw">let </span>persistent_ctx = test_util::new_persistent_context(<span class="number">1</span>, <span class="number">2</span>, RegionId::new(<span class="number">1024</span>, <span class="number">1</span>));
         <span class="comment">// NOTES: Changes it will break backward compatibility.
-        </span><span class="kw">let </span>serialized = <span class="string">r#&quot;{&quot;cluster_id&quot;:0,&quot;from_peer&quot;:{&quot;id&quot;:1,&quot;addr&quot;:&quot;&quot;},&quot;to_peer&quot;:{&quot;id&quot;:2,&quot;addr&quot;:&quot;&quot;},&quot;region_id&quot;:4398046511105}&quot;#</span>;
+        </span><span class="kw">let </span>serialized = <span class="string">r#"{"cluster_id":0,"from_peer":{"id":1,"addr":""},"to_peer":{"id":2,"addr":""},"region_id":4398046511105}"#</span>;
         <span class="kw">let </span>deserialized: PersistentContext = serde_json::from_str(serialized).unwrap();
 
         <span class="macro">assert_eq!</span>(persistent_ctx, deserialized);
@@ -1465,19 +1466,19 @@
         <span class="macro">vec!</span>[
             <span class="comment">// MigrationStart
             </span>Step::next(
-                <span class="string">&quot;Should be the update metadata for downgrading&quot;</span>,
+                <span class="string">"Should be the update metadata for downgrading"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::simple(assert_update_metadata_downgrade, assert_need_persist),
             ),
             <span class="comment">// UpdateMetadata::Downgrade
             </span>Step::next(
-                <span class="string">&quot;Should be the downgrade leader region&quot;</span>,
+                <span class="string">"Should be the downgrade leader region"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::simple(assert_downgrade_leader_region, assert_no_persist),
             ),
             <span class="comment">// Downgrade Candidate
             </span>Step::next(
-                <span class="string">&quot;Should be the upgrade candidate region&quot;</span>,
+                <span class="string">"Should be the upgrade candidate region"</span>,
                 <span class="prelude-val">Some</span>(mock_datanode_reply(
                     from_peer_id,
                     Arc::new(|id| <span class="prelude-val">Ok</span>(new_downgrade_region_reply(id, <span class="prelude-val">None</span>, <span class="bool-val">true</span>, <span class="prelude-val">None</span>))),
@@ -1486,7 +1487,7 @@
             ),
             <span class="comment">// Upgrade Candidate
             </span>Step::next(
-                <span class="string">&quot;Should be the update metadata for upgrading&quot;</span>,
+                <span class="string">"Should be the update metadata for upgrading"</span>,
                 <span class="prelude-val">Some</span>(mock_datanode_reply(
                     to_peer_id,
                     Arc::new(|id| <span class="prelude-val">Ok</span>(new_upgrade_region_reply(id, <span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="prelude-val">None</span>))),
@@ -1495,13 +1496,13 @@
             ),
             <span class="comment">// UpdateMetadata::Upgrade
             </span>Step::next(
-                <span class="string">&quot;Should be the region migration end&quot;</span>,
+                <span class="string">"Should be the region migration end"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::simple(assert_region_migration_end, assert_done),
             ),
             <span class="comment">// RegionMigrationEnd
             </span>Step::next(
-                <span class="string">&quot;Should be the region migration end again&quot;</span>,
+                <span class="string">"Should be the region migration end again"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::simple(assert_region_migration_end, assert_done),
             ),
@@ -1541,7 +1542,7 @@
             .run_once()
             .<span class="kw">await</span>;
 
-        <span class="comment">// Ensure it didn&#39;t run into the slow path.
+        <span class="comment">// Ensure it didn't run into the slow path.
         </span><span class="macro">assert!</span>(timer.elapsed().as_secs() &lt; REGION_LEASE_SECS / <span class="number">2</span>);
 
         runner.suite.verify_table_metadata().<span class="kw">await</span>;
@@ -1573,7 +1574,7 @@
 
         <span class="kw">let </span>steps = procedure_flow_steps(from_peer_id, to_peer_id);
         <span class="kw">let </span>setup_to_latest_persisted_state = Step::setup(
-            <span class="string">&quot;Sets state to UpdateMetadata::Downgrade&quot;</span>,
+            <span class="string">"Sets state to UpdateMetadata::Downgrade"</span>,
             merge_before_test_fn(<span class="macro">vec!</span>[
                 setup_state(Arc::new(|| Box::new(UpdateMetadata::Downgrade))),
                 Arc::new(reset_volatile_ctx),
@@ -1596,7 +1597,7 @@
             .run_once()
             .<span class="kw">await</span>;
 
-        <span class="comment">// Ensure it didn&#39;t run into the slow path.
+        <span class="comment">// Ensure it didn't run into the slow path.
         </span><span class="macro">assert!</span>(timer.elapsed().as_secs() &lt; REGION_LEASE_SECS / <span class="number">2</span>);
 
         runner.suite.verify_table_metadata().<span class="kw">await</span>;
@@ -1627,13 +1628,13 @@
         <span class="kw">let </span>steps = <span class="macro">vec!</span>[
             <span class="comment">// Migration Start
             </span>Step::next(
-                <span class="string">&quot;Should be the open candidate region&quot;</span>,
+                <span class="string">"Should be the open candidate region"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::simple(assert_open_candidate_region, assert_need_persist),
             ),
             <span class="comment">// OpenCandidateRegion
             </span>Step::next(
-                <span class="string">&quot;Should be throwing a non-retry error&quot;</span>,
+                <span class="string">"Should be throwing a non-retry error"</span>,
                 <span class="prelude-val">Some</span>(mock_datanode_reply(
                     to_peer_id,
                     Arc::new(|id| error::MailboxTimeoutSnafu { id }.fail()),
@@ -1642,7 +1643,7 @@
             ),
             <span class="comment">// OpenCandidateRegion
             </span>Step::next(
-                <span class="string">&quot;Should be throwing a non-retry error again&quot;</span>,
+                <span class="string">"Should be throwing a non-retry error again"</span>,
                 <span class="prelude-val">Some</span>(mock_datanode_reply(
                     to_peer_id,
                     Arc::new(|id| error::MailboxTimeoutSnafu { id }.fail()),
@@ -1652,7 +1653,7 @@
         ];
 
         <span class="kw">let </span>setup_to_latest_persisted_state = Step::setup(
-            <span class="string">&quot;Sets state to UpdateMetadata::Downgrade&quot;</span>,
+            <span class="string">"Sets state to UpdateMetadata::Downgrade"</span>,
             merge_before_test_fn(<span class="macro">vec!</span>[
                 setup_state(Arc::new(|| Box::new(OpenCandidateRegion))),
                 Arc::new(reset_volatile_ctx),
@@ -1715,19 +1716,19 @@
         <span class="kw">let </span>steps = <span class="macro">vec!</span>[
             <span class="comment">// MigrationStart
             </span>Step::next(
-                <span class="string">&quot;Should be the update metadata for downgrading&quot;</span>,
+                <span class="string">"Should be the update metadata for downgrading"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::simple(assert_update_metadata_downgrade, assert_need_persist),
             ),
             <span class="comment">// UpdateMetadata::Downgrade
             </span>Step::next(
-                <span class="string">&quot;Should be the downgrade leader region&quot;</span>,
+                <span class="string">"Should be the downgrade leader region"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::simple(assert_downgrade_leader_region, assert_no_persist),
             ),
             <span class="comment">// Downgrade Candidate
             </span>Step::next(
-                <span class="string">&quot;Should be the upgrade candidate region&quot;</span>,
+                <span class="string">"Should be the upgrade candidate region"</span>,
                 <span class="prelude-val">Some</span>(mock_datanode_reply(
                     from_peer_id,
                     Arc::new(|id| <span class="prelude-val">Ok</span>(new_downgrade_region_reply(id, <span class="prelude-val">None</span>, <span class="bool-val">true</span>, <span class="prelude-val">None</span>))),
@@ -1736,7 +1737,7 @@
             ),
             <span class="comment">// Upgrade Candidate
             </span>Step::next(
-                <span class="string">&quot;Should be the rollback metadata&quot;</span>,
+                <span class="string">"Should be the rollback metadata"</span>,
                 <span class="prelude-val">Some</span>(mock_datanode_reply(
                     to_peer_id,
                     Arc::new(|id| error::MailboxTimeoutSnafu { id }.fail()),
@@ -1745,13 +1746,13 @@
             ),
             <span class="comment">// UpdateMetadata::Rollback
             </span>Step::next(
-                <span class="string">&quot;Should be the region migration abort&quot;</span>,
+                <span class="string">"Should be the region migration abort"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::simple(assert_region_migration_abort, assert_no_persist),
             ),
             <span class="comment">// RegionMigrationAbort
             </span>Step::next(
-                <span class="string">&quot;Should throw an error&quot;</span>,
+                <span class="string">"Should throw an error"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::error(|error| {
                     <span class="macro">assert!</span>(!error.is_retryable());
@@ -1761,7 +1762,7 @@
         ];
 
         <span class="kw">let </span>setup_to_latest_persisted_state = Step::setup(
-            <span class="string">&quot;Sets state to UpdateMetadata::Downgrade&quot;</span>,
+            <span class="string">"Sets state to UpdateMetadata::Downgrade"</span>,
             merge_before_test_fn(<span class="macro">vec!</span>[
                 setup_state(Arc::new(|| Box::new(UpdateMetadata::Downgrade))),
                 Arc::new(reset_volatile_ctx),
@@ -1810,13 +1811,13 @@
         <span class="kw">let </span>steps = <span class="macro">vec!</span>[
             <span class="comment">// Migration Start
             </span>Step::next(
-                <span class="string">&quot;Should be the open candidate region&quot;</span>,
+                <span class="string">"Should be the open candidate region"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::simple(assert_open_candidate_region, assert_need_persist),
             ),
             <span class="comment">// OpenCandidateRegion
             </span>Step::next(
-                <span class="string">&quot;Should be throwing a retryable error&quot;</span>,
+                <span class="string">"Should be throwing a retryable error"</span>,
                 <span class="prelude-val">Some</span>(mock_datanode_reply(
                     to_peer_id,
                     Arc::new(|id| <span class="prelude-val">Ok</span>(new_open_region_reply(id, <span class="bool-val">false</span>, <span class="prelude-val">None</span>))),
@@ -1825,7 +1826,7 @@
             ),
             <span class="comment">// OpenCandidateRegion
             </span>Step::next(
-                <span class="string">&quot;Should be the update metadata for downgrading&quot;</span>,
+                <span class="string">"Should be the update metadata for downgrading"</span>,
                 <span class="prelude-val">Some</span>(mock_datanode_reply(
                     to_peer_id,
                     Arc::new(|id| <span class="prelude-val">Ok</span>(new_open_region_reply(id, <span class="bool-val">true</span>, <span class="prelude-val">None</span>))),
@@ -1834,13 +1835,13 @@
             ),
             <span class="comment">// UpdateMetadata::Downgrade
             </span>Step::next(
-                <span class="string">&quot;Should be the downgrade leader region&quot;</span>,
+                <span class="string">"Should be the downgrade leader region"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::simple(assert_downgrade_leader_region, assert_no_persist),
             ),
             <span class="comment">// Downgrade Leader
             </span>Step::next(
-                <span class="string">&quot;Should be the upgrade candidate region&quot;</span>,
+                <span class="string">"Should be the upgrade candidate region"</span>,
                 <span class="prelude-val">Some</span>(mock_datanode_reply(
                     from_peer_id,
                     merge_mailbox_messages(<span class="macro">vec!</span>[
@@ -1852,7 +1853,7 @@
             ),
             <span class="comment">// Upgrade Candidate
             </span>Step::next(
-                <span class="string">&quot;Should be the update metadata for upgrading&quot;</span>,
+                <span class="string">"Should be the update metadata for upgrading"</span>,
                 <span class="prelude-val">Some</span>(mock_datanode_reply(
                     to_peer_id,
                     merge_mailbox_messages(<span class="macro">vec!</span>[
@@ -1864,20 +1865,20 @@
             ),
             <span class="comment">// UpdateMetadata::Upgrade
             </span>Step::next(
-                <span class="string">&quot;Should be the region migration end&quot;</span>,
+                <span class="string">"Should be the region migration end"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::simple(assert_region_migration_end, assert_done),
             ),
             <span class="comment">// RegionMigrationEnd
             </span>Step::next(
-                <span class="string">&quot;Should be the region migration end again&quot;</span>,
+                <span class="string">"Should be the region migration end again"</span>,
                 <span class="prelude-val">None</span>,
                 Assertion::simple(assert_region_migration_end, assert_done),
             ),
         ];
 
         <span class="kw">let </span>setup_to_latest_persisted_state = Step::setup(
-            <span class="string">&quot;Sets state to OpenCandidateRegion&quot;</span>,
+            <span class="string">"Sets state to OpenCandidateRegion"</span>,
             merge_before_test_fn(<span class="macro">vec!</span>[
                 setup_state(Arc::new(|| Box::new(OpenCandidateRegion))),
                 Arc::new(reset_volatile_ctx),
@@ -1901,7 +1902,7 @@
             .run_once()
             .<span class="kw">await</span>;
 
-        <span class="comment">// Ensure it didn&#39;t run into the slow path.
+        <span class="comment">// Ensure it didn't run into the slow path.
         </span><span class="macro">assert!</span>(timer.elapsed().as_secs() &lt; REGION_LEASE_SECS);
         runner.suite.verify_table_metadata().<span class="kw">await</span>;
     }

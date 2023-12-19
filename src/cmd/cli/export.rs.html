@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/cmd/src/cli/export.rs`."><title>export.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="cmd" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/cmd/src/cli/export.rs`."><title>export.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="cmd" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -420,14 +421,14 @@
 <a href="#420" id="420">420</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -478,20 +479,20 @@
     </span><span class="attr">#[clap(long)]
     </span>output_dir: String,
 
-    <span class="doccomment">/// The name of the catalog to export. Default to &quot;greptime-*&quot;&quot;.
-    </span><span class="attr">#[clap(long, default_value = <span class="string">&quot;&quot;</span>)]
+    <span class="doccomment">/// The name of the catalog to export. Default to "greptime-*"".
+    </span><span class="attr">#[clap(long, default_value = <span class="string">""</span>)]
     </span>database: String,
 
     <span class="doccomment">/// Parallelism of the export.
-    </span><span class="attr">#[clap(long, short = <span class="string">&#39;j&#39;</span>, default_value = <span class="string">&quot;1&quot;</span>)]
+    </span><span class="attr">#[clap(long, short = <span class="string">'j'</span>, default_value = <span class="string">"1"</span>)]
     </span>export_jobs: usize,
 
     <span class="doccomment">/// Max retry times for each job.
-    </span><span class="attr">#[clap(long, default_value = <span class="string">&quot;3&quot;</span>)]
+    </span><span class="attr">#[clap(long, default_value = <span class="string">"3"</span>)]
     </span>max_retry: usize,
 
     <span class="doccomment">/// Things to export
-    </span><span class="attr">#[clap(long, short = <span class="string">&#39;t&#39;</span>, value_enum)]
+    </span><span class="attr">#[clap(long, short = <span class="string">'t'</span>, value_enum)]
     </span>target: ExportTarget,
 
     <span class="doccomment">/// basic authentication for connecting to the server
@@ -516,8 +517,8 @@
         );
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(auth_basic) = <span class="kw-2">&amp;</span><span class="self">self</span>.auth_basic {
-            <span class="kw">let </span>(username, password) = auth_basic.split_once(<span class="string">&#39;:&#39;</span>).context(IllegalConfigSnafu {
-                msg: <span class="string">&quot;auth_basic cannot be split by &#39;:&#39;&quot;</span>.to_string(),
+            <span class="kw">let </span>(username, password) = auth_basic.split_once(<span class="string">':'</span>).context(IllegalConfigSnafu {
+                msg: <span class="string">"auth_basic cannot be split by ':'"</span>.to_string(),
             })<span class="question-mark">?</span>;
             database_client.set_auth(AuthScheme::Basic(Basic {
                 username: username.to_string(),
@@ -557,10 +558,10 @@
             client.set_catalog(<span class="self">self</span>.catalog.clone());
             <span class="kw">let </span>result =
                 client
-                    .sql(<span class="string">&quot;show databases&quot;</span>)
+                    .sql(<span class="string">"show databases"</span>)
                     .<span class="kw">await
                     </span>.with_context(|<span class="kw">_</span>| RequestDatabaseSnafu {
-                        sql: <span class="string">&quot;show databases&quot;</span>.to_string(),
+                        sql: <span class="string">"show databases"</span>.to_string(),
                     })<span class="question-mark">?</span>;
             <span class="kw">let </span>Output::Stream(stream) = result <span class="kw">else </span>{
                 NotDataFromOutputSnafu.fail()<span class="question-mark">?
@@ -592,9 +593,9 @@
     </span><span class="kw">async fn </span>get_table_list(<span class="kw-2">&amp;</span><span class="self">self</span>, catalog: <span class="kw-2">&amp;</span>str, schema: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;TableReference&gt;&gt; {
         <span class="comment">// TODO: SQL injection hurts
         </span><span class="kw">let </span>sql = <span class="macro">format!</span>(
-            <span class="string">&quot;select table_catalog, table_schema, table_name from \
-            information_schema.tables where table_type = \&#39;BASE TABLE\&#39;\
-            and table_catalog = \&#39;{catalog}\&#39; and table_schema = \&#39;{schema}\&#39;&quot;</span>,
+            <span class="string">"select table_catalog, table_schema, table_name from \
+            information_schema.tables where table_type = \'BASE TABLE\'\
+            and table_catalog = \'{catalog}\' and table_schema = \'{schema}\'"</span>,
         );
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.clone();
         client.set_catalog(catalog);
@@ -614,7 +615,7 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[]);
         };
 
-        <span class="macro">debug!</span>(<span class="string">&quot;Fetched table list: {}&quot;</span>, record_batch.pretty_print());
+        <span class="macro">debug!</span>(<span class="string">"Fetched table list: {}"</span>, record_batch.pretty_print());
 
         <span class="kw">if </span>record_batch.num_rows() == <span class="number">0 </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[]);
@@ -647,7 +648,7 @@
     }
 
     <span class="kw">async fn </span>show_create_table(<span class="kw-2">&amp;</span><span class="self">self</span>, catalog: <span class="kw-2">&amp;</span>str, schema: <span class="kw-2">&amp;</span>str, table: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
-        <span class="kw">let </span>sql = <span class="macro">format!</span>(<span class="string">&quot;show create table {}.{}.{}&quot;</span>, catalog, schema, table);
+        <span class="kw">let </span>sql = <span class="macro">format!</span>(<span class="string">"show create table {}.{}.{}"</span>, catalog, schema, table);
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.clone();
         client.set_catalog(catalog);
         client.set_schema(schema);
@@ -671,7 +672,7 @@
             .get_data(<span class="number">0</span>)
             .unwrap();
 
-        <span class="prelude-val">Ok</span>(<span class="macro">format!</span>(<span class="string">&quot;{create_table};\n&quot;</span>))
+        <span class="prelude-val">Ok</span>(<span class="macro">format!</span>(<span class="string">"{create_table};\n"</span>))
     }
 
     <span class="kw">async fn </span>export_create_table(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
@@ -689,12 +690,12 @@
                     .<span class="kw">await
                     </span>.context(FileIoSnafu)<span class="question-mark">?</span>;
                 <span class="kw">let </span>output_file =
-                    Path::new(<span class="kw-2">&amp;</span><span class="self">self</span>.output_dir).join(<span class="macro">format!</span>(<span class="string">&quot;{catalog}-{schema}.sql&quot;</span>));
+                    Path::new(<span class="kw-2">&amp;</span><span class="self">self</span>.output_dir).join(<span class="macro">format!</span>(<span class="string">"{catalog}-{schema}.sql"</span>));
                 <span class="kw">let </span><span class="kw-2">mut </span>file = File::create(output_file).<span class="kw">await</span>.context(FileIoSnafu)<span class="question-mark">?</span>;
                 <span class="kw">for </span>(c, s, t) <span class="kw">in </span>table_list {
                     <span class="kw">match </span><span class="self">self</span>.show_create_table(<span class="kw-2">&amp;</span>c, <span class="kw-2">&amp;</span>s, <span class="kw-2">&amp;</span>t).<span class="kw">await </span>{
                         <span class="prelude-val">Err</span>(e) =&gt; {
-                            <span class="macro">error!</span>(e; <span class="string">&quot;Failed to export table {}.{}.{}&quot;</span>, c, s, t)
+                            <span class="macro">error!</span>(e; <span class="string">"Failed to export table {}.{}.{}"</span>, c, s, t)
                         }
                         <span class="prelude-val">Ok</span>(create_table) =&gt; {
                             file.write_all(create_table.as_bytes())
@@ -703,7 +704,7 @@
                         }
                     }
                 }
-                <span class="macro">info!</span>(<span class="string">&quot;finished exporting {catalog}.{schema} with {table_count} tables&quot;</span>,);
+                <span class="macro">info!</span>(<span class="string">"finished exporting {catalog}.{schema} with {table_count} tables"</span>,);
                 <span class="prelude-val">Ok</span>::&lt;(), Error&gt;(())
             });
         }
@@ -714,13 +715,13 @@
             .filter(|r| <span class="kw">match </span>r {
                 <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
                 <span class="prelude-val">Err</span>(e) =&gt; {
-                    <span class="macro">error!</span>(e; <span class="string">&quot;export job failed&quot;</span>);
+                    <span class="macro">error!</span>(e; <span class="string">"export job failed"</span>);
                     <span class="bool-val">false
                 </span>}
             })
             .count();
 
-        <span class="macro">info!</span>(<span class="string">&quot;success {success}/{db_count} jobs&quot;</span>);
+        <span class="macro">info!</span>(<span class="string">"success {success}/{db_count} jobs"</span>);
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -737,7 +738,7 @@
                 tokio::fs::create_dir_all(<span class="kw-2">&amp;</span><span class="self">self</span>.output_dir)
                     .<span class="kw">await
                     </span>.context(FileIoSnafu)<span class="question-mark">?</span>;
-                <span class="kw">let </span>output_dir = Path::new(<span class="kw-2">&amp;</span><span class="self">self</span>.output_dir).join(<span class="macro">format!</span>(<span class="string">&quot;{catalog}-{schema}/&quot;</span>));
+                <span class="kw">let </span>output_dir = Path::new(<span class="kw-2">&amp;</span><span class="self">self</span>.output_dir).join(<span class="macro">format!</span>(<span class="string">"{catalog}-{schema}/"</span>));
 
                 <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.clone();
                 client.set_catalog(catalog.clone());
@@ -745,7 +746,7 @@
 
                 <span class="comment">// copy database to
                 </span><span class="kw">let </span>sql = <span class="macro">format!</span>(
-                    <span class="string">&quot;copy database {} to &#39;{}&#39; with (format=&#39;parquet&#39;);&quot;</span>,
+                    <span class="string">"copy database {} to '{}' with (format='parquet');"</span>,
                     schema,
                     output_dir.to_str().unwrap()
                 );
@@ -753,19 +754,19 @@
                     .sql(sql.clone())
                     .<span class="kw">await
                     </span>.context(RequestDatabaseSnafu { sql })<span class="question-mark">?</span>;
-                <span class="macro">info!</span>(<span class="string">&quot;finished exporting {catalog}.{schema} data&quot;</span>);
+                <span class="macro">info!</span>(<span class="string">"finished exporting {catalog}.{schema} data"</span>);
 
                 <span class="comment">// export copy from sql
                 </span><span class="kw">let </span>dir_filenames = <span class="kw">match </span>output_dir.read_dir() {
                     <span class="prelude-val">Ok</span>(dir) =&gt; dir,
                     <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
-                        <span class="macro">warn!</span>(<span class="string">&quot;empty database {catalog}.{schema}&quot;</span>);
+                        <span class="macro">warn!</span>(<span class="string">"empty database {catalog}.{schema}"</span>);
                         <span class="kw">return </span><span class="prelude-val">Ok</span>(());
                     }
                 };
 
                 <span class="kw">let </span>copy_from_file =
-                    Path::new(<span class="kw-2">&amp;</span><span class="self">self</span>.output_dir).join(<span class="macro">format!</span>(<span class="string">&quot;{catalog}-{schema}_copy_from.sql&quot;</span>));
+                    Path::new(<span class="kw-2">&amp;</span><span class="self">self</span>.output_dir).join(<span class="macro">format!</span>(<span class="string">"{catalog}-{schema}_copy_from.sql"</span>));
                 <span class="kw">let </span><span class="kw-2">mut </span>writer =
                     BufWriter::new(File::create(copy_from_file).<span class="kw">await</span>.context(FileIoSnafu)<span class="question-mark">?</span>);
 
@@ -775,12 +776,12 @@
                         .file_name()
                         .into_string()
                         .unwrap()
-                        .replace(<span class="string">&quot;.parquet&quot;</span>, <span class="string">&quot;&quot;</span>);
+                        .replace(<span class="string">".parquet"</span>, <span class="string">""</span>);
 
                     writer
                         .write(
                             <span class="macro">format!</span>(
-                                <span class="string">&quot;copy {} from &#39;{}&#39; with (format=&#39;parquet&#39;);\n&quot;</span>,
+                                <span class="string">"copy {} from '{}' with (format='parquet');\n"</span>,
                                 table_name,
                                 table_file.path().to_str().unwrap()
                             )
@@ -791,7 +792,7 @@
                 }
                 writer.flush().<span class="kw">await</span>.context(FileIoSnafu)<span class="question-mark">?</span>;
 
-                <span class="macro">info!</span>(<span class="string">&quot;finished exporting {catalog}.{schema} copy_from.sql&quot;</span>);
+                <span class="macro">info!</span>(<span class="string">"finished exporting {catalog}.{schema} copy_from.sql"</span>);
 
                 <span class="prelude-val">Ok</span>::&lt;(), Error&gt;(())
             });
@@ -803,13 +804,13 @@
             .filter(|r| <span class="kw">match </span>r {
                 <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
                 <span class="prelude-val">Err</span>(e) =&gt; {
-                    <span class="macro">error!</span>(e; <span class="string">&quot;export job failed&quot;</span>);
+                    <span class="macro">error!</span>(e; <span class="string">"export job failed"</span>);
                     <span class="bool-val">false
                 </span>}
             })
             .count();
 
-        <span class="macro">info!</span>(<span class="string">&quot;success {success}/{db_count} jobs&quot;</span>);
+        <span class="macro">info!</span>(<span class="string">"success {success}/{db_count} jobs"</span>);
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -828,11 +829,11 @@
 <span class="doccomment">/// Split at `-`.
 </span><span class="kw">fn </span>split_database(database: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;(String, <span class="prelude-ty">Option</span>&lt;String&gt;)&gt; {
     <span class="kw">let </span>(catalog, schema) = database
-        .split_once(<span class="string">&#39;-&#39;</span>)
+        .split_once(<span class="string">'-'</span>)
         .with_context(|| InvalidDatabaseNameSnafu {
             database: database.to_string(),
         })<span class="question-mark">?</span>;
-    <span class="kw">if </span>schema == <span class="string">&quot;*&quot; </span>{
+    <span class="kw">if </span>schema == <span class="string">"*" </span>{
         <span class="prelude-val">Ok</span>((catalog.to_string(), <span class="prelude-val">None</span>))
     } <span class="kw">else </span>{
         <span class="prelude-val">Ok</span>((catalog.to_string(), <span class="prelude-val">Some</span>(schema.to_string())))

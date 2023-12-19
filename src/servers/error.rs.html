@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/servers/src/error.rs`."><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="servers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/servers/src/error.rs`."><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="servers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -615,14 +616,14 @@
 <a href="#615" id="615">615</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -650,345 +651,345 @@
 #[snafu(visibility(<span class="kw">pub</span>))]
 #[stack_trace_debug]
 </span><span class="kw">pub enum </span>Error {
-    <span class="attr">#[snafu(display(<span class="string">&quot;Internal error: {}&quot;</span>, err_msg))]
+    <span class="attr">#[snafu(display(<span class="string">"Internal error: {}"</span>, err_msg))]
     </span>Internal { err_msg: String },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Internal IO error&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Internal IO error"</span>))]
     </span>InternalIo {
         <span class="attr">#[snafu(source)]
         </span>error: std::io::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Tokio IO error: {}&quot;</span>, err_msg))]
+    <span class="attr">#[snafu(display(<span class="string">"Tokio IO error: {}"</span>, err_msg))]
     </span>TokioIo {
         err_msg: String,
         <span class="attr">#[snafu(source)]
         </span>error: std::io::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to collect recordbatch&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to collect recordbatch"</span>))]
     </span>CollectRecordbatch {
         location: Location,
         source: common_recordbatch::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to start HTTP server&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to start HTTP server"</span>))]
     </span>StartHttp {
         <span class="attr">#[snafu(source)]
         </span>error: hyper::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to start gRPC server&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to start gRPC server"</span>))]
     </span>StartGrpc {
         <span class="attr">#[snafu(source)]
         </span>error: tonic::transport::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;{} server is already started&quot;</span>, server))]
+    <span class="attr">#[snafu(display(<span class="string">"{} server is already started"</span>, server))]
     </span>AlreadyStarted { server: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to bind address {}&quot;</span>, addr))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to bind address {}"</span>, addr))]
     </span>TcpBind {
         addr: SocketAddr,
         <span class="attr">#[snafu(source)]
         </span>error: std::io::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to convert to TcpIncoming&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to convert to TcpIncoming"</span>))]
     </span>TcpIncoming {
         <span class="attr">#[snafu(source)]
         </span>error: Box&lt;<span class="kw">dyn </span>std::error::Error + Send + Sync&gt;,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to execute query, query: {}&quot;</span>, query))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to execute query, query: {}"</span>, query))]
     </span>ExecuteQuery {
         query: String,
         location: Location,
         source: BoxedError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to execute plan&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to execute plan"</span>))]
     </span>ExecutePlan {
         location: Location,
         source: BoxedError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Execute gRPC query error&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Execute gRPC query error"</span>))]
     </span>ExecuteGrpcQuery {
         location: Location,
         source: BoxedError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Execute gRPC request error&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Execute gRPC request error"</span>))]
     </span>ExecuteGrpcRequest {
         location: Location,
         source: BoxedError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to check database validity&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to check database validity"</span>))]
     </span>CheckDatabaseValidity {
         location: Location,
         source: BoxedError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to describe statement&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to describe statement"</span>))]
     </span>DescribeStatement { source: BoxedError },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to insert script with name: {}&quot;</span>, name))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to insert script with name: {}"</span>, name))]
     </span>InsertScript {
         name: String,
         location: Location,
         source: BoxedError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to execute script by name: {}&quot;</span>, name))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to execute script by name: {}"</span>, name))]
     </span>ExecuteScript {
         name: String,
         location: Location,
         source: BoxedError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Not supported: {}&quot;</span>, feat))]
+    <span class="attr">#[snafu(display(<span class="string">"Not supported: {}"</span>, feat))]
     </span>NotSupported { feat: String },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid request parameter: {}&quot;</span>, reason))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid request parameter: {}"</span>, reason))]
     </span>InvalidParameter { reason: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid query: {}&quot;</span>, reason))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid query: {}"</span>, reason))]
     </span>InvalidQuery { reason: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to parse InfluxDB line protocol&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to parse InfluxDB line protocol"</span>))]
     </span>InfluxdbLineProtocol {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: influxdb_line_protocol::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to write InfluxDB line protocol&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to write InfluxDB line protocol"</span>))]
     </span>InfluxdbLinesWrite {
         location: Location,
         source: common_grpc::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to write prometheus series&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to write prometheus series"</span>))]
     </span>PromSeriesWrite {
         location: Location,
         source: common_grpc::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to write OTLP metrics&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to write OTLP metrics"</span>))]
     </span>OtlpMetricsWrite {
         location: Location,
         source: common_grpc::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to convert time precision, name: {}&quot;</span>, name))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to convert time precision, name: {}"</span>, name))]
     </span>TimePrecision { name: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Connection reset by peer&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Connection reset by peer"</span>))]
     </span>ConnResetByPeer { location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Hyper error&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Hyper error"</span>))]
     </span>Hyper {
         <span class="attr">#[snafu(source)]
         </span>error: hyper::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid OpenTSDB line&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid OpenTSDB line"</span>))]
     </span>InvalidOpentsdbLine {
         <span class="attr">#[snafu(source)]
         </span>error: FromUtf8Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid OpenTSDB Json request&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid OpenTSDB Json request"</span>))]
     </span>InvalidOpentsdbJsonRequest {
         <span class="attr">#[snafu(source)]
         </span>error: serde_json::error::Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to decode prometheus remote request&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to decode prometheus remote request"</span>))]
     </span>DecodePromRemoteRequest {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: prost::DecodeError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to decode OTLP request&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to decode OTLP request"</span>))]
     </span>DecodeOtlpRequest {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: prost::DecodeError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to decompress prometheus remote request&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to decompress prometheus remote request"</span>))]
     </span>DecompressPromRemoteRequest {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: snap::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to compress prometheus remote request&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to compress prometheus remote request"</span>))]
     </span>CompressPromRemoteRequest {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: snap::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid prometheus remote request, msg: {}&quot;</span>, msg))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid prometheus remote request, msg: {}"</span>, msg))]
     </span>InvalidPromRemoteRequest { msg: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid prometheus remote read query result, msg: {}&quot;</span>, msg))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid prometheus remote read query result, msg: {}"</span>, msg))]
     </span>InvalidPromRemoteReadQueryResult { msg: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid Flight ticket&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid Flight ticket"</span>))]
     </span>InvalidFlightTicket {
         <span class="attr">#[snafu(source)]
         </span>error: api::DecodeError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Tls is required for {}, plain connection is rejected&quot;</span>, server))]
+    <span class="attr">#[snafu(display(<span class="string">"Tls is required for {}, plain connection is rejected"</span>, server))]
     </span>TlsRequired { server: String },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to get user info&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to get user info"</span>))]
     </span>Auth {
         location: Location,
         source: auth::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Not found http or grpc authorization header&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Not found http or grpc authorization header"</span>))]
     </span>NotFoundAuthHeader {},
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Not found influx http authorization info&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Not found influx http authorization info"</span>))]
     </span>NotFoundInfluxAuth {},
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid visibility ASCII chars&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid visibility ASCII chars"</span>))]
     </span>InvisibleASCII {
         <span class="attr">#[snafu(source)]
         </span>error: hyper::header::ToStrError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Unsupported http auth scheme, name: {}&quot;</span>, name))]
+    <span class="attr">#[snafu(display(<span class="string">"Unsupported http auth scheme, name: {}"</span>, name))]
     </span>UnsupportedAuthScheme { name: String },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid http authorization header&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid http authorization header"</span>))]
     </span>InvalidAuthorizationHeader { location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid base64 value&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid base64 value"</span>))]
     </span>InvalidBase64Value {
         <span class="attr">#[snafu(source)]
         </span>error: DecodeError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid utf-8 value&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid utf-8 value"</span>))]
     </span>InvalidUtf8Value {
         <span class="attr">#[snafu(source)]
         </span>error: FromUtf8Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Error accessing catalog&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Error accessing catalog"</span>))]
     </span>CatalogError { source: catalog::error::Error },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Cannot find requested database: {}-{}&quot;</span>, catalog, schema))]
+    <span class="attr">#[snafu(display(<span class="string">"Cannot find requested database: {}-{}"</span>, catalog, schema))]
     </span>DatabaseNotFound { catalog: String, schema: String },
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;mem-prof&quot;</span>)]
-    #[snafu(display(<span class="string">&quot;Failed to dump profile data&quot;</span>))]
+    <span class="attr">#[cfg(feature = <span class="string">"mem-prof"</span>)]
+    #[snafu(display(<span class="string">"Failed to dump profile data"</span>))]
     </span>DumpProfileData {
         location: Location,
         source: common_mem_prof::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid prepare statement: {}&quot;</span>, err_msg))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid prepare statement: {}"</span>, err_msg))]
     </span>InvalidPrepareStatement { err_msg: String },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid flush argument: {}&quot;</span>, err_msg))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid flush argument: {}"</span>, err_msg))]
     </span>InvalidFlushArgument { err_msg: String },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to build gRPC reflection service&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to build gRPC reflection service"</span>))]
     </span>GrpcReflectionService {
         <span class="attr">#[snafu(source)]
         </span>error: tonic_reflection::server::Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to build HTTP response&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to build HTTP response"</span>))]
     </span>BuildHttpResponse {
         <span class="attr">#[snafu(source)]
         </span>error: http::Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to parse PromQL: {query:?}&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to parse PromQL: {query:?}"</span>))]
     </span>ParsePromQL {
         query: PromQuery,
         location: Location,
         source: query::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to get param types&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to get param types"</span>))]
     </span>GetPreparedStmtParams {
         source: query::error::Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;{}&quot;</span>, reason))]
+    <span class="attr">#[snafu(display(<span class="string">"{}"</span>, reason))]
     </span>UnexpectedResult { reason: String, location: Location },
 
     <span class="comment">// this error is used for custom error mapping
     // please do not delete it
-    </span><span class="attr">#[snafu(display(<span class="string">&quot;Other error&quot;</span>))]
+    </span><span class="attr">#[snafu(display(<span class="string">"Other error"</span>))]
     </span>Other {
         source: BoxedError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to join task&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to join task"</span>))]
     </span>JoinTask {
         <span class="attr">#[snafu(source)]
         </span>error: tokio::task::JoinError,
         location: Location,
     },
 
-    <span class="attr">#[cfg(feature = <span class="string">&quot;pprof&quot;</span>)]
-    #[snafu(display(<span class="string">&quot;Failed to dump pprof data&quot;</span>))]
+    <span class="attr">#[cfg(feature = <span class="string">"pprof"</span>)]
+    #[snafu(display(<span class="string">"Failed to dump pprof data"</span>))]
     </span>DumpPprof {
         source: <span class="kw">crate</span>::http::pprof::nix::Error,
     },
 
     <span class="attr">#[cfg(not(windows))]
-    #[snafu(display(<span class="string">&quot;Failed to update jemalloc metrics&quot;</span>))]
+    #[snafu(display(<span class="string">"Failed to update jemalloc metrics"</span>))]
     </span>UpdateJemallocMetrics {
         <span class="attr">#[snafu(source)]
         </span>error: tikv_jemalloc_ctl::Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;DataFrame operation error&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"DataFrame operation error"</span>))]
     </span>DataFrame {
         <span class="attr">#[snafu(source)]
         </span>error: datafusion::error::DataFusionError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to replace params with values in prepared statement&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to replace params with values in prepared statement"</span>))]
     </span>ReplacePreparedStmtParams {
         source: query::error::Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to convert scalar value&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to convert scalar value"</span>))]
     </span>ConvertScalarValue {
         source: datatypes::error::Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Expected type: {:?}, actual: {:?}&quot;</span>, expected, actual))]
+    <span class="attr">#[snafu(display(<span class="string">"Expected type: {:?}, actual: {:?}"</span>, expected, actual))]
     </span>PreparedStmtTypeMismatch {
         expected: ConcreteDataType,
         actual: opensrv_mysql::ColumnType,
@@ -996,7 +997,7 @@
     },
 
     <span class="attr">#[snafu(display(
-        <span class="string">&quot;Column: {}, {} incompatible, expected: {}, actual: {}&quot;</span>,
+        <span class="string">"Column: {}, {} incompatible, expected: {}, actual: {}"</span>,
         column_name,
         datatype,
         expected,
@@ -1010,14 +1011,14 @@
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to convert to json&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to convert to json"</span>))]
     </span>ToJson {
         <span class="attr">#[snafu(source)]
         </span>error: serde_json::error::Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to decode url&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to decode url"</span>))]
     </span>UrlDecode {
         <span class="attr">#[snafu(source)]
         </span>error: FromUtf8Error,
@@ -1094,7 +1095,7 @@
             | InvalidUtf8Value { .. } =&gt; StatusCode::InvalidAuthHeader,
 
             DatabaseNotFound { .. } =&gt; StatusCode::DatabaseNotFound,
-            <span class="attr">#[cfg(feature = <span class="string">&quot;mem-prof&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"mem-prof"</span>)]
             </span>DumpProfileData { source, .. } =&gt; source.status_code(),
             InvalidFlushArgument { .. } =&gt; StatusCode::InvalidArguments,
 
@@ -1115,7 +1116,7 @@
                 }
             }
 
-            <span class="attr">#[cfg(feature = <span class="string">&quot;pprof&quot;</span>)]
+            <span class="attr">#[cfg(feature = <span class="string">"pprof"</span>)]
             </span>DumpPprof { source, .. } =&gt; source.status_code(),
 
             ConvertScalarValue { source, .. } =&gt; source.status_code(),
@@ -1217,13 +1218,13 @@
             | Error::InvalidQuery { .. }
             | Error::TimePrecision { .. } =&gt; HttpStatusCode::BAD_REQUEST,
             <span class="kw">_ </span>=&gt; {
-                <span class="macro">logging::error!</span>(<span class="self">self</span>; <span class="string">&quot;Failed to handle HTTP request&quot;</span>);
+                <span class="macro">logging::error!</span>(<span class="self">self</span>; <span class="string">"Failed to handle HTTP request"</span>);
 
                 HttpStatusCode::INTERNAL_SERVER_ERROR
             }
         };
         <span class="kw">let </span>body = Json(<span class="macro">json!</span>({
-            <span class="string">&quot;error&quot;</span>: error_msg,
+            <span class="string">"error"</span>: error_msg,
         }));
         (status, body).into_response()
     }

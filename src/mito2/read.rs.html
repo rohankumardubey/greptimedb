@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/read.rs`."><title>read.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/read.rs`."><title>read.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1005,14 +1006,14 @@
 <a href="#1005" id="1005">1005</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -1215,7 +1216,7 @@
         <span class="macro">ensure!</span>(
             !batches.is_empty(),
             InvalidBatchSnafu {
-                reason: <span class="string">&quot;empty batches&quot;</span>,
+                reason: <span class="string">"empty batches"</span>,
             }
         );
         <span class="kw">if </span>batches.len() == <span class="number">1 </span>{
@@ -1225,28 +1226,28 @@
 
         <span class="kw">let </span>primary_key = std::mem::take(<span class="kw-2">&amp;mut </span>batches[<span class="number">0</span>].primary_key);
         <span class="kw">let </span>first = <span class="kw-2">&amp;</span>batches[<span class="number">0</span>];
-        <span class="comment">// We took the primary key from the first batch so we don&#39;t use `first.primary_key()`.
+        <span class="comment">// We took the primary key from the first batch so we don't use `first.primary_key()`.
         </span><span class="macro">ensure!</span>(
             batches
                 .iter()
                 .skip(<span class="number">1</span>)
                 .all(|b| b.primary_key() == primary_key),
             InvalidBatchSnafu {
-                reason: <span class="string">&quot;batches have different primary key&quot;</span>,
+                reason: <span class="string">"batches have different primary key"</span>,
             }
         );
         <span class="kw">for </span>b <span class="kw">in </span>batches.iter().skip(<span class="number">1</span>) {
             <span class="macro">ensure!</span>(
                 b.fields.len() == first.fields.len(),
                 InvalidBatchSnafu {
-                    reason: <span class="string">&quot;batches have different field num&quot;</span>,
+                    reason: <span class="string">"batches have different field num"</span>,
                 }
             );
             <span class="kw">for </span>(l, r) <span class="kw">in </span>b.fields.iter().zip(<span class="kw-2">&amp;</span>first.fields) {
                 <span class="macro">ensure!</span>(
                     l.column_id == r.column_id,
                     InvalidBatchSnafu {
-                        reason: <span class="string">&quot;batches have different fields&quot;</span>,
+                        reason: <span class="string">"batches have different fields"</span>,
                     }
                 );
             }
@@ -1323,7 +1324,7 @@
     <span class="doccomment">/// Sorts and dedup rows in the batch.
     ///
     /// It orders rows by timestamp, sequence desc and only keep the latest
-    /// row for the same timestamp. It doesn&#39;t consider op type as sequence
+    /// row for the same timestamp. It doesn't consider op type as sequence
     /// should already provide uniqueness for a row.
     </span><span class="kw">pub fn </span>sort_and_dedup(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="comment">// If building a converter each time is costly, we may allow passing a
@@ -1414,7 +1415,7 @@
                 .unwrap()
                 .as_arrow()
                 .values(),
-            other =&gt; <span class="macro">panic!</span>(<span class="string">&quot;timestamps in a Batch has other type {:?}&quot;</span>, other),
+            other =&gt; <span class="macro">panic!</span>(<span class="string">"timestamps in a Batch has other type {:?}"</span>, other),
         };
 
         <span class="prelude-val">Some</span>(values)
@@ -1452,8 +1453,8 @@
         <span class="kw">match </span><span class="self">self</span>.timestamps.get_ref(index) {
             ValueRef::Timestamp(timestamp) =&gt; timestamp,
 
-            <span class="comment">// We have check the data type is timestamp compatible in the [BatchBuilder] so it&#39;s safe to panic.
-            </span>value =&gt; <span class="macro">panic!</span>(<span class="string">&quot;{:?} is not a timestamp&quot;</span>, value),
+            <span class="comment">// We have check the data type is timestamp compatible in the [BatchBuilder] so it's safe to panic.
+            </span>value =&gt; <span class="macro">panic!</span>(<span class="string">"{:?} is not a timestamp"</span>, value),
         }
     }
 
@@ -1562,7 +1563,7 @@
         <span class="macro">ensure!</span>(
             vector.data_type().is_timestamp(),
             InvalidBatchSnafu {
-                reason: <span class="macro">format!</span>(<span class="string">&quot;{:?} is not a timestamp type&quot;</span>, vector.data_type()),
+                reason: <span class="macro">format!</span>(<span class="string">"{:?} is not a timestamp type"</span>, vector.data_type()),
             }
         );
 
@@ -1575,7 +1576,7 @@
         <span class="macro">ensure!</span>(
             <span class="kw-2">*</span>array.data_type() == arrow::datatypes::DataType::UInt64,
             InvalidBatchSnafu {
-                reason: <span class="string">&quot;sequence array is not UInt64 type&quot;</span>,
+                reason: <span class="string">"sequence array is not UInt64 type"</span>,
             }
         );
         <span class="comment">// Safety: The cast must success as we have ensured it is uint64 type.
@@ -1590,7 +1591,7 @@
         <span class="macro">ensure!</span>(
             <span class="kw-2">*</span>array.data_type() == arrow::datatypes::DataType::UInt8,
             InvalidBatchSnafu {
-                reason: <span class="string">&quot;sequence array is not UInt8 type&quot;</span>,
+                reason: <span class="string">"sequence array is not UInt8 type"</span>,
             }
         );
         <span class="comment">// Safety: The cast must success as we have ensured it is uint64 type.
@@ -1603,13 +1604,13 @@
     <span class="doccomment">/// Builds the [Batch].
     </span><span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Batch&gt; {
         <span class="kw">let </span>timestamps = <span class="self">self</span>.timestamps.context(InvalidBatchSnafu {
-            reason: <span class="string">&quot;missing timestamps&quot;</span>,
+            reason: <span class="string">"missing timestamps"</span>,
         })<span class="question-mark">?</span>;
         <span class="kw">let </span>sequences = <span class="self">self</span>.sequences.context(InvalidBatchSnafu {
-            reason: <span class="string">&quot;missing sequences&quot;</span>,
+            reason: <span class="string">"missing sequences"</span>,
         })<span class="question-mark">?</span>;
         <span class="kw">let </span>op_types = <span class="self">self</span>.op_types.context(InvalidBatchSnafu {
-            reason: <span class="string">&quot;missing op_types&quot;</span>,
+            reason: <span class="string">"missing op_types"</span>,
         })<span class="question-mark">?</span>;
         <span class="comment">// Our storage format ensure these columns are not nullable so
         // we use assert here.
@@ -1622,7 +1623,7 @@
             sequences.len() == ts_len,
             InvalidBatchSnafu {
                 reason: <span class="macro">format!</span>(
-                    <span class="string">&quot;sequence have different len {} != {}&quot;</span>,
+                    <span class="string">"sequence have different len {} != {}"</span>,
                     sequences.len(),
                     ts_len
                 ),
@@ -1632,7 +1633,7 @@
             op_types.len() == ts_len,
             InvalidBatchSnafu {
                 reason: <span class="macro">format!</span>(
-                    <span class="string">&quot;op type have different len {} != {}&quot;</span>,
+                    <span class="string">"op type have different len {} != {}"</span>,
                     op_types.len(),
                     ts_len
                 ),
@@ -1643,7 +1644,7 @@
                 column.data.len() == ts_len,
                 InvalidBatchSnafu {
                     reason: <span class="macro">format!</span>(
-                        <span class="string">&quot;column {} has different len {} != {}&quot;</span>,
+                        <span class="string">"column {} has different len {} != {}"</span>,
                         column.column_id,
                         column.data.len(),
                         ts_len
@@ -1698,7 +1699,7 @@
     <span class="doccomment">/// Fetch next [Batch].
     ///
     /// Returns `Ok(None)` when the reader has reached its end and calling `next_batch()`
-    /// again won&#39;t return batch again.
+    /// again won't return batch again.
     ///
     /// If `Err` is returned, caller should not call this method again, the implementor
     /// may or may not panic in such case.
@@ -1709,7 +1710,7 @@
 </span><span class="kw">pub type </span>BoxedBatchReader = Box&lt;<span class="kw">dyn </span>BatchReader&gt;;
 
 <span class="doccomment">/// Pointer to a stream that yields [Batch].
-</span><span class="kw">pub type </span>BoxedBatchStream = BoxStream&lt;<span class="lifetime">&#39;static</span>, <span class="prelude-ty">Result</span>&lt;Batch&gt;&gt;;
+</span><span class="kw">pub type </span>BoxedBatchStream = BoxStream&lt;<span class="lifetime">'static</span>, <span class="prelude-ty">Result</span>&lt;Batch&gt;&gt;;
 
 <span class="attr">#[async_trait::async_trait]
 </span><span class="kw">impl</span>&lt;T: BatchReader + <span class="question-mark">?</span>Sized&gt; BatchReader <span class="kw">for </span>Box&lt;T&gt; {
@@ -1730,7 +1731,7 @@
         op_types: <span class="kw-2">&amp;</span>[OpType],
         field: <span class="kw-2">&amp;</span>[u64],
     ) -&gt; Batch {
-        new_batch_builder(<span class="string">b&quot;test&quot;</span>, timestamps, sequences, op_types, <span class="number">1</span>, field)
+        new_batch_builder(<span class="string">b"test"</span>, timestamps, sequences, op_types, <span class="number">1</span>, field)
             .build()
             .unwrap()
     }
@@ -1814,7 +1815,7 @@
         <span class="kw">let </span>err = Batch::concat(<span class="macro">vec!</span>[]).unwrap_err();
         <span class="macro">assert!</span>(
             <span class="macro">matches!</span>(err, Error::InvalidBatch { .. }),
-            <span class="string">&quot;unexpected err: {err}&quot;
+            <span class="string">"unexpected err: {err}"
         </span>);
     }
 
@@ -1863,11 +1864,11 @@
     </span><span class="kw">fn </span>test_concat_different() {
         <span class="kw">let </span>batch1 = new_batch(<span class="kw-2">&amp;</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">1</span>]);
         <span class="kw">let </span><span class="kw-2">mut </span>batch2 = new_batch(<span class="kw-2">&amp;</span>[<span class="number">2</span>], <span class="kw-2">&amp;</span>[<span class="number">2</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">2</span>]);
-        batch2.primary_key = <span class="string">b&quot;hello&quot;</span>.to_vec();
+        batch2.primary_key = <span class="string">b"hello"</span>.to_vec();
         <span class="kw">let </span>err = Batch::concat(<span class="macro">vec!</span>[batch1, batch2]).unwrap_err();
         <span class="macro">assert!</span>(
             <span class="macro">matches!</span>(err, Error::InvalidBatch { .. }),
-            <span class="string">&quot;unexpected err: {err}&quot;
+            <span class="string">"unexpected err: {err}"
         </span>);
     }
 
@@ -1886,7 +1887,7 @@
         <span class="kw">let </span>err = Batch::concat(<span class="macro">vec!</span>[batch1.clone(), batch2]).unwrap_err();
         <span class="macro">assert!</span>(
             <span class="macro">matches!</span>(err, Error::InvalidBatch { .. }),
-            <span class="string">&quot;unexpected err: {err}&quot;
+            <span class="string">"unexpected err: {err}"
         </span>);
 
         <span class="comment">// Batch 2 has different field.
@@ -1898,7 +1899,7 @@
         <span class="kw">let </span>err = Batch::concat(<span class="macro">vec!</span>[batch1, batch2]).unwrap_err();
         <span class="macro">assert!</span>(
             <span class="macro">matches!</span>(err, Error::InvalidBatch { .. }),
-            <span class="string">&quot;unexpected err: {err}&quot;
+            <span class="string">"unexpected err: {err}"
         </span>);
     }
 

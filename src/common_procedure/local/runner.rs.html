@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/common/procedure/src/local/runner.rs`."><title>runner.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="common_procedure" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/common/procedure/src/local/runner.rs`."><title>runner.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="common_procedure" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1052,14 +1053,14 @@
 <a href="#1052" id="1052">1052</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -1130,11 +1131,11 @@
 <span class="kw">impl </span>Drop <span class="kw">for </span>ProcedureGuard {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if </span>!<span class="self">self</span>.finish {
-            <span class="macro">logging::error!</span>(<span class="string">&quot;Procedure {} exits unexpectedly&quot;</span>, <span class="self">self</span>.meta.id);
+            <span class="macro">logging::error!</span>(<span class="string">"Procedure {} exits unexpectedly"</span>, <span class="self">self</span>.meta.id);
 
             <span class="comment">// Set state to failed. This is useful in test as runtime may not abort when the runner task panics.
             // See https://github.com/tokio-rs/tokio/issues/2002 .
-            // We set set_panic_hook() in the application&#39;s main function. But our tests don&#39;t have this panic hook.
+            // We set set_panic_hook() in the application's main function. But our tests don't have this panic hook.
             </span><span class="kw">let </span>err = ProcedurePanicSnafu {
                 procedure_id: <span class="self">self</span>.meta.id,
             }
@@ -1176,7 +1177,7 @@
         </span><span class="kw">let </span>guard = ProcedureGuard::new(<span class="self">self</span>.meta.clone(), <span class="self">self</span>.manager_ctx.clone());
 
         <span class="macro">logging::info!</span>(
-            <span class="string">&quot;Runner {}-{} starts&quot;</span>,
+            <span class="string">"Runner {}-{} starts"</span>,
             <span class="self">self</span>.procedure.type_name(),
             <span class="self">self</span>.meta.id
         );
@@ -1195,10 +1196,10 @@
         // is successful or fail.
         </span><span class="self">self</span>.execute_procedure_in_loop().<span class="kw">await</span>;
 
-        <span class="comment">// We can&#39;t remove the metadata of the procedure now as users and its parent might
+        <span class="comment">// We can't remove the metadata of the procedure now as users and its parent might
         // need to query its state.
         // TODO(yingwen): 1. Add TTL to the metadata; 2. Only keep state in the procedure store
-        // so we don&#39;t need to always store the metadata in memory after the procedure is done.
+        // so we don't need to always store the metadata in memory after the procedure is done.
 
         // Release locks and notify parent procedure.
         </span>guard.finish();
@@ -1218,7 +1219,7 @@
                 <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self</span>.store.delete_procedure(id).<span class="kw">await </span>{
                     <span class="macro">logging::error!</span>(
                         e;
-                        <span class="string">&quot;Runner {}-{} failed to delete procedure {}&quot;</span>,
+                        <span class="string">"Runner {}-{} failed to delete procedure {}"</span>,
                         <span class="self">self</span>.procedure.type_name(),
                         <span class="self">self</span>.meta.id,
                         id,
@@ -1228,7 +1229,7 @@
         }
 
         <span class="macro">logging::info!</span>(
-            <span class="string">&quot;Runner {}-{} exits&quot;</span>,
+            <span class="string">"Runner {}-{} exits"</span>,
             <span class="self">self</span>.procedure.type_name(),
             <span class="self">self</span>.meta.id
         );
@@ -1248,7 +1249,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>retry = <span class="self">self</span>.exponential_builder.build();
         <span class="kw">let </span><span class="kw-2">mut </span>retry_times = <span class="number">0</span>;
         <span class="kw">loop </span>{
-            <span class="comment">// Don&#39;t store state if `ProcedureManager` is stopped.
+            <span class="comment">// Don't store state if `ProcedureManager` is stopped.
             </span><span class="kw">if </span>!<span class="self">self</span>.running() {
                 <span class="self">self</span>.meta.set_state(ProcedureState::Failed {
                     error: Arc::new(error::ManagerNotStartSnafu {}.build()),
@@ -1300,14 +1301,14 @@
         <span class="kw">match </span><span class="self">self</span>.procedure.execute(ctx).<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>(status) =&gt; {
                 <span class="macro">logging::debug!</span>(
-                    <span class="string">&quot;Execute procedure {}-{} once, status: {:?}, need_persist: {}&quot;</span>,
+                    <span class="string">"Execute procedure {}-{} once, status: {:?}, need_persist: {}"</span>,
                     <span class="self">self</span>.procedure.type_name(),
                     <span class="self">self</span>.meta.id,
                     status,
                     status.need_persist(),
                 );
 
-                <span class="comment">// Don&#39;t store state if `ProcedureManager` is stopped.
+                <span class="comment">// Don't store state if `ProcedureManager` is stopped.
                 </span><span class="kw">if </span>!<span class="self">self</span>.running() {
                     <span class="self">self</span>.meta.set_state(ProcedureState::Failed {
                         error: Arc::new(error::ManagerNotStartSnafu {}.build()),
@@ -1343,13 +1344,13 @@
             <span class="prelude-val">Err</span>(e) =&gt; {
                 <span class="macro">logging::error!</span>(
                     e;
-                    <span class="string">&quot;Failed to execute procedure {}-{}, retry: {}&quot;</span>,
+                    <span class="string">"Failed to execute procedure {}-{}, retry: {}"</span>,
                     <span class="self">self</span>.procedure.type_name(),
                     <span class="self">self</span>.meta.id,
                     e.is_retry_later(),
                 );
 
-                <span class="comment">// Don&#39;t store state if `ProcedureManager` is stopped.
+                <span class="comment">// Don't store state if `ProcedureManager` is stopped.
                 </span><span class="kw">if </span>!<span class="self">self</span>.running() {
                     <span class="self">self</span>.meta.set_state(ProcedureState::Failed {
                         error: Arc::new(error::ManagerNotStartSnafu {}.build()),
@@ -1371,7 +1372,7 @@
     <span class="doccomment">/// Submit a subprocedure with specific `procedure_id`.
     </span><span class="kw">fn </span>submit_subprocedure(<span class="kw-2">&amp;</span><span class="self">self</span>, procedure_id: ProcedureId, <span class="kw-2">mut </span>procedure: BoxedProcedure) {
         <span class="kw">if </span><span class="self">self</span>.manager_ctx.contains_procedure(procedure_id) {
-            <span class="comment">// If the parent has already submitted this procedure, don&#39;t submit it again.
+            <span class="comment">// If the parent has already submitted this procedure, don't submit it again.
             </span><span class="kw">return</span>;
         }
 
@@ -1407,7 +1408,7 @@
         // using the same procedure id.
         </span><span class="macro">assert!</span>(
             <span class="self">self</span>.manager_ctx.try_insert_procedure(meta),
-            <span class="string">&quot;Procedure {}-{} submit an existing procedure {}-{}&quot;</span>,
+            <span class="string">"Procedure {}-{} submit an existing procedure {}-{}"</span>,
             <span class="self">self</span>.procedure.type_name(),
             <span class="self">self</span>.meta.id,
             runner.procedure.type_name(),
@@ -1426,7 +1427,7 @@
     <span class="doccomment">/// Extend the retry time to wait for the next retry.
     </span><span class="kw">async fn </span>wait_on_err(<span class="kw-2">&amp;</span><span class="self">self</span>, d: Duration, i: u64) {
         <span class="macro">logging::info!</span>(
-            <span class="string">&quot;Procedure {}-{} retry for the {} times after {} millis&quot;</span>,
+            <span class="string">"Procedure {}-{} retry for the {} times after {} millis"</span>,
             <span class="self">self</span>.procedure.type_name(),
             <span class="self">self</span>.meta.id,
             i,
@@ -1439,7 +1440,7 @@
         <span class="kw">let </span>has_child = !subprocedures.is_empty();
         <span class="kw">for </span>subprocedure <span class="kw">in </span>subprocedures {
             <span class="macro">logging::info!</span>(
-                <span class="string">&quot;Procedure {}-{} submit subprocedure {}-{}&quot;</span>,
+                <span class="string">"Procedure {}-{} submit subprocedure {}-{}"</span>,
                 <span class="self">self</span>.procedure.type_name(),
                 <span class="self">self</span>.meta.id,
                 subprocedure.procedure.type_name(),
@@ -1450,7 +1451,7 @@
         }
 
         <span class="macro">logging::info!</span>(
-            <span class="string">&quot;Procedure {}-{} is waiting for subprocedures&quot;</span>,
+            <span class="string">"Procedure {}-{} is waiting for subprocedures"</span>,
             <span class="self">self</span>.procedure.type_name(),
             <span class="self">self</span>.meta.id,
         );
@@ -1460,7 +1461,7 @@
             <span class="self">self</span>.meta.child_notify.notified().<span class="kw">await</span>;
 
             <span class="macro">logging::info!</span>(
-                <span class="string">&quot;Procedure {}-{} is waked up&quot;</span>,
+                <span class="string">"Procedure {}-{} is waked up"</span>,
                 <span class="self">self</span>.procedure.type_name(),
                 <span class="self">self</span>.meta.id,
             );
@@ -1478,7 +1479,7 @@
             .<span class="kw">await
             </span>.map_err(|e| {
                 <span class="macro">logging::error!</span>(
-                    e; <span class="string">&quot;Failed to persist procedure {}-{}&quot;</span>,
+                    e; <span class="string">"Failed to persist procedure {}-{}"</span>,
                     <span class="self">self</span>.procedure.type_name(),
                     <span class="self">self</span>.meta.id
                 );
@@ -1494,7 +1495,7 @@
             .<span class="kw">await
             </span>.map_err(|e| {
                 <span class="macro">logging::error!</span>(
-                    e; <span class="string">&quot;Failed to commit procedure {}-{}&quot;</span>,
+                    e; <span class="string">"Failed to commit procedure {}-{}"</span>,
                     <span class="self">self</span>.procedure.type_name(),
                     <span class="self">self</span>.meta.id
                 );
@@ -1510,7 +1511,7 @@
             .<span class="kw">await
             </span>.map_err(|e| {
                 <span class="macro">logging::error!</span>(
-                    e; <span class="string">&quot;Failed to write rollback key for procedure {}-{}&quot;</span>,
+                    e; <span class="string">"Failed to write rollback key for procedure {}-{}"</span>,
                     <span class="self">self</span>.procedure.type_name(),
                     <span class="self">self</span>.meta.id
                 );
@@ -1523,7 +1524,7 @@
     <span class="kw">fn </span>done(<span class="kw-2">&amp;</span><span class="self">self</span>) {
         <span class="comment">// TODO(yingwen): Add files to remove list.
         </span><span class="macro">logging::info!</span>(
-            <span class="string">&quot;Procedure {}-{} done&quot;</span>,
+            <span class="string">"Procedure {}-{} done"</span>,
             <span class="self">self</span>.procedure.type_name(),
             <span class="self">self</span>.meta.id,
         );
@@ -1551,7 +1552,7 @@
     <span class="kw">use </span><span class="kw">crate</span>::store::proc_path;
     <span class="kw">use crate</span>::{ContextProvider, Error, LockKey, Procedure};
 
-    <span class="kw">const </span>ROOT_ID: <span class="kw-2">&amp;</span>str = <span class="string">&quot;9f805a1f-05f7-490c-9f91-bd56e3cc54c1&quot;</span>;
+    <span class="kw">const </span>ROOT_ID: <span class="kw-2">&amp;</span>str = <span class="string">"9f805a1f-05f7-490c-9f91-bd56e3cc54c1"</span>;
 
     <span class="kw">fn </span>new_runner(
         meta: ProcedureMetaRef,
@@ -1575,7 +1576,7 @@
         procedure_id: ProcedureId,
         files: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str],
     ) {
-        <span class="kw">let </span>dir = <span class="macro">proc_path!</span>(procedure_store, <span class="string">&quot;{procedure_id}/&quot;</span>);
+        <span class="kw">let </span>dir = <span class="macro">proc_path!</span>(procedure_store, <span class="string">"{procedure_id}/"</span>);
         <span class="kw">let </span>lister = object_store.list(<span class="kw-2">&amp;</span>dir).<span class="kw">await</span>.unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>files_in_dir: Vec&lt;<span class="kw">_</span>&gt; = lister.into_iter().map(|de| de.name().to_string()).collect();
         files_in_dir.sort_unstable();
@@ -1621,10 +1622,10 @@
     <span class="attr">#[async_trait]
     </span><span class="kw">impl</span>&lt;F&gt; Procedure <span class="kw">for </span>ProcedureAdapter&lt;F&gt;
     <span class="kw">where
-        </span>F: FnMut(Context) -&gt; BoxFuture&lt;<span class="lifetime">&#39;static</span>, <span class="prelude-ty">Result</span>&lt;Status&gt;&gt; + Send + Sync,
+        </span>F: FnMut(Context) -&gt; BoxFuture&lt;<span class="lifetime">'static</span>, <span class="prelude-ty">Result</span>&lt;Status&gt;&gt; + Send + Sync,
     {
         <span class="kw">fn </span>type_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-            <span class="string">&quot;ProcedureAdapter&quot;
+            <span class="string">"ProcedureAdapter"
         </span>}
 
         <span class="kw">async fn </span>execute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ctx: <span class="kw-2">&amp;</span>Context) -&gt; <span class="prelude-ty">Result</span>&lt;Status&gt; {
@@ -1655,12 +1656,12 @@
             .boxed()
         };
         <span class="kw">let </span>normal = ProcedureAdapter {
-            data: <span class="string">&quot;normal&quot;</span>.to_string(),
-            lock_key: LockKey::single(<span class="string">&quot;catalog.schema.table&quot;</span>),
+            data: <span class="string">"normal"</span>.to_string(),
+            lock_key: LockKey::single(<span class="string">"catalog.schema.table"</span>),
             exec_fn,
         };
 
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;normal&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"normal"</span>);
         <span class="kw">let </span>meta = normal.new_meta(ROOT_ID);
         <span class="kw">let </span>ctx = context_without_provider(meta.id);
         <span class="kw">let </span>object_store = test_util::new_object_store(<span class="kw-2">&amp;</span>dir);
@@ -1669,7 +1670,7 @@
         runner.manager_ctx.start();
 
         <span class="kw">let </span>res = runner.execute_once(<span class="kw-2">&amp;</span>ctx).<span class="kw">await</span>;
-        <span class="macro">assert!</span>(res.is_continue(), <span class="string">&quot;{res:?}&quot;</span>);
+        <span class="macro">assert!</span>(res.is_continue(), <span class="string">"{res:?}"</span>);
         check_files(
             <span class="kw-2">&amp;</span>object_store,
             <span class="kw-2">&amp;</span>procedure_store,
@@ -1679,7 +1680,7 @@
         .<span class="kw">await</span>;
 
         <span class="kw">let </span>res = runner.execute_once(<span class="kw-2">&amp;</span>ctx).<span class="kw">await</span>;
-        <span class="macro">assert!</span>(res.is_done(), <span class="string">&quot;{res:?}&quot;</span>);
+        <span class="macro">assert!</span>(res.is_done(), <span class="string">"{res:?}"</span>);
         check_files(
             <span class="kw-2">&amp;</span>object_store,
             <span class="kw-2">&amp;</span>procedure_store,
@@ -1693,15 +1694,15 @@
     </span><span class="kw">async fn </span>test_execute_once_normal() {
         execute_once_normal(
             <span class="bool-val">true</span>,
-            <span class="kw-2">&amp;</span>[<span class="string">&quot;0000000000.step&quot;</span>],
-            <span class="kw-2">&amp;</span>[<span class="string">&quot;0000000000.step&quot;</span>, <span class="string">&quot;0000000001.commit&quot;</span>],
+            <span class="kw-2">&amp;</span>[<span class="string">"0000000000.step"</span>],
+            <span class="kw-2">&amp;</span>[<span class="string">"0000000000.step"</span>, <span class="string">"0000000001.commit"</span>],
         )
         .<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_execute_once_normal_skip_persist() {
-        execute_once_normal(<span class="bool-val">false</span>, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[<span class="string">&quot;0000000000.commit&quot;</span>]).<span class="kw">await</span>;
+        execute_once_normal(<span class="bool-val">false</span>, <span class="kw-2">&amp;</span>[], <span class="kw-2">&amp;</span>[<span class="string">"0000000000.commit"</span>]).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
@@ -1716,12 +1717,12 @@
             .boxed()
         };
         <span class="kw">let </span>suspend = ProcedureAdapter {
-            data: <span class="string">&quot;suspend&quot;</span>.to_string(),
-            lock_key: LockKey::single(<span class="string">&quot;catalog.schema.table&quot;</span>),
+            data: <span class="string">"suspend"</span>.to_string(),
+            lock_key: LockKey::single(<span class="string">"catalog.schema.table"</span>),
             exec_fn,
         };
 
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;suspend&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"suspend"</span>);
         <span class="kw">let </span>meta = suspend.new_meta(ROOT_ID);
         <span class="kw">let </span>ctx = context_without_provider(meta.id);
         <span class="kw">let </span>object_store = test_util::new_object_store(<span class="kw-2">&amp;</span>dir);
@@ -1730,7 +1731,7 @@
         runner.manager_ctx.start();
 
         <span class="kw">let </span>res = runner.execute_once(<span class="kw-2">&amp;</span>ctx).<span class="kw">await</span>;
-        <span class="macro">assert!</span>(res.is_continue(), <span class="string">&quot;{res:?}&quot;</span>);
+        <span class="macro">assert!</span>(res.is_continue(), <span class="string">"{res:?}"</span>);
     }
 
     <span class="kw">fn </span>new_child_procedure(procedure_id: ProcedureId, keys: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str]) -&gt; ProcedureWithId {
@@ -1748,7 +1749,7 @@
             .boxed()
         };
         <span class="kw">let </span>child = ProcedureAdapter {
-            data: <span class="string">&quot;child&quot;</span>.to_string(),
+            data: <span class="string">"child"</span>.to_string(),
             lock_key: LockKey::new(keys.iter().map(|k| k.to_string())),
             exec_fn,
         };
@@ -1765,12 +1766,12 @@
         <span class="kw">let </span>children_ids = [ProcedureId::random(), ProcedureId::random()];
         <span class="kw">let </span>keys = [
             <span class="kw-2">&amp;</span>[
-                <span class="string">&quot;catalog.schema.table.region-0&quot;</span>,
-                <span class="string">&quot;catalog.schema.table.region-1&quot;</span>,
+                <span class="string">"catalog.schema.table.region-0"</span>,
+                <span class="string">"catalog.schema.table.region-1"</span>,
             ],
             <span class="kw-2">&amp;</span>[
-                <span class="string">&quot;catalog.schema.table.region-2&quot;</span>,
-                <span class="string">&quot;catalog.schema.table.region-3&quot;</span>,
+                <span class="string">"catalog.schema.table.region-2"</span>,
+                <span class="string">"catalog.schema.table.region-3"</span>,
             ],
         ];
 
@@ -1816,12 +1817,12 @@
             .boxed()
         };
         <span class="kw">let </span>parent = ProcedureAdapter {
-            data: <span class="string">&quot;parent&quot;</span>.to_string(),
-            lock_key: LockKey::single(<span class="string">&quot;catalog.schema.table&quot;</span>),
+            data: <span class="string">"parent"</span>.to_string(),
+            lock_key: LockKey::single(<span class="string">"catalog.schema.table"</span>),
             exec_fn,
         };
 
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;parent&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"parent"</span>);
         <span class="kw">let </span>meta = parent.new_meta(ROOT_ID);
         <span class="kw">let </span>procedure_id = meta.id;
 
@@ -1840,10 +1841,10 @@
         <span class="comment">// Check child procedures.
         </span><span class="kw">for </span>child_id <span class="kw">in </span>children_ids {
             <span class="kw">let </span>state = manager_ctx.state(child_id).unwrap();
-            <span class="macro">assert!</span>(state.is_done(), <span class="string">&quot;{state:?}&quot;</span>);
+            <span class="macro">assert!</span>(state.is_done(), <span class="string">"{state:?}"</span>);
         }
         <span class="kw">let </span>state = manager_ctx.state(procedure_id).unwrap();
-        <span class="macro">assert!</span>(state.is_done(), <span class="string">&quot;{state:?}&quot;</span>);
+        <span class="macro">assert!</span>(state.is_done(), <span class="string">"{state:?}"</span>);
         <span class="comment">// Files are removed.
         </span>check_files(<span class="kw-2">&amp;</span>object_store, <span class="kw-2">&amp;</span>procedure_store, procedure_id, <span class="kw-2">&amp;</span>[]).<span class="kw">await</span>;
 
@@ -1861,12 +1862,12 @@
     </span><span class="kw">async fn </span>test_running_is_stopped() {
         <span class="kw">let </span>exec_fn = <span class="kw">move </span>|<span class="kw">_</span>| <span class="kw">async move </span>{ <span class="prelude-val">Ok</span>(Status::Executing { persist: <span class="bool-val">true </span>}) }.boxed();
         <span class="kw">let </span>normal = ProcedureAdapter {
-            data: <span class="string">&quot;normal&quot;</span>.to_string(),
-            lock_key: LockKey::single(<span class="string">&quot;catalog.schema.table&quot;</span>),
+            data: <span class="string">"normal"</span>.to_string(),
+            lock_key: LockKey::single(<span class="string">"catalog.schema.table"</span>),
             exec_fn,
         };
 
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;test_running_is_stopped&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"test_running_is_stopped"</span>);
         <span class="kw">let </span>meta = normal.new_meta(ROOT_ID);
         <span class="kw">let </span>ctx = context_without_provider(meta.id);
         <span class="kw">let </span>object_store = test_util::new_object_store(<span class="kw-2">&amp;</span>dir);
@@ -1875,24 +1876,24 @@
         runner.manager_ctx.start();
 
         <span class="kw">let </span>res = runner.execute_once(<span class="kw-2">&amp;</span>ctx).<span class="kw">await</span>;
-        <span class="macro">assert!</span>(res.is_continue(), <span class="string">&quot;{res:?}&quot;</span>);
+        <span class="macro">assert!</span>(res.is_continue(), <span class="string">"{res:?}"</span>);
         check_files(
             <span class="kw-2">&amp;</span>object_store,
             <span class="kw-2">&amp;</span>procedure_store,
             ctx.procedure_id,
-            <span class="kw-2">&amp;</span>[<span class="string">&quot;0000000000.step&quot;</span>],
+            <span class="kw-2">&amp;</span>[<span class="string">"0000000000.step"</span>],
         )
         .<span class="kw">await</span>;
 
         runner.manager_ctx.stop();
         <span class="kw">let </span>res = runner.execute_once(<span class="kw-2">&amp;</span>ctx).<span class="kw">await</span>;
         <span class="macro">assert!</span>(res.is_failed());
-        <span class="comment">// Shouldn&#39;t write any files
+        <span class="comment">// Shouldn't write any files
         </span>check_files(
             <span class="kw-2">&amp;</span>object_store,
             <span class="kw-2">&amp;</span>procedure_store,
             ctx.procedure_id,
-            <span class="kw-2">&amp;</span>[<span class="string">&quot;0000000000.step&quot;</span>],
+            <span class="kw-2">&amp;</span>[<span class="string">"0000000000.step"</span>],
         )
         .<span class="kw">await</span>;
     }
@@ -1902,12 +1903,12 @@
         <span class="kw">let </span>exec_fn =
             |<span class="kw">_</span>| <span class="kw">async </span>{ <span class="prelude-val">Err</span>(Error::external(MockError::new(StatusCode::Unexpected))) }.boxed();
         <span class="kw">let </span>normal = ProcedureAdapter {
-            data: <span class="string">&quot;fail&quot;</span>.to_string(),
-            lock_key: LockKey::single(<span class="string">&quot;catalog.schema.table&quot;</span>),
+            data: <span class="string">"fail"</span>.to_string(),
+            lock_key: LockKey::single(<span class="string">"catalog.schema.table"</span>),
             exec_fn,
         };
 
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;test_running_is_stopped_on_error&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"test_running_is_stopped_on_error"</span>);
         <span class="kw">let </span>meta = normal.new_meta(ROOT_ID);
         <span class="kw">let </span>ctx = context_without_provider(meta.id);
         <span class="kw">let </span>object_store = test_util::new_object_store(<span class="kw-2">&amp;</span>dir);
@@ -1916,8 +1917,8 @@
         runner.manager_ctx.stop();
 
         <span class="kw">let </span>res = runner.execute_once(<span class="kw-2">&amp;</span>ctx).<span class="kw">await</span>;
-        <span class="macro">assert!</span>(res.is_failed(), <span class="string">&quot;{res:?}&quot;</span>);
-        <span class="comment">// Shouldn&#39;t write any files
+        <span class="macro">assert!</span>(res.is_failed(), <span class="string">"{res:?}"</span>);
+        <span class="comment">// Shouldn't write any files
         </span>check_files(<span class="kw-2">&amp;</span>object_store, <span class="kw-2">&amp;</span>procedure_store, ctx.procedure_id, <span class="kw-2">&amp;</span>[]).<span class="kw">await</span>;
     }
 
@@ -1926,12 +1927,12 @@
         <span class="kw">let </span>exec_fn =
             |<span class="kw">_</span>| <span class="kw">async </span>{ <span class="prelude-val">Err</span>(Error::external(MockError::new(StatusCode::Unexpected))) }.boxed();
         <span class="kw">let </span>fail = ProcedureAdapter {
-            data: <span class="string">&quot;fail&quot;</span>.to_string(),
-            lock_key: LockKey::single(<span class="string">&quot;catalog.schema.table&quot;</span>),
+            data: <span class="string">"fail"</span>.to_string(),
+            lock_key: LockKey::single(<span class="string">"catalog.schema.table"</span>),
             exec_fn,
         };
 
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;fail&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"fail"</span>);
         <span class="kw">let </span>meta = fail.new_meta(ROOT_ID);
         <span class="kw">let </span>ctx = context_without_provider(meta.id);
         <span class="kw">let </span>object_store = test_util::new_object_store(<span class="kw-2">&amp;</span>dir);
@@ -1940,13 +1941,13 @@
         runner.manager_ctx.start();
 
         <span class="kw">let </span>res = runner.execute_once(<span class="kw-2">&amp;</span>ctx).<span class="kw">await</span>;
-        <span class="macro">assert!</span>(res.is_failed(), <span class="string">&quot;{res:?}&quot;</span>);
+        <span class="macro">assert!</span>(res.is_failed(), <span class="string">"{res:?}"</span>);
         <span class="macro">assert!</span>(meta.state().is_failed());
         check_files(
             <span class="kw-2">&amp;</span>object_store,
             <span class="kw-2">&amp;</span>procedure_store,
             ctx.procedure_id,
-            <span class="kw-2">&amp;</span>[<span class="string">&quot;0000000000.rollback&quot;</span>],
+            <span class="kw-2">&amp;</span>[<span class="string">"0000000000.rollback"</span>],
         )
         .<span class="kw">await</span>;
     }
@@ -1968,12 +1969,12 @@
         };
 
         <span class="kw">let </span>retry_later = ProcedureAdapter {
-            data: <span class="string">&quot;retry_later&quot;</span>.to_string(),
-            lock_key: LockKey::single(<span class="string">&quot;catalog.schema.table&quot;</span>),
+            data: <span class="string">"retry_later"</span>.to_string(),
+            lock_key: LockKey::single(<span class="string">"catalog.schema.table"</span>),
             exec_fn,
         };
 
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;retry_later&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"retry_later"</span>);
         <span class="kw">let </span>meta = retry_later.new_meta(ROOT_ID);
         <span class="kw">let </span>ctx = context_without_provider(meta.id);
         <span class="kw">let </span>object_store = test_util::new_object_store(<span class="kw-2">&amp;</span>dir);
@@ -1982,17 +1983,17 @@
         runner.manager_ctx.start();
 
         <span class="kw">let </span>res = runner.execute_once(<span class="kw-2">&amp;</span>ctx).<span class="kw">await</span>;
-        <span class="macro">assert!</span>(res.is_retry_later(), <span class="string">&quot;{res:?}&quot;</span>);
+        <span class="macro">assert!</span>(res.is_retry_later(), <span class="string">"{res:?}"</span>);
         <span class="macro">assert!</span>(meta.state().is_retrying());
 
         <span class="kw">let </span>res = runner.execute_once(<span class="kw-2">&amp;</span>ctx).<span class="kw">await</span>;
-        <span class="macro">assert!</span>(res.is_done(), <span class="string">&quot;{res:?}&quot;</span>);
+        <span class="macro">assert!</span>(res.is_done(), <span class="string">"{res:?}"</span>);
         <span class="macro">assert!</span>(meta.state().is_done());
         check_files(
             <span class="kw-2">&amp;</span>object_store,
             <span class="kw-2">&amp;</span>procedure_store,
             ctx.procedure_id,
-            <span class="kw-2">&amp;</span>[<span class="string">&quot;0000000000.commit&quot;</span>],
+            <span class="kw-2">&amp;</span>[<span class="string">"0000000000.commit"</span>],
         )
         .<span class="kw">await</span>;
     }
@@ -2003,12 +2004,12 @@
             |<span class="kw">_</span>| <span class="kw">async </span>{ <span class="prelude-val">Err</span>(Error::retry_later(MockError::new(StatusCode::Unexpected))) }.boxed();
 
         <span class="kw">let </span>exceed_max_retry_later = ProcedureAdapter {
-            data: <span class="string">&quot;exceed_max_retry_later&quot;</span>.to_string(),
-            lock_key: LockKey::single(<span class="string">&quot;catalog.schema.table&quot;</span>),
+            data: <span class="string">"exceed_max_retry_later"</span>.to_string(),
+            lock_key: LockKey::single(<span class="string">"catalog.schema.table"</span>),
             exec_fn,
         };
 
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;exceed_max_retry_later&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"exceed_max_retry_later"</span>);
         <span class="kw">let </span>meta = exceed_max_retry_later.new_meta(ROOT_ID);
         <span class="kw">let </span>object_store = test_util::new_object_store(<span class="kw-2">&amp;</span>dir);
         <span class="kw">let </span>procedure_store = Arc::new(ProcedureStore::from_object_store(object_store.clone()));
@@ -2026,7 +2027,7 @@
         <span class="comment">// Run the runner and execute the procedure.
         </span>runner.execute_procedure_in_loop().<span class="kw">await</span>;
         <span class="kw">let </span>err = meta.state().error().unwrap().to_string();
-        <span class="macro">assert!</span>(err.contains(<span class="string">&quot;Procedure retry exceeded max times&quot;</span>));
+        <span class="macro">assert!</span>(err.contains(<span class="string">"Procedure retry exceeded max times"</span>));
     }
 
     <span class="attr">#[tokio::test]
@@ -2044,8 +2045,8 @@
                             .boxed()
                     };
                     <span class="kw">let </span>fail = ProcedureAdapter {
-                        data: <span class="string">&quot;fail&quot;</span>.to_string(),
-                        lock_key: LockKey::single(<span class="string">&quot;catalog.schema.table.region-0&quot;</span>),
+                        data: <span class="string">"fail"</span>.to_string(),
+                        lock_key: LockKey::single(<span class="string">"catalog.schema.table.region-0"</span>),
                         exec_fn,
                     };
 
@@ -2063,7 +2064,7 @@
                     <span class="kw">if </span>is_failed {
                         <span class="comment">// The parent procedure to abort itself if child procedure is failed.
                         </span><span class="prelude-val">Err</span>(Error::from_error_ext(PlainError::new(
-                            <span class="string">&quot;subprocedure failed&quot;</span>.to_string(),
+                            <span class="string">"subprocedure failed"</span>.to_string(),
                             StatusCode::Unexpected,
                         )))
                     } <span class="kw">else </span>{
@@ -2078,12 +2079,12 @@
             .boxed()
         };
         <span class="kw">let </span>parent = ProcedureAdapter {
-            data: <span class="string">&quot;parent&quot;</span>.to_string(),
-            lock_key: LockKey::single(<span class="string">&quot;catalog.schema.table&quot;</span>),
+            data: <span class="string">"parent"</span>.to_string(),
+            lock_key: LockKey::single(<span class="string">"catalog.schema.table"</span>),
             exec_fn,
         };
 
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;child_err&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"child_err"</span>);
         <span class="kw">let </span>meta = parent.new_meta(ROOT_ID);
 
         <span class="kw">let </span>object_store = test_util::new_object_store(<span class="kw-2">&amp;</span>dir);
@@ -2099,7 +2100,7 @@
         <span class="comment">// Run the runner and execute the procedure.
         </span>runner.run().<span class="kw">await</span>;
         <span class="kw">let </span>err = meta.state().error().unwrap().output_msg();
-        <span class="macro">assert!</span>(err.contains(<span class="string">&quot;subprocedure failed&quot;</span>), <span class="string">&quot;{err}&quot;</span>);
+        <span class="macro">assert!</span>(err.contains(<span class="string">"subprocedure failed"</span>), <span class="string">"{err}"</span>);
     }
 }
 </code></pre></div></section></main></body></html>

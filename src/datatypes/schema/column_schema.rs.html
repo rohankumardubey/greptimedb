@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/datatypes/src/schema/column_schema.rs`."><title>column_schema.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="datatypes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/datatypes/src/schema/column_schema.rs`."><title>column_schema.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="datatypes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -446,14 +447,14 @@
 <a href="#446" id="446">446</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -473,11 +474,11 @@
 
 <span class="kw">pub type </span>Metadata = HashMap&lt;String, String&gt;;
 
-<span class="doccomment">/// Key used to store whether the column is time index in arrow field&#39;s metadata.
-</span><span class="kw">pub const </span>TIME_INDEX_KEY: <span class="kw-2">&amp;</span>str = <span class="string">&quot;greptime:time_index&quot;</span>;
-<span class="kw">pub const </span>COMMENT_KEY: <span class="kw-2">&amp;</span>str = <span class="string">&quot;greptime:storage:comment&quot;</span>;
-<span class="doccomment">/// Key used to store default constraint in arrow field&#39;s metadata.
-</span><span class="kw">const </span>DEFAULT_CONSTRAINT_KEY: <span class="kw-2">&amp;</span>str = <span class="string">&quot;greptime:default_constraint&quot;</span>;
+<span class="doccomment">/// Key used to store whether the column is time index in arrow field's metadata.
+</span><span class="kw">pub const </span>TIME_INDEX_KEY: <span class="kw-2">&amp;</span>str = <span class="string">"greptime:time_index"</span>;
+<span class="kw">pub const </span>COMMENT_KEY: <span class="kw-2">&amp;</span>str = <span class="string">"greptime:storage:comment"</span>;
+<span class="doccomment">/// Key used to store default constraint in arrow field's metadata.
+</span><span class="kw">const </span>DEFAULT_CONSTRAINT_KEY: <span class="kw-2">&amp;</span>str = <span class="string">"greptime:default_constraint"</span>;
 
 <span class="doccomment">/// Schema of a column, used as an immutable struct.
 </span><span class="attr">#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -491,23 +492,23 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ColumnSchema {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;{} {} {}&quot;</span>,
+            <span class="string">"{} {} {}"</span>,
             <span class="self">self</span>.name,
             <span class="self">self</span>.data_type,
-            <span class="kw">if </span><span class="self">self</span>.is_nullable { <span class="string">&quot;null&quot; </span>} <span class="kw">else </span>{ <span class="string">&quot;not null&quot; </span>},
+            <span class="kw">if </span><span class="self">self</span>.is_nullable { <span class="string">"null" </span>} <span class="kw">else </span>{ <span class="string">"not null" </span>},
         )<span class="question-mark">?</span>;
 
         <span class="comment">// Add default constraint if present
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(default_constraint) = <span class="kw-2">&amp;</span><span class="self">self</span>.default_constraint {
-            <span class="macro">write!</span>(f, <span class="string">&quot; default={:?}&quot;</span>, default_constraint)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(f, <span class="string">" default={:?}"</span>, default_constraint)<span class="question-mark">?</span>;
         }
 
         <span class="comment">// Add metadata if present
         </span><span class="kw">if </span>!<span class="self">self</span>.metadata.is_empty() {
-            <span class="macro">write!</span>(f, <span class="string">&quot; metadata={:?}&quot;</span>, <span class="self">self</span>.metadata)<span class="question-mark">?</span>;
+            <span class="macro">write!</span>(f, <span class="string">" metadata={:?}"</span>, <span class="self">self</span>.metadata)<span class="question-mark">?</span>;
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -560,7 +561,7 @@
         <span class="kw">if </span>is_time_index {
             <span class="kw">let _ </span>= <span class="self">self
                 </span>.metadata
-                .insert(TIME_INDEX_KEY.to_string(), <span class="string">&quot;true&quot;</span>.to_string());
+                .insert(TIME_INDEX_KEY.to_string(), <span class="string">"true"</span>.to_string());
         } <span class="kw">else </span>{
             <span class="kw">let _ </span>= <span class="self">self</span>.metadata.remove(TIME_INDEX_KEY);
         }
@@ -570,7 +571,7 @@
     <span class="doccomment">/// Set default constraint.
     ///
     /// If a default constraint exists for the column, this method will
-    /// validate it against the column&#39;s data type and nullability.
+    /// validate it against the column's data type and nullability.
     </span><span class="kw">pub fn </span>with_default_constraint(
         <span class="kw-2">mut </span><span class="self">self</span>,
         default_constraint: <span class="prelude-ty">Option</span>&lt;ColumnDefaultConstraint&gt;,
@@ -597,7 +598,7 @@
 
     <span class="doccomment">/// Creates a vector with default value for this column.
     ///
-    /// If the column is `NOT NULL` but doesn&#39;t has `DEFAULT` value supplied, returns `Ok(None)`.
+    /// If the column is `NOT NULL` but doesn't has `DEFAULT` value supplied, returns `Ok(None)`.
     </span><span class="kw">pub fn </span>create_default_vector(<span class="kw-2">&amp;</span><span class="self">self</span>, num_rows: usize) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;VectorRef&gt;&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.default_constraint {
             <span class="prelude-val">Some</span>(c) =&gt; c
@@ -626,7 +627,7 @@
         <span class="kw">let </span>padding_value = <span class="kw">if </span><span class="self">self</span>.is_nullable {
             Value::Null
         } <span class="kw">else </span>{
-            <span class="comment">// If the column is not null, use the data type&#39;s default value as it is
+            <span class="comment">// If the column is not null, use the data type's default value as it is
             // more efficient to acquire.
             </span><span class="self">self</span>.data_type.default_value()
         };
@@ -640,7 +641,7 @@
 
     <span class="doccomment">/// Creates a default value for this column.
     ///
-    /// If the column is `NOT NULL` but doesn&#39;t has `DEFAULT` value supplied, returns `Ok(None)`.
+    /// If the column is `NOT NULL` but doesn't has `DEFAULT` value supplied, returns `Ok(None)`.
     </span><span class="kw">pub fn </span>create_default(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Value&gt;&gt; {
         <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.default_constraint {
             <span class="prelude-val">Some</span>(c) =&gt; c
@@ -726,9 +727,9 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_schema() {
-        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>);
+        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>);
         <span class="kw">let </span>field = Field::try_from(<span class="kw-2">&amp;</span>column_schema).unwrap();
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;test&quot;</span>, field.name());
+        <span class="macro">assert_eq!</span>(<span class="string">"test"</span>, field.name());
         <span class="macro">assert_eq!</span>(ArrowDataType::Int32, <span class="kw-2">*</span>field.data_type());
         <span class="macro">assert!</span>(field.is_nullable());
 
@@ -738,7 +739,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_schema_with_default_constraint() {
-        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>)
+        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>)
             .with_default_constraint(<span class="prelude-val">Some</span>(ColumnDefaultConstraint::Value(Value::from(<span class="number">99</span>))))
             .unwrap();
         <span class="macro">assert!</span>(column_schema
@@ -747,11 +748,11 @@
             .is_none());
 
         <span class="kw">let </span>field = Field::try_from(<span class="kw-2">&amp;</span>column_schema).unwrap();
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;test&quot;</span>, field.name());
+        <span class="macro">assert_eq!</span>(<span class="string">"test"</span>, field.name());
         <span class="macro">assert_eq!</span>(ArrowDataType::Int32, <span class="kw-2">*</span>field.data_type());
         <span class="macro">assert!</span>(field.is_nullable());
         <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;{\&quot;Value\&quot;:{\&quot;Int32\&quot;:99}}&quot;</span>,
+            <span class="string">"{\"Value\":{\"Int32\":99}}"</span>,
             field.metadata().get(DEFAULT_CONSTRAINT_KEY).unwrap()
         );
 
@@ -761,19 +762,19 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_schema_with_metadata() {
-        <span class="kw">let </span>metadata = Metadata::from([(<span class="string">&quot;k1&quot;</span>.to_string(), <span class="string">&quot;v1&quot;</span>.to_string())]);
-        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>)
+        <span class="kw">let </span>metadata = Metadata::from([(<span class="string">"k1"</span>.to_string(), <span class="string">"v1"</span>.to_string())]);
+        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>)
             .with_metadata(metadata)
             .with_default_constraint(<span class="prelude-val">Some</span>(ColumnDefaultConstraint::null_value()))
             .unwrap();
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;v1&quot;</span>, column_schema.metadata().get(<span class="string">&quot;k1&quot;</span>).unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"v1"</span>, column_schema.metadata().get(<span class="string">"k1"</span>).unwrap());
         <span class="macro">assert!</span>(column_schema
             .metadata()
             .get(DEFAULT_CONSTRAINT_KEY)
             .is_none());
 
         <span class="kw">let </span>field = Field::try_from(<span class="kw-2">&amp;</span>column_schema).unwrap();
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;v1&quot;</span>, field.metadata().get(<span class="string">&quot;k1&quot;</span>).unwrap());
+        <span class="macro">assert_eq!</span>(<span class="string">"v1"</span>, field.metadata().get(<span class="string">"k1"</span>).unwrap());
         <span class="kw">let _ </span>= field.metadata().get(DEFAULT_CONSTRAINT_KEY).unwrap();
 
         <span class="kw">let </span>new_column_schema = ColumnSchema::try_from(<span class="kw-2">&amp;</span>field).unwrap();
@@ -782,8 +783,8 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_schema_with_duplicate_metadata() {
-        <span class="kw">let </span>metadata = Metadata::from([(DEFAULT_CONSTRAINT_KEY.to_string(), <span class="string">&quot;v1&quot;</span>.to_string())]);
-        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>)
+        <span class="kw">let </span>metadata = Metadata::from([(DEFAULT_CONSTRAINT_KEY.to_string(), <span class="string">"v1"</span>.to_string())]);
+        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>)
             .with_metadata(metadata)
             .with_default_constraint(<span class="prelude-val">Some</span>(ColumnDefaultConstraint::null_value()))
             .unwrap();
@@ -793,7 +794,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_schema_invalid_default_constraint() {
         <span class="macro">assert!</span>(
-            ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">false</span>)
+            ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">false</span>)
                 .with_default_constraint(<span class="prelude-val">Some</span>(ColumnDefaultConstraint::null_value()))
                 .is_err()
         );
@@ -812,13 +813,13 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_schema_create_default_null() {
         <span class="comment">// Implicit default null.
-        </span><span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>);
+        </span><span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>);
         <span class="kw">let </span>v = column_schema.create_default_vector(<span class="number">5</span>).unwrap().unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">5</span>, v.len());
         <span class="macro">assert!</span>(v.only_null());
 
         <span class="comment">// Explicit default null.
-        </span><span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>)
+        </span><span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>)
             .with_default_constraint(<span class="prelude-val">Some</span>(ColumnDefaultConstraint::null_value()))
             .unwrap();
         <span class="kw">let </span>v = column_schema.create_default_vector(<span class="number">5</span>).unwrap().unwrap();
@@ -828,18 +829,18 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_schema_no_default() {
-        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">false</span>);
+        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">false</span>);
         <span class="macro">assert!</span>(column_schema.create_default_vector(<span class="number">5</span>).unwrap().is_none());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_create_default_vector_for_padding() {
-        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>);
+        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>);
         <span class="kw">let </span>vector = column_schema.create_default_vector_for_padding(<span class="number">4</span>);
         <span class="macro">assert!</span>(vector.only_null());
         <span class="macro">assert_eq!</span>(<span class="number">4</span>, vector.len());
 
-        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">false</span>);
+        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">false</span>);
         <span class="kw">let </span>vector = column_schema.create_default_vector_for_padding(<span class="number">4</span>);
         <span class="macro">assert_eq!</span>(<span class="number">4</span>, vector.len());
         <span class="kw">let </span>expect: VectorRef = Arc::new(Int32Vector::from_slice([<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]));
@@ -849,12 +850,12 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_schema_single_create_default_null() {
         <span class="comment">// Implicit default null.
-        </span><span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>);
+        </span><span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>);
         <span class="kw">let </span>v = column_schema.create_default().unwrap().unwrap();
         <span class="macro">assert!</span>(v.is_null());
 
         <span class="comment">// Explicit default null.
-        </span><span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>)
+        </span><span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>)
             .with_default_constraint(<span class="prelude-val">Some</span>(ColumnDefaultConstraint::null_value()))
             .unwrap();
         <span class="kw">let </span>v = column_schema.create_default().unwrap().unwrap();
@@ -863,7 +864,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_schema_single_create_default_not_null() {
-        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>)
+        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">true</span>)
             .with_default_constraint(<span class="prelude-val">Some</span>(ColumnDefaultConstraint::Value(Value::Int32(<span class="number">6</span>))))
             .unwrap();
         <span class="kw">let </span>v = column_schema.create_default().unwrap().unwrap();
@@ -872,22 +873,22 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_schema_single_no_default() {
-        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">&quot;test&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">false</span>);
+        <span class="kw">let </span>column_schema = ColumnSchema::new(<span class="string">"test"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">false</span>);
         <span class="macro">assert!</span>(column_schema.create_default().unwrap().is_none());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_debug_for_column_schema() {
         <span class="kw">let </span>column_schema_int8 =
-            ColumnSchema::new(<span class="string">&quot;test_column_1&quot;</span>, ConcreteDataType::int8_datatype(), <span class="bool-val">true</span>);
+            ColumnSchema::new(<span class="string">"test_column_1"</span>, ConcreteDataType::int8_datatype(), <span class="bool-val">true</span>);
 
         <span class="kw">let </span>column_schema_int32 =
-            ColumnSchema::new(<span class="string">&quot;test_column_2&quot;</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">false</span>);
+            ColumnSchema::new(<span class="string">"test_column_2"</span>, ConcreteDataType::int32_datatype(), <span class="bool-val">false</span>);
 
-        <span class="kw">let </span>formatted_int8 = <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, column_schema_int8);
-        <span class="kw">let </span>formatted_int32 = <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, column_schema_int32);
-        <span class="macro">assert_eq!</span>(formatted_int8, <span class="string">&quot;test_column_1 Int8 null&quot;</span>);
-        <span class="macro">assert_eq!</span>(formatted_int32, <span class="string">&quot;test_column_2 Int32 not null&quot;</span>);
+        <span class="kw">let </span>formatted_int8 = <span class="macro">format!</span>(<span class="string">"{:?}"</span>, column_schema_int8);
+        <span class="kw">let </span>formatted_int32 = <span class="macro">format!</span>(<span class="string">"{:?}"</span>, column_schema_int32);
+        <span class="macro">assert_eq!</span>(formatted_int8, <span class="string">"test_column_1 Int8 null"</span>);
+        <span class="macro">assert_eq!</span>(formatted_int32, <span class="string">"test_column_2 Int32 not null"</span>);
     }
 }
 </code></pre></div></section></main></body></html>

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/common/meta/src/rpc/router.rs`."><title>router.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="common_meta" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/common/meta/src/rpc/router.rs`."><title>router.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="common_meta" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -485,14 +486,14 @@
 <a href="#485" id="485">485</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -560,7 +561,7 @@
 
 <span class="doccomment">/// Returns the HashMap&lt;[RegionNumber], &amp;[Peer]&gt;;
 ///
-/// If the region doesn&#39;t have a leader peer, the [Region] will be omitted.
+/// If the region doesn't have a leader peer, the [Region] will be omitted.
 </span><span class="kw">pub fn </span>convert_to_region_leader_map(region_routes: <span class="kw-2">&amp;</span>[RegionRoute]) -&gt; HashMap&lt;RegionNumber, <span class="kw-2">&amp;</span>Peer&gt; {
     region_routes
         .iter()
@@ -659,7 +660,7 @@
         <span class="kw">let </span>table = table_route
             .table
             .context(error::RouteInfoCorruptedSnafu {
-                err_msg: <span class="string">&quot;&#39;table&#39; is empty in table route&quot;</span>,
+                err_msg: <span class="string">"'table' is empty in table route"</span>,
             })<span class="question-mark">?
             </span>.try_into()<span class="question-mark">?</span>;
 
@@ -668,7 +669,7 @@
             <span class="kw">let </span>region = region_route
                 .region
                 .context(error::RouteInfoCorruptedSnafu {
-                    err_msg: <span class="string">&quot;&#39;region&#39; is empty in region route&quot;</span>,
+                    err_msg: <span class="string">"'region' is empty in region route"</span>,
                 })<span class="question-mark">?
                 </span>.into();
 
@@ -699,7 +700,7 @@
 </span><span class="kw">pub struct </span>Table {
     <span class="kw">pub </span>id: u64,
     <span class="kw">pub </span>table_name: TableName,
-    <span class="attr">#[serde(serialize_with = <span class="string">&quot;as_utf8&quot;</span>, deserialize_with = <span class="string">&quot;from_utf8&quot;</span>)]
+    <span class="attr">#[serde(serialize_with = <span class="string">"as_utf8"</span>, deserialize_with = <span class="string">"from_utf8"</span>)]
     </span><span class="kw">pub </span>table_schema: Vec&lt;u8&gt;,
 }
 
@@ -710,7 +711,7 @@
         <span class="kw">let </span>table_name = t
             .table_name
             .context(error::RouteInfoCorruptedSnafu {
-                err_msg: <span class="string">&quot;table name required&quot;</span>,
+                err_msg: <span class="string">"table name required"</span>,
             })<span class="question-mark">?
             </span>.into();
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
@@ -740,7 +741,7 @@
     </span><span class="kw">pub </span>follower_peers: Vec&lt;Peer&gt;,
     <span class="doccomment">/// `None` by default.
     </span><span class="attr">#[builder(setter(into, strip_option), default)]
-    #[serde(default, skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    #[serde(default, skip_serializing_if = <span class="string">"Option::is_none"</span>)]
     </span><span class="kw">pub </span>leader_status: <span class="prelude-ty">Option</span>&lt;RegionStatus&gt;,
 }
 
@@ -811,7 +812,7 @@
 }
 
 <span class="kw">impl </span>Region {
-    <span class="attr">#[cfg(any(test, feature = <span class="string">&quot;testing&quot;</span>))]
+    <span class="attr">#[cfg(any(test, feature = <span class="string">"testing"</span>))]
     </span><span class="kw">pub fn </span>new_test(id: RegionId) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             id,
@@ -844,23 +845,23 @@
 
 <span class="attr">#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 </span><span class="kw">pub struct </span>Partition {
-    <span class="attr">#[serde(serialize_with = <span class="string">&quot;as_utf8_vec&quot;</span>, deserialize_with = <span class="string">&quot;from_utf8_vec&quot;</span>)]
+    <span class="attr">#[serde(serialize_with = <span class="string">"as_utf8_vec"</span>, deserialize_with = <span class="string">"from_utf8_vec"</span>)]
     </span><span class="kw">pub </span>column_list: Vec&lt;Vec&lt;u8&gt;&gt;,
-    <span class="attr">#[serde(serialize_with = <span class="string">&quot;as_utf8_vec&quot;</span>, deserialize_with = <span class="string">&quot;from_utf8_vec&quot;</span>)]
+    <span class="attr">#[serde(serialize_with = <span class="string">"as_utf8_vec"</span>, deserialize_with = <span class="string">"from_utf8_vec"</span>)]
     </span><span class="kw">pub </span>value_list: Vec&lt;Vec&lt;u8&gt;&gt;,
 }
 
 <span class="kw">fn </span>as_utf8&lt;S: Serializer&gt;(val: <span class="kw-2">&amp;</span>[u8], serializer: S) -&gt; std::result::Result&lt;S::Ok, S::Error&gt; {
     serializer.serialize_str(
         String::from_utf8(val.to_vec())
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="string">&quot;&lt;unknown-not-UTF8&gt;&quot;</span>.to_string())
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="string">"&lt;unknown-not-UTF8&gt;"</span>.to_string())
             .as_str(),
     )
 }
 
-<span class="kw">pub fn </span>from_utf8&lt;<span class="lifetime">&#39;de</span>, D&gt;(deserializer: D) -&gt; std::result::Result&lt;Vec&lt;u8&gt;, D::Error&gt;
+<span class="kw">pub fn </span>from_utf8&lt;<span class="lifetime">'de</span>, D&gt;(deserializer: D) -&gt; std::result::Result&lt;Vec&lt;u8&gt;, D::Error&gt;
 <span class="kw">where
-    </span>D: Deserializer&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>D: Deserializer&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">let </span>s = String::deserialize(deserializer)<span class="question-mark">?</span>;
 
@@ -878,9 +879,9 @@
     seq.end()
 }
 
-<span class="kw">pub fn </span>from_utf8_vec&lt;<span class="lifetime">&#39;de</span>, D&gt;(deserializer: D) -&gt; std::result::Result&lt;Vec&lt;Vec&lt;u8&gt;&gt;, D::Error&gt;
+<span class="kw">pub fn </span>from_utf8_vec&lt;<span class="lifetime">'de</span>, D&gt;(deserializer: D) -&gt; std::result::Result&lt;Vec&lt;Vec&lt;u8&gt;&gt;, D::Error&gt;
 <span class="kw">where
-    </span>D: Deserializer&lt;<span class="lifetime">&#39;de</span>&gt;,
+    </span>D: Deserializer&lt;<span class="lifetime">'de</span>&gt;,
 {
     <span class="kw">let </span>values = Vec::&lt;String&gt;::deserialize(deserializer)<span class="question-mark">?</span>;
 
@@ -918,12 +919,12 @@
         <span class="kw">let </span><span class="kw-2">mut </span>region_route = RegionRoute {
             region: Region {
                 id: <span class="number">2</span>.into(),
-                name: <span class="string">&quot;r2&quot;</span>.to_string(),
+                name: <span class="string">"r2"</span>.to_string(),
                 partition: <span class="prelude-val">None</span>,
                 attrs: BTreeMap::new(),
             },
-            leader_peer: <span class="prelude-val">Some</span>(Peer::new(<span class="number">1</span>, <span class="string">&quot;a1&quot;</span>)),
-            follower_peers: <span class="macro">vec!</span>[Peer::new(<span class="number">2</span>, <span class="string">&quot;a2&quot;</span>), Peer::new(<span class="number">3</span>, <span class="string">&quot;a3&quot;</span>)],
+            leader_peer: <span class="prelude-val">Some</span>(Peer::new(<span class="number">1</span>, <span class="string">"a1"</span>)),
+            follower_peers: <span class="macro">vec!</span>[Peer::new(<span class="number">2</span>, <span class="string">"a2"</span>), Peer::new(<span class="number">3</span>, <span class="string">"a3"</span>)],
             leader_status: <span class="prelude-val">None</span>,
         };
 
@@ -939,16 +940,16 @@
         <span class="kw">let </span>region_route = RegionRoute {
             region: Region {
                 id: <span class="number">2</span>.into(),
-                name: <span class="string">&quot;r2&quot;</span>.to_string(),
+                name: <span class="string">"r2"</span>.to_string(),
                 partition: <span class="prelude-val">None</span>,
                 attrs: BTreeMap::new(),
             },
-            leader_peer: <span class="prelude-val">Some</span>(Peer::new(<span class="number">1</span>, <span class="string">&quot;a1&quot;</span>)),
-            follower_peers: <span class="macro">vec!</span>[Peer::new(<span class="number">2</span>, <span class="string">&quot;a2&quot;</span>), Peer::new(<span class="number">3</span>, <span class="string">&quot;a3&quot;</span>)],
+            leader_peer: <span class="prelude-val">Some</span>(Peer::new(<span class="number">1</span>, <span class="string">"a1"</span>)),
+            follower_peers: <span class="macro">vec!</span>[Peer::new(<span class="number">2</span>, <span class="string">"a2"</span>), Peer::new(<span class="number">3</span>, <span class="string">"a3"</span>)],
             leader_status: <span class="prelude-val">None</span>,
         };
 
-        <span class="kw">let </span>input = <span class="string">r#&quot;{&quot;region&quot;:{&quot;id&quot;:2,&quot;name&quot;:&quot;r2&quot;,&quot;partition&quot;:null,&quot;attrs&quot;:{}},&quot;leader_peer&quot;:{&quot;id&quot;:1,&quot;addr&quot;:&quot;a1&quot;},&quot;follower_peers&quot;:[{&quot;id&quot;:2,&quot;addr&quot;:&quot;a2&quot;},{&quot;id&quot;:3,&quot;addr&quot;:&quot;a3&quot;}]}&quot;#</span>;
+        <span class="kw">let </span>input = <span class="string">r#"{"region":{"id":2,"name":"r2","partition":null,"attrs":{}},"leader_peer":{"id":1,"addr":"a1"},"follower_peers":[{"id":2,"addr":"a2"},{"id":3,"addr":"a3"}]}"#</span>;
 
         <span class="kw">let </span>decoded: RegionRoute = serde_json::from_str(input).unwrap();
 
@@ -958,8 +959,8 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_de_serialize_partition() {
         <span class="kw">let </span>p = Partition {
-            column_list: <span class="macro">vec!</span>[<span class="string">b&quot;a&quot;</span>.to_vec(), <span class="string">b&quot;b&quot;</span>.to_vec()],
-            value_list: <span class="macro">vec!</span>[<span class="string">b&quot;hi&quot;</span>.to_vec(), <span class="string">b&quot;,&quot;</span>.to_vec()],
+            column_list: <span class="macro">vec!</span>[<span class="string">b"a"</span>.to_vec(), <span class="string">b"b"</span>.to_vec()],
+            value_list: <span class="macro">vec!</span>[<span class="string">b"hi"</span>.to_vec(), <span class="string">b","</span>.to_vec()],
         };
 
         <span class="kw">let </span>output = serde_json::to_string(<span class="kw-2">&amp;</span>p).unwrap();

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/query/src/range_select/plan.rs`."><title>plan.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="query" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/query/src/range_select/plan.rs`."><title>plan.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="query" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1450,14 +1451,14 @@
 <a href="#1450" id="1450">1450</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -1517,12 +1518,12 @@
 }
 
 <span class="kw">impl </span>Display <span class="kw">for </span>Fill {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
-            Fill::Null =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;NULL&quot;</span>),
-            Fill::Prev =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;PREV&quot;</span>),
-            Fill::Linear =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;LINEAR&quot;</span>),
-            Fill::Const(x) =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, x),
+            Fill::Null =&gt; <span class="macro">write!</span>(f, <span class="string">"NULL"</span>),
+            Fill::Prev =&gt; <span class="macro">write!</span>(f, <span class="string">"PREV"</span>),
+            Fill::Linear =&gt; <span class="macro">write!</span>(f, <span class="string">"LINEAR"</span>),
+            Fill::Const(x) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, x),
         }
     }
 }
@@ -1531,14 +1532,14 @@
     <span class="kw">pub fn </span>try_from_str(value: <span class="kw-2">&amp;</span>str, datatype: <span class="kw-2">&amp;</span>DataType) -&gt; DfResult&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>s = value.to_uppercase();
         <span class="kw">match </span>s.as_str() {
-            <span class="string">&quot;NULL&quot; </span>| <span class="string">&quot;&quot; </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::Null),
-            <span class="string">&quot;PREV&quot; </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::Prev),
-            <span class="string">&quot;LINEAR&quot; </span>=&gt; {
+            <span class="string">"NULL" </span>| <span class="string">"" </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::Null),
+            <span class="string">"PREV" </span>=&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::Prev),
+            <span class="string">"LINEAR" </span>=&gt; {
                 <span class="kw">if </span>datatype.is_numeric() {
                     <span class="prelude-val">Ok</span>(<span class="self">Self</span>::Linear)
                 } <span class="kw">else </span>{
                     <span class="prelude-val">Err</span>(DataFusionError::Plan(<span class="macro">format!</span>(
-                        <span class="string">&quot;Use FILL LINEAR on Non-numeric DataType {}&quot;</span>,
+                        <span class="string">"Use FILL LINEAR on Non-numeric DataType {}"</span>,
                         datatype
                     )))
                 }
@@ -1546,7 +1547,7 @@
             <span class="kw">_ </span>=&gt; ScalarValue::try_from_string(s.clone(), datatype)
                 .map_err(|err| {
                     DataFusionError::Plan(<span class="macro">format!</span>(
-                        <span class="string">&quot;{} is not a valid fill option, fail to convert to a const value. {{ {} }}&quot;</span>,
+                        <span class="string">"{} is not a valid fill option, fail to convert to a const value. {{ {} }}"</span>,
                         s, err
                     ))
                 })
@@ -1646,14 +1647,14 @@
         }
         <span class="kw">_ </span>=&gt; {
             <span class="kw">return </span><span class="prelude-val">Err</span>(DataFusionError::Execution(
-                <span class="string">&quot;RangePlan: Apply Fill LINEAR strategy on Non-floating type&quot;</span>.to_string(),
+                <span class="string">"RangePlan: Apply Fill LINEAR strategy on Non-floating type"</span>.to_string(),
             ));
         }
     };
     <span class="comment">// To avoid divide zero error, kind of defensive programming
     </span><span class="kw">if </span>x1 == x0 {
         <span class="kw">return </span><span class="prelude-val">Err</span>(DataFusionError::Execution(
-            <span class="string">&quot;RangePlan: Linear interpolation using the same coordinate points&quot;</span>.to_string(),
+            <span class="string">"RangePlan: Linear interpolation using the same coordinate points"</span>.to_string(),
         ));
     }
     <span class="kw">for </span>i <span class="kw">in </span>start..end {
@@ -1707,8 +1708,8 @@
 }
 
 <span class="kw">impl </span>Display <span class="kw">for </span>RangeFn {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        <span class="macro">write!</span>(f, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.name)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        <span class="macro">write!</span>(f, <span class="string">"{}"</span>, <span class="self">self</span>.name)
     }
 }
 
@@ -1747,7 +1748,7 @@
         <span class="macro">ensure!</span>(
             align.as_millis() != <span class="number">0</span>,
             RangeQuerySnafu {
-                msg: <span class="string">&quot;Can&#39;t use 0 as align in Range Query&quot;
+                msg: <span class="string">"Can't use 0 as align in Range Query"
             </span>}
         );
         <span class="kw">for </span>expr <span class="kw">in </span><span class="kw-2">&amp;</span>range_expr {
@@ -1755,7 +1756,7 @@
                 expr.range.as_millis() != <span class="number">0</span>,
                 RangeQuerySnafu {
                     msg: <span class="macro">format!</span>(
-                        <span class="string">&quot;Invalid Range expr `{}`, Can&#39;t use 0 as range in Range Query&quot;</span>,
+                        <span class="string">"Invalid Range expr `{}`, Can't use 0 as range in Range Query"</span>,
                         expr.name
                     )
                 }
@@ -1773,7 +1774,7 @@
                     <span class="prelude-val">Ok</span>(DFField::new_unqualified(
                         name,
                         data_type.clone(),
-                        <span class="comment">// Only when data fill with Const option, the data can&#39;t be null
+                        <span class="comment">// Only when data fill with Const option, the data can't be null
                         </span>!<span class="macro">matches!</span>(fill, Fill::Const(..)),
                     ))
                 },
@@ -1843,7 +1844,7 @@
 
 <span class="kw">impl </span>UserDefinedLogicalNodeCore <span class="kw">for </span>RangeSelect {
     <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
-        <span class="string">&quot;RangeSelect&quot;
+        <span class="string">"RangeSelect"
     </span>}
 
     <span class="kw">fn </span>inputs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;<span class="kw-2">&amp;</span>LogicalPlan&gt; {
@@ -1864,19 +1865,19 @@
     <span class="kw">fn </span>fmt_for_explain(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;RangeSelect: range_exprs=[{}], align={}ms, align_to={}ms, align_by=[{}], time_index={}&quot;</span>,
+            <span class="string">"RangeSelect: range_exprs=[{}], align={}ms, align_to={}ms, align_by=[{}], time_index={}"</span>,
             <span class="self">self</span>.range_expr
                 .iter()
                 .map(ToString::to_string)
                 .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
-                .join(<span class="string">&quot;, &quot;</span>),
+                .join(<span class="string">", "</span>),
             <span class="self">self</span>.align.as_millis(),
             <span class="self">self</span>.align_to,
             <span class="self">self</span>.by
                 .iter()
                 .map(ToString::to_string)
                 .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
-                .join(<span class="string">&quot;, &quot;</span>),
+                .join(<span class="string">", "</span>),
             <span class="self">self</span>.time_index
         )
     }
@@ -1984,7 +1985,7 @@
                         <span class="prelude-val">Ok</span>(expr)
                     }
                     <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(DataFusionError::Plan(<span class="macro">format!</span>(
-                        <span class="string">&quot;Unexpected Expr:{} in RangeSelect&quot;</span>,
+                        <span class="string">"Unexpected Expr:{} in RangeSelect"</span>,
                         range_fn.expr.display_name()<span class="question-mark">?
                     </span>))),
                 }<span class="question-mark">?</span>;
@@ -2057,13 +2058,13 @@
     <span class="kw">fn </span>fmt_as(<span class="kw-2">&amp;</span><span class="self">self</span>, t: DisplayFormatType, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
         <span class="kw">match </span>t {
             DisplayFormatType::Default | DisplayFormatType::Verbose =&gt; {
-                <span class="macro">write!</span>(f, <span class="string">&quot;RangeSelectExec: &quot;</span>)<span class="question-mark">?</span>;
+                <span class="macro">write!</span>(f, <span class="string">"RangeSelectExec: "</span>)<span class="question-mark">?</span>;
                 <span class="kw">let </span>range_expr_strs: Vec&lt;String&gt; = <span class="self">self
                     </span>.range_exec
                     .iter()
                     .map(|e| {
                         <span class="macro">format!</span>(
-                            <span class="string">&quot;{} RANGE {}s FILL {}&quot;</span>,
+                            <span class="string">"{} RANGE {}s FILL {}"</span>,
                             e.expr.name(),
                             e.range / <span class="number">1000</span>,
                             e.fill
@@ -2073,11 +2074,11 @@
                 <span class="kw">let </span>by: Vec&lt;String&gt; = <span class="self">self</span>.by.iter().map(|e| e.to_string()).collect();
                 <span class="macro">write!</span>(
                     f,
-                    <span class="string">&quot;range_expr=[{}], align={}ms, align_to={}ms, align_by=[{}], time_index={}&quot;</span>,
-                    range_expr_strs.join(<span class="string">&quot;, &quot;</span>),
+                    <span class="string">"range_expr=[{}], align={}ms, align_to={}ms, align_by=[{}], time_index={}"</span>,
+                    range_expr_strs.join(<span class="string">", "</span>),
                     <span class="self">self</span>.align,
                     <span class="self">self</span>.align_to,
-                    by.join(<span class="string">&quot;, &quot;</span>),
+                    by.join(<span class="string">", "</span>),
                     <span class="self">self</span>.time_index,
                 )<span class="question-mark">?</span>;
             }
@@ -2142,7 +2143,7 @@
         <span class="kw">let </span>time_index = schema
             .column_with_name(<span class="kw-2">&amp;</span><span class="self">self</span>.time_index)
             .ok_or(DataFusionError::Execution(
-                <span class="string">&quot;time index column not found&quot;</span>.into(),
+                <span class="string">"time index column not found"</span>.into(),
             ))<span class="question-mark">?
             </span>.<span class="number">0</span>;
         <span class="kw">let </span>row_converter = RowConverter::new(
@@ -2186,7 +2187,7 @@
     </span>schema: SchemaRef,
     range_exec: Vec&lt;RangeFnExec&gt;,
     input: SendableRecordBatchStream,
-    <span class="doccomment">/// Column index of TIME INDEX column&#39;s position in the input schema
+    <span class="doccomment">/// Column index of TIME INDEX column's position in the input schema
     </span>time_index: usize,
     <span class="doccomment">/// the unit of `align` is millisecond
     </span>align: Millisecond,
@@ -2196,8 +2197,8 @@
     <span class="doccomment">/// Converter for the by values
     </span>row_converter: RowConverter,
     random_state: RandomState,
-    <span class="doccomment">/// key: time series&#39;s hash value
-    /// value: time series&#39;s state on different align_ts
+    <span class="doccomment">/// key: time series's hash value
+    /// value: time series's state on different align_ts
     </span>series_map: HashMap&lt;u64, SeriesState&gt;,
     <span class="doccomment">/// key: `(hash of by rows, align_ts)`
     /// value: `[row_ids]`
@@ -2293,7 +2294,7 @@
             .as_any()
             .downcast_ref::&lt;TimestampMillisecondArray&gt;()
             .ok_or(DataFusionError::Execution(
-                <span class="string">&quot;Time index Column downcast to TimestampMillisecondArray failed&quot;</span>.into(),
+                <span class="string">"Time index Column downcast to TimestampMillisecondArray failed"</span>.into(),
             ))<span class="question-mark">?</span>;
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.range_exec.len() {
             <span class="kw">let </span>args = <span class="self">self</span>.evaluate_many(<span class="kw-2">&amp;</span>batch, <span class="kw-2">&amp;</span><span class="self">self</span>.range_exec[i].args)<span class="question-mark">?</span>;
@@ -2445,7 +2446,7 @@
 <span class="kw">impl </span>Stream <span class="kw">for </span>RangeSelectStream {
     <span class="kw">type </span>Item = DataFusionResult&lt;RecordBatch&gt;;
 
-    <span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {
+    <span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">match </span><span class="self">self</span>.exec_state {
                 ExecutionState::ReadingInput =&gt; {
@@ -2526,13 +2527,13 @@
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-    <span class="kw">const </span>TIME_INDEX_COLUMN: <span class="kw-2">&amp;</span>str = <span class="string">&quot;timestamp&quot;</span>;
+    <span class="kw">const </span>TIME_INDEX_COLUMN: <span class="kw-2">&amp;</span>str = <span class="string">"timestamp"</span>;
 
     <span class="kw">fn </span>prepare_test_data(is_float: bool) -&gt; MemoryExec {
         <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[
             Field::new(TIME_INDEX_COLUMN, TimestampMillisecondType::DATA_TYPE, <span class="bool-val">true</span>),
             Field::new(
-                <span class="string">&quot;value&quot;</span>,
+                <span class="string">"value"</span>,
                 <span class="kw">if </span>is_float {
                     DataType::Float64
                 } <span class="kw">else </span>{
@@ -2540,14 +2541,14 @@
                 },
                 <span class="bool-val">true</span>,
             ),
-            Field::new(<span class="string">&quot;host&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"host"</span>, DataType::Utf8, <span class="bool-val">true</span>),
         ]));
         <span class="kw">let </span>timestamp_column: Arc&lt;<span class="kw">dyn </span>Array&gt; = Arc::new(TimestampMillisecondArray::from(<span class="macro">vec!</span>[
             <span class="number">0</span>, <span class="number">5_000</span>, <span class="number">10_000</span>, <span class="number">15_000</span>, <span class="number">20_000</span>, <span class="comment">// host 1 every 5s
             </span><span class="number">0</span>, <span class="number">5_000</span>, <span class="number">10_000</span>, <span class="number">15_000</span>, <span class="number">20_000</span>, <span class="comment">// host 2 every 5s
         </span>])) <span class="kw">as _</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>host = <span class="macro">vec!</span>[<span class="string">&quot;host1&quot;</span>; <span class="number">5</span>];
-        host.extend(<span class="macro">vec!</span>[<span class="string">&quot;host2&quot;</span>; <span class="number">5</span>]);
+        <span class="kw">let </span><span class="kw-2">mut </span>host = <span class="macro">vec!</span>[<span class="string">"host1"</span>; <span class="number">5</span>];
+        host.extend(<span class="macro">vec!</span>[<span class="string">"host2"</span>; <span class="number">5</span>]);
         <span class="kw">let </span>value_column: Arc&lt;<span class="kw">dyn </span>Array&gt; = <span class="kw">if </span>is_float {
             Arc::new(<span class="macro">nullable_array!</span>(Float64;
                 <span class="number">0.0</span>, null, <span class="number">1.0</span>, null, <span class="number">2.0</span>, <span class="comment">// data for host 1
@@ -2590,32 +2591,32 @@
         };
         <span class="kw">let </span>memory_exec = Arc::new(prepare_test_data(is_float));
         <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[
-            Field::new(<span class="string">&quot;MIN(value)&quot;</span>, schema_data_type.clone(), <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;MAX(value)&quot;</span>, schema_data_type, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"MIN(value)"</span>, schema_data_type.clone(), <span class="bool-val">true</span>),
+            Field::new(<span class="string">"MAX(value)"</span>, schema_data_type, <span class="bool-val">true</span>),
             Field::new(TIME_INDEX_COLUMN, TimestampMillisecondType::DATA_TYPE, <span class="bool-val">true</span>),
-            Field::new(<span class="string">&quot;host&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>),
+            Field::new(<span class="string">"host"</span>, DataType::Utf8, <span class="bool-val">true</span>),
         ]));
         <span class="kw">let </span>range_select_exec = Arc::new(RangeSelectExec {
             input: memory_exec,
             range_exec: <span class="macro">vec!</span>[
                 RangeFnExec {
                     expr: Arc::new(expressions::Min::new(
-                        Arc::new(Column::new(<span class="string">&quot;value&quot;</span>, <span class="number">1</span>)),
-                        <span class="string">&quot;MIN(value)&quot;</span>,
+                        Arc::new(Column::new(<span class="string">"value"</span>, <span class="number">1</span>)),
+                        <span class="string">"MIN(value)"</span>,
                         data_type.clone(),
                     )),
-                    args: <span class="macro">vec!</span>[Arc::new(Column::new(<span class="string">&quot;value&quot;</span>, <span class="number">1</span>))],
+                    args: <span class="macro">vec!</span>[Arc::new(Column::new(<span class="string">"value"</span>, <span class="number">1</span>))],
                     range: range1,
                     fill: fill.clone(),
                     need_cast: need_cast.clone(),
                 },
                 RangeFnExec {
                     expr: Arc::new(expressions::Max::new(
-                        Arc::new(Column::new(<span class="string">&quot;value&quot;</span>, <span class="number">1</span>)),
-                        <span class="string">&quot;MAX(value)&quot;</span>,
+                        Arc::new(Column::new(<span class="string">"value"</span>, <span class="number">1</span>)),
+                        <span class="string">"MAX(value)"</span>,
                         data_type,
                     )),
-                    args: <span class="macro">vec!</span>[Arc::new(Column::new(<span class="string">&quot;value&quot;</span>, <span class="number">1</span>))],
+                    args: <span class="macro">vec!</span>[Arc::new(Column::new(<span class="string">"value"</span>, <span class="number">1</span>))],
                     range: range2,
                     fill,
                     need_cast,
@@ -2623,18 +2624,18 @@
             ],
             align,
             align_to: <span class="number">0</span>,
-            by: <span class="macro">vec!</span>[Arc::new(Column::new(<span class="string">&quot;host&quot;</span>, <span class="number">2</span>))],
+            by: <span class="macro">vec!</span>[Arc::new(Column::new(<span class="string">"host"</span>, <span class="number">2</span>))],
             time_index: TIME_INDEX_COLUMN.to_string(),
             schema: schema.clone(),
             schema_before_project: schema.clone(),
             schema_project: <span class="prelude-val">None</span>,
-            by_schema: Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">&quot;host&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>)])),
+            by_schema: Arc::new(Schema::new(<span class="macro">vec!</span>[Field::new(<span class="string">"host"</span>, DataType::Utf8, <span class="bool-val">true</span>)])),
             metric: ExecutionPlanMetricsSet::new(),
         });
         <span class="kw">let </span>sort_exec = SortExec::new(
             <span class="macro">vec!</span>[
                 PhysicalSortExpr {
-                    expr: Arc::new(Column::new(<span class="string">&quot;host&quot;</span>, <span class="number">3</span>)),
+                    expr: Arc::new(Column::new(<span class="string">"host"</span>, <span class="number">3</span>)),
                     options: SortOptions {
                         descending: <span class="bool-val">false</span>,
                         nulls_first: <span class="bool-val">true</span>,
@@ -2666,12 +2667,12 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_10s_align_1000s() {
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;+------------+------------+---------------------+-------+\
+            <span class="string">"+------------+------------+---------------------+-------+\
             \n| MIN(value) | MAX(value) | timestamp           | host  |\
             \n+------------+------------+---------------------+-------+\
             \n| 0.0        | 0.0        | 1970-01-01T00:00:00 | host1 |\
             \n| 3.0        | 3.0        | 1970-01-01T00:00:00 | host2 |\
-            \n+------------+------------+---------------------+-------+&quot;</span>,
+            \n+------------+------------+---------------------+-------+"</span>,
         );
         do_range_select_test(<span class="number">10_000</span>, <span class="number">10_000</span>, <span class="number">1_000_000</span>, Fill::Null, <span class="bool-val">true</span>, expected).<span class="kw">await</span>;
     }
@@ -2679,7 +2680,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_fill_null() {
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;+------------+------------+---------------------+-------+\
+            <span class="string">"+------------+------------+---------------------+-------+\
             \n| MIN(value) | MAX(value) | timestamp           | host  |\
             \n+------------+------------+---------------------+-------+\
             \n| 0.0        |            | 1969-12-31T23:59:55 | host1 |\
@@ -2694,7 +2695,7 @@
             \n| 4.0        | 4.0        | 1970-01-01T00:00:10 | host2 |\
             \n| 5.0        |            | 1970-01-01T00:00:15 | host2 |\
             \n| 5.0        | 5.0        | 1970-01-01T00:00:20 | host2 |\
-            \n+------------+------------+---------------------+-------+&quot;</span>,
+            \n+------------+------------+---------------------+-------+"</span>,
         );
         do_range_select_test(<span class="number">10_000</span>, <span class="number">5_000</span>, <span class="number">5_000</span>, Fill::Null, <span class="bool-val">true</span>, expected).<span class="kw">await</span>;
     }
@@ -2702,7 +2703,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_fill_prev() {
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;+------------+------------+---------------------+-------+\
+            <span class="string">"+------------+------------+---------------------+-------+\
             \n| MIN(value) | MAX(value) | timestamp           | host  |\
             \n+------------+------------+---------------------+-------+\
             \n| 0.0        |            | 1969-12-31T23:59:55 | host1 |\
@@ -2717,7 +2718,7 @@
             \n| 4.0        | 4.0        | 1970-01-01T00:00:10 | host2 |\
             \n| 5.0        | 4.0        | 1970-01-01T00:00:15 | host2 |\
             \n| 5.0        | 5.0        | 1970-01-01T00:00:20 | host2 |\
-            \n+------------+------------+---------------------+-------+&quot;</span>,
+            \n+------------+------------+---------------------+-------+"</span>,
         );
         do_range_select_test(<span class="number">10_000</span>, <span class="number">5_000</span>, <span class="number">5_000</span>, Fill::Prev, <span class="bool-val">true</span>, expected).<span class="kw">await</span>;
     }
@@ -2725,7 +2726,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_fill_linear() {
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;+------------+------------+---------------------+-------+\
+            <span class="string">"+------------+------------+---------------------+-------+\
             \n| MIN(value) | MAX(value) | timestamp           | host  |\
             \n+------------+------------+---------------------+-------+\
             \n| 0.0        | -0.5       | 1969-12-31T23:59:55 | host1 |\
@@ -2740,7 +2741,7 @@
             \n| 4.0        | 4.0        | 1970-01-01T00:00:10 | host2 |\
             \n| 5.0        | 4.5        | 1970-01-01T00:00:15 | host2 |\
             \n| 5.0        | 5.0        | 1970-01-01T00:00:20 | host2 |\
-            \n+------------+------------+---------------------+-------+&quot;</span>,
+            \n+------------+------------+---------------------+-------+"</span>,
         );
         do_range_select_test(<span class="number">10_000</span>, <span class="number">5_000</span>, <span class="number">5_000</span>, Fill::Linear, <span class="bool-val">true</span>, expected).<span class="kw">await</span>;
     }
@@ -2748,7 +2749,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_fill_integer_linear() {
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;+------------+------------+---------------------+-------+\
+            <span class="string">"+------------+------------+---------------------+-------+\
             \n| MIN(value) | MAX(value) | timestamp           | host  |\
             \n+------------+------------+---------------------+-------+\
             \n| 0.0        | -0.5       | 1969-12-31T23:59:55 | host1 |\
@@ -2763,7 +2764,7 @@
             \n| 4.0        | 4.0        | 1970-01-01T00:00:10 | host2 |\
             \n| 5.0        | 4.5        | 1970-01-01T00:00:15 | host2 |\
             \n| 5.0        | 5.0        | 1970-01-01T00:00:20 | host2 |\
-            \n+------------+------------+---------------------+-------+&quot;</span>,
+            \n+------------+------------+---------------------+-------+"</span>,
         );
         do_range_select_test(<span class="number">10_000</span>, <span class="number">5_000</span>, <span class="number">5_000</span>, Fill::Linear, <span class="bool-val">false</span>, expected).<span class="kw">await</span>;
     }
@@ -2771,7 +2772,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_fill_const() {
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;+------------+------------+---------------------+-------+\
+            <span class="string">"+------------+------------+---------------------+-------+\
             \n| MIN(value) | MAX(value) | timestamp           | host  |\
             \n+------------+------------+---------------------+-------+\
             \n| 0.0        | 6.6        | 1969-12-31T23:59:55 | host1 |\
@@ -2786,7 +2787,7 @@
             \n| 4.0        | 4.0        | 1970-01-01T00:00:10 | host2 |\
             \n| 5.0        | 6.6        | 1970-01-01T00:00:15 | host2 |\
             \n| 5.0        | 5.0        | 1970-01-01T00:00:20 | host2 |\
-            \n+------------+------------+---------------------+-------+&quot;</span>,
+            \n+------------+------------+---------------------+-------+"</span>,
         );
         do_range_select_test(
             <span class="number">10_000</span>,
@@ -2801,27 +2802,27 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>fill_test() {
-        <span class="macro">assert!</span>(Fill::try_from_str(<span class="string">&quot;Linear&quot;</span>, <span class="kw-2">&amp;</span>DataType::UInt8).unwrap() == Fill::Linear);
+        <span class="macro">assert!</span>(Fill::try_from_str(<span class="string">"Linear"</span>, <span class="kw-2">&amp;</span>DataType::UInt8).unwrap() == Fill::Linear);
         <span class="macro">assert_eq!</span>(
-            Fill::try_from_str(<span class="string">&quot;Linear&quot;</span>, <span class="kw-2">&amp;</span>DataType::Boolean)
+            Fill::try_from_str(<span class="string">"Linear"</span>, <span class="kw-2">&amp;</span>DataType::Boolean)
                 .unwrap_err()
                 .to_string(),
-            <span class="string">&quot;Error during planning: Use FILL LINEAR on Non-numeric DataType Boolean&quot;
+            <span class="string">"Error during planning: Use FILL LINEAR on Non-numeric DataType Boolean"
         </span>);
         <span class="macro">assert_eq!</span>(
-            Fill::try_from_str(<span class="string">&quot;WHAT&quot;</span>, <span class="kw-2">&amp;</span>DataType::UInt8)
+            Fill::try_from_str(<span class="string">"WHAT"</span>, <span class="kw-2">&amp;</span>DataType::UInt8)
                 .unwrap_err()
                 .to_string(),
-                <span class="string">&quot;Error during planning: WHAT is not a valid fill option, fail to convert to a const value. { Arrow error: Cast error: Cannot cast string &#39;WHAT&#39; to value of UInt8 type }&quot;
+                <span class="string">"Error during planning: WHAT is not a valid fill option, fail to convert to a const value. { Arrow error: Cast error: Cannot cast string 'WHAT' to value of UInt8 type }"
         </span>);
         <span class="macro">assert_eq!</span>(
-            Fill::try_from_str(<span class="string">&quot;8.0&quot;</span>, <span class="kw-2">&amp;</span>DataType::UInt8)
+            Fill::try_from_str(<span class="string">"8.0"</span>, <span class="kw-2">&amp;</span>DataType::UInt8)
                 .unwrap_err()
                 .to_string(),
-                <span class="string">&quot;Error during planning: 8.0 is not a valid fill option, fail to convert to a const value. { Arrow error: Cast error: Cannot cast string &#39;8.0&#39; to value of UInt8 type }&quot;
+                <span class="string">"Error during planning: 8.0 is not a valid fill option, fail to convert to a const value. { Arrow error: Cast error: Cannot cast string '8.0' to value of UInt8 type }"
         </span>);
         <span class="macro">assert!</span>(
-            Fill::try_from_str(<span class="string">&quot;8&quot;</span>, <span class="kw-2">&amp;</span>DataType::UInt8).unwrap()
+            Fill::try_from_str(<span class="string">"8"</span>, <span class="kw-2">&amp;</span>DataType::UInt8).unwrap()
                 == Fill::Const(ScalarValue::UInt8(<span class="prelude-val">Some</span>(<span class="number">8</span>)))
         );
         <span class="kw">let </span><span class="kw-2">mut </span>test1 = <span class="macro">vec!</span>[

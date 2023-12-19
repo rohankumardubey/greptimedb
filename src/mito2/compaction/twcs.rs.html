@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/compaction/twcs.rs`."><title>twcs.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/compaction/twcs.rs`."><title>twcs.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -679,16 +680,30 @@
 <a href="#679" id="679">679</a>
 <a href="#680" id="680">680</a>
 <a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -733,10 +748,10 @@
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>TwcsPicker {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        f.debug_struct(<span class="string">&quot;TwcsPicker&quot;</span>)
-            .field(<span class="string">&quot;max_active_window_files&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_active_window_files)
-            .field(<span class="string">&quot;max_inactive_window_files&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_inactive_window_files)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        f.debug_struct(<span class="string">"TwcsPicker"</span>)
+            .field(<span class="string">"max_active_window_files"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_active_window_files)
+            .field(<span class="string">"max_inactive_window_files"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.max_inactive_window_files)
             .finish()
     }
 }
@@ -764,15 +779,17 @@
     ) -&gt; Vec&lt;CompactionOutput&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>output = <span class="macro">vec!</span>[];
         <span class="kw">for </span>(window, files) <span class="kw">in </span>time_windows {
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(active_window) = active_window &amp;&amp; <span class="kw-2">*</span>window == active_window {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(active_window) = active_window
+                &amp;&amp; <span class="kw-2">*</span>window == active_window
+            {
                 <span class="kw">if </span>files.len() &gt; <span class="self">self</span>.max_active_window_files {
                     output.push(CompactionOutput {
                         output_file_id: FileId::random(),
-                        output_level: <span class="number">1</span>, <span class="comment">// we only have two levels and always compact to l1 
+                        output_level: <span class="number">1</span>, <span class="comment">// we only have two levels and always compact to l1
                         </span>inputs: files.clone(),
                     });
                 } <span class="kw">else </span>{
-                    <span class="macro">debug!</span>(<span class="string">&quot;Active window not present or no enough files in active window {:?}, window: {}&quot;</span>, active_window, <span class="kw-2">*</span>window);
+                    <span class="macro">debug!</span>(<span class="string">"Active window not present or no enough files in active window {:?}, window: {}"</span>, active_window, <span class="kw-2">*</span>window);
                 }
             } <span class="kw">else </span>{
                 <span class="comment">// not active writing window
@@ -783,7 +800,11 @@
                         inputs: files.clone(),
                     });
                 } <span class="kw">else </span>{
-                    <span class="macro">debug!</span>(<span class="string">&quot;No enough files, current: {}, max_inactive_window_files: {}&quot;</span>, files.len(), <span class="self">self</span>.max_inactive_window_files)
+                    <span class="macro">debug!</span>(
+                        <span class="string">"No enough files, current: {}, max_inactive_window_files: {}"</span>,
+                        files.len(),
+                        <span class="self">self</span>.max_inactive_window_files
+                    )
                 }
             }
         }
@@ -810,7 +831,7 @@
         <span class="kw">let </span>ttl = current_version.options.ttl;
         <span class="kw">let </span>expired_ssts = get_expired_ssts(levels, ttl, Timestamp::current_millis());
         <span class="kw">if </span>!expired_ssts.is_empty() {
-            <span class="macro">info!</span>(<span class="string">&quot;Expired SSTs in region {}: {:?}&quot;</span>, region_id, expired_ssts);
+            <span class="macro">info!</span>(<span class="string">"Expired SSTs in region {}: {:?}"</span>, region_id, expired_ssts);
             <span class="comment">// here we mark expired SSTs as compacting to avoid them being picked.
             </span>expired_ssts.iter().for_each(|f| f.set_compacting(<span class="bool-val">true</span>));
         }
@@ -823,7 +844,7 @@
             .unwrap_or_else(|| {
                 <span class="kw">let </span>inferred = infer_time_bucket(levels[<span class="number">0</span>].files());
                 <span class="macro">info!</span>(
-                    <span class="string">&quot;Compaction window for region {} is not present, inferring from files: {:?}&quot;</span>,
+                    <span class="string">"Compaction window for region {} is not present, inferring from files: {:?}"</span>,
                     region_id, inferred
                 );
                 inferred
@@ -860,8 +881,8 @@
 }
 
 <span class="doccomment">/// Assigns files to windows with predefined window size (in seconds) by their max timestamps.
-</span><span class="kw">fn </span>assign_to_windows&lt;<span class="lifetime">&#39;a</span>&gt;(
-    files: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FileHandle&gt;,
+</span><span class="kw">fn </span>assign_to_windows&lt;<span class="lifetime">'a</span>&gt;(
+    files: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>FileHandle&gt;,
     time_window_size: i64,
 ) -&gt; BTreeMap&lt;i64, Vec&lt;FileHandle&gt;&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>windows: BTreeMap&lt;i64, Vec&lt;FileHandle&gt;&gt; = BTreeMap::new();
@@ -881,14 +902,16 @@
 
 <span class="doccomment">/// Finds the latest active writing window among all files.
 /// Returns `None` when there are no files or all files are corrupted.
-</span><span class="kw">fn </span>find_latest_window_in_seconds&lt;<span class="lifetime">&#39;a</span>&gt;(
-    files: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FileHandle&gt;,
+</span><span class="kw">fn </span>find_latest_window_in_seconds&lt;<span class="lifetime">'a</span>&gt;(
+    files: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>FileHandle&gt;,
     time_window_size: i64,
 ) -&gt; <span class="prelude-ty">Option</span>&lt;i64&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>latest_timestamp = <span class="prelude-val">None</span>;
     <span class="kw">for </span>f <span class="kw">in </span>files {
         <span class="kw">let </span>(<span class="kw">_</span>, end) = f.time_range();
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(latest) = latest_timestamp &amp;&amp; end &gt; latest {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(latest) = latest_timestamp
+            &amp;&amp; end &gt; latest
+        {
             latest_timestamp = <span class="prelude-val">Some</span>(end);
         } <span class="kw">else </span>{
             latest_timestamp = <span class="prelude-val">Some</span>(end);
@@ -917,12 +940,12 @@
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>TwcsCompactionTask {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        f.debug_struct(<span class="string">&quot;TwcsCompactionTask&quot;</span>)
-            .field(<span class="string">&quot;region_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.region_id)
-            .field(<span class="string">&quot;outputs&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.outputs)
-            .field(<span class="string">&quot;expired_ssts&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.expired_ssts)
-            .field(<span class="string">&quot;compaction_time_window&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.compaction_time_window)
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        f.debug_struct(<span class="string">"TwcsCompactionTask"</span>)
+            .field(<span class="string">"region_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.region_id)
+            .field(<span class="string">"outputs"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.outputs)
+            .field(<span class="string">"expired_ssts"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.expired_ssts)
+            .field(<span class="string">"compaction_time_window"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.compaction_time_window)
             .finish()
     }
 }
@@ -955,14 +978,14 @@
             compacted_inputs.extend(output.inputs.iter().map(FileHandle::meta));
 
             <span class="macro">info!</span>(
-                <span class="string">&quot;Compaction region {} output [{}]-&gt; {}&quot;</span>,
+                <span class="string">"Compaction region {} output [{}]-&gt; {}"</span>,
                 <span class="self">self</span>.region_id,
                 output
                     .inputs
                     .iter()
                     .map(|f| f.file_id().to_string())
                     .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
-                    .join(<span class="string">&quot;,&quot;</span>),
+                    .join(<span class="string">","</span>),
                 output.output_file_id
             );
 
@@ -997,10 +1020,10 @@
     <span class="kw">async fn </span>handle_compaction(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; error::Result&lt;(Vec&lt;FileMeta&gt;, Vec&lt;FileMeta&gt;)&gt; {
         <span class="self">self</span>.mark_files_compacting(<span class="bool-val">true</span>);
         <span class="kw">let </span>merge_timer = COMPACTION_STAGE_ELAPSED
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">&quot;merge&quot;</span>])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"merge"</span>])
             .start_timer();
         <span class="kw">let </span>(output, <span class="kw-2">mut </span>compacted) = <span class="self">self</span>.merge_ssts().<span class="kw">await</span>.map_err(|e| {
-            <span class="macro">error!</span>(e; <span class="string">&quot;Failed to compact region: {}&quot;</span>, <span class="self">self</span>.region_id);
+            <span class="macro">error!</span>(e; <span class="string">"Failed to compact region: {}"</span>, <span class="self">self</span>.region_id);
             merge_timer.stop_and_discard();
             e
         })<span class="question-mark">?</span>;
@@ -1022,7 +1045,7 @@
     </span><span class="kw">async fn </span>send_to_worker(<span class="kw-2">&amp;</span><span class="self">self</span>, request: WorkerRequest) {
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self</span>.request_sender.send(request).<span class="kw">await </span>{
             <span class="macro">error!</span>(
-                <span class="string">&quot;Failed to notify compaction job status for region {}, request: {:?}&quot;</span>,
+                <span class="string">"Failed to notify compaction job status for region {}, request: {:?}"</span>,
                 <span class="self">self</span>.region_id, e.<span class="number">0
             </span>);
         }
@@ -1035,7 +1058,7 @@
         <span class="kw">let </span>notify = <span class="kw">match </span><span class="self">self</span>.handle_compaction().<span class="kw">await </span>{
             <span class="prelude-val">Ok</span>((added, deleted)) =&gt; {
                 <span class="macro">info!</span>(
-                    <span class="string">&quot;Compacted SST files, input: {:?}, output: {:?}, window: {:?}&quot;</span>,
+                    <span class="string">"Compacted SST files, input: {:?}, output: {:?}, window: {:?}"</span>,
                     deleted, added, <span class="self">self</span>.compaction_time_window
                 );
 
@@ -1052,7 +1075,7 @@
                 })
             }
             <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="macro">error!</span>(e; <span class="string">&quot;Failed to compact region, region id: {}&quot;</span>, <span class="self">self</span>.region_id);
+                <span class="macro">error!</span>(e; <span class="string">"Failed to compact region, region id: {}"</span>, <span class="self">self</span>.region_id);
                 <span class="kw">let </span>err = Arc::new(e);
                 <span class="comment">// notify compaction waiters
                 </span><span class="self">self</span>.on_failure(err.clone());
@@ -1074,7 +1097,7 @@
 <span class="doccomment">/// Infers the suitable time bucket duration.
 /// Now it simply find the max and min timestamp across all SSTs in level and fit the time span
 /// into time bucket.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>infer_time_bucket&lt;<span class="lifetime">&#39;a</span>&gt;(files: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>FileHandle&gt;) -&gt; i64 {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>infer_time_bucket&lt;<span class="lifetime">'a</span>&gt;(files: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>FileHandle&gt;) -&gt; i64 {
     <span class="kw">let </span><span class="kw-2">mut </span>max_ts = Timestamp::new(i64::MIN, TimeUnit::Second);
     <span class="kw">let </span><span class="kw-2">mut </span>min_ts = Timestamp::new(i64::MAX, TimeUnit::Second);
 
@@ -1147,7 +1170,7 @@
     <span class="kw">let </span>expire_time = <span class="kw">match </span>now.sub_duration(ttl) {
         <span class="prelude-val">Ok</span>(expire_time) =&gt; expire_time,
         <span class="prelude-val">Err</span>(e) =&gt; {
-            <span class="macro">error!</span>(e; <span class="string">&quot;Failed to calculate region TTL expire time&quot;</span>);
+            <span class="macro">error!</span>(e; <span class="string">"Failed to calculate region TTL expire time"</span>);
             <span class="kw">return </span><span class="macro">vec!</span>[];
         }
     };
@@ -1223,11 +1246,17 @@
             .iter(),
             <span class="number">3</span>,
         );
-        <span class="macro">assert_eq!</span>(files[<span class="number">0</span>], windows.get(<span class="kw-2">&amp;</span><span class="number">0</span>).unwrap().get(<span class="number">0</span>).unwrap().file_id());
-        <span class="macro">assert_eq!</span>(files[<span class="number">1</span>], windows.get(<span class="kw-2">&amp;</span><span class="number">3</span>).unwrap().get(<span class="number">0</span>).unwrap().file_id());
+        <span class="macro">assert_eq!</span>(
+            files[<span class="number">0</span>],
+            windows.get(<span class="kw-2">&amp;</span><span class="number">0</span>).unwrap().first().unwrap().file_id()
+        );
+        <span class="macro">assert_eq!</span>(
+            files[<span class="number">1</span>],
+            windows.get(<span class="kw-2">&amp;</span><span class="number">3</span>).unwrap().first().unwrap().file_id()
+        );
         <span class="macro">assert_eq!</span>(
             files[<span class="number">2</span>],
-            windows.get(<span class="kw-2">&amp;</span><span class="number">12</span>).unwrap().get(<span class="number">0</span>).unwrap().file_id()
+            windows.get(<span class="kw-2">&amp;</span><span class="number">12</span>).unwrap().first().unwrap().file_id()
         );
     }
 

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/promql/src/planner.rs`."><title>planner.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="promql" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/promql/src/planner.rs`."><title>planner.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="promql" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2461,14 +2462,14 @@
 <a href="#2461" id="2461">2461</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -2521,19 +2522,19 @@
 };
 
 <span class="doccomment">/// `time()` function in PromQL.
-</span><span class="kw">const </span>SPECIAL_TIME_FUNCTION: <span class="kw-2">&amp;</span>str = <span class="string">&quot;time&quot;</span>;
+</span><span class="kw">const </span>SPECIAL_TIME_FUNCTION: <span class="kw-2">&amp;</span>str = <span class="string">"time"</span>;
 <span class="doccomment">/// `histogram_quantile` function in PromQL
-</span><span class="kw">const </span>SPECIAL_HISTOGRAM_QUANTILE: <span class="kw-2">&amp;</span>str = <span class="string">&quot;histogram_quantile&quot;</span>;
+</span><span class="kw">const </span>SPECIAL_HISTOGRAM_QUANTILE: <span class="kw-2">&amp;</span>str = <span class="string">"histogram_quantile"</span>;
 <span class="doccomment">/// `le` column for conventional histogram.
-</span><span class="kw">const </span>LE_COLUMN_NAME: <span class="kw-2">&amp;</span>str = <span class="string">&quot;le&quot;</span>;
+</span><span class="kw">const </span>LE_COLUMN_NAME: <span class="kw-2">&amp;</span>str = <span class="string">"le"</span>;
 
-<span class="kw">const </span>DEFAULT_TIME_INDEX_COLUMN: <span class="kw-2">&amp;</span>str = <span class="string">&quot;time&quot;</span>;
+<span class="kw">const </span>DEFAULT_TIME_INDEX_COLUMN: <span class="kw-2">&amp;</span>str = <span class="string">"time"</span>;
 
 <span class="doccomment">/// default value column name for empty metric
-</span><span class="kw">const </span>DEFAULT_FIELD_COLUMN: <span class="kw-2">&amp;</span>str = <span class="string">&quot;value&quot;</span>;
+</span><span class="kw">const </span>DEFAULT_FIELD_COLUMN: <span class="kw-2">&amp;</span>str = <span class="string">"value"</span>;
 
 <span class="doccomment">/// Special modifier to project field columns under multi-field mode
-</span><span class="kw">const </span>FIELD_COLUMN_MATCHER: <span class="kw-2">&amp;</span>str = <span class="string">&quot;__field__&quot;</span>;
+</span><span class="kw">const </span>FIELD_COLUMN_MATCHER: <span class="kw-2">&amp;</span>str = <span class="string">"__field__"</span>;
 
 <span class="attr">#[derive(Default, Debug, Clone)]
 </span><span class="kw">struct </span>PromPlannerContext {
@@ -2760,7 +2761,7 @@
 
                         <span class="comment">// TODO(ruihang): avoid join if left and right are the same table
 
-                        // set op has &quot;special&quot; join semantics
+                        // set op has "special" join semantics
                         </span><span class="kw">if </span><span class="self">Self</span>::is_token_a_set_op(<span class="kw-2">*</span>op) {
                             <span class="kw">return </span><span class="self">self</span>.set_op_on_non_field_columns(
                                 left_input,
@@ -2817,7 +2818,7 @@
             }
             PromExpr::Paren(ParenExpr { expr }) =&gt; <span class="self">self</span>.prom_expr_to_plan(<span class="kw-2">*</span>expr.clone()).<span class="kw">await</span><span class="question-mark">?</span>,
             PromExpr::Subquery(SubqueryExpr { .. }) =&gt; UnsupportedExprSnafu {
-                name: <span class="string">&quot;Prom Subquery&quot;</span>,
+                name: <span class="string">"Prom Subquery"</span>,
             }
             .fail()<span class="question-mark">?</span>,
             PromExpr::NumberLiteral(NumberLiteral { val }) =&gt; {
@@ -2879,8 +2880,8 @@
                     <span class="self">self</span>.ctx
                         .time_index_column
                         .clone()
-                        .expect(<span class="string">&quot;time index should be set in `setup_context`&quot;</span>),
-                    <span class="self">self</span>.ctx.field_columns.get(<span class="number">0</span>).cloned(),
+                        .expect(<span class="string">"time index should be set in `setup_context`"</span>),
+                    <span class="self">self</span>.ctx.field_columns.first().cloned(),
                     normalize,
                 );
                 LogicalPlan::Extension(Extension {
@@ -2913,7 +2914,7 @@
                     <span class="self">self</span>.ctx
                         .time_index_column
                         .clone()
-                        .expect(<span class="string">&quot;time index should be set in `setup_context`&quot;</span>),
+                        .expect(<span class="string">"time index should be set in `setup_context`"</span>),
                     <span class="self">self</span>.ctx.field_columns.clone(),
                     normalize,
                 )
@@ -3016,12 +3017,12 @@
                 // information about metrics during run.
                 // if `verbose` is true, prints out additional details when VERBOSE keyword is specified
                 </span><span class="kw">match </span>expr.name() {
-                    <span class="string">&quot;ANALYZE&quot; </span>=&gt; LogicalPlanBuilder::from(plan)
+                    <span class="string">"ANALYZE" </span>=&gt; LogicalPlanBuilder::from(plan)
                         .explain(<span class="bool-val">false</span>, <span class="bool-val">true</span>)
                         .unwrap()
                         .build()
                         .context(DataFusionPlanningSnafu)<span class="question-mark">?</span>,
-                    <span class="string">&quot;EXPLAIN&quot; </span>=&gt; LogicalPlanBuilder::from(plan)
+                    <span class="string">"EXPLAIN" </span>=&gt; LogicalPlanBuilder::from(plan)
                         .explain(<span class="bool-val">false</span>, <span class="bool-val">false</span>)
                         .unwrap()
                         .build()
@@ -3036,7 +3037,7 @@
     }
 
     <span class="doccomment">/// Extract metric name from `__name__` matcher and set it into [PromPlannerContext].
-    /// Returns a new [Matchers] that doesn&#39;t contains metric name matcher.
+    /// Returns a new [Matchers] that doesn't contains metric name matcher.
     ///
     /// Each call to this function means new selector is started. Thus the context will be reset
     /// at first.
@@ -3267,7 +3268,7 @@
                     .map(|f| f.name())
                     .collect::&lt;BTreeSet&lt;<span class="kw">_</span>&gt;&gt;();
 
-                <span class="comment">// remove &quot;without&quot;-ed fields
+                <span class="comment">// remove "without"-ed fields
                 // nonexistence label will be ignored
                 </span><span class="kw">for </span>label <span class="kw">in </span><span class="kw-2">&amp;</span>labels.labels {
                     <span class="kw">let _ </span>= all_fields.remove(label);
@@ -3342,7 +3343,7 @@
         <span class="prelude-val">Ok</span>(result)
     }
 
-    <span class="doccomment">/// Setup [PromPlannerContext]&#39;s state fields.
+    <span class="doccomment">/// Setup [PromPlannerContext]'s state fields.
     </span><span class="kw">async fn </span>setup_context(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>table_name = <span class="self">self
             </span>.ctx
@@ -3429,7 +3430,7 @@
 
     <span class="doccomment">/// # Side Effects
     ///
-    /// This method will update [PromPlannerContext]&#39;s value fields.
+    /// This method will update [PromPlannerContext]'s value fields.
     </span><span class="kw">fn </span>create_function_expr(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         func: <span class="kw-2">&amp;</span>Function,
@@ -3442,57 +3443,57 @@
         </span><span class="kw">let </span>field_column_pos = <span class="number">0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>exprs = Vec::with_capacity(<span class="self">self</span>.ctx.field_columns.len());
         <span class="kw">let </span>scalar_func = <span class="kw">match </span>func.name {
-            <span class="string">&quot;increase&quot; </span>=&gt; ScalarFunc::ExtrapolateUdf(Increase::scalar_udf(
+            <span class="string">"increase" </span>=&gt; ScalarFunc::ExtrapolateUdf(Increase::scalar_udf(
                 <span class="self">self</span>.ctx.range.context(ExpectRangeSelectorSnafu)<span class="question-mark">?</span>,
             )),
-            <span class="string">&quot;rate&quot; </span>=&gt; ScalarFunc::ExtrapolateUdf(Rate::scalar_udf(
+            <span class="string">"rate" </span>=&gt; ScalarFunc::ExtrapolateUdf(Rate::scalar_udf(
                 <span class="self">self</span>.ctx.range.context(ExpectRangeSelectorSnafu)<span class="question-mark">?</span>,
             )),
-            <span class="string">&quot;delta&quot; </span>=&gt; ScalarFunc::ExtrapolateUdf(Delta::scalar_udf(
+            <span class="string">"delta" </span>=&gt; ScalarFunc::ExtrapolateUdf(Delta::scalar_udf(
                 <span class="self">self</span>.ctx.range.context(ExpectRangeSelectorSnafu)<span class="question-mark">?</span>,
             )),
-            <span class="string">&quot;idelta&quot; </span>=&gt; ScalarFunc::Udf(IDelta::&lt;<span class="bool-val">false</span>&gt;::scalar_udf()),
-            <span class="string">&quot;irate&quot; </span>=&gt; ScalarFunc::Udf(IDelta::&lt;<span class="bool-val">true</span>&gt;::scalar_udf()),
-            <span class="string">&quot;resets&quot; </span>=&gt; ScalarFunc::Udf(Resets::scalar_udf()),
-            <span class="string">&quot;changes&quot; </span>=&gt; ScalarFunc::Udf(Changes::scalar_udf()),
-            <span class="string">&quot;deriv&quot; </span>=&gt; ScalarFunc::Udf(Deriv::scalar_udf()),
-            <span class="string">&quot;avg_over_time&quot; </span>=&gt; ScalarFunc::Udf(AvgOverTime::scalar_udf()),
-            <span class="string">&quot;min_over_time&quot; </span>=&gt; ScalarFunc::Udf(MinOverTime::scalar_udf()),
-            <span class="string">&quot;max_over_time&quot; </span>=&gt; ScalarFunc::Udf(MaxOverTime::scalar_udf()),
-            <span class="string">&quot;sum_over_time&quot; </span>=&gt; ScalarFunc::Udf(SumOverTime::scalar_udf()),
-            <span class="string">&quot;count_over_time&quot; </span>=&gt; ScalarFunc::Udf(CountOverTime::scalar_udf()),
-            <span class="string">&quot;last_over_time&quot; </span>=&gt; ScalarFunc::Udf(LastOverTime::scalar_udf()),
-            <span class="string">&quot;absent_over_time&quot; </span>=&gt; ScalarFunc::Udf(AbsentOverTime::scalar_udf()),
-            <span class="string">&quot;present_over_time&quot; </span>=&gt; ScalarFunc::Udf(PresentOverTime::scalar_udf()),
-            <span class="string">&quot;stddev_over_time&quot; </span>=&gt; ScalarFunc::Udf(StddevOverTime::scalar_udf()),
-            <span class="string">&quot;stdvar_over_time&quot; </span>=&gt; ScalarFunc::Udf(StdvarOverTime::scalar_udf()),
-            <span class="string">&quot;quantile_over_time&quot; </span>=&gt; {
+            <span class="string">"idelta" </span>=&gt; ScalarFunc::Udf(IDelta::&lt;<span class="bool-val">false</span>&gt;::scalar_udf()),
+            <span class="string">"irate" </span>=&gt; ScalarFunc::Udf(IDelta::&lt;<span class="bool-val">true</span>&gt;::scalar_udf()),
+            <span class="string">"resets" </span>=&gt; ScalarFunc::Udf(Resets::scalar_udf()),
+            <span class="string">"changes" </span>=&gt; ScalarFunc::Udf(Changes::scalar_udf()),
+            <span class="string">"deriv" </span>=&gt; ScalarFunc::Udf(Deriv::scalar_udf()),
+            <span class="string">"avg_over_time" </span>=&gt; ScalarFunc::Udf(AvgOverTime::scalar_udf()),
+            <span class="string">"min_over_time" </span>=&gt; ScalarFunc::Udf(MinOverTime::scalar_udf()),
+            <span class="string">"max_over_time" </span>=&gt; ScalarFunc::Udf(MaxOverTime::scalar_udf()),
+            <span class="string">"sum_over_time" </span>=&gt; ScalarFunc::Udf(SumOverTime::scalar_udf()),
+            <span class="string">"count_over_time" </span>=&gt; ScalarFunc::Udf(CountOverTime::scalar_udf()),
+            <span class="string">"last_over_time" </span>=&gt; ScalarFunc::Udf(LastOverTime::scalar_udf()),
+            <span class="string">"absent_over_time" </span>=&gt; ScalarFunc::Udf(AbsentOverTime::scalar_udf()),
+            <span class="string">"present_over_time" </span>=&gt; ScalarFunc::Udf(PresentOverTime::scalar_udf()),
+            <span class="string">"stddev_over_time" </span>=&gt; ScalarFunc::Udf(StddevOverTime::scalar_udf()),
+            <span class="string">"stdvar_over_time" </span>=&gt; ScalarFunc::Udf(StdvarOverTime::scalar_udf()),
+            <span class="string">"quantile_over_time" </span>=&gt; {
                 <span class="kw">let </span>quantile_expr = <span class="kw">match </span>other_input_exprs.pop_front() {
                     <span class="prelude-val">Some</span>(DfExpr::Literal(ScalarValue::Float64(<span class="prelude-val">Some</span>(quantile)))) =&gt; quantile,
                     other =&gt; UnexpectedPlanExprSnafu {
-                        desc: <span class="macro">format!</span>(<span class="string">&quot;expect f64 literal as quantile, but found {:?}&quot;</span>, other),
+                        desc: <span class="macro">format!</span>(<span class="string">"expect f64 literal as quantile, but found {:?}"</span>, other),
                     }
                     .fail()<span class="question-mark">?</span>,
                 };
                 ScalarFunc::Udf(QuantileOverTime::scalar_udf(quantile_expr))
             }
-            <span class="string">&quot;predict_linear&quot; </span>=&gt; {
+            <span class="string">"predict_linear" </span>=&gt; {
                 <span class="kw">let </span>t_expr = <span class="kw">match </span>other_input_exprs.pop_front() {
                     <span class="prelude-val">Some</span>(DfExpr::Literal(ScalarValue::Float64(<span class="prelude-val">Some</span>(t)))) =&gt; t <span class="kw">as </span>i64,
                     <span class="prelude-val">Some</span>(DfExpr::Literal(ScalarValue::Int64(<span class="prelude-val">Some</span>(t)))) =&gt; t,
                     other =&gt; UnexpectedPlanExprSnafu {
-                        desc: <span class="macro">format!</span>(<span class="string">&quot;expect i64 literal as t, but found {:?}&quot;</span>, other),
+                        desc: <span class="macro">format!</span>(<span class="string">"expect i64 literal as t, but found {:?}"</span>, other),
                     }
                     .fail()<span class="question-mark">?</span>,
                 };
                 ScalarFunc::Udf(PredictLinear::scalar_udf(t_expr))
             }
-            <span class="string">&quot;holt_winters&quot; </span>=&gt; {
+            <span class="string">"holt_winters" </span>=&gt; {
                 <span class="kw">let </span>sf_exp = <span class="kw">match </span>other_input_exprs.pop_front() {
                     <span class="prelude-val">Some</span>(DfExpr::Literal(ScalarValue::Float64(<span class="prelude-val">Some</span>(sf)))) =&gt; sf,
                     other =&gt; UnexpectedPlanExprSnafu {
                         desc: <span class="macro">format!</span>(
-                            <span class="string">&quot;expect f64 literal as smoothing factor, but found {:?}&quot;</span>,
+                            <span class="string">"expect f64 literal as smoothing factor, but found {:?}"</span>,
                             other
                         ),
                     }
@@ -3501,67 +3502,67 @@
                 <span class="kw">let </span>tf_exp = <span class="kw">match </span>other_input_exprs.pop_front() {
                     <span class="prelude-val">Some</span>(DfExpr::Literal(ScalarValue::Float64(<span class="prelude-val">Some</span>(tf)))) =&gt; tf,
                     other =&gt; UnexpectedPlanExprSnafu {
-                        desc: <span class="macro">format!</span>(<span class="string">&quot;expect f64 literal as trend factor, but found {:?}&quot;</span>, other),
+                        desc: <span class="macro">format!</span>(<span class="string">"expect f64 literal as trend factor, but found {:?}"</span>, other),
                     }
                     .fail()<span class="question-mark">?</span>,
                 };
                 ScalarFunc::Udf(HoltWinters::scalar_udf(sf_exp, tf_exp))
             }
-            <span class="string">&quot;time&quot; </span>=&gt; {
+            <span class="string">"time" </span>=&gt; {
                 exprs.push(build_special_time_expr(
                     <span class="self">self</span>.ctx.time_index_column.as_ref().unwrap(),
                 ));
                 ScalarFunc::GeneratedExpr
             }
-            <span class="string">&quot;minute&quot; </span>=&gt; {
-                <span class="comment">// date_part(&#39;minute&#39;, time_index)
-                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">&quot;minute&quot;</span>)<span class="question-mark">?</span>;
+            <span class="string">"minute" </span>=&gt; {
+                <span class="comment">// date_part('minute', time_index)
+                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">"minute"</span>)<span class="question-mark">?</span>;
                 exprs.push(expr);
                 ScalarFunc::GeneratedExpr
             }
-            <span class="string">&quot;hour&quot; </span>=&gt; {
-                <span class="comment">// date_part(&#39;hour&#39;, time_index)
-                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">&quot;hour&quot;</span>)<span class="question-mark">?</span>;
+            <span class="string">"hour" </span>=&gt; {
+                <span class="comment">// date_part('hour', time_index)
+                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">"hour"</span>)<span class="question-mark">?</span>;
                 exprs.push(expr);
                 ScalarFunc::GeneratedExpr
             }
-            <span class="string">&quot;month&quot; </span>=&gt; {
-                <span class="comment">// date_part(&#39;month&#39;, time_index)
-                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">&quot;month&quot;</span>)<span class="question-mark">?</span>;
+            <span class="string">"month" </span>=&gt; {
+                <span class="comment">// date_part('month', time_index)
+                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">"month"</span>)<span class="question-mark">?</span>;
                 exprs.push(expr);
                 ScalarFunc::GeneratedExpr
             }
-            <span class="string">&quot;year&quot; </span>=&gt; {
-                <span class="comment">// date_part(&#39;year&#39;, time_index)
-                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">&quot;year&quot;</span>)<span class="question-mark">?</span>;
+            <span class="string">"year" </span>=&gt; {
+                <span class="comment">// date_part('year', time_index)
+                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">"year"</span>)<span class="question-mark">?</span>;
                 exprs.push(expr);
                 ScalarFunc::GeneratedExpr
             }
-            <span class="string">&quot;day_of_month&quot; </span>=&gt; {
-                <span class="comment">// date_part(&#39;day&#39;, time_index)
-                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">&quot;day&quot;</span>)<span class="question-mark">?</span>;
+            <span class="string">"day_of_month" </span>=&gt; {
+                <span class="comment">// date_part('day', time_index)
+                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">"day"</span>)<span class="question-mark">?</span>;
                 exprs.push(expr);
                 ScalarFunc::GeneratedExpr
             }
-            <span class="string">&quot;day_of_week&quot; </span>=&gt; {
-                <span class="comment">// date_part(&#39;dow&#39;, time_index)
-                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">&quot;dow&quot;</span>)<span class="question-mark">?</span>;
+            <span class="string">"day_of_week" </span>=&gt; {
+                <span class="comment">// date_part('dow', time_index)
+                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">"dow"</span>)<span class="question-mark">?</span>;
                 exprs.push(expr);
                 ScalarFunc::GeneratedExpr
             }
-            <span class="string">&quot;day_of_year&quot; </span>=&gt; {
-                <span class="comment">// date_part(&#39;doy&#39;, time_index)
-                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">&quot;doy&quot;</span>)<span class="question-mark">?</span>;
+            <span class="string">"day_of_year" </span>=&gt; {
+                <span class="comment">// date_part('doy', time_index)
+                </span><span class="kw">let </span>expr = <span class="self">self</span>.date_part_on_time_index(<span class="string">"doy"</span>)<span class="question-mark">?</span>;
                 exprs.push(expr);
                 ScalarFunc::GeneratedExpr
             }
-            <span class="string">&quot;days_in_month&quot; </span>=&gt; {
+            <span class="string">"days_in_month" </span>=&gt; {
                 <span class="comment">// date_part(
-                //     &#39;days&#39;,
-                //     (date_trunc(&#39;month&#39;, &lt;TIME INDEX&gt;::date) + interval &#39;1 month - 1 day&#39;)
+                //     'days',
+                //     (date_trunc('month', &lt;TIME INDEX&gt;::date) + interval '1 month - 1 day')
                 // );
-                </span><span class="kw">let </span>day_lit_expr = DfExpr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">&quot;day&quot;</span>.to_string())));
-                <span class="kw">let </span>month_lit_expr = DfExpr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">&quot;month&quot;</span>.to_string())));
+                </span><span class="kw">let </span>day_lit_expr = DfExpr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">"day"</span>.to_string())));
+                <span class="kw">let </span>month_lit_expr = DfExpr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">"month"</span>.to_string())));
                 <span class="kw">let </span>interval_1month_lit_expr =
                     DfExpr::Literal(ScalarValue::IntervalYearMonth(<span class="prelude-val">Some</span>(<span class="number">1</span>)));
                 <span class="kw">let </span>interval_1day_lit_expr =
@@ -3650,7 +3651,7 @@
             }
         }
 
-        <span class="comment">// update value columns&#39; name, and alias them to remove qualifiers
+        <span class="comment">// update value columns' name, and alias them to remove qualifiers
         </span><span class="kw">let </span><span class="kw-2">mut </span>new_field_columns = Vec::with_capacity(exprs.len());
         exprs = exprs
             .into_iter()
@@ -3671,7 +3672,7 @@
             <span class="self">self</span>.ctx
                 .time_index_column
                 .clone()
-                .with_context(|| TimeIndexNotFoundSnafu { table: <span class="string">&quot;unknown&quot; </span>})<span class="question-mark">?</span>,
+                .with_context(|| TimeIndexNotFoundSnafu { table: <span class="string">"unknown" </span>})<span class="question-mark">?</span>,
         )))
     }
 
@@ -3729,7 +3730,7 @@
             token::T_STDVAR =&gt; AggregateFunctionEnum::VariancePop,
             token::T_TOPK | token::T_BOTTOMK | token::T_COUNT_VALUES | token::T_QUANTILE =&gt; {
                 UnsupportedExprSnafu {
-                    name: <span class="macro">format!</span>(<span class="string">&quot;{op:?}&quot;</span>),
+                    name: <span class="macro">format!</span>(<span class="string">"{op:?}"</span>),
                 }
                 .fail()<span class="question-mark">?
             </span>}
@@ -3986,7 +3987,7 @@
                     }
                     <span class="comment">// removes columns memtioned in `ignoring`
                     </span>LabelModifier::Exclude(ignoring) =&gt; {
-                        <span class="comment">// doesn&#39;t check existence of label
+                        <span class="comment">// doesn't check existence of label
                         </span><span class="kw">for </span>label <span class="kw">in </span><span class="kw-2">&amp;</span>ignoring.labels {
                             <span class="kw">let _ </span>= left_tag_col_set.remove(label);
                             <span class="kw">let _ </span>= right_tag_col_set.remove(label);
@@ -4011,7 +4012,7 @@
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
 
         <span class="comment">// Generate join plan.
-        // All set operations in PromQL are &quot;distinct&quot;
+        // All set operations in PromQL are "distinct"
         </span><span class="kw">match </span>op.id() {
             token::T_LAND =&gt; LogicalPlanBuilder::from(left)
                 .distinct()
@@ -4041,9 +4042,9 @@
                 .context(DataFusionPlanningSnafu),
             token::T_LOR =&gt; {
                 <span class="comment">// `OR` can not be expressed by `UNION` precisely.
-                // it will generate unexpceted result when schemas don&#39;t match
+                // it will generate unexpceted result when schemas don't match
                 </span>UnsupportedExprSnafu {
-                    name: <span class="string">&quot;set operation `OR`&quot;</span>,
+                    name: <span class="string">"set operation `OR`"</span>,
                 }
                 .fail()
             }
@@ -4057,7 +4058,7 @@
     /// # Side effect
     ///
     /// This function will update the value columns in the context. Those new column names
-    /// don&#39;t contains qualifier.
+    /// don't contains qualifier.
     </span><span class="kw">fn </span>projection_for_each_field_column&lt;F&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         input: LogicalPlan,
@@ -4122,7 +4123,7 @@
         <span class="macro">ensure!</span>(
             <span class="self">self</span>.ctx.field_columns.len() == <span class="number">1</span>,
             UnsupportedExprSnafu {
-                name: <span class="string">&quot;filter on multi-value input&quot;
+                name: <span class="string">"filter on multi-value input"
             </span>}
         );
 
@@ -4135,7 +4136,7 @@
             .context(DataFusionPlanningSnafu)
     }
 
-    <span class="doccomment">/// Generate an expr like `date_part(&quot;hour&quot;, &lt;TIME_INDEX&gt;)`. Caller should ensure the
+    <span class="doccomment">/// Generate an expr like `date_part("hour", &lt;TIME_INDEX&gt;)`. Caller should ensure the
     /// time index column in context is set
     </span><span class="kw">fn </span>date_part_on_time_index(<span class="kw-2">&amp;</span><span class="self">self</span>, date_part: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;DfExpr&gt; {
         <span class="kw">let </span>lit_expr = DfExpr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(date_part.to_string())));
@@ -4143,9 +4144,9 @@
             <span class="self">self</span>.ctx
                 .time_index_column
                 .as_ref()
-                <span class="comment">// table name doesn&#39;t matters here
+                <span class="comment">// table name doesn't matters here
                 </span>.with_context(|| TimeIndexNotFoundSnafu {
-                    table: <span class="string">&quot;&lt;doesn&#39;t matter&gt;&quot;</span>,
+                    table: <span class="string">"&lt;doesn't matter&gt;"</span>,
                 })<span class="question-mark">?</span>,
         );
         <span class="kw">let </span>fn_expr = DfExpr::ScalarFunction(ScalarFunction {
@@ -4169,7 +4170,7 @@
     <span class="comment">// todo(ruihang): maybe merge with Udf later
     </span><span class="doccomment">/// UDF that require extra information like range length to be evaluated.
     </span>ExtrapolateUdf(ScalarUdfDef),
-    <span class="doccomment">/// Func that doesn&#39;t require input, like `time()`.
+    <span class="doccomment">/// Func that doesn't require input, like `time()`.
     </span>GeneratedExpr,
 }
 
@@ -4198,14 +4199,14 @@
         <span class="kw">let </span><span class="kw-2">mut </span>columns = <span class="macro">vec!</span>[];
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..num_tag {
             columns.push(ColumnSchema::new(
-                <span class="macro">format!</span>(<span class="string">&quot;tag_{i}&quot;</span>),
+                <span class="macro">format!</span>(<span class="string">"tag_{i}"</span>),
                 ConcreteDataType::string_datatype(),
                 <span class="bool-val">false</span>,
             ));
         }
         columns.push(
             ColumnSchema::new(
-                <span class="string">&quot;timestamp&quot;</span>.to_string(),
+                <span class="string">"timestamp"</span>.to_string(),
                 ConcreteDataType::timestamp_millisecond_datatype(),
                 <span class="bool-val">false</span>,
             )
@@ -4213,7 +4214,7 @@
         );
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..num_field {
             columns.push(ColumnSchema::new(
-                <span class="macro">format!</span>(<span class="string">&quot;field_{i}&quot;</span>),
+                <span class="macro">format!</span>(<span class="string">"field_{i}"</span>),
                 ConcreteDataType::float64_datatype(),
                 <span class="bool-val">true</span>,
             ));
@@ -4246,23 +4247,23 @@
     }
 
     <span class="comment">// {
-    //     input: `abs(some_metric{foo!=&quot;bar&quot;})`,
+    //     input: `abs(some_metric{foo!="bar"})`,
     //     expected: &amp;Call{
-    //         Func: MustGetFunction(&quot;abs&quot;),
+    //         Func: MustGetFunction("abs"),
     //         Args: Expressions{
     //             &amp;VectorSelector{
-    //                 Name: &quot;some_metric&quot;,
+    //                 Name: "some_metric",
     //                 LabelMatchers: []*labels.Matcher{
-    //                     MustLabelMatcher(labels.MatchNotEqual, &quot;foo&quot;, &quot;bar&quot;),
-    //                     MustLabelMatcher(labels.MatchEqual, model.MetricNameLabel, &quot;some_metric&quot;),
+    //                     MustLabelMatcher(labels.MatchNotEqual, "foo", "bar"),
+    //                     MustLabelMatcher(labels.MatchEqual, model.MetricNameLabel, "some_metric"),
     //                 },
     //             },
     //         },
     //     },
     // },
-    </span><span class="kw">async fn </span>do_single_instant_function_call(fn_name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str, plan_name: <span class="kw-2">&amp;</span>str) {
+    </span><span class="kw">async fn </span>do_single_instant_function_call(fn_name: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str, plan_name: <span class="kw-2">&amp;</span>str) {
         <span class="kw">let </span>prom_expr =
-            parser::parse(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{fn_name}(some_metric{{tag_0!=\&quot;bar\&quot;}})&quot;</span>)).unwrap();
+            parser::parse(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{fn_name}(some_metric{{tag_0!=\"bar\"}})"</span>)).unwrap();
         <span class="kw">let </span>eval_stmt = EvalStmt {
             expr: prom_expr,
             start: UNIX_EPOCH,
@@ -4273,189 +4274,189 @@
             lookback_delta: Duration::from_secs(<span class="number">1</span>),
         };
 
-        <span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">&quot;some_metric&quot;</span>.to_string(), <span class="number">1</span>, <span class="number">1</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">"some_metric"</span>.to_string(), <span class="number">1</span>, <span class="number">1</span>).<span class="kw">await</span>;
         <span class="kw">let </span>plan = PromPlanner::stmt_to_plan(table_provider, eval_stmt)
             .<span class="kw">await
             </span>.unwrap();
 
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Filter: TEMPLATE(field_0) IS NOT NULL [timestamp:Timestamp(Millisecond, None), TEMPLATE(field_0):Float64;N, tag_0:Utf8]\
+            <span class="string">"Filter: TEMPLATE(field_0) IS NOT NULL [timestamp:Timestamp(Millisecond, None), TEMPLATE(field_0):Float64;N, tag_0:Utf8]\
             \n  Projection: some_metric.timestamp, TEMPLATE(some_metric.field_0) AS TEMPLATE(field_0), some_metric.tag_0 [timestamp:Timestamp(Millisecond, None), TEMPLATE(field_0):Float64;N, tag_0:Utf8]\
             \n    PromInstantManipulate: range=[0..100000000], lookback=[1000], interval=[5000], time index=[timestamp] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n      PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [false] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n        PromSeriesDivide: tags=[\&quot;tag_0\&quot;] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n        PromSeriesDivide: tags=[\"tag_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n          Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n            Filter: some_metric.tag_0 != Utf8(\&quot;bar\&quot;) [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n              TableScan: some_metric, unsupported_filters=[tag_0 != Utf8(\&quot;bar\&quot;), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]&quot;
-        </span>).replace(<span class="string">&quot;TEMPLATE&quot;</span>, plan_name);
+            \n            Filter: some_metric.tag_0 != Utf8(\"bar\") [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n              TableScan: some_metric, unsupported_filters=[tag_0 != Utf8(\"bar\"), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]"
+        </span>).replace(<span class="string">"TEMPLATE"</span>, plan_name);
 
         <span class="macro">assert_eq!</span>(plan.display_indent_schema().to_string(), expected);
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_abs() {
-        do_single_instant_function_call(<span class="string">&quot;abs&quot;</span>, <span class="string">&quot;abs&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"abs"</span>, <span class="string">"abs"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_absent() {
-        do_single_instant_function_call(<span class="string">&quot;absent&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"absent"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_ceil() {
-        do_single_instant_function_call(<span class="string">&quot;ceil&quot;</span>, <span class="string">&quot;ceil&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"ceil"</span>, <span class="string">"ceil"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_exp() {
-        do_single_instant_function_call(<span class="string">&quot;exp&quot;</span>, <span class="string">&quot;exp&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"exp"</span>, <span class="string">"exp"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_ln() {
-        do_single_instant_function_call(<span class="string">&quot;ln&quot;</span>, <span class="string">&quot;ln&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"ln"</span>, <span class="string">"ln"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_log2() {
-        do_single_instant_function_call(<span class="string">&quot;log2&quot;</span>, <span class="string">&quot;log2&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"log2"</span>, <span class="string">"log2"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_log10() {
-        do_single_instant_function_call(<span class="string">&quot;log10&quot;</span>, <span class="string">&quot;log10&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"log10"</span>, <span class="string">"log10"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_scalar() {
-        do_single_instant_function_call(<span class="string">&quot;scalar&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"scalar"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_sgn() {
-        do_single_instant_function_call(<span class="string">&quot;sgn&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"sgn"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_sort() {
-        do_single_instant_function_call(<span class="string">&quot;sort&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"sort"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_sort_desc() {
-        do_single_instant_function_call(<span class="string">&quot;sort_desc&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"sort_desc"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_sqrt() {
-        do_single_instant_function_call(<span class="string">&quot;sqrt&quot;</span>, <span class="string">&quot;sqrt&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"sqrt"</span>, <span class="string">"sqrt"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_timestamp() {
-        do_single_instant_function_call(<span class="string">&quot;timestamp&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"timestamp"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_acos() {
-        do_single_instant_function_call(<span class="string">&quot;acos&quot;</span>, <span class="string">&quot;acos&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"acos"</span>, <span class="string">"acos"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_acosh() {
-        do_single_instant_function_call(<span class="string">&quot;acosh&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"acosh"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_asin() {
-        do_single_instant_function_call(<span class="string">&quot;asin&quot;</span>, <span class="string">&quot;asin&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"asin"</span>, <span class="string">"asin"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_asinh() {
-        do_single_instant_function_call(<span class="string">&quot;asinh&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"asinh"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_atan() {
-        do_single_instant_function_call(<span class="string">&quot;atan&quot;</span>, <span class="string">&quot;atan&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"atan"</span>, <span class="string">"atan"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_atanh() {
-        do_single_instant_function_call(<span class="string">&quot;atanh&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"atanh"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_cos() {
-        do_single_instant_function_call(<span class="string">&quot;cos&quot;</span>, <span class="string">&quot;cos&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"cos"</span>, <span class="string">"cos"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_cosh() {
-        do_single_instant_function_call(<span class="string">&quot;cosh&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"cosh"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_sin() {
-        do_single_instant_function_call(<span class="string">&quot;sin&quot;</span>, <span class="string">&quot;sin&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"sin"</span>, <span class="string">"sin"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_sinh() {
-        do_single_instant_function_call(<span class="string">&quot;sinh&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"sinh"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>single_tan() {
-        do_single_instant_function_call(<span class="string">&quot;tan&quot;</span>, <span class="string">&quot;tan&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"tan"</span>, <span class="string">"tan"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_tanh() {
-        do_single_instant_function_call(<span class="string">&quot;tanh&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"tanh"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_deg() {
-        do_single_instant_function_call(<span class="string">&quot;deg&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"deg"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>single_rad() {
-        do_single_instant_function_call(<span class="string">&quot;rad&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_single_instant_function_call(<span class="string">"rad"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="comment">// {
-    //     input: &quot;avg by (foo)(some_metric)&quot;,
+    //     input: "avg by (foo)(some_metric)",
     //     expected: &amp;AggregateExpr{
     //         Op: AVG,
     //         Expr: &amp;VectorSelector{
-    //             Name: &quot;some_metric&quot;,
+    //             Name: "some_metric",
     //             LabelMatchers: []*labels.Matcher{
-    //                 MustLabelMatcher(labels.MatchEqual, model.MetricNameLabel, &quot;some_metric&quot;),
+    //                 MustLabelMatcher(labels.MatchEqual, model.MetricNameLabel, "some_metric"),
     //             },
     //             PosRange: PositionRange{
     //                 Start: 13,
     //                 End:   24,
     //             },
     //         },
-    //         Grouping: []string{&quot;foo&quot;},
+    //         Grouping: []string{"foo"},
     //         PosRange: PositionRange{
     //             Start: 0,
     //             End:   25,
@@ -4464,7 +4465,7 @@
     // },
     </span><span class="kw">async fn </span>do_aggregate_expr_plan(fn_name: <span class="kw-2">&amp;</span>str, plan_name: <span class="kw-2">&amp;</span>str) {
         <span class="kw">let </span>prom_expr = parser::parse(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-            <span class="string">&quot;{fn_name} by (tag_1)(some_metric{{tag_0!=\&quot;bar\&quot;}})&quot;</span>,
+            <span class="string">"{fn_name} by (tag_1)(some_metric{{tag_0!=\"bar\"}})"</span>,
         ))
         .unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>eval_stmt = EvalStmt {
@@ -4478,20 +4479,20 @@
         };
 
         <span class="comment">// test group by
-        </span><span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">&quot;some_metric&quot;</span>.to_string(), <span class="number">2</span>, <span class="number">2</span>).<span class="kw">await</span>;
+        </span><span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">"some_metric"</span>.to_string(), <span class="number">2</span>, <span class="number">2</span>).<span class="kw">await</span>;
         <span class="kw">let </span>plan = PromPlanner::stmt_to_plan(table_provider, eval_stmt.clone())
             .<span class="kw">await
             </span>.unwrap();
         <span class="kw">let </span>expected_no_without = String::from(
-            <span class="string">&quot;Sort: some_metric.tag_1 ASC NULLS LAST, some_metric.timestamp ASC NULLS LAST [tag_1:Utf8, timestamp:Timestamp(Millisecond, None), TEMPLATE(some_metric.field_0):Float64;N, TEMPLATE(some_metric.field_1):Float64;N]\
+            <span class="string">"Sort: some_metric.tag_1 ASC NULLS LAST, some_metric.timestamp ASC NULLS LAST [tag_1:Utf8, timestamp:Timestamp(Millisecond, None), TEMPLATE(some_metric.field_0):Float64;N, TEMPLATE(some_metric.field_1):Float64;N]\
             \n  Aggregate: groupBy=[[some_metric.tag_1, some_metric.timestamp]], aggr=[[TEMPLATE(some_metric.field_0), TEMPLATE(some_metric.field_1)]] [tag_1:Utf8, timestamp:Timestamp(Millisecond, None), TEMPLATE(some_metric.field_0):Float64;N, TEMPLATE(some_metric.field_1):Float64;N]\
             \n    PromInstantManipulate: range=[0..100000000], lookback=[1000], interval=[5000], time index=[timestamp] [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
             \n      PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [false] [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
-            \n        PromSeriesDivide: tags=[\&quot;tag_0\&quot;, \&quot;tag_1\&quot;] [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
+            \n        PromSeriesDivide: tags=[\"tag_0\", \"tag_1\"] [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
             \n          Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.tag_1 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
-            \n            Filter: some_metric.tag_0 != Utf8(\&quot;bar\&quot;) [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
-            \n              TableScan: some_metric, unsupported_filters=[tag_0 != Utf8(\&quot;bar\&quot;), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]&quot;
-        </span>).replace(<span class="string">&quot;TEMPLATE&quot;</span>, plan_name);
+            \n            Filter: some_metric.tag_0 != Utf8(\"bar\") [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
+            \n              TableScan: some_metric, unsupported_filters=[tag_0 != Utf8(\"bar\"), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]"
+        </span>).replace(<span class="string">"TEMPLATE"</span>, plan_name);
         <span class="macro">assert_eq!</span>(
             plan.display_indent_schema().to_string(),
             expected_no_without
@@ -4500,110 +4501,110 @@
         <span class="comment">// test group without
         </span><span class="kw">if let </span>PromExpr::Aggregate(AggregateExpr { modifier, .. }) = <span class="kw-2">&amp;mut </span>eval_stmt.expr {
             <span class="kw-2">*</span>modifier = <span class="prelude-val">Some</span>(LabelModifier::Exclude(Labels {
-                labels: <span class="macro">vec!</span>[String::from(<span class="string">&quot;tag_1&quot;</span>)].into_iter().collect(),
+                labels: <span class="macro">vec!</span>[String::from(<span class="string">"tag_1"</span>)].into_iter().collect(),
             }));
         }
-        <span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">&quot;some_metric&quot;</span>.to_string(), <span class="number">2</span>, <span class="number">2</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">"some_metric"</span>.to_string(), <span class="number">2</span>, <span class="number">2</span>).<span class="kw">await</span>;
         <span class="kw">let </span>plan = PromPlanner::stmt_to_plan(table_provider, eval_stmt)
             .<span class="kw">await
             </span>.unwrap();
         <span class="kw">let </span>expected_without = String::from(
-            <span class="string">&quot;Sort: some_metric.tag_0 ASC NULLS LAST, some_metric.timestamp ASC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), TEMPLATE(some_metric.field_0):Float64;N, TEMPLATE(some_metric.field_1):Float64;N]\
+            <span class="string">"Sort: some_metric.tag_0 ASC NULLS LAST, some_metric.timestamp ASC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), TEMPLATE(some_metric.field_0):Float64;N, TEMPLATE(some_metric.field_1):Float64;N]\
             \n  Aggregate: groupBy=[[some_metric.tag_0, some_metric.timestamp]], aggr=[[TEMPLATE(some_metric.field_0), TEMPLATE(some_metric.field_1)]] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), TEMPLATE(some_metric.field_0):Float64;N, TEMPLATE(some_metric.field_1):Float64;N]\
             \n    PromInstantManipulate: range=[0..100000000], lookback=[1000], interval=[5000], time index=[timestamp] [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
             \n      PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [false] [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
-            \n        PromSeriesDivide: tags=[\&quot;tag_0\&quot;, \&quot;tag_1\&quot;] [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
+            \n        PromSeriesDivide: tags=[\"tag_0\", \"tag_1\"] [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
             \n          Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.tag_1 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
-            \n            Filter: some_metric.tag_0 != Utf8(\&quot;bar\&quot;) [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
-            \n              TableScan: some_metric, unsupported_filters=[tag_0 != Utf8(\&quot;bar\&quot;), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]&quot;
-        </span>).replace(<span class="string">&quot;TEMPLATE&quot;</span>, plan_name);
+            \n            Filter: some_metric.tag_0 != Utf8(\"bar\") [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]\
+            \n              TableScan: some_metric, unsupported_filters=[tag_0 != Utf8(\"bar\"), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, tag_1:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N]"
+        </span>).replace(<span class="string">"TEMPLATE"</span>, plan_name);
         <span class="macro">assert_eq!</span>(plan.display_indent_schema().to_string(), expected_without);
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>aggregate_sum() {
-        do_aggregate_expr_plan(<span class="string">&quot;sum&quot;</span>, <span class="string">&quot;SUM&quot;</span>).<span class="kw">await</span>;
+        do_aggregate_expr_plan(<span class="string">"sum"</span>, <span class="string">"SUM"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>aggregate_avg() {
-        do_aggregate_expr_plan(<span class="string">&quot;avg&quot;</span>, <span class="string">&quot;AVG&quot;</span>).<span class="kw">await</span>;
+        do_aggregate_expr_plan(<span class="string">"avg"</span>, <span class="string">"AVG"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
-    #[should_panic] </span><span class="comment">// output type doesn&#39;t match
+    #[should_panic] </span><span class="comment">// output type doesn't match
     </span><span class="kw">async fn </span>aggregate_count() {
-        do_aggregate_expr_plan(<span class="string">&quot;count&quot;</span>, <span class="string">&quot;COUNT&quot;</span>).<span class="kw">await</span>;
+        do_aggregate_expr_plan(<span class="string">"count"</span>, <span class="string">"COUNT"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>aggregate_min() {
-        do_aggregate_expr_plan(<span class="string">&quot;min&quot;</span>, <span class="string">&quot;MIN&quot;</span>).<span class="kw">await</span>;
+        do_aggregate_expr_plan(<span class="string">"min"</span>, <span class="string">"MIN"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>aggregate_max() {
-        do_aggregate_expr_plan(<span class="string">&quot;max&quot;</span>, <span class="string">&quot;MAX&quot;</span>).<span class="kw">await</span>;
+        do_aggregate_expr_plan(<span class="string">"max"</span>, <span class="string">"MAX"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
-    #[should_panic] </span><span class="comment">// output type doesn&#39;t match
+    #[should_panic] </span><span class="comment">// output type doesn't match
     </span><span class="kw">async fn </span>aggregate_group() {
-        do_aggregate_expr_plan(<span class="string">&quot;grouping&quot;</span>, <span class="string">&quot;GROUPING&quot;</span>).<span class="kw">await</span>;
+        do_aggregate_expr_plan(<span class="string">"grouping"</span>, <span class="string">"GROUPING"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>aggregate_stddev() {
-        do_aggregate_expr_plan(<span class="string">&quot;stddev&quot;</span>, <span class="string">&quot;STDDEV_POP&quot;</span>).<span class="kw">await</span>;
+        do_aggregate_expr_plan(<span class="string">"stddev"</span>, <span class="string">"STDDEV_POP"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>aggregate_stdvar() {
-        do_aggregate_expr_plan(<span class="string">&quot;stdvar&quot;</span>, <span class="string">&quot;VARIANCE_POP&quot;</span>).<span class="kw">await</span>;
+        do_aggregate_expr_plan(<span class="string">"stdvar"</span>, <span class="string">"VARIANCE_POP"</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>aggregate_top_k() {
-        do_aggregate_expr_plan(<span class="string">&quot;topk&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_aggregate_expr_plan(<span class="string">"topk"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>aggregate_bottom_k() {
-        do_aggregate_expr_plan(<span class="string">&quot;bottomk&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_aggregate_expr_plan(<span class="string">"bottomk"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>aggregate_count_values() {
-        do_aggregate_expr_plan(<span class="string">&quot;count_values&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_aggregate_expr_plan(<span class="string">"count_values"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     #[should_panic]
     </span><span class="kw">async fn </span>aggregate_quantile() {
-        do_aggregate_expr_plan(<span class="string">&quot;quantile&quot;</span>, <span class="string">&quot;&quot;</span>).<span class="kw">await</span>;
+        do_aggregate_expr_plan(<span class="string">"quantile"</span>, <span class="string">""</span>).<span class="kw">await</span>;
     }
 
     <span class="comment">// TODO(ruihang): add range fn tests once exprs are ready.
 
     // {
-    //     input: &quot;some_metric{tag_0=&quot;foo&quot;} + some_metric{tag_0=&quot;bar&quot;}&quot;,
+    //     input: "some_metric{tag_0="foo"} + some_metric{tag_0="bar"}",
     //     expected: &amp;BinaryExpr{
     //         Op: ADD,
     //         LHS: &amp;VectorSelector{
-    //             Name: &quot;a&quot;,
+    //             Name: "a",
     //             LabelMatchers: []*labels.Matcher{
-    //                     MustLabelMatcher(labels.MatchEqual, &quot;tag_0&quot;, &quot;foo&quot;),
-    //                     MustLabelMatcher(labels.MatchEqual, model.MetricNameLabel, &quot;some_metric&quot;),
+    //                     MustLabelMatcher(labels.MatchEqual, "tag_0", "foo"),
+    //                     MustLabelMatcher(labels.MatchEqual, model.MetricNameLabel, "some_metric"),
     //             },
     //         },
     //         RHS: &amp;VectorSelector{
-    //             Name: &quot;sum&quot;,
+    //             Name: "sum",
     //             LabelMatchers: []*labels.Matcher{
-    //                     MustLabelMatcher(labels.MatchxEqual, &quot;tag_0&quot;, &quot;bar&quot;),
-    //                     MustLabelMatcher(labels.MatchEqual, model.MetricNameLabel, &quot;some_metric&quot;),
+    //                     MustLabelMatcher(labels.MatchxEqual, "tag_0", "bar"),
+    //                     MustLabelMatcher(labels.MatchEqual, model.MetricNameLabel, "some_metric"),
     //             },
     //         },
     //         VectorMatching: &amp;VectorMatching{},
@@ -4612,7 +4613,7 @@
     </span><span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>binary_op_column_column() {
         <span class="kw">let </span>prom_expr =
-            parser::parse(<span class="string">r#&quot;some_metric{tag_0=&quot;foo&quot;} + some_metric{tag_0=&quot;bar&quot;}&quot;#</span>).unwrap();
+            parser::parse(<span class="string">r#"some_metric{tag_0="foo"} + some_metric{tag_0="bar"}"#</span>).unwrap();
         <span class="kw">let </span>eval_stmt = EvalStmt {
             expr: prom_expr,
             start: UNIX_EPOCH,
@@ -4623,28 +4624,28 @@
             lookback_delta: Duration::from_secs(<span class="number">1</span>),
         };
 
-        <span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">&quot;some_metric&quot;</span>.to_string(), <span class="number">1</span>, <span class="number">1</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">"some_metric"</span>.to_string(), <span class="number">1</span>, <span class="number">1</span>).<span class="kw">await</span>;
         <span class="kw">let </span>plan = PromPlanner::stmt_to_plan(table_provider, eval_stmt)
             .<span class="kw">await
             </span>.unwrap();
 
         <span class="kw">let  </span>expected = String::from(
-            <span class="string">&quot;Projection: some_metric.tag_0, some_metric.timestamp, some_metric.field_0 + some_metric.field_0 AS some_metric.field_0 + some_metric.field_0 [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), some_metric.field_0 + some_metric.field_0:Float64;N]\
+            <span class="string">"Projection: some_metric.tag_0, some_metric.timestamp, some_metric.field_0 + some_metric.field_0 AS some_metric.field_0 + some_metric.field_0 [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), some_metric.field_0 + some_metric.field_0:Float64;N]\
             \n  Inner Join: some_metric.tag_0 = some_metric.tag_0, some_metric.timestamp = some_metric.timestamp [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n    SubqueryAlias: some_metric [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n      PromInstantManipulate: range=[0..100000000], lookback=[1000], interval=[5000], time index=[timestamp] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n        PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [false] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n          PromSeriesDivide: tags=[\&quot;tag_0\&quot;] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n          PromSeriesDivide: tags=[\"tag_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n            Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n              Filter: some_metric.tag_0 = Utf8(\&quot;foo\&quot;) [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n                TableScan: some_metric, unsupported_filters=[tag_0 = Utf8(\&quot;foo\&quot;), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n              Filter: some_metric.tag_0 = Utf8(\"foo\") [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n                TableScan: some_metric, unsupported_filters=[tag_0 = Utf8(\"foo\"), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n    SubqueryAlias: some_metric [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n      PromInstantManipulate: range=[0..100000000], lookback=[1000], interval=[5000], time index=[timestamp] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n        PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [false] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n          PromSeriesDivide: tags=[\&quot;tag_0\&quot;] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n          PromSeriesDivide: tags=[\"tag_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n            Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n              Filter: some_metric.tag_0 = Utf8(\&quot;bar\&quot;) [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n                TableScan: some_metric, unsupported_filters=[tag_0 = Utf8(\&quot;bar\&quot;), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]&quot;
+            \n              Filter: some_metric.tag_0 = Utf8(\"bar\") [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n                TableScan: some_metric, unsupported_filters=[tag_0 = Utf8(\"bar\"), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]"
         </span>);
 
         <span class="macro">assert_eq!</span>(plan.display_indent_schema().to_string(), expected);
@@ -4662,7 +4663,7 @@
             lookback_delta: Duration::from_secs(<span class="number">1</span>),
         };
 
-        <span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">&quot;some_metric&quot;</span>.to_string(), <span class="number">1</span>, <span class="number">1</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">"some_metric"</span>.to_string(), <span class="number">1</span>, <span class="number">1</span>).<span class="kw">await</span>;
         <span class="kw">let </span>plan = PromPlanner::stmt_to_plan(table_provider, eval_stmt)
             .<span class="kw">await
             </span>.unwrap();
@@ -4672,15 +4673,15 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>binary_op_literal_column() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;1 + some_metric{tag_0=&quot;bar&quot;}&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"1 + some_metric{tag_0="bar"}"#</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: some_metric.tag_0, some_metric.timestamp, Float64(1) + some_metric.field_0 AS Float64(1) + field_0 [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), Float64(1) + field_0:Float64;N]\
+            <span class="string">"Projection: some_metric.tag_0, some_metric.timestamp, Float64(1) + some_metric.field_0 AS Float64(1) + field_0 [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), Float64(1) + field_0:Float64;N]\
             \n  PromInstantManipulate: range=[0..100000000], lookback=[1000], interval=[5000], time index=[timestamp] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n    PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [false] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n      PromSeriesDivide: tags=[\&quot;tag_0\&quot;] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n      PromSeriesDivide: tags=[\"tag_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n        Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n          Filter: some_metric.tag_0 = Utf8(\&quot;bar\&quot;) [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n            TableScan: some_metric, unsupported_filters=[tag_0 = Utf8(\&quot;bar\&quot;), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]&quot;
+            \n          Filter: some_metric.tag_0 = Utf8(\"bar\") [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n            TableScan: some_metric, unsupported_filters=[tag_0 = Utf8(\"bar\"), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]"
         </span>);
 
         indie_query_plan_compare(query, expected).<span class="kw">await</span>;
@@ -4688,22 +4689,22 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>binary_op_literal_literal() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;1 + 1&quot;#</span>;
-        <span class="kw">let </span>expected = String::from(<span class="string">&quot;EmptyMetric: range=[0..100000000], interval=[5000] [time:Timestamp(Millisecond, None), value:Float64;N]&quot;</span>);
+        <span class="kw">let </span>query = <span class="string">r#"1 + 1"#</span>;
+        <span class="kw">let </span>expected = String::from(<span class="string">"EmptyMetric: range=[0..100000000], interval=[5000] [time:Timestamp(Millisecond, None), value:Float64;N]"</span>);
 
         indie_query_plan_compare(query, expected).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>simple_bool_grammar() {
-        <span class="kw">let </span>query = <span class="string">&quot;some_metric != bool 1.2345&quot;</span>;
+        <span class="kw">let </span>query = <span class="string">"some_metric != bool 1.2345"</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: some_metric.tag_0, some_metric.timestamp, CAST(some_metric.field_0 != Float64(1.2345) AS Float64) AS field_0 != Float64(1.2345) [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0 != Float64(1.2345):Float64;N]\
+            <span class="string">"Projection: some_metric.tag_0, some_metric.timestamp, CAST(some_metric.field_0 != Float64(1.2345) AS Float64) AS field_0 != Float64(1.2345) [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0 != Float64(1.2345):Float64;N]\
             \n  PromInstantManipulate: range=[0..100000000], lookback=[1000], interval=[5000], time index=[timestamp] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n    PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [false] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n      PromSeriesDivide: tags=[\&quot;tag_0\&quot;] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n      PromSeriesDivide: tags=[\"tag_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n        Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n          TableScan: some_metric, unsupported_filters=[timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]&quot;
+            \n          TableScan: some_metric, unsupported_filters=[timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]"
         </span>);
 
         indie_query_plan_compare(query, expected).<span class="kw">await</span>;
@@ -4711,14 +4712,14 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>bool_with_additional_arithmetic() {
-        <span class="kw">let </span>query = <span class="string">&quot;some_metric + (1 == bool 2)&quot;</span>;
+        <span class="kw">let </span>query = <span class="string">"some_metric + (1 == bool 2)"</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: some_metric.tag_0, some_metric.timestamp, some_metric.field_0 + CAST(Float64(1) = Float64(2) AS Float64) AS field_0 + Float64(1) = Float64(2) [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0 + Float64(1) = Float64(2):Float64;N]\
+            <span class="string">"Projection: some_metric.tag_0, some_metric.timestamp, some_metric.field_0 + CAST(Float64(1) = Float64(2) AS Float64) AS field_0 + Float64(1) = Float64(2) [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0 + Float64(1) = Float64(2):Float64;N]\
             \n  PromInstantManipulate: range=[0..100000000], lookback=[1000], interval=[5000], time index=[timestamp] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n    PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [false] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n      PromSeriesDivide: tags=[\&quot;tag_0\&quot;] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n      PromSeriesDivide: tags=[\"tag_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n        Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n          TableScan: some_metric, unsupported_filters=[timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]&quot;
+            \n          TableScan: some_metric, unsupported_filters=[timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]"
         </span>);
 
         indie_query_plan_compare(query, expected).<span class="kw">await</span>;
@@ -4726,14 +4727,14 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>simple_unary() {
-        <span class="kw">let </span>query = <span class="string">&quot;-some_metric&quot;</span>;
+        <span class="kw">let </span>query = <span class="string">"-some_metric"</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: some_metric.tag_0, some_metric.timestamp, (- some_metric.field_0) AS (- field_0) [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), (- field_0):Float64;N]\
+            <span class="string">"Projection: some_metric.tag_0, some_metric.timestamp, (- some_metric.field_0) AS (- field_0) [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), (- field_0):Float64;N]\
             \n  PromInstantManipulate: range=[0..100000000], lookback=[1000], interval=[5000], time index=[timestamp] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n    PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [false] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n      PromSeriesDivide: tags=[\&quot;tag_0\&quot;] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n      PromSeriesDivide: tags=[\"tag_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n        Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n          TableScan: some_metric, unsupported_filters=[timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]&quot;
+            \n          TableScan: some_metric, unsupported_filters=[timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]"
         </span>);
 
         indie_query_plan_compare(query, expected).<span class="kw">await</span>;
@@ -4741,15 +4742,15 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>increase_aggr() {
-        <span class="kw">let </span>query = <span class="string">&quot;increase(some_metric[5m])&quot;</span>;
+        <span class="kw">let </span>query = <span class="string">"increase(some_metric[5m])"</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Filter: prom_increase(timestamp_range,field_0,timestamp) IS NOT NULL [timestamp:Timestamp(Millisecond, None), prom_increase(timestamp_range,field_0,timestamp):Float64;N, tag_0:Utf8]\
+            <span class="string">"Filter: prom_increase(timestamp_range,field_0,timestamp) IS NOT NULL [timestamp:Timestamp(Millisecond, None), prom_increase(timestamp_range,field_0,timestamp):Float64;N, tag_0:Utf8]\
             \n  Projection: some_metric.timestamp, prom_increase(timestamp_range, field_0, some_metric.timestamp) AS prom_increase(timestamp_range,field_0,timestamp), some_metric.tag_0 [timestamp:Timestamp(Millisecond, None), prom_increase(timestamp_range,field_0,timestamp):Float64;N, tag_0:Utf8]\
-            \n    PromRangeManipulate: req range=[0..100000000], interval=[5000], eval range=[300000], time index=[timestamp], values=[\&quot;field_0\&quot;] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Dictionary(Int64, Float64);N, timestamp_range:Dictionary(Int64, Timestamp(Millisecond, None))]\
+            \n    PromRangeManipulate: req range=[0..100000000], interval=[5000], eval range=[300000], time index=[timestamp], values=[\"field_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Dictionary(Int64, Float64);N, timestamp_range:Dictionary(Int64, Timestamp(Millisecond, None))]\
             \n      PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [true] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n        PromSeriesDivide: tags=[\&quot;tag_0\&quot;] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n        PromSeriesDivide: tags=[\"tag_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n          Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n            TableScan: some_metric, unsupported_filters=[timestamp &gt;= TimestampMillisecond(-301000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]&quot;
+            \n            TableScan: some_metric, unsupported_filters=[timestamp &gt;= TimestampMillisecond(-301000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]"
         </span>);
 
         indie_query_plan_compare(query, expected).<span class="kw">await</span>;
@@ -4757,14 +4758,14 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>less_filter_on_value() {
-        <span class="kw">let </span>query = <span class="string">&quot;some_metric &lt; 1.2345&quot;</span>;
+        <span class="kw">let </span>query = <span class="string">"some_metric &lt; 1.2345"</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Filter: some_metric.field_0 &lt; Float64(1.2345) [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            <span class="string">"Filter: some_metric.field_0 &lt; Float64(1.2345) [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n  PromInstantManipulate: range=[0..100000000], lookback=[1000], interval=[5000], time index=[timestamp] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n    PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [false] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n      PromSeriesDivide: tags=[\&quot;tag_0\&quot;] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n      PromSeriesDivide: tags=[\"tag_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n        Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n          TableScan: some_metric, unsupported_filters=[timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]&quot;
+            \n          TableScan: some_metric, unsupported_filters=[timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]"
         </span>);
 
         indie_query_plan_compare(query, expected).<span class="kw">await</span>;
@@ -4772,15 +4773,15 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>count_over_time() {
-        <span class="kw">let </span>query = <span class="string">&quot;count_over_time(some_metric[5m])&quot;</span>;
+        <span class="kw">let </span>query = <span class="string">"count_over_time(some_metric[5m])"</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Filter: prom_count_over_time(timestamp_range,field_0) IS NOT NULL [timestamp:Timestamp(Millisecond, None), prom_count_over_time(timestamp_range,field_0):Float64;N, tag_0:Utf8]\
+            <span class="string">"Filter: prom_count_over_time(timestamp_range,field_0) IS NOT NULL [timestamp:Timestamp(Millisecond, None), prom_count_over_time(timestamp_range,field_0):Float64;N, tag_0:Utf8]\
             \n  Projection: some_metric.timestamp, prom_count_over_time(timestamp_range, field_0) AS prom_count_over_time(timestamp_range,field_0), some_metric.tag_0 [timestamp:Timestamp(Millisecond, None), prom_count_over_time(timestamp_range,field_0):Float64;N, tag_0:Utf8]\
-            \n    PromRangeManipulate: req range=[0..100000000], interval=[5000], eval range=[300000], time index=[timestamp], values=[\&quot;field_0\&quot;] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Dictionary(Int64, Float64);N, timestamp_range:Dictionary(Int64, Timestamp(Millisecond, None))]\
+            \n    PromRangeManipulate: req range=[0..100000000], interval=[5000], eval range=[300000], time index=[timestamp], values=[\"field_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Dictionary(Int64, Float64);N, timestamp_range:Dictionary(Int64, Timestamp(Millisecond, None))]\
             \n      PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [true] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n        PromSeriesDivide: tags=[\&quot;tag_0\&quot;] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n        PromSeriesDivide: tags=[\"tag_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n          Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n            TableScan: some_metric, unsupported_filters=[timestamp &gt;= TimestampMillisecond(-301000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]&quot;
+            \n            TableScan: some_metric, unsupported_filters=[timestamp &gt;= TimestampMillisecond(-301000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]"
         </span>);
 
         indie_query_plan_compare(query, expected).<span class="kw">await</span>;
@@ -4802,92 +4803,92 @@
         <span class="kw">let </span>cases = [
             <span class="comment">// single equal matcher
             </span>(
-                <span class="string">r#&quot;some_metric{__field__=&quot;field_1&quot;}&quot;#</span>,
+                <span class="string">r#"some_metric{__field__="field_1"}"#</span>,
                 <span class="macro">vec!</span>[
-                    <span class="string">&quot;some_metric.field_1&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_0&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_1&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_2&quot;</span>,
-                    <span class="string">&quot;some_metric.timestamp&quot;</span>,
+                    <span class="string">"some_metric.field_1"</span>,
+                    <span class="string">"some_metric.tag_0"</span>,
+                    <span class="string">"some_metric.tag_1"</span>,
+                    <span class="string">"some_metric.tag_2"</span>,
+                    <span class="string">"some_metric.timestamp"</span>,
                 ],
             ),
             <span class="comment">// two equal matchers
             </span>(
-                <span class="string">r#&quot;some_metric{__field__=&quot;field_1&quot;, __field__=&quot;field_0&quot;}&quot;#</span>,
+                <span class="string">r#"some_metric{__field__="field_1", __field__="field_0"}"#</span>,
                 <span class="macro">vec!</span>[
-                    <span class="string">&quot;some_metric.field_0&quot;</span>,
-                    <span class="string">&quot;some_metric.field_1&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_0&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_1&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_2&quot;</span>,
-                    <span class="string">&quot;some_metric.timestamp&quot;</span>,
+                    <span class="string">"some_metric.field_0"</span>,
+                    <span class="string">"some_metric.field_1"</span>,
+                    <span class="string">"some_metric.tag_0"</span>,
+                    <span class="string">"some_metric.tag_1"</span>,
+                    <span class="string">"some_metric.tag_2"</span>,
+                    <span class="string">"some_metric.timestamp"</span>,
                 ],
             ),
             <span class="comment">// single not_eq matcher
             </span>(
-                <span class="string">r#&quot;some_metric{__field__!=&quot;field_1&quot;}&quot;#</span>,
+                <span class="string">r#"some_metric{__field__!="field_1"}"#</span>,
                 <span class="macro">vec!</span>[
-                    <span class="string">&quot;some_metric.field_0&quot;</span>,
-                    <span class="string">&quot;some_metric.field_2&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_0&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_1&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_2&quot;</span>,
-                    <span class="string">&quot;some_metric.timestamp&quot;</span>,
+                    <span class="string">"some_metric.field_0"</span>,
+                    <span class="string">"some_metric.field_2"</span>,
+                    <span class="string">"some_metric.tag_0"</span>,
+                    <span class="string">"some_metric.tag_1"</span>,
+                    <span class="string">"some_metric.tag_2"</span>,
+                    <span class="string">"some_metric.timestamp"</span>,
                 ],
             ),
             <span class="comment">// two not_eq matchers
             </span>(
-                <span class="string">r#&quot;some_metric{__field__!=&quot;field_1&quot;, __field__!=&quot;field_2&quot;}&quot;#</span>,
+                <span class="string">r#"some_metric{__field__!="field_1", __field__!="field_2"}"#</span>,
                 <span class="macro">vec!</span>[
-                    <span class="string">&quot;some_metric.field_0&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_0&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_1&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_2&quot;</span>,
-                    <span class="string">&quot;some_metric.timestamp&quot;</span>,
+                    <span class="string">"some_metric.field_0"</span>,
+                    <span class="string">"some_metric.tag_0"</span>,
+                    <span class="string">"some_metric.tag_1"</span>,
+                    <span class="string">"some_metric.tag_2"</span>,
+                    <span class="string">"some_metric.timestamp"</span>,
                 ],
             ),
             <span class="comment">// equal and not_eq matchers (no conflict)
             </span>(
-                <span class="string">r#&quot;some_metric{__field__=&quot;field_1&quot;, __field__!=&quot;field_0&quot;}&quot;#</span>,
+                <span class="string">r#"some_metric{__field__="field_1", __field__!="field_0"}"#</span>,
                 <span class="macro">vec!</span>[
-                    <span class="string">&quot;some_metric.field_1&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_0&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_1&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_2&quot;</span>,
-                    <span class="string">&quot;some_metric.timestamp&quot;</span>,
+                    <span class="string">"some_metric.field_1"</span>,
+                    <span class="string">"some_metric.tag_0"</span>,
+                    <span class="string">"some_metric.tag_1"</span>,
+                    <span class="string">"some_metric.tag_2"</span>,
+                    <span class="string">"some_metric.timestamp"</span>,
                 ],
             ),
             <span class="comment">// equal and not_eq matchers (conflict)
             </span>(
-                <span class="string">r#&quot;some_metric{__field__=&quot;field_2&quot;, __field__!=&quot;field_2&quot;}&quot;#</span>,
+                <span class="string">r#"some_metric{__field__="field_2", __field__!="field_2"}"#</span>,
                 <span class="macro">vec!</span>[
-                    <span class="string">&quot;some_metric.tag_0&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_1&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_2&quot;</span>,
-                    <span class="string">&quot;some_metric.timestamp&quot;</span>,
+                    <span class="string">"some_metric.tag_0"</span>,
+                    <span class="string">"some_metric.tag_1"</span>,
+                    <span class="string">"some_metric.tag_2"</span>,
+                    <span class="string">"some_metric.timestamp"</span>,
                 ],
             ),
             <span class="comment">// single regex eq matcher
             </span>(
-                <span class="string">r#&quot;some_metric{__field__=~&quot;field_1|field_2&quot;}&quot;#</span>,
+                <span class="string">r#"some_metric{__field__=~"field_1|field_2"}"#</span>,
                 <span class="macro">vec!</span>[
-                    <span class="string">&quot;some_metric.field_1&quot;</span>,
-                    <span class="string">&quot;some_metric.field_2&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_0&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_1&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_2&quot;</span>,
-                    <span class="string">&quot;some_metric.timestamp&quot;</span>,
+                    <span class="string">"some_metric.field_1"</span>,
+                    <span class="string">"some_metric.field_2"</span>,
+                    <span class="string">"some_metric.tag_0"</span>,
+                    <span class="string">"some_metric.tag_1"</span>,
+                    <span class="string">"some_metric.tag_2"</span>,
+                    <span class="string">"some_metric.timestamp"</span>,
                 ],
             ),
             <span class="comment">// single regex not_eq matcher
             </span>(
-                <span class="string">r#&quot;some_metric{__field__!~&quot;field_1|field_2&quot;}&quot;#</span>,
+                <span class="string">r#"some_metric{__field__!~"field_1|field_2"}"#</span>,
                 <span class="macro">vec!</span>[
-                    <span class="string">&quot;some_metric.field_0&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_0&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_1&quot;</span>,
-                    <span class="string">&quot;some_metric.tag_2&quot;</span>,
-                    <span class="string">&quot;some_metric.timestamp&quot;</span>,
+                    <span class="string">"some_metric.field_0"</span>,
+                    <span class="string">"some_metric.tag_0"</span>,
+                    <span class="string">"some_metric.tag_1"</span>,
+                    <span class="string">"some_metric.tag_2"</span>,
+                    <span class="string">"some_metric.timestamp"</span>,
                 ],
             ),
         ];
@@ -4895,7 +4896,7 @@
         <span class="kw">for </span>case <span class="kw">in </span>cases {
             <span class="kw">let </span>prom_expr = parser::parse(case.<span class="number">0</span>).unwrap();
             eval_stmt.expr = prom_expr;
-            <span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">&quot;some_metric&quot;</span>.to_string(), <span class="number">3</span>, <span class="number">3</span>).<span class="kw">await</span>;
+            <span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">"some_metric"</span>.to_string(), <span class="number">3</span>, <span class="number">3</span>).<span class="kw">await</span>;
             <span class="kw">let </span>plan = PromPlanner::stmt_to_plan(table_provider, eval_stmt.clone())
                 .<span class="kw">await
                 </span>.unwrap();
@@ -4903,20 +4904,20 @@
             <span class="kw">let </span><span class="kw-2">mut </span>expected = case.<span class="number">1</span>.into_iter().map(String::from).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
             fields.sort();
             expected.sort();
-            <span class="macro">assert_eq!</span>(fields, expected, <span class="string">&quot;case: {:?}&quot;</span>, case.<span class="number">0</span>);
+            <span class="macro">assert_eq!</span>(fields, expected, <span class="string">"case: {:?}"</span>, case.<span class="number">0</span>);
         }
 
         <span class="kw">let </span>bad_cases = [
-            <span class="string">r#&quot;some_metric{__field__=&quot;nonexistent&quot;}&quot;#</span>,
-            <span class="string">r#&quot;some_metric{__field__!=&quot;nonexistent&quot;}&quot;#</span>,
+            <span class="string">r#"some_metric{__field__="nonexistent"}"#</span>,
+            <span class="string">r#"some_metric{__field__!="nonexistent"}"#</span>,
         ];
 
         <span class="kw">for </span>case <span class="kw">in </span>bad_cases {
             <span class="kw">let </span>prom_expr = parser::parse(case).unwrap();
             eval_stmt.expr = prom_expr;
-            <span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">&quot;some_metric&quot;</span>.to_string(), <span class="number">3</span>, <span class="number">3</span>).<span class="kw">await</span>;
+            <span class="kw">let </span>table_provider = build_test_table_provider(<span class="string">"some_metric"</span>.to_string(), <span class="number">3</span>, <span class="number">3</span>).<span class="kw">await</span>;
             <span class="kw">let </span>plan = PromPlanner::stmt_to_plan(table_provider, eval_stmt.clone()).<span class="kw">await</span>;
-            <span class="macro">assert!</span>(plan.is_err(), <span class="string">&quot;case: {:?}&quot;</span>, case);
+            <span class="macro">assert!</span>(plan.is_err(), <span class="string">"case: {:?}"</span>, case);
         }
     }
 }

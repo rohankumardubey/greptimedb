@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/sst/parquet/reader.rs`."><title>reader.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/sst/parquet/reader.rs`."><title>reader.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -453,14 +454,14 @@
 <a href="#453" id="453">453</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -615,7 +616,7 @@
         </span><span class="kw">let </span>parquet_schema_desc = parquet_meta.file_metadata().schema_descr();
         <span class="kw">let </span>projection_mask = <span class="kw">if let </span><span class="prelude-val">Some</span>(column_ids) = <span class="self">self</span>.projection.as_ref() {
             <span class="kw">let </span>indices = read_format.projection_indices(column_ids.iter().copied());
-            <span class="comment">// Now we assumes we don&#39;t have nested schemas.
+            <span class="comment">// Now we assumes we don't have nested schemas.
             </span>ProjectionMask::roots(parquet_schema_desc, indices)
         } <span class="kw">else </span>{
             ProjectionMask::all()
@@ -660,21 +661,21 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;RegionMetadata&gt; {
         <span class="kw">let </span>key_values = key_value_meta.context(InvalidParquetSnafu {
             file: file_path,
-            reason: <span class="string">&quot;missing key value meta&quot;</span>,
+            reason: <span class="string">"missing key value meta"</span>,
         })<span class="question-mark">?</span>;
         <span class="kw">let </span>meta_value = key_values
             .iter()
             .find(|kv| kv.key == PARQUET_METADATA_KEY)
             .with_context(|| InvalidParquetSnafu {
                 file: file_path,
-                reason: <span class="macro">format!</span>(<span class="string">&quot;key {} not found&quot;</span>, PARQUET_METADATA_KEY),
+                reason: <span class="macro">format!</span>(<span class="string">"key {} not found"</span>, PARQUET_METADATA_KEY),
             })<span class="question-mark">?</span>;
         <span class="kw">let </span>json = meta_value
             .value
             .as_ref()
             .with_context(|| InvalidParquetSnafu {
                 file: file_path,
-                reason: <span class="macro">format!</span>(<span class="string">&quot;No value for key {}&quot;</span>, PARQUET_METADATA_KEY),
+                reason: <span class="macro">format!</span>(<span class="string">"No value for key {}"</span>, PARQUET_METADATA_KEY),
             })<span class="question-mark">?</span>;
 
         RegionMetadata::from_json(json).context(InvalidMetadataSnafu)
@@ -795,7 +796,7 @@
     </span>read_format: ReadFormat,
     <span class="doccomment">/// Builder to build row group readers.
     ///
-    /// The builder contains the file handle, so don&#39;t drop the builder while using
+    /// The builder contains the file handle, so don't drop the builder while using
     /// the [ParquetReader].
     </span>reader_builder: RowGroupReaderBuilder,
     <span class="doccomment">/// Reader of current row group.
@@ -837,7 +838,7 @@
 <span class="kw">impl </span>Drop <span class="kw">for </span>ParquetReader {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="macro">debug!</span>(
-            <span class="string">&quot;Read parquet {} {}, range: {:?}, {}/{} row groups, metrics: {:?}&quot;</span>,
+            <span class="string">"Read parquet {} {}, range: {:?}, {}/{} row groups, metrics: {:?}"</span>,
             <span class="self">self</span>.reader_builder.file_handle.region_id(),
             <span class="self">self</span>.reader_builder.file_handle.file_id(),
             <span class="self">self</span>.reader_builder.file_handle.time_range(),
@@ -848,13 +849,13 @@
 
         <span class="comment">// Report metrics.
         </span>READ_STAGE_ELAPSED
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">&quot;build_parquet_reader&quot;</span>])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"build_parquet_reader"</span>])
             .observe(<span class="self">self</span>.metrics.build_cost.as_secs_f64());
         READ_STAGE_ELAPSED
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">&quot;scan_row_groups&quot;</span>])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"scan_row_groups"</span>])
             .observe(<span class="self">self</span>.metrics.scan_cost.as_secs_f64());
         READ_ROWS_TOTAL
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">&quot;parquet&quot;</span>])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"parquet"</span>])
             .inc_by(<span class="self">self</span>.metrics.num_rows <span class="kw">as </span>u64);
     }
 }

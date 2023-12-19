@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/metrics.rs`."><title>metrics.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/metrics.rs`."><title>metrics.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -146,14 +147,14 @@
 <a href="#146" id="146">146</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -162,23 +163,23 @@
 <span class="kw">use </span>prometheus::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Stage label.
-</span><span class="kw">pub const </span>STAGE_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;stage&quot;</span>;
+</span><span class="kw">pub const </span>STAGE_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">"stage"</span>;
 <span class="doccomment">/// Type label.
-</span><span class="kw">pub const </span>TYPE_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;type&quot;</span>;
+</span><span class="kw">pub const </span>TYPE_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">"type"</span>;
 <span class="doccomment">/// Reason to flush.
-</span><span class="kw">pub const </span>FLUSH_REASON: <span class="kw-2">&amp;</span>str = <span class="string">&quot;reason&quot;</span>;
+</span><span class="kw">pub const </span>FLUSH_REASON: <span class="kw-2">&amp;</span>str = <span class="string">"reason"</span>;
 
 <span class="macro">lazy_static! </span>{
     <span class="doccomment">/// Global write buffer size in bytes.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>WRITE_BUFFER_BYTES: IntGauge =
-        <span class="macro">register_int_gauge!</span>(<span class="string">&quot;mito_write_buffer_bytes&quot;</span>, <span class="string">&quot;mito write buffer bytes&quot;</span>).unwrap();
+        <span class="macro">register_int_gauge!</span>(<span class="string">"mito_write_buffer_bytes"</span>, <span class="string">"mito write buffer bytes"</span>).unwrap();
     <span class="doccomment">/// Gauge for open regions
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>REGION_COUNT: IntGauge =
-        <span class="macro">register_int_gauge!</span>(<span class="string">&quot;mito_region_count&quot;</span>, <span class="string">&quot;mito region count&quot;</span>).unwrap();
+        <span class="macro">register_int_gauge!</span>(<span class="string">"mito_region_count"</span>, <span class="string">"mito region count"</span>).unwrap();
     <span class="doccomment">/// Elapsed time to handle requests.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>HANDLE_REQUEST_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-            <span class="string">&quot;mito_handle_request_elapsed&quot;</span>,
-            <span class="string">&quot;mito handle request elapsed&quot;</span>,
+            <span class="string">"mito_handle_request_elapsed"</span>,
+            <span class="string">"mito handle request elapsed"</span>,
             <span class="kw-2">&amp;</span>[TYPE_LABEL]
         )
         .unwrap();
@@ -187,45 +188,45 @@
     </span><span class="doccomment">/// Counter of scheduled flush requests.
     /// Note that the flush scheduler may merge some flush requests.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>FLUSH_REQUESTS_TOTAL: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-            <span class="string">&quot;mito_flush_requests_total&quot;</span>,
-            <span class="string">&quot;mito flush requests total&quot;</span>,
+            <span class="string">"mito_flush_requests_total"</span>,
+            <span class="string">"mito flush requests total"</span>,
             <span class="kw-2">&amp;</span>[FLUSH_REASON]
         )
         .unwrap();
     <span class="doccomment">/// Counter of scheduled failed flush jobs.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>FLUSH_ERRORS_TOTAL: IntCounter =
-        <span class="macro">register_int_counter!</span>(<span class="string">&quot;mito_flush_errors_total&quot;</span>, <span class="string">&quot;mito flush errors total&quot;</span>).unwrap();
+        <span class="macro">register_int_counter!</span>(<span class="string">"mito_flush_errors_total"</span>, <span class="string">"mito flush errors total"</span>).unwrap();
     <span class="doccomment">/// Elapsed time of a flush job.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>FLUSH_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-            <span class="string">&quot;mito_flush_elapsed&quot;</span>,
-            <span class="string">&quot;mito flush elapsed&quot;</span>,
+            <span class="string">"mito_flush_elapsed"</span>,
+            <span class="string">"mito flush elapsed"</span>,
             <span class="kw-2">&amp;</span>[TYPE_LABEL]
         )
         .unwrap();
     <span class="doccomment">/// Histogram of flushed bytes.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>FLUSH_BYTES_TOTAL: IntCounter =
-        <span class="macro">register_int_counter!</span>(<span class="string">&quot;mito_flush_bytes_total&quot;</span>, <span class="string">&quot;mito flush bytes total&quot;</span>).unwrap();
+        <span class="macro">register_int_counter!</span>(<span class="string">"mito_flush_bytes_total"</span>, <span class="string">"mito flush bytes total"</span>).unwrap();
     <span class="comment">// ------ End of flush related metrics
 
 
     // ------ Write related metrics
     </span><span class="doccomment">/// Counter of stalled write requests.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>WRITE_STALL_TOTAL: IntCounter =
-        <span class="macro">register_int_counter!</span>(<span class="string">&quot;mito_write_stall_total&quot;</span>, <span class="string">&quot;mito write stall total&quot;</span>).unwrap();
+        <span class="macro">register_int_counter!</span>(<span class="string">"mito_write_stall_total"</span>, <span class="string">"mito write stall total"</span>).unwrap();
     <span class="doccomment">/// Counter of rejected write requests.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>WRITE_REJECT_TOTAL: IntCounter =
-        <span class="macro">register_int_counter!</span>(<span class="string">&quot;mito_write_reject_total&quot;</span>, <span class="string">&quot;mito write reject total&quot;</span>).unwrap();
+        <span class="macro">register_int_counter!</span>(<span class="string">"mito_write_reject_total"</span>, <span class="string">"mito write reject total"</span>).unwrap();
     <span class="doccomment">/// Elapsed time of each write stage.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>WRITE_STAGE_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-            <span class="string">&quot;mito_write_stage_elapsed&quot;</span>,
-            <span class="string">&quot;mito write stage elapsed&quot;</span>,
+            <span class="string">"mito_write_stage_elapsed"</span>,
+            <span class="string">"mito write stage elapsed"</span>,
             <span class="kw-2">&amp;</span>[STAGE_LABEL]
         )
         .unwrap();
     <span class="doccomment">/// Counter of rows to write.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>WRITE_ROWS_TOTAL: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-        <span class="string">&quot;mito_write_rows_total&quot;</span>,
-        <span class="string">&quot;mito write rows total&quot;</span>,
+        <span class="string">"mito_write_rows_total"</span>,
+        <span class="string">"mito write rows total"</span>,
         <span class="kw-2">&amp;</span>[TYPE_LABEL]
     )
     .unwrap();
@@ -235,57 +236,57 @@
     // Compaction metrics
     </span><span class="doccomment">/// Timer of different stages in compaction.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>COMPACTION_STAGE_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;mito_compaction_stage_elapsed&quot;</span>,
-        <span class="string">&quot;mito compaction stage elapsed&quot;</span>,
+        <span class="string">"mito_compaction_stage_elapsed"</span>,
+        <span class="string">"mito compaction stage elapsed"</span>,
         <span class="kw-2">&amp;</span>[STAGE_LABEL]
     )
     .unwrap();
     <span class="doccomment">/// Timer of whole compaction task.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>COMPACTION_ELAPSED_TOTAL: Histogram =
-        <span class="macro">register_histogram!</span>(<span class="string">&quot;mito_compaction_total_elapsed&quot;</span>, <span class="string">&quot;mito compaction total elapsed&quot;</span>).unwrap();
+        <span class="macro">register_histogram!</span>(<span class="string">"mito_compaction_total_elapsed"</span>, <span class="string">"mito compaction total elapsed"</span>).unwrap();
     <span class="doccomment">/// Counter of all requested compaction task.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>COMPACTION_REQUEST_COUNT: IntCounter =
-        <span class="macro">register_int_counter!</span>(<span class="string">&quot;mito_compaction_requests_total&quot;</span>, <span class="string">&quot;mito compaction requests total&quot;</span>).unwrap();
+        <span class="macro">register_int_counter!</span>(<span class="string">"mito_compaction_requests_total"</span>, <span class="string">"mito compaction requests total"</span>).unwrap();
     <span class="doccomment">/// Counter of failed compaction task.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>COMPACTION_FAILURE_COUNT: IntCounter =
-        <span class="macro">register_int_counter!</span>(<span class="string">&quot;mito_compaction_failure_total&quot;</span>, <span class="string">&quot;mito compaction failure total&quot;</span>).unwrap();
+        <span class="macro">register_int_counter!</span>(<span class="string">"mito_compaction_failure_total"</span>, <span class="string">"mito compaction failure total"</span>).unwrap();
     <span class="comment">// ------- End of compaction metrics.
 
     // Query metrics.
     </span><span class="doccomment">/// Timer of different stages in query.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>READ_STAGE_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;mito_read_stage_elapsed&quot;</span>,
-        <span class="string">&quot;mito read stage elapsed&quot;</span>,
+        <span class="string">"mito_read_stage_elapsed"</span>,
+        <span class="string">"mito read stage elapsed"</span>,
         <span class="kw-2">&amp;</span>[STAGE_LABEL]
     )
     .unwrap();
     <span class="doccomment">/// Counter of rows read.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>READ_ROWS_TOTAL: IntCounterVec =
-        <span class="macro">register_int_counter_vec!</span>(<span class="string">&quot;mito_read_rows_total&quot;</span>, <span class="string">&quot;mito read rows total&quot;</span>, <span class="kw-2">&amp;</span>[TYPE_LABEL]).unwrap();
+        <span class="macro">register_int_counter_vec!</span>(<span class="string">"mito_read_rows_total"</span>, <span class="string">"mito read rows total"</span>, <span class="kw-2">&amp;</span>[TYPE_LABEL]).unwrap();
     <span class="doccomment">/// Counter of filtered rows during merge.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>MERGE_FILTER_ROWS_TOTAL: IntCounterVec =
-        <span class="macro">register_int_counter_vec!</span>(<span class="string">&quot;mito_merge_filter_rows_total&quot;</span>, <span class="string">&quot;mito merge filter rows total&quot;</span>, <span class="kw-2">&amp;</span>[TYPE_LABEL]).unwrap();
+        <span class="macro">register_int_counter_vec!</span>(<span class="string">"mito_merge_filter_rows_total"</span>, <span class="string">"mito merge filter rows total"</span>, <span class="kw-2">&amp;</span>[TYPE_LABEL]).unwrap();
     <span class="comment">// ------- End of query metrics.
 
     // Cache related metrics.
     </span><span class="doccomment">/// Cache hit counter.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>CACHE_HIT: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-        <span class="string">&quot;mito_cache_hit&quot;</span>,
-        <span class="string">&quot;mito cache hit&quot;</span>,
+        <span class="string">"mito_cache_hit"</span>,
+        <span class="string">"mito cache hit"</span>,
         <span class="kw-2">&amp;</span>[TYPE_LABEL]
     )
     .unwrap();
     <span class="doccomment">/// Cache miss counter.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>CACHE_MISS: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-        <span class="string">&quot;mito_cache_miss&quot;</span>,
-        <span class="string">&quot;mito cache miss&quot;</span>,
+        <span class="string">"mito_cache_miss"</span>,
+        <span class="string">"mito cache miss"</span>,
         <span class="kw-2">&amp;</span>[TYPE_LABEL]
     )
     .unwrap();
     <span class="doccomment">/// Cache size in bytes.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>CACHE_BYTES: IntGaugeVec = <span class="macro">register_int_gauge_vec!</span>(
-        <span class="string">&quot;mito_cache_bytes&quot;</span>,
-        <span class="string">&quot;mito cache bytes&quot;</span>,
+        <span class="string">"mito_cache_bytes"</span>,
+        <span class="string">"mito cache bytes"</span>,
         <span class="kw-2">&amp;</span>[TYPE_LABEL]
     )
     .unwrap();

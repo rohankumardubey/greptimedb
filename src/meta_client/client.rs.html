@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/meta-client/src/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="meta_client" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/meta-client/src/client.rs`."><title>client.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="meta_client" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -832,14 +833,14 @@
 <a href="#832" id="832">832</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -967,7 +968,7 @@
         };
 
         <span class="kw">if </span>!(<span class="self">self</span>.enable_heartbeat || <span class="self">self</span>.enable_router || <span class="self">self</span>.enable_store || <span class="self">self</span>.enable_lock) {
-            <span class="macro">panic!</span>(<span class="string">&quot;At least one client needs to be enabled.&quot;</span>)
+            <span class="macro">panic!</span>(<span class="string">"At least one client needs to be enabled."</span>)
         }
 
         <span class="kw">let </span>mgr = client.channel_manager.clone();
@@ -1046,23 +1047,23 @@
         </span>U: AsRef&lt;str&gt;,
         A: AsRef&lt;[U]&gt; + Clone,
     {
-        <span class="macro">info!</span>(<span class="string">&quot;MetaClient channel config: {:?}&quot;</span>, <span class="self">self</span>.channel_config());
+        <span class="macro">info!</span>(<span class="string">"MetaClient channel config: {:?}"</span>, <span class="self">self</span>.channel_config());
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.heartbeat {
             client.start(urls.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="macro">info!</span>(<span class="string">&quot;Heartbeat client started&quot;</span>);
+            <span class="macro">info!</span>(<span class="string">"Heartbeat client started"</span>);
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.store {
             client.start(urls.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="macro">info!</span>(<span class="string">&quot;Store client started&quot;</span>);
+            <span class="macro">info!</span>(<span class="string">"Store client started"</span>);
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.lock {
             client.start(urls.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="macro">info!</span>(<span class="string">&quot;Lock client started&quot;</span>);
+            <span class="macro">info!</span>(<span class="string">"Lock client started"</span>);
         }
         <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = <span class="kw-2">&amp;mut </span><span class="self">self</span>.ddl {
             client.start(urls).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="macro">info!</span>(<span class="string">&quot;DDL client started&quot;</span>);
+            <span class="macro">info!</span>(<span class="string">"DDL client started"</span>);
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -1079,7 +1080,7 @@
     ///
     /// The `datanode` needs to use the sender to continuously send heartbeat
     /// packets (some self-state data), and the receiver can receive a response
-    /// from &quot;metasrv&quot; (which may contain some scheduling instructions).
+    /// from "metasrv" (which may contain some scheduling instructions).
     </span><span class="kw">pub async fn </span>heartbeat(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(HeartbeatSender, HeartbeatStream)&gt; {
         <span class="self">self</span>.heartbeat_client()<span class="question-mark">?</span>.heartbeat().<span class="kw">await
     </span>}
@@ -1177,21 +1178,21 @@
     <span class="attr">#[inline]
     </span><span class="kw">pub fn </span>heartbeat_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;HeartbeatClient&gt; {
         <span class="self">self</span>.heartbeat.clone().context(error::NotStartedSnafu {
-            name: <span class="string">&quot;heartbeat_client&quot;</span>,
+            name: <span class="string">"heartbeat_client"</span>,
         })
     }
 
     <span class="attr">#[inline]
     </span><span class="kw">pub fn </span>store_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;StoreClient&gt; {
         <span class="self">self</span>.store.clone().context(error::NotStartedSnafu {
-            name: <span class="string">&quot;store_client&quot;</span>,
+            name: <span class="string">"store_client"</span>,
         })
     }
 
     <span class="attr">#[inline]
     </span><span class="kw">pub fn </span>lock_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;LockClient&gt; {
         <span class="self">self</span>.lock.clone().context(error::NotStartedSnafu {
-            name: <span class="string">&quot;lock_client&quot;</span>,
+            name: <span class="string">"lock_client"</span>,
         })
     }
 
@@ -1199,7 +1200,7 @@
     </span><span class="kw">pub fn </span>ddl_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;DdlClient&gt; {
         <span class="self">self</span>.ddl
             .clone()
-            .context(error::NotStartedSnafu { name: <span class="string">&quot;ddl_client&quot; </span>})
+            .context(error::NotStartedSnafu { name: <span class="string">"ddl_client" </span>})
     }
 
     <span class="attr">#[inline]
@@ -1223,7 +1224,7 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::mocks;
 
-    <span class="kw">const </span>TEST_KEY_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">&quot;__unit_test__meta__&quot;</span>;
+    <span class="kw">const </span>TEST_KEY_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">"__unit_test__meta__"</span>;
 
     <span class="kw">struct </span>TestClient {
         ns: String,
@@ -1232,7 +1233,7 @@
 
     <span class="kw">impl </span>TestClient {
         <span class="kw">async fn </span>new(ns: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; <span class="self">Self </span>{
-            <span class="comment">// can also test with etcd: mocks::mock_client_with_etcdstore(&quot;127.0.0.1:2379&quot;).await;
+            <span class="comment">// can also test with etcd: mocks::mock_client_with_etcdstore("127.0.0.1:2379").await;
             </span><span class="kw">let </span>client = mocks::mock_client_with_memstore().<span class="kw">await</span>;
             <span class="self">Self </span>{
                 ns: ns.into(),
@@ -1241,14 +1242,14 @@
         }
 
         <span class="kw">fn </span>key(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) -&gt; Vec&lt;u8&gt; {
-            <span class="macro">format!</span>(<span class="string">&quot;{}-{}-{}&quot;</span>, TEST_KEY_PREFIX, <span class="self">self</span>.ns, name).into_bytes()
+            <span class="macro">format!</span>(<span class="string">"{}-{}-{}"</span>, TEST_KEY_PREFIX, <span class="self">self</span>.ns, name).into_bytes()
         }
 
         <span class="kw">async fn </span>gen_data(<span class="kw-2">&amp;</span><span class="self">self</span>) {
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">10 </span>{
                 <span class="kw">let </span>req = PutRequest::new()
-                    .with_key(<span class="self">self</span>.key(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;key-{i}&quot;</span>)))
-                    .with_value(<span class="macro">format!</span>(<span class="string">&quot;{}-{}&quot;</span>, <span class="string">&quot;value&quot;</span>, i).into_bytes())
+                    .with_key(<span class="self">self</span>.key(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"key-{i}"</span>)))
+                    .with_value(<span class="macro">format!</span>(<span class="string">"{}-{}"</span>, <span class="string">"value"</span>, i).into_bytes())
                     .with_prev_kv();
                 <span class="kw">let </span>res = <span class="self">self</span>.client.put(req).<span class="kw">await</span>;
                 <span class="kw">let _ </span>= res.unwrap();
@@ -1257,7 +1258,7 @@
 
         <span class="kw">async fn </span>clear_data(<span class="kw-2">&amp;</span><span class="self">self</span>) {
             <span class="kw">let </span>req =
-                DeleteRangeRequest::new().with_prefix(<span class="macro">format!</span>(<span class="string">&quot;{}-{}&quot;</span>, TEST_KEY_PREFIX, <span class="self">self</span>.ns));
+                DeleteRangeRequest::new().with_prefix(<span class="macro">format!</span>(<span class="string">"{}-{}"</span>, TEST_KEY_PREFIX, <span class="self">self</span>.ns));
             <span class="kw">let </span>res = <span class="self">self</span>.client.delete_range(req).<span class="kw">await</span>;
             <span class="kw">let _ </span>= res.unwrap();
         }
@@ -1271,7 +1272,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_meta_client_builder() {
-        <span class="kw">let </span>urls = <span class="kw-2">&amp;</span>[<span class="string">&quot;127.0.0.1:3001&quot;</span>, <span class="string">&quot;127.0.0.1:3002&quot;</span>];
+        <span class="kw">let </span>urls = <span class="kw-2">&amp;</span>[<span class="string">"127.0.0.1:3001"</span>, <span class="string">"127.0.0.1:3002"</span>];
 
         <span class="kw">let </span><span class="kw-2">mut </span>meta_client = MetaClientBuilder::new(<span class="number">0</span>, <span class="number">0</span>, Role::Datanode)
             .enable_heartbeat()
@@ -1312,7 +1313,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_not_start_heartbeat_client() {
-        <span class="kw">let </span>urls = <span class="kw-2">&amp;</span>[<span class="string">&quot;127.0.0.1:3001&quot;</span>, <span class="string">&quot;127.0.0.1:3002&quot;</span>];
+        <span class="kw">let </span>urls = <span class="kw-2">&amp;</span>[<span class="string">"127.0.0.1:3001"</span>, <span class="string">"127.0.0.1:3002"</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>meta_client = MetaClientBuilder::new(<span class="number">0</span>, <span class="number">0</span>, Role::Datanode)
             .enable_router()
             .enable_store()
@@ -1324,7 +1325,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_not_start_store_client() {
-        <span class="kw">let </span>urls = <span class="kw-2">&amp;</span>[<span class="string">&quot;127.0.0.1:3001&quot;</span>, <span class="string">&quot;127.0.0.1:3002&quot;</span>];
+        <span class="kw">let </span>urls = <span class="kw-2">&amp;</span>[<span class="string">"127.0.0.1:3001"</span>, <span class="string">"127.0.0.1:3002"</span>];
         <span class="kw">let </span><span class="kw-2">mut </span>meta_client = MetaClientBuilder::new(<span class="number">0</span>, <span class="number">0</span>, Role::Datanode)
             .enable_heartbeat()
             .enable_router()
@@ -1343,13 +1344,13 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_ask_leader() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_ask_leader&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_ask_leader"</span>).<span class="kw">await</span>;
         tc.client.ask_leader().<span class="kw">await</span>.unwrap();
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_heartbeat() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_heartbeat&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_heartbeat"</span>).<span class="kw">await</span>;
         <span class="kw">let </span>(sender, <span class="kw-2">mut </span>receiver) = tc.client.heartbeat().<span class="kw">await</span>.unwrap();
         <span class="comment">// send heartbeats
         </span><span class="kw">let </span>_handle = tokio::spawn(<span class="kw">async move </span>{
@@ -1357,7 +1358,7 @@
                 <span class="kw">let </span>req = HeartbeatRequest {
                     peer: <span class="prelude-val">Some</span>(Peer {
                         id: <span class="number">1</span>,
-                        addr: <span class="string">&quot;meta_client_peer&quot;</span>.to_string(),
+                        addr: <span class="string">"meta_client_peer"</span>.to_string(),
                     }),
                     ..Default::default()
                 };
@@ -1388,15 +1389,15 @@
             <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[
                 Peer {
                     id: <span class="number">0</span>,
-                    addr: <span class="string">&quot;peer0&quot;</span>.to_string(),
+                    addr: <span class="string">"peer0"</span>.to_string(),
                 },
                 Peer {
                     id: <span class="number">1</span>,
-                    addr: <span class="string">&quot;peer1&quot;</span>.to_string(),
+                    addr: <span class="string">"peer1"</span>.to_string(),
                 },
                 Peer {
                     id: <span class="number">2</span>,
-                    addr: <span class="string">&quot;peer2&quot;</span>.to_string(),
+                    addr: <span class="string">"peer2"</span>.to_string(),
                 },
             ])
         }
@@ -1404,47 +1405,47 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_range_get() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_range_get&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_range_get"</span>).<span class="kw">await</span>;
         tc.gen_data().<span class="kw">await</span>;
 
-        <span class="kw">let </span>key = tc.key(<span class="string">&quot;key-0&quot;</span>);
+        <span class="kw">let </span>key = tc.key(<span class="string">"key-0"</span>);
         <span class="kw">let </span>req = RangeRequest::new().with_key(key.as_slice());
         <span class="kw">let </span>res = tc.client.range(req).<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>kvs = res.unwrap().take_kvs();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, kvs.len());
         <span class="kw">let </span><span class="kw-2">mut </span>kv = kvs.pop().unwrap();
         <span class="macro">assert_eq!</span>(key, kv.take_key());
-        <span class="macro">assert_eq!</span>(<span class="string">b&quot;value-0&quot;</span>.to_vec(), kv.take_value());
+        <span class="macro">assert_eq!</span>(<span class="string">b"value-0"</span>.to_vec(), kv.take_value());
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_range_get_prefix() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_range_get_prefix&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_range_get_prefix"</span>).<span class="kw">await</span>;
         tc.gen_data().<span class="kw">await</span>;
 
-        <span class="kw">let </span>req = RangeRequest::new().with_prefix(tc.key(<span class="string">&quot;key-&quot;</span>));
+        <span class="kw">let </span>req = RangeRequest::new().with_prefix(tc.key(<span class="string">"key-"</span>));
         <span class="kw">let </span>res = tc.client.range(req).<span class="kw">await</span>;
         <span class="kw">let </span>kvs = res.unwrap().take_kvs();
         <span class="macro">assert_eq!</span>(<span class="number">10</span>, kvs.len());
         <span class="kw">for </span>(i, <span class="kw-2">mut </span>kv) <span class="kw">in </span>kvs.into_iter().enumerate() {
-            <span class="macro">assert_eq!</span>(tc.key(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;key-{i}&quot;</span>)), kv.take_key());
-            <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{}-{}&quot;</span>, <span class="string">&quot;value&quot;</span>, i).into_bytes(), kv.take_value());
+            <span class="macro">assert_eq!</span>(tc.key(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"key-{i}"</span>)), kv.take_key());
+            <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{}-{}"</span>, <span class="string">"value"</span>, i).into_bytes(), kv.take_value());
         }
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_range() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_range&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_range"</span>).<span class="kw">await</span>;
         tc.gen_data().<span class="kw">await</span>;
 
-        <span class="kw">let </span>req = RangeRequest::new().with_range(tc.key(<span class="string">&quot;key-5&quot;</span>), tc.key(<span class="string">&quot;key-8&quot;</span>));
+        <span class="kw">let </span>req = RangeRequest::new().with_range(tc.key(<span class="string">"key-5"</span>), tc.key(<span class="string">"key-8"</span>));
         <span class="kw">let </span>res = tc.client.range(req).<span class="kw">await</span>;
         <span class="kw">let </span>kvs = res.unwrap().take_kvs();
         <span class="macro">assert_eq!</span>(<span class="number">3</span>, kvs.len());
         <span class="kw">for </span>(i, <span class="kw-2">mut </span>kv) <span class="kw">in </span>kvs.into_iter().enumerate() {
-            <span class="macro">assert_eq!</span>(tc.key(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;key-{}&quot;</span>, i + <span class="number">5</span>)), kv.take_key());
+            <span class="macro">assert_eq!</span>(tc.key(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"key-{}"</span>, i + <span class="number">5</span>)), kv.take_key());
             <span class="macro">assert_eq!</span>(
-                <span class="macro">format!</span>(<span class="string">&quot;{}-{}&quot;</span>, <span class="string">&quot;value&quot;</span>, i + <span class="number">5</span>).into_bytes(),
+                <span class="macro">format!</span>(<span class="string">"{}-{}"</span>, <span class="string">"value"</span>, i + <span class="number">5</span>).into_bytes(),
                 kv.take_value()
             );
         }
@@ -1452,70 +1453,70 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_range_keys_only() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_range_keys_only&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_range_keys_only"</span>).<span class="kw">await</span>;
         tc.gen_data().<span class="kw">await</span>;
 
         <span class="kw">let </span>req = RangeRequest::new()
-            .with_range(tc.key(<span class="string">&quot;key-5&quot;</span>), tc.key(<span class="string">&quot;key-8&quot;</span>))
+            .with_range(tc.key(<span class="string">"key-5"</span>), tc.key(<span class="string">"key-8"</span>))
             .with_keys_only();
         <span class="kw">let </span>res = tc.client.range(req).<span class="kw">await</span>;
         <span class="kw">let </span>kvs = res.unwrap().take_kvs();
         <span class="macro">assert_eq!</span>(<span class="number">3</span>, kvs.len());
         <span class="kw">for </span>(i, <span class="kw-2">mut </span>kv) <span class="kw">in </span>kvs.into_iter().enumerate() {
-            <span class="macro">assert_eq!</span>(tc.key(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;key-{}&quot;</span>, i + <span class="number">5</span>)), kv.take_key());
+            <span class="macro">assert_eq!</span>(tc.key(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"key-{}"</span>, i + <span class="number">5</span>)), kv.take_key());
             <span class="macro">assert!</span>(kv.take_value().is_empty());
         }
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_put() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_put&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_put"</span>).<span class="kw">await</span>;
 
         <span class="kw">let </span>req = PutRequest::new()
-            .with_key(tc.key(<span class="string">&quot;key&quot;</span>))
-            .with_value(<span class="string">b&quot;value&quot;</span>.to_vec());
+            .with_key(tc.key(<span class="string">"key"</span>))
+            .with_value(<span class="string">b"value"</span>.to_vec());
         <span class="kw">let </span>res = tc.client.put(req).<span class="kw">await</span>;
         <span class="macro">assert!</span>(res.unwrap().prev_kv.is_none());
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_put_with_prev_kv() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_put_with_prev_kv&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_put_with_prev_kv"</span>).<span class="kw">await</span>;
 
-        <span class="kw">let </span>key = tc.key(<span class="string">&quot;key&quot;</span>);
+        <span class="kw">let </span>key = tc.key(<span class="string">"key"</span>);
         <span class="kw">let </span>req = PutRequest::new()
             .with_key(key.as_slice())
-            .with_value(<span class="string">b&quot;value&quot;</span>.to_vec())
+            .with_value(<span class="string">b"value"</span>.to_vec())
             .with_prev_kv();
         <span class="kw">let </span>res = tc.client.put(req).<span class="kw">await</span>;
         <span class="macro">assert!</span>(res.unwrap().prev_kv.is_none());
 
         <span class="kw">let </span>req = PutRequest::new()
             .with_key(key.as_slice())
-            .with_value(<span class="string">b&quot;value1&quot;</span>.to_vec())
+            .with_value(<span class="string">b"value1"</span>.to_vec())
             .with_prev_kv();
         <span class="kw">let </span>res = tc.client.put(req).<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>kv = res.unwrap().prev_kv.unwrap();
         <span class="macro">assert_eq!</span>(key, kv.take_key());
-        <span class="macro">assert_eq!</span>(<span class="string">b&quot;value&quot;</span>.to_vec(), kv.take_value());
+        <span class="macro">assert_eq!</span>(<span class="string">b"value"</span>.to_vec(), kv.take_value());
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_batch_put() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_batch_put&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_batch_put"</span>).<span class="kw">await</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = BatchPutRequest::new();
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">275 </span>{
             req = req.add_kv(
-                tc.key(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;key-{}&quot;</span>, i)),
-                <span class="macro">format!</span>(<span class="string">&quot;value-{}&quot;</span>, i).into_bytes(),
+                tc.key(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"key-{}"</span>, i)),
+                <span class="macro">format!</span>(<span class="string">"value-{}"</span>, i).into_bytes(),
             );
         }
 
         <span class="kw">let </span>res = tc.client.batch_put(req).<span class="kw">await</span>;
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, res.unwrap().take_prev_kvs().len());
 
-        <span class="kw">let </span>req = RangeRequest::new().with_prefix(tc.key(<span class="string">&quot;key-&quot;</span>));
+        <span class="kw">let </span>req = RangeRequest::new().with_prefix(tc.key(<span class="string">"key-"</span>));
         <span class="kw">let </span>res = tc.client.range(req).<span class="kw">await</span>;
         <span class="kw">let </span>kvs = res.unwrap().take_kvs();
         <span class="macro">assert_eq!</span>(<span class="number">275</span>, kvs.len());
@@ -1523,61 +1524,61 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_batch_get() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_batch_get&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_batch_get"</span>).<span class="kw">await</span>;
         tc.gen_data().<span class="kw">await</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>req = BatchGetRequest::default();
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">256 </span>{
-            req = req.add_key(tc.key(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;key-{}&quot;</span>, i)));
+            req = req.add_key(tc.key(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"key-{}"</span>, i)));
         }
         <span class="kw">let </span>res = tc.client.batch_get(req).<span class="kw">await</span>.unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">10</span>, res.kvs.len());
 
         <span class="kw">let </span>req = BatchGetRequest::default()
-            .add_key(tc.key(<span class="string">&quot;key-1&quot;</span>))
-            .add_key(tc.key(<span class="string">&quot;key-999&quot;</span>));
+            .add_key(tc.key(<span class="string">"key-1"</span>))
+            .add_key(tc.key(<span class="string">"key-999"</span>));
         <span class="kw">let </span>res = tc.client.batch_get(req).<span class="kw">await</span>.unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, res.kvs.len());
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_batch_put_with_prev_kv() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_batch_put_with_prev_kv&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_batch_put_with_prev_kv"</span>).<span class="kw">await</span>;
 
-        <span class="kw">let </span>key = tc.key(<span class="string">&quot;key&quot;</span>);
-        <span class="kw">let </span>key2 = tc.key(<span class="string">&quot;key2&quot;</span>);
-        <span class="kw">let </span>req = BatchPutRequest::new().add_kv(key.as_slice(), <span class="string">b&quot;value&quot;</span>.to_vec());
+        <span class="kw">let </span>key = tc.key(<span class="string">"key"</span>);
+        <span class="kw">let </span>key2 = tc.key(<span class="string">"key2"</span>);
+        <span class="kw">let </span>req = BatchPutRequest::new().add_kv(key.as_slice(), <span class="string">b"value"</span>.to_vec());
         <span class="kw">let </span>res = tc.client.batch_put(req).<span class="kw">await</span>;
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, res.unwrap().take_prev_kvs().len());
 
         <span class="kw">let </span>req = BatchPutRequest::new()
-            .add_kv(key.as_slice(), <span class="string">b&quot;value-&quot;</span>.to_vec())
-            .add_kv(key2.as_slice(), <span class="string">b&quot;value2-&quot;</span>.to_vec())
+            .add_kv(key.as_slice(), <span class="string">b"value-"</span>.to_vec())
+            .add_kv(key2.as_slice(), <span class="string">b"value2-"</span>.to_vec())
             .with_prev_kv();
         <span class="kw">let </span>res = tc.client.batch_put(req).<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>kvs = res.unwrap().take_prev_kvs();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, kvs.len());
         <span class="kw">let </span><span class="kw-2">mut </span>kv = kvs.pop().unwrap();
         <span class="macro">assert_eq!</span>(key, kv.take_key());
-        <span class="macro">assert_eq!</span>(<span class="string">b&quot;value&quot;</span>.to_vec(), kv.take_value());
+        <span class="macro">assert_eq!</span>(<span class="string">b"value"</span>.to_vec(), kv.take_value());
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_compare_and_put() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_compare_and_put&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_compare_and_put"</span>).<span class="kw">await</span>;
 
-        <span class="kw">let </span>key = tc.key(<span class="string">&quot;key&quot;</span>);
+        <span class="kw">let </span>key = tc.key(<span class="string">"key"</span>);
         <span class="kw">let </span>req = CompareAndPutRequest::new()
             .with_key(key.as_slice())
-            .with_expect(<span class="string">b&quot;expect&quot;</span>.to_vec())
-            .with_value(<span class="string">b&quot;value&quot;</span>.to_vec());
+            .with_expect(<span class="string">b"expect"</span>.to_vec())
+            .with_value(<span class="string">b"value"</span>.to_vec());
         <span class="kw">let </span>res = tc.client.compare_and_put(req).<span class="kw">await</span>;
         <span class="macro">assert!</span>(!res.unwrap().is_success());
 
         <span class="comment">// create if absent
         </span><span class="kw">let </span>req = CompareAndPutRequest::new()
             .with_key(key.as_slice())
-            .with_value(<span class="string">b&quot;value&quot;</span>.to_vec());
+            .with_value(<span class="string">b"value"</span>.to_vec());
         <span class="kw">let </span>res = tc.client.compare_and_put(req).<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>res = res.unwrap();
         <span class="macro">assert!</span>(res.is_success());
@@ -1586,33 +1587,33 @@
         <span class="comment">// compare and put fail
         </span><span class="kw">let </span>req = CompareAndPutRequest::new()
             .with_key(key.as_slice())
-            .with_expect(<span class="string">b&quot;not_eq&quot;</span>.to_vec())
-            .with_value(<span class="string">b&quot;value2&quot;</span>.to_vec());
+            .with_expect(<span class="string">b"not_eq"</span>.to_vec())
+            .with_value(<span class="string">b"value2"</span>.to_vec());
         <span class="kw">let </span>res = tc.client.compare_and_put(req).<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>res = res.unwrap();
         <span class="macro">assert!</span>(!res.is_success());
-        <span class="macro">assert_eq!</span>(<span class="string">b&quot;value&quot;</span>.to_vec(), res.take_prev_kv().unwrap().take_value());
+        <span class="macro">assert_eq!</span>(<span class="string">b"value"</span>.to_vec(), res.take_prev_kv().unwrap().take_value());
 
         <span class="comment">// compare and put success
         </span><span class="kw">let </span>req = CompareAndPutRequest::new()
             .with_key(key.as_slice())
-            .with_expect(<span class="string">b&quot;value&quot;</span>.to_vec())
-            .with_value(<span class="string">b&quot;value2&quot;</span>.to_vec());
+            .with_expect(<span class="string">b"value"</span>.to_vec())
+            .with_value(<span class="string">b"value2"</span>.to_vec());
         <span class="kw">let </span>res = tc.client.compare_and_put(req).<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>res = res.unwrap();
         <span class="macro">assert!</span>(res.is_success());
 
-        <span class="comment">// If compare-and-put is success, previous value doesn&#39;t need to be returned.
+        <span class="comment">// If compare-and-put is success, previous value doesn't need to be returned.
         </span><span class="macro">assert!</span>(res.take_prev_kv().is_none());
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_delete_with_key() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_delete_with_key&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_delete_with_key"</span>).<span class="kw">await</span>;
         tc.gen_data().<span class="kw">await</span>;
 
         <span class="kw">let </span>req = DeleteRangeRequest::new()
-            .with_key(tc.key(<span class="string">&quot;key-0&quot;</span>))
+            .with_key(tc.key(<span class="string">"key-0"</span>))
             .with_prev_kv();
         <span class="kw">let </span>res = tc.client.delete_range(req).<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>res = res.unwrap();
@@ -1620,16 +1621,16 @@
         <span class="kw">let </span><span class="kw-2">mut </span>kvs = res.take_prev_kvs();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, kvs.len());
         <span class="kw">let </span><span class="kw-2">mut </span>kv = kvs.pop().unwrap();
-        <span class="macro">assert_eq!</span>(<span class="string">b&quot;value-0&quot;</span>.to_vec(), kv.take_value());
+        <span class="macro">assert_eq!</span>(<span class="string">b"value-0"</span>.to_vec(), kv.take_value());
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_delete_with_prefix() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_delete_with_prefix&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_delete_with_prefix"</span>).<span class="kw">await</span>;
         tc.gen_data().<span class="kw">await</span>;
 
         <span class="kw">let </span>req = DeleteRangeRequest::new()
-            .with_prefix(tc.key(<span class="string">&quot;key-&quot;</span>))
+            .with_prefix(tc.key(<span class="string">"key-"</span>))
             .with_prev_kv();
         <span class="kw">let </span>res = tc.client.delete_range(req).<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>res = res.unwrap();
@@ -1637,17 +1638,17 @@
         <span class="kw">let </span>kvs = res.take_prev_kvs();
         <span class="macro">assert_eq!</span>(<span class="number">10</span>, kvs.len());
         <span class="kw">for </span>(i, <span class="kw-2">mut </span>kv) <span class="kw">in </span>kvs.into_iter().enumerate() {
-            <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{}-{}&quot;</span>, <span class="string">&quot;value&quot;</span>, i).into_bytes(), kv.take_value());
+            <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">"{}-{}"</span>, <span class="string">"value"</span>, i).into_bytes(), kv.take_value());
         }
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_delete_with_range() {
-        <span class="kw">let </span>tc = new_client(<span class="string">&quot;test_delete_with_range&quot;</span>).<span class="kw">await</span>;
+        <span class="kw">let </span>tc = new_client(<span class="string">"test_delete_with_range"</span>).<span class="kw">await</span>;
         tc.gen_data().<span class="kw">await</span>;
 
         <span class="kw">let </span>req = DeleteRangeRequest::new()
-            .with_range(tc.key(<span class="string">&quot;key-2&quot;</span>), tc.key(<span class="string">&quot;key-7&quot;</span>))
+            .with_range(tc.key(<span class="string">"key-2"</span>), tc.key(<span class="string">"key-7"</span>))
             .with_prev_kv();
         <span class="kw">let </span>res = tc.client.delete_range(req).<span class="kw">await</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>res = res.unwrap();
@@ -1656,7 +1657,7 @@
         <span class="macro">assert_eq!</span>(<span class="number">5</span>, kvs.len());
         <span class="kw">for </span>(i, <span class="kw-2">mut </span>kv) <span class="kw">in </span>kvs.into_iter().enumerate() {
             <span class="macro">assert_eq!</span>(
-                <span class="macro">format!</span>(<span class="string">&quot;{}-{}&quot;</span>, <span class="string">&quot;value&quot;</span>, i + <span class="number">2</span>).into_bytes(),
+                <span class="macro">format!</span>(<span class="string">"{}-{}"</span>, <span class="string">"value"</span>, i + <span class="number">2</span>).into_bytes(),
                 kv.take_value()
             );
         }

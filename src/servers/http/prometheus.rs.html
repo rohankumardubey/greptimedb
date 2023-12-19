@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/servers/src/http/prometheus.rs`."><title>prometheus.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="servers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/servers/src/http/prometheus.rs`."><title>prometheus.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="servers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -871,14 +872,14 @@
 <a href="#871" id="871">871</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -923,13 +924,13 @@
     <span class="doccomment">/// For [ValueType::Matrix] result type
     </span><span class="kw">pub </span>values: Vec&lt;(f64, String)&gt;,
     <span class="doccomment">/// For [ValueType::Vector] result type
-    </span><span class="attr">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    </span><span class="attr">#[serde(skip_serializing_if = <span class="string">"Option::is_none"</span>)]
     </span><span class="kw">pub </span>value: <span class="prelude-ty">Option</span>&lt;(f64, String)&gt;,
 }
 
 <span class="attr">#[derive(Debug, Default, Serialize, Deserialize, JsonSchema, PartialEq)]
 </span><span class="kw">pub struct </span>PromData {
-    <span class="attr">#[serde(rename = <span class="string">&quot;resultType&quot;</span>)]
+    <span class="attr">#[serde(rename = <span class="string">"resultType"</span>)]
     </span><span class="kw">pub </span>result_type: String,
     <span class="kw">pub </span>result: Vec&lt;PromSeries&gt;,
 }
@@ -954,12 +955,12 @@
 </span><span class="kw">pub struct </span>PrometheusJsonResponse {
     <span class="kw">pub </span>status: String,
     <span class="kw">pub </span>data: PrometheusResponse,
-    <span class="attr">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    <span class="attr">#[serde(skip_serializing_if = <span class="string">"Option::is_none"</span>)]
     </span><span class="kw">pub </span>error: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="attr">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
-    #[serde(rename = <span class="string">&quot;errorType&quot;</span>)]
+    <span class="attr">#[serde(skip_serializing_if = <span class="string">"Option::is_none"</span>)]
+    #[serde(rename = <span class="string">"errorType"</span>)]
     </span><span class="kw">pub </span>error_type: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="attr">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    <span class="attr">#[serde(skip_serializing_if = <span class="string">"Option::is_none"</span>)]
     </span><span class="kw">pub </span>warnings: <span class="prelude-ty">Option</span>&lt;Vec&lt;String&gt;&gt;,
 }
 
@@ -970,7 +971,7 @@
         S2: Into&lt;String&gt;,
     {
         Json(PrometheusJsonResponse {
-            status: <span class="string">&quot;error&quot;</span>.to_string(),
+            status: <span class="string">"error"</span>.to_string(),
             data: PrometheusResponse::default(),
             error: <span class="prelude-val">Some</span>(reason.into()),
             error_type: <span class="prelude-val">Some</span>(error_type.into()),
@@ -980,7 +981,7 @@
 
     <span class="kw">pub fn </span>success(data: PrometheusResponse) -&gt; Json&lt;<span class="self">Self</span>&gt; {
         Json(PrometheusJsonResponse {
-            status: <span class="string">&quot;success&quot;</span>.to_string(),
+            status: <span class="string">"success"</span>.to_string(),
             data,
             error: <span class="prelude-val">None</span>,
             error_type: <span class="prelude-val">None</span>,
@@ -1012,7 +1013,7 @@
                     )<span class="question-mark">?</span>)
                 }
                 Output::AffectedRows(<span class="kw">_</span>) =&gt; {
-                    <span class="self">Self</span>::error(<span class="string">&quot;Unexpected&quot;</span>, <span class="string">&quot;expected data result, but got affected rows&quot;</span>)
+                    <span class="self">Self</span>::error(<span class="string">"Unexpected"</span>, <span class="string">"expected data result, but got affected rows"</span>)
                 }
             };
 
@@ -1024,7 +1025,7 @@
         <span class="kw">match </span>response {
             <span class="prelude-val">Ok</span>(resp) =&gt; resp,
             <span class="prelude-val">Err</span>(err) =&gt; {
-                <span class="comment">// Prometheus won&#39;t report error if querying nonexist label and metric
+                <span class="comment">// Prometheus won't report error if querying nonexist label and metric
                 </span><span class="kw">if </span>err.status_code() == StatusCode::TableNotFound
                     || err.status_code() == StatusCode::TableColumnNotFound
                 {
@@ -1071,10 +1072,10 @@
         }
 
         <span class="kw">let </span>timestamp_column_index = timestamp_column_index.context(InternalSnafu {
-            err_msg: <span class="string">&quot;no timestamp column found&quot;</span>.to_string(),
+            err_msg: <span class="string">"no timestamp column found"</span>.to_string(),
         })<span class="question-mark">?</span>;
         <span class="kw">let </span>first_field_column_index = first_field_column_index.context(InternalSnafu {
-            err_msg: <span class="string">&quot;no value column found&quot;</span>.to_string(),
+            err_msg: <span class="string">"no value column found"</span>.to_string(),
         })<span class="question-mark">?</span>;
 
         <span class="kw">let </span>metric_name = (METRIC_NAME.to_string(), metric_name);
@@ -1214,7 +1215,7 @@
         query: params.query.or(form_params.query).unwrap_or_default(),
         start: time.clone(),
         end: time,
-        step: <span class="string">&quot;1s&quot;</span>.to_string(),
+        step: <span class="string">"1s"</span>.to_string(),
     };
 
     <span class="kw">let </span>result = handler.do_query(<span class="kw-2">&amp;</span>prom_query, query_ctx).<span class="kw">await</span>;
@@ -1275,27 +1276,27 @@
 }
 
 <span class="comment">// Custom Deserialize method to support parsing repeated match[]
-</span><span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>&gt; Deserialize&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>Matches {
+</span><span class="kw">impl</span>&lt;<span class="lifetime">'de</span>&gt; Deserialize&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>Matches {
     <span class="kw">fn </span>deserialize&lt;D&gt;(deserializer: D) -&gt; std::result::Result&lt;Matches, D::Error&gt;
     <span class="kw">where
-        </span>D: de::Deserializer&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>D: de::Deserializer&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="kw">struct </span>MatchesVisitor;
 
-        <span class="kw">impl</span>&lt;<span class="lifetime">&#39;d</span>&gt; Visitor&lt;<span class="lifetime">&#39;d</span>&gt; <span class="kw">for </span>MatchesVisitor {
+        <span class="kw">impl</span>&lt;<span class="lifetime">'d</span>&gt; Visitor&lt;<span class="lifetime">'d</span>&gt; <span class="kw">for </span>MatchesVisitor {
             <span class="kw">type </span>Value = Vec&lt;String&gt;;
 
             <span class="kw">fn </span>expecting(<span class="kw-2">&amp;</span><span class="self">self</span>, formatter: <span class="kw-2">&amp;mut </span>std::fmt::Formatter) -&gt; std::fmt::Result {
-                formatter.write_str(<span class="string">&quot;a string&quot;</span>)
+                formatter.write_str(<span class="string">"a string"</span>)
             }
 
             <span class="kw">fn </span>visit_map&lt;M&gt;(<span class="self">self</span>, <span class="kw-2">mut </span>access: M) -&gt; std::result::Result&lt;<span class="self">Self</span>::Value, M::Error&gt;
             <span class="kw">where
-                </span>M: MapAccess&lt;<span class="lifetime">&#39;d</span>&gt;,
+                </span>M: MapAccess&lt;<span class="lifetime">'d</span>&gt;,
             {
                 <span class="kw">let </span><span class="kw-2">mut </span>matches = Vec::new();
                 <span class="kw">while let </span><span class="prelude-val">Some</span>((key, value)) = access.next_entry::&lt;String, String&gt;()<span class="question-mark">? </span>{
-                    <span class="kw">if </span>key == <span class="string">&quot;match[]&quot; </span>{
+                    <span class="kw">if </span>key == <span class="string">"match[]" </span>{
                         matches.push(value);
                     }
                 }
@@ -1358,7 +1359,7 @@
         <span class="kw">let </span>response = retrieve_labels_name_from_query_result(result, <span class="kw-2">&amp;mut </span>labels).<span class="kw">await</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = response {
-            <span class="comment">// Prometheus won&#39;t report error if querying nonexist label and metric
+            <span class="comment">// Prometheus won't report error if querying nonexist label and metric
             </span><span class="kw">if </span>err.status_code() != StatusCode::TableNotFound
                 &amp;&amp; err.status_code() != StatusCode::TableColumnNotFound
             {
@@ -1419,7 +1420,7 @@
             <span class="prelude-val">Ok</span>(())
         }
         Output::AffectedRows(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(Error::UnexpectedResult {
-            reason: <span class="string">&quot;expected data result, but got affected rows&quot;</span>.to_string(),
+            reason: <span class="string">"expected data result, but got affected rows"</span>.to_string(),
             location: Location::default(),
         }),
     }
@@ -1443,7 +1444,7 @@
             <span class="prelude-val">Ok</span>(())
         }
         Output::AffectedRows(<span class="kw">_</span>) =&gt; UnexpectedResultSnafu {
-            reason: <span class="string">&quot;expected data result, but got affected rows&quot;</span>.to_string(),
+            reason: <span class="string">"expected data result, but got affected rows"</span>.to_string(),
         }
         .fail(),
     }
@@ -1464,7 +1465,7 @@
                     (column_name.to_string(), column.to_string())
                 })
                 .collect();
-            <span class="kw">let _ </span>= element.insert(<span class="string">&quot;__name__&quot;</span>.to_string(), table_name.to_string());
+            <span class="kw">let _ </span>= element.insert(<span class="string">"__name__"</span>.to_string(), table_name.to_string());
             series.push(element);
         }
     }
@@ -1487,7 +1488,7 @@
 
     <span class="kw">if </span>field_column_indices.is_empty() {
         <span class="kw">return </span><span class="prelude-val">Err</span>(Error::Internal {
-            err_msg: <span class="string">&quot;no value column found&quot;</span>.to_string(),
+            err_msg: <span class="string">"no value column found"</span>.to_string(),
         });
     }
 
@@ -1597,7 +1598,7 @@
 
     <span class="kw">let </span>queries = params.matches.<span class="number">0</span>;
     <span class="kw">if </span>queries.is_empty() {
-        <span class="kw">return </span>PrometheusJsonResponse::error(<span class="string">&quot;Invalid argument&quot;</span>, <span class="string">&quot;match[] parameter is required&quot;</span>);
+        <span class="kw">return </span>PrometheusJsonResponse::error(<span class="string">"Invalid argument"</span>, <span class="string">"match[] parameter is required"</span>);
     }
 
     <span class="kw">let </span>start = params.start.unwrap_or_else(yesterday_rfc3339);
@@ -1615,7 +1616,7 @@
         <span class="kw">let </span>result = handler.do_query(<span class="kw-2">&amp;</span>prom_query, query_ctx.clone()).<span class="kw">await</span>;
         <span class="kw">let </span>result = retrieve_label_values(result, <span class="kw-2">&amp;</span>label_name, <span class="kw-2">&amp;mut </span>label_values).<span class="kw">await</span>;
         <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = result {
-            <span class="comment">// Prometheus won&#39;t report error if querying nonexist label and metric
+            <span class="comment">// Prometheus won't report error if querying nonexist label and metric
             </span><span class="kw">if </span>err.status_code() != StatusCode::TableNotFound
                 &amp;&amp; err.status_code() != StatusCode::TableColumnNotFound
             {
@@ -1648,7 +1649,7 @@
             retrieve_label_values_from_record_batch(batches, label_name, labels_values).<span class="kw">await
         </span>}
         Output::AffectedRows(<span class="kw">_</span>) =&gt; UnexpectedResultSnafu {
-            reason: <span class="string">&quot;expected data result, but got affected rows&quot;</span>.to_string(),
+            reason: <span class="string">"expected data result, but got affected rows"</span>.to_string(),
         }
         .fail(),
     }
@@ -1711,7 +1712,7 @@
         queries = form_params.matches.<span class="number">0</span>;
     }
     <span class="kw">if </span>queries.is_empty() {
-        <span class="kw">return </span>PrometheusJsonResponse::error(<span class="string">&quot;Unsupported&quot;</span>, <span class="string">&quot;match[] parameter is required&quot;</span>);
+        <span class="kw">return </span>PrometheusJsonResponse::error(<span class="string">"Unsupported"</span>, <span class="string">"match[] parameter is required"</span>);
     }
     <span class="kw">let </span>start = params
         .start

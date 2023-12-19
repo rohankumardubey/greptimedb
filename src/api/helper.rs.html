@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/api/src/helper.rs`."><title>helper.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="api" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/api/src/helper.rs`."><title>helper.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="api" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -2044,14 +2045,14 @@
 <a href="#2044" id="2044">2044</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -2533,36 +2534,36 @@
 }
 
 <span class="doccomment">/// Returns the type name of the [Request].
-</span><span class="kw">pub fn </span>request_type(request: <span class="kw-2">&amp;</span>Request) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+</span><span class="kw">pub fn </span>request_type(request: <span class="kw-2">&amp;</span>Request) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
     <span class="kw">match </span>request {
-        Request::Inserts(<span class="kw">_</span>) =&gt; <span class="string">&quot;inserts&quot;</span>,
+        Request::Inserts(<span class="kw">_</span>) =&gt; <span class="string">"inserts"</span>,
         Request::Query(query_req) =&gt; query_request_type(query_req),
         Request::Ddl(ddl_req) =&gt; ddl_request_type(ddl_req),
-        Request::Deletes(<span class="kw">_</span>) =&gt; <span class="string">&quot;deletes&quot;</span>,
-        Request::RowInserts(<span class="kw">_</span>) =&gt; <span class="string">&quot;row_inserts&quot;</span>,
-        Request::RowDeletes(<span class="kw">_</span>) =&gt; <span class="string">&quot;row_deletes&quot;</span>,
+        Request::Deletes(<span class="kw">_</span>) =&gt; <span class="string">"deletes"</span>,
+        Request::RowInserts(<span class="kw">_</span>) =&gt; <span class="string">"row_inserts"</span>,
+        Request::RowDeletes(<span class="kw">_</span>) =&gt; <span class="string">"row_deletes"</span>,
     }
 }
 
 <span class="doccomment">/// Returns the type name of the [QueryRequest].
-</span><span class="kw">fn </span>query_request_type(request: <span class="kw-2">&amp;</span>QueryRequest) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+</span><span class="kw">fn </span>query_request_type(request: <span class="kw-2">&amp;</span>QueryRequest) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
     <span class="kw">match </span>request.query {
-        <span class="prelude-val">Some</span>(Query::Sql(<span class="kw">_</span>)) =&gt; <span class="string">&quot;query.sql&quot;</span>,
-        <span class="prelude-val">Some</span>(Query::LogicalPlan(<span class="kw">_</span>)) =&gt; <span class="string">&quot;query.logical_plan&quot;</span>,
-        <span class="prelude-val">Some</span>(Query::PromRangeQuery(<span class="kw">_</span>)) =&gt; <span class="string">&quot;query.prom_range&quot;</span>,
-        <span class="prelude-val">None </span>=&gt; <span class="string">&quot;query.empty&quot;</span>,
+        <span class="prelude-val">Some</span>(Query::Sql(<span class="kw">_</span>)) =&gt; <span class="string">"query.sql"</span>,
+        <span class="prelude-val">Some</span>(Query::LogicalPlan(<span class="kw">_</span>)) =&gt; <span class="string">"query.logical_plan"</span>,
+        <span class="prelude-val">Some</span>(Query::PromRangeQuery(<span class="kw">_</span>)) =&gt; <span class="string">"query.prom_range"</span>,
+        <span class="prelude-val">None </span>=&gt; <span class="string">"query.empty"</span>,
     }
 }
 
 <span class="doccomment">/// Returns the type name of the [DdlRequest].
-</span><span class="kw">fn </span>ddl_request_type(request: <span class="kw-2">&amp;</span>DdlRequest) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+</span><span class="kw">fn </span>ddl_request_type(request: <span class="kw-2">&amp;</span>DdlRequest) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
     <span class="kw">match </span>request.expr {
-        <span class="prelude-val">Some</span>(Expr::CreateDatabase(<span class="kw">_</span>)) =&gt; <span class="string">&quot;ddl.create_database&quot;</span>,
-        <span class="prelude-val">Some</span>(Expr::CreateTable(<span class="kw">_</span>)) =&gt; <span class="string">&quot;ddl.create_table&quot;</span>,
-        <span class="prelude-val">Some</span>(Expr::Alter(<span class="kw">_</span>)) =&gt; <span class="string">&quot;ddl.alter&quot;</span>,
-        <span class="prelude-val">Some</span>(Expr::DropTable(<span class="kw">_</span>)) =&gt; <span class="string">&quot;ddl.drop_table&quot;</span>,
-        <span class="prelude-val">Some</span>(Expr::TruncateTable(<span class="kw">_</span>)) =&gt; <span class="string">&quot;ddl.truncate_table&quot;</span>,
-        <span class="prelude-val">None </span>=&gt; <span class="string">&quot;ddl.empty&quot;</span>,
+        <span class="prelude-val">Some</span>(Expr::CreateDatabase(<span class="kw">_</span>)) =&gt; <span class="string">"ddl.create_database"</span>,
+        <span class="prelude-val">Some</span>(Expr::CreateTable(<span class="kw">_</span>)) =&gt; <span class="string">"ddl.create_table"</span>,
+        <span class="prelude-val">Some</span>(Expr::Alter(<span class="kw">_</span>)) =&gt; <span class="string">"ddl.alter"</span>,
+        <span class="prelude-val">Some</span>(Expr::DropTable(<span class="kw">_</span>)) =&gt; <span class="string">"ddl.drop_table"</span>,
+        <span class="prelude-val">Some</span>(Expr::TruncateTable(<span class="kw">_</span>)) =&gt; <span class="string">"ddl.truncate_table"</span>,
+        <span class="prelude-val">None </span>=&gt; <span class="string">"ddl.empty"</span>,
     }
 }
 
@@ -2583,10 +2584,10 @@
     v1::Decimal128 { hi, lo }
 }
 
-<span class="kw">pub fn </span>pb_value_to_value_ref&lt;<span class="lifetime">&#39;a</span>&gt;(
-    value: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>v1::Value,
-    datatype_ext: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span><span class="prelude-ty">Option</span>&lt;ColumnDataTypeExtension&gt;,
-) -&gt; ValueRef&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">pub fn </span>pb_value_to_value_ref&lt;<span class="lifetime">'a</span>&gt;(
+    value: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>v1::Value,
+    datatype_ext: <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="prelude-ty">Option</span>&lt;ColumnDataTypeExtension&gt;,
+) -&gt; ValueRef&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">let </span><span class="prelude-val">Some</span>(value) = <span class="kw-2">&amp;</span>value.value_data <span class="kw">else </span>{
         <span class="kw">return </span>ValueRef::Null;
     };
@@ -2948,7 +2949,7 @@
         .unwrap_or(<span class="bool-val">false</span>)
 }
 
-<span class="doccomment">/// Convert value into proto&#39;s value.
+<span class="doccomment">/// Convert value into proto's value.
 </span><span class="kw">pub fn </span>to_proto_value(value: Value) -&gt; <span class="prelude-ty">Option</span>&lt;v1::Value&gt; {
     <span class="kw">let </span>proto_value = <span class="kw">match </span>value {
         Value::Null =&gt; v1::Value { value_data: <span class="prelude-val">None </span>},
@@ -3101,8 +3102,8 @@
     <span class="prelude-val">Some</span>(value_type)
 }
 
-<span class="kw">pub fn </span>vectors_to_rows&lt;<span class="lifetime">&#39;a</span>&gt;(
-    columns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>VectorRef&gt;,
+<span class="kw">pub fn </span>vectors_to_rows&lt;<span class="lifetime">'a</span>&gt;(
+    columns: <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span><span class="lifetime">'a </span>VectorRef&gt;,
     row_count: usize,
 ) -&gt; Vec&lt;Row&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>rows = <span class="macro">vec!</span>[Row { values: <span class="macro">vec!</span>[] }; row_count];
@@ -3460,7 +3461,7 @@
         <span class="macro">assert!</span>(result.is_err());
         <span class="macro">assert_eq!</span>(
             result.unwrap_err().to_string(),
-            <span class="string">&quot;Failed to create column datatype from Null(NullType)&quot;
+            <span class="string">"Failed to create column datatype from Null(NullType)"
         </span>);
 
         <span class="kw">let </span>result: <span class="prelude-ty">Result</span>&lt;ColumnDataTypeWrapper&gt; =
@@ -3468,14 +3469,14 @@
         <span class="macro">assert!</span>(result.is_err());
         <span class="macro">assert_eq!</span>(
             result.unwrap_err().to_string(),
-            <span class="string">&quot;Failed to create column datatype from List(ListType { item_type: Boolean(BooleanType) })&quot;
+            <span class="string">"Failed to create column datatype from List(ListType { item_type: Boolean(BooleanType) })"
         </span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_put_timestamp_values() {
         <span class="kw">let </span><span class="kw-2">mut </span>column = Column {
-            column_name: <span class="string">&quot;test&quot;</span>.to_string(),
+            column_name: <span class="string">"test"</span>.to_string(),
             semantic_type: <span class="number">0</span>,
             values: <span class="prelude-val">Some</span>(Values {
                 ..Default::default()
@@ -3517,7 +3518,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_put_time_values() {
         <span class="kw">let </span><span class="kw-2">mut </span>column = Column {
-            column_name: <span class="string">&quot;test&quot;</span>.to_string(),
+            column_name: <span class="string">"test"</span>.to_string(),
             semantic_type: <span class="number">0</span>,
             values: <span class="prelude-val">Some</span>(Values {
                 ..Default::default()
@@ -3559,7 +3560,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_put_interval_values() {
         <span class="kw">let </span><span class="kw-2">mut </span>column = Column {
-            column_name: <span class="string">&quot;test&quot;</span>.to_string(),
+            column_name: <span class="string">"test"</span>.to_string(),
             semantic_type: <span class="number">0</span>,
             values: <span class="prelude-val">Some</span>(Values {
                 ..Default::default()
@@ -3604,7 +3605,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_put_duration_values() {
         <span class="kw">let </span><span class="kw-2">mut </span>column = Column {
-            column_name: <span class="string">&quot;test&quot;</span>.to_string(),
+            column_name: <span class="string">"test"</span>.to_string(),
             semantic_type: <span class="number">0</span>,
             values: <span class="prelude-val">Some</span>(Values {
                 ..Default::default()
@@ -3648,7 +3649,7 @@
         <span class="kw">use </span><span class="kw">crate</span>::v1::SemanticType;
         <span class="comment">// Some(false), None, Some(true), Some(true)
         </span><span class="kw">let </span><span class="kw-2">mut </span>column = Column {
-            column_name: <span class="string">&quot;test&quot;</span>.to_string(),
+            column_name: <span class="string">"test"</span>.to_string(),
             semantic_type: SemanticType::Field <span class="kw">as </span>i32,
             values: <span class="prelude-val">Some</span>(Values {
                 bool_values: <span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>],
@@ -3943,23 +3944,23 @@
 
     <span class="macro">test_convert_values!</span>(
         string,
-        <span class="macro">vec!</span>[<span class="string">&quot;1&quot;</span>.to_string(), <span class="string">&quot;2&quot;</span>.to_string(), <span class="string">&quot;3&quot;</span>.to_string()],
+        <span class="macro">vec!</span>[<span class="string">"1"</span>.to_string(), <span class="string">"2"</span>.to_string(), <span class="string">"3"</span>.to_string()],
         string,
         <span class="macro">vec!</span>[
-            Value::String(<span class="string">&quot;1&quot;</span>.into()),
-            Value::String(<span class="string">&quot;2&quot;</span>.into()),
-            Value::String(<span class="string">&quot;3&quot;</span>.into())
+            Value::String(<span class="string">"1"</span>.into()),
+            Value::String(<span class="string">"2"</span>.into()),
+            Value::String(<span class="string">"3"</span>.into())
         ]
     );
 
     <span class="macro">test_convert_values!</span>(
         binary,
-        <span class="macro">vec!</span>[<span class="string">&quot;1&quot;</span>.into(), <span class="string">&quot;2&quot;</span>.into(), <span class="string">&quot;3&quot;</span>.into()],
+        <span class="macro">vec!</span>[<span class="string">"1"</span>.into(), <span class="string">"2"</span>.into(), <span class="string">"3"</span>.into()],
         binary,
         <span class="macro">vec!</span>[
-            Value::Binary(<span class="string">b&quot;1&quot;</span>.to_vec().into()),
-            Value::Binary(<span class="string">b&quot;2&quot;</span>.to_vec().into()),
-            Value::Binary(<span class="string">b&quot;3&quot;</span>.to_vec().into())
+            Value::Binary(<span class="string">b"1"</span>.to_vec().into()),
+            Value::Binary(<span class="string">b"2"</span>.to_vec().into()),
+            Value::Binary(<span class="string">b"3"</span>.to_vec().into())
         ]
     );
 
@@ -3994,7 +3995,7 @@
         <span class="kw">let </span>uint32_vec = PrimitiveVector::&lt;UInt32Type&gt;::from_iter_values(<span class="macro">vec!</span>[<span class="number">1000</span>, <span class="number">2000</span>, <span class="number">3000</span>]);
         <span class="kw">let </span>float32_vec = Float32Vector::from_vec(<span class="macro">vec!</span>[<span class="number">1.1</span>, <span class="number">2.2</span>, <span class="number">3.3</span>]);
         <span class="kw">let </span>date_vec = DateVector::from_vec(<span class="macro">vec!</span>[<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>]);
-        <span class="kw">let </span>string_vec = StringVector::from_vec(<span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>]);
+        <span class="kw">let </span>string_vec = StringVector::from_vec(<span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>]);
 
         <span class="kw">let </span>vector_refs: Vec&lt;VectorRef&gt; = <span class="macro">vec!</span>[
             Arc::new(boolean_vec),
@@ -4024,7 +4025,7 @@
         <span class="macro">assert_eq!</span>(values[<span class="number">4</span>], ValueData::U32Value(<span class="number">1000</span>));
         <span class="macro">assert_eq!</span>(values[<span class="number">5</span>], ValueData::F32Value(<span class="number">1.1</span>));
         <span class="macro">assert_eq!</span>(values[<span class="number">6</span>], ValueData::DateValue(<span class="number">10</span>));
-        <span class="macro">assert_eq!</span>(values[<span class="number">7</span>], ValueData::StringValue(<span class="string">&quot;a&quot;</span>.to_string()));
+        <span class="macro">assert_eq!</span>(values[<span class="number">7</span>], ValueData::StringValue(<span class="string">"a"</span>.to_string()));
 
         <span class="macro">assert_eq!</span>(result[<span class="number">1</span>].values.len(), <span class="number">8</span>);
         <span class="kw">let </span>values = result[<span class="number">1</span>]
@@ -4039,7 +4040,7 @@
         <span class="macro">assert_eq!</span>(values[<span class="number">4</span>], ValueData::U32Value(<span class="number">2000</span>));
         <span class="macro">assert_eq!</span>(values[<span class="number">5</span>], ValueData::F32Value(<span class="number">2.2</span>));
         <span class="macro">assert_eq!</span>(values[<span class="number">6</span>], ValueData::DateValue(<span class="number">20</span>));
-        <span class="macro">assert_eq!</span>(values[<span class="number">7</span>], ValueData::StringValue(<span class="string">&quot;b&quot;</span>.to_string()));
+        <span class="macro">assert_eq!</span>(values[<span class="number">7</span>], ValueData::StringValue(<span class="string">"b"</span>.to_string()));
 
         <span class="macro">assert_eq!</span>(result[<span class="number">2</span>].values.len(), <span class="number">8</span>);
         <span class="kw">let </span>values = result[<span class="number">2</span>]
@@ -4054,14 +4055,14 @@
         <span class="macro">assert_eq!</span>(values[<span class="number">4</span>], ValueData::U32Value(<span class="number">3000</span>));
         <span class="macro">assert_eq!</span>(values[<span class="number">5</span>], ValueData::F32Value(<span class="number">3.3</span>));
         <span class="macro">assert_eq!</span>(values[<span class="number">6</span>], ValueData::DateValue(<span class="number">30</span>));
-        <span class="macro">assert_eq!</span>(values[<span class="number">7</span>], ValueData::StringValue(<span class="string">&quot;c&quot;</span>.to_string()));
+        <span class="macro">assert_eq!</span>(values[<span class="number">7</span>], ValueData::StringValue(<span class="string">"c"</span>.to_string()));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_is_column_type_value_eq() {
         <span class="comment">// test column type eq
         </span><span class="kw">let </span>column1 = Column {
-            column_name: <span class="string">&quot;test&quot;</span>.to_string(),
+            column_name: <span class="string">"test"</span>.to_string(),
             semantic_type: <span class="number">0</span>,
             values: <span class="prelude-val">Some</span>(Values {
                 bool_values: <span class="macro">vec!</span>[<span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="bool-val">true</span>],

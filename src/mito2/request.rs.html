@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/request.rs`."><title>request.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/request.rs`."><title>request.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1232,14 +1233,14 @@
 <a href="#1232" id="1232">1232</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -1309,7 +1310,7 @@
                     .is_none(),
                 InvalidRequestSnafu {
                     region_id,
-                    reason: <span class="macro">format!</span>(<span class="string">&quot;duplicate column {}&quot;</span>, column.column_name),
+                    reason: <span class="macro">format!</span>(<span class="string">"duplicate column {}"</span>, column.column_name),
                 }
             );
         }
@@ -1321,7 +1322,7 @@
                 InvalidRequestSnafu {
                     region_id,
                     reason: <span class="macro">format!</span>(
-                        <span class="string">&quot;row has {} columns but schema has {}&quot;</span>,
+                        <span class="string">"row has {} columns but schema has {}"</span>,
                         row.values.len(),
                         rows.schema.len()
                     ),
@@ -1351,7 +1352,7 @@
         <span class="kw">let </span>row_size = <span class="self">self
             </span>.rows
             .rows
-            .get(<span class="number">0</span>)
+            .first()
             .map(|row| row.encoded_len())
             .unwrap_or(<span class="number">0</span>);
         row_size * <span class="self">self</span>.rows.rows.len()
@@ -1392,12 +1393,12 @@
                     InvalidRequestSnafu {
                         region_id,
                         reason: <span class="macro">format!</span>(
-                            <span class="string">&quot;column {} expect type {:?}, given: {}({})&quot;</span>,
+                            <span class="string">"column {} expect type {:?}, given: {}({})"</span>,
                             column.column_schema.name,
                             column.column_schema.data_type,
                             ColumnDataType::try_from(input_col.datatype)
                                 .map(|v| v.as_str_name())
-                                .unwrap_or(<span class="string">&quot;Unknown&quot;</span>),
+                                .unwrap_or(<span class="string">"Unknown"</span>),
                             input_col.datatype,
                         )
                     }
@@ -1409,12 +1410,12 @@
                     InvalidRequestSnafu {
                         region_id,
                         reason: <span class="macro">format!</span>(
-                            <span class="string">&quot;column {} has semantic type {:?}, given: {}({})&quot;</span>,
+                            <span class="string">"column {} has semantic type {:?}, given: {}({})"</span>,
                             column.column_schema.name,
                             column.semantic_type,
                             api::v1::SemanticType::try_from(input_col.semantic_type)
                                 .map(|v| v.as_str_name())
-                                .unwrap_or(<span class="string">&quot;Unknown&quot;</span>),
+                                .unwrap_or(<span class="string">"Unknown"</span>),
                             input_col.semantic_type
                         ),
                     }
@@ -1428,13 +1429,13 @@
                     InvalidRequestSnafu {
                         region_id,
                         reason: <span class="macro">format!</span>(
-                            <span class="string">&quot;column {} is not null but input has null&quot;</span>,
+                            <span class="string">"column {} is not null but input has null"</span>,
                             column.column_schema.name
                         ),
                     }
                 );
             } <span class="kw">else </span>{
-                <span class="comment">// Rows don&#39;t have this column.
+                <span class="comment">// Rows don't have this column.
                 </span><span class="self">self</span>.check_missing_column(column)<span class="question-mark">?</span>;
 
                 need_fill_default = <span class="bool-val">true</span>;
@@ -1446,7 +1447,7 @@
             <span class="kw">let </span>names: Vec&lt;<span class="kw">_</span>&gt; = rows_columns.into_keys().collect();
             <span class="kw">return </span>InvalidRequestSnafu {
                 region_id,
-                reason: <span class="macro">format!</span>(<span class="string">&quot;unknown columns: {:?}&quot;</span>, names),
+                reason: <span class="macro">format!</span>(<span class="string">"unknown columns: {:?}"</span>, names),
             }
             .fail();
         }
@@ -1488,7 +1489,7 @@
             ColumnDataTypeWrapper::try_from(column.column_schema.data_type.clone())
                 .with_context(|<span class="kw">_</span>| ConvertColumnDataTypeSnafu {
                     reason: <span class="macro">format!</span>(
-                        <span class="string">&quot;no protobuf type for column {} ({:?})&quot;</span>,
+                        <span class="string">"no protobuf type for column {} ({:?})"</span>,
                         column.column_schema.name, column.column_schema.data_type
                     ),
                 })<span class="question-mark">?
@@ -1503,17 +1504,17 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Checks whether we should allow a row doesn&#39;t provide this column.
+    <span class="doccomment">/// Checks whether we should allow a row doesn't provide this column.
     </span><span class="kw">fn </span>check_missing_column(<span class="kw-2">&amp;</span><span class="self">self</span>, column: <span class="kw-2">&amp;</span>ColumnMetadata) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if </span><span class="self">self</span>.op_type == OpType::Delete {
             <span class="kw">if </span>column.semantic_type == SemanticType::Field {
-                <span class="comment">// For delete request, all tags and timestamp is required. We don&#39;t fill default
+                <span class="comment">// For delete request, all tags and timestamp is required. We don't fill default
                 // tag or timestamp while deleting rows.
                 </span><span class="kw">return </span><span class="prelude-val">Ok</span>(());
             } <span class="kw">else </span>{
                 <span class="kw">return </span>InvalidRequestSnafu {
                     region_id: <span class="self">self</span>.region_id,
-                    reason: <span class="macro">format!</span>(<span class="string">&quot;delete requests need column {}&quot;</span>, column.column_schema.name),
+                    reason: <span class="macro">format!</span>(<span class="string">"delete requests need column {}"</span>, column.column_schema.name),
                 }
                 .fail();
             }
@@ -1525,7 +1526,7 @@
                 || column.column_schema.default_constraint().is_some(),
             InvalidRequestSnafu {
                 region_id: <span class="self">self</span>.region_id,
-                reason: <span class="macro">format!</span>(<span class="string">&quot;missing column {}&quot;</span>, column.column_schema.name),
+                reason: <span class="macro">format!</span>(<span class="string">"missing column {}"</span>, column.column_schema.name),
             }
         );
 
@@ -1541,15 +1542,15 @@
                     InvalidRequestSnafu {
                         region_id: <span class="self">self</span>.region_id,
                         reason: <span class="macro">format!</span>(
-                            <span class="string">&quot;delete requests need column {}&quot;</span>,
+                            <span class="string">"delete requests need column {}"</span>,
                             column.column_schema.name
                         ),
                     }
                 );
 
                 <span class="comment">// For delete request, we need a default value for padding so we
-                // can delete a row even a field doesn&#39;t have a default value. So the
-                // value doesn&#39;t need to following the default value constraint of the
+                // can delete a row even a field doesn't have a default value. So the
+                // value doesn't need to following the default value constraint of the
                 // column.
                 </span><span class="kw">if </span>column.column_schema.is_nullable() {
                     datatypes::value::Value::Null
@@ -1566,22 +1567,22 @@
                         region_id: <span class="self">self</span>.region_id,
                         column: <span class="kw-2">&amp;</span>column.column_schema.name,
                     })<span class="question-mark">?
-                    </span><span class="comment">// This column doesn&#39;t have default value.
+                    </span><span class="comment">// This column doesn't have default value.
                     </span>.with_context(|| InvalidRequestSnafu {
                         region_id: <span class="self">self</span>.region_id,
                         reason: <span class="macro">format!</span>(
-                            <span class="string">&quot;column {} does not have default value&quot;</span>,
+                            <span class="string">"column {} does not have default value"</span>,
                             column.column_schema.name
                         ),
                     })<span class="question-mark">?
             </span>}
         };
 
-        <span class="comment">// Convert default value into proto&#39;s value.
+        <span class="comment">// Convert default value into proto's value.
         </span>to_proto_value(default_value).with_context(|| InvalidRequestSnafu {
             region_id: <span class="self">self</span>.region_id,
             reason: <span class="macro">format!</span>(
-                <span class="string">&quot;no protobuf type for default value of column {} ({:?})&quot;</span>,
+                <span class="string">"no protobuf type for default value of column {} ({:?})"</span>,
                 column.column_schema.name, column.column_schema.data_type
             ),
         })
@@ -1600,7 +1601,7 @@
             InvalidRequestSnafu {
                 region_id,
                 reason: <span class="macro">format!</span>(
-                    <span class="string">&quot;value has type {:?}, but column {} has type {:?}({})&quot;</span>,
+                    <span class="string">"value has type {:?}, but column {} has type {:?}({})"</span>,
                     value_type,
                     column_schema.column_name,
                     ColumnDataType::try_from(column_schema.datatype),
@@ -1918,12 +1919,12 @@
         <span class="kw">for </span>sender <span class="kw">in </span><span class="self">self</span>.senders {
             sender.send(<span class="prelude-val">Ok</span>(<span class="number">0</span>));
         }
-        <span class="macro">info!</span>(<span class="string">&quot;Successfully compacted region: {}&quot;</span>, <span class="self">self</span>.region_id);
+        <span class="macro">info!</span>(<span class="string">"Successfully compacted region: {}"</span>, <span class="self">self</span>.region_id);
     }
 }
 
 <span class="kw">impl </span>OnFailure <span class="kw">for </span>CompactionFinished {
-    <span class="doccomment">/// Compaction succeeded but failed to update manifest or region&#39;s already been dropped,
+    <span class="doccomment">/// Compaction succeeded but failed to update manifest or region's already been dropped,
     /// clean compaction output files.
     </span><span class="kw">fn </span>on_failure(<span class="kw-2">&amp;mut </span><span class="self">self</span>, err: Error) {
         <span class="kw">let </span>err = Arc::new(err);
@@ -1935,7 +1936,7 @@
         <span class="kw">for </span>file <span class="kw">in </span><span class="kw-2">&amp;</span><span class="self">self</span>.compacted_files {
             <span class="kw">let </span>file_id = file.file_id;
             <span class="macro">warn!</span>(
-                <span class="string">&quot;Cleaning region {} compaction output file: {}&quot;</span>,
+                <span class="string">"Cleaning region {} compaction output file: {}"</span>,
                 <span class="self">self</span>.region_id, file_id
             );
             <span class="self">self</span>.file_purger.send_request(PurgeRequest {
@@ -1988,7 +1989,7 @@
         {
             <span class="macro">assert_eq!</span>(reason, expect);
         } <span class="kw">else </span>{
-            <span class="macro">panic!</span>(<span class="string">&quot;Unexpected error {err}&quot;</span>)
+            <span class="macro">panic!</span>(<span class="string">"Unexpected error {err}"</span>)
         }
     }
 
@@ -1996,22 +1997,22 @@
     </span><span class="kw">fn </span>test_write_request_duplicate_column() {
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[
-                new_column_schema(<span class="string">&quot;c0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
-                new_column_schema(<span class="string">&quot;c0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"c0"</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"c0"</span>, ColumnDataType::Int64, SemanticType::Tag),
             ],
             rows: <span class="macro">vec!</span>[],
         };
 
         <span class="kw">let </span>err = WriteRequest::new(RegionId::new(<span class="number">1</span>, <span class="number">1</span>), OpType::Put, rows).unwrap_err();
-        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">&quot;duplicate column c0&quot;</span>);
+        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">"duplicate column c0"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_valid_write_request() {
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[
-                new_column_schema(<span class="string">&quot;c0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
-                new_column_schema(<span class="string">&quot;c1&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"c0"</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"c1"</span>, ColumnDataType::Int64, SemanticType::Tag),
             ],
             rows: <span class="macro">vec!</span>[Row {
                 values: <span class="macro">vec!</span>[i64_value(<span class="number">1</span>), i64_value(<span class="number">2</span>)],
@@ -2019,17 +2020,17 @@
         };
 
         <span class="kw">let </span>request = WriteRequest::new(RegionId::new(<span class="number">1</span>, <span class="number">1</span>), OpType::Put, rows).unwrap();
-        <span class="macro">assert_eq!</span>(<span class="number">0</span>, request.column_index_by_name(<span class="string">&quot;c0&quot;</span>).unwrap());
-        <span class="macro">assert_eq!</span>(<span class="number">1</span>, request.column_index_by_name(<span class="string">&quot;c1&quot;</span>).unwrap());
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">None</span>, request.column_index_by_name(<span class="string">&quot;c2&quot;</span>));
+        <span class="macro">assert_eq!</span>(<span class="number">0</span>, request.column_index_by_name(<span class="string">"c0"</span>).unwrap());
+        <span class="macro">assert_eq!</span>(<span class="number">1</span>, request.column_index_by_name(<span class="string">"c1"</span>).unwrap());
+        <span class="macro">assert_eq!</span>(<span class="prelude-val">None</span>, request.column_index_by_name(<span class="string">"c2"</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_write_request_column_num() {
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[
-                new_column_schema(<span class="string">&quot;c0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
-                new_column_schema(<span class="string">&quot;c1&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"c0"</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"c1"</span>, ColumnDataType::Int64, SemanticType::Tag),
             ],
             rows: <span class="macro">vec!</span>[Row {
                 values: <span class="macro">vec!</span>[i64_value(<span class="number">1</span>), i64_value(<span class="number">2</span>), i64_value(<span class="number">3</span>)],
@@ -2037,7 +2038,7 @@
         };
 
         <span class="kw">let </span>err = WriteRequest::new(RegionId::new(<span class="number">1</span>, <span class="number">1</span>), OpType::Put, rows).unwrap_err();
-        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">&quot;row has 3 columns but schema has 2&quot;</span>);
+        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">"row has 3 columns but schema has 2"</span>);
     }
 
     <span class="kw">fn </span>new_region_metadata() -&gt; RegionMetadata {
@@ -2045,7 +2046,7 @@
         builder
             .push_column_metadata(ColumnMetadata {
                 column_schema: datatypes::schema::ColumnSchema::new(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ConcreteDataType::timestamp_millisecond_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -2054,7 +2055,7 @@
             })
             .push_column_metadata(ColumnMetadata {
                 column_schema: datatypes::schema::ColumnSchema::new(
-                    <span class="string">&quot;k0&quot;</span>,
+                    <span class="string">"k0"</span>,
                     ConcreteDataType::int64_datatype(),
                     <span class="bool-val">true</span>,
                 ),
@@ -2070,11 +2071,11 @@
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[
                 new_column_schema(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ColumnDataType::TimestampMillisecond,
                     SemanticType::Timestamp,
                 ),
-                new_column_schema(<span class="string">&quot;k0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"k0"</span>, ColumnDataType::Int64, SemanticType::Tag),
             ],
             rows: <span class="macro">vec!</span>[Row {
                 values: <span class="macro">vec!</span>[ts_ms_value(<span class="number">1</span>), i64_value(<span class="number">2</span>)],
@@ -2090,8 +2091,8 @@
     </span><span class="kw">fn </span>test_column_type() {
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[
-                new_column_schema(<span class="string">&quot;ts&quot;</span>, ColumnDataType::Int64, SemanticType::Timestamp),
-                new_column_schema(<span class="string">&quot;k0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"ts"</span>, ColumnDataType::Int64, SemanticType::Timestamp),
+                new_column_schema(<span class="string">"k0"</span>, ColumnDataType::Int64, SemanticType::Tag),
             ],
             rows: <span class="macro">vec!</span>[Row {
                 values: <span class="macro">vec!</span>[i64_value(<span class="number">1</span>), i64_value(<span class="number">2</span>)],
@@ -2101,7 +2102,7 @@
 
         <span class="kw">let </span>request = WriteRequest::new(RegionId::new(<span class="number">1</span>, <span class="number">1</span>), OpType::Put, rows).unwrap();
         <span class="kw">let </span>err = request.check_schema(<span class="kw-2">&amp;</span>metadata).unwrap_err();
-        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">&quot;column ts expect type Timestamp(Millisecond(TimestampMillisecondType)), given: INT64(4)&quot;</span>);
+        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">"column ts expect type Timestamp(Millisecond(TimestampMillisecondType)), given: INT64(4)"</span>);
     }
 
     <span class="attr">#[test]
@@ -2109,11 +2110,11 @@
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[
                 new_column_schema(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ColumnDataType::TimestampMillisecond,
                     SemanticType::Tag,
                 ),
-                new_column_schema(<span class="string">&quot;k0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"k0"</span>, ColumnDataType::Int64, SemanticType::Tag),
             ],
             rows: <span class="macro">vec!</span>[Row {
                 values: <span class="macro">vec!</span>[ts_ms_value(<span class="number">1</span>), i64_value(<span class="number">2</span>)],
@@ -2123,7 +2124,7 @@
 
         <span class="kw">let </span>request = WriteRequest::new(RegionId::new(<span class="number">1</span>, <span class="number">1</span>), OpType::Put, rows).unwrap();
         <span class="kw">let </span>err = request.check_schema(<span class="kw-2">&amp;</span>metadata).unwrap_err();
-        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">&quot;column ts has semantic type Timestamp, given: TAG(0)&quot;</span>);
+        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">"column ts has semantic type Timestamp, given: TAG(0)"</span>);
     }
 
     <span class="attr">#[test]
@@ -2131,11 +2132,11 @@
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[
                 new_column_schema(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ColumnDataType::TimestampMillisecond,
                     SemanticType::Timestamp,
                 ),
-                new_column_schema(<span class="string">&quot;k0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"k0"</span>, ColumnDataType::Int64, SemanticType::Tag),
             ],
             rows: <span class="macro">vec!</span>[Row {
                 values: <span class="macro">vec!</span>[Value { value_data: <span class="prelude-val">None </span>}, i64_value(<span class="number">2</span>)],
@@ -2145,14 +2146,14 @@
 
         <span class="kw">let </span>request = WriteRequest::new(RegionId::new(<span class="number">1</span>, <span class="number">1</span>), OpType::Put, rows).unwrap();
         <span class="kw">let </span>err = request.check_schema(<span class="kw-2">&amp;</span>metadata).unwrap_err();
-        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">&quot;column ts is not null but input has null&quot;</span>);
+        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">"column ts is not null but input has null"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_column_default() {
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[new_column_schema(
-                <span class="string">&quot;k0&quot;</span>,
+                <span class="string">"k0"</span>,
                 ColumnDataType::Int64,
                 SemanticType::Tag,
             )],
@@ -2164,7 +2165,7 @@
 
         <span class="kw">let </span>request = WriteRequest::new(RegionId::new(<span class="number">1</span>, <span class="number">1</span>), OpType::Put, rows).unwrap();
         <span class="kw">let </span>err = request.check_schema(<span class="kw-2">&amp;</span>metadata).unwrap_err();
-        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">&quot;missing column ts&quot;</span>);
+        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">"missing column ts"</span>);
     }
 
     <span class="attr">#[test]
@@ -2172,12 +2173,12 @@
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[
                 new_column_schema(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ColumnDataType::TimestampMillisecond,
                     SemanticType::Timestamp,
                 ),
-                new_column_schema(<span class="string">&quot;k0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
-                new_column_schema(<span class="string">&quot;k1&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"k0"</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"k1"</span>, ColumnDataType::Int64, SemanticType::Tag),
             ],
             rows: <span class="macro">vec!</span>[Row {
                 values: <span class="macro">vec!</span>[ts_ms_value(<span class="number">1</span>), i64_value(<span class="number">2</span>), i64_value(<span class="number">3</span>)],
@@ -2187,14 +2188,14 @@
 
         <span class="kw">let </span>request = WriteRequest::new(RegionId::new(<span class="number">1</span>, <span class="number">1</span>), OpType::Put, rows).unwrap();
         <span class="kw">let </span>err = request.check_schema(<span class="kw-2">&amp;</span>metadata).unwrap_err();
-        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">r#&quot;unknown columns: [&quot;k1&quot;]&quot;#</span>);
+        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">r#"unknown columns: ["k1"]"#</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_fill_missing_columns() {
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[new_column_schema(
-                <span class="string">&quot;ts&quot;</span>,
+                <span class="string">"ts"</span>,
                 ColumnDataType::TimestampMillisecond,
                 SemanticType::Timestamp,
             )],
@@ -2212,11 +2213,11 @@
         <span class="kw">let </span>expect_rows = Rows {
             schema: <span class="macro">vec!</span>[
                 new_column_schema(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ColumnDataType::TimestampMillisecond,
                     SemanticType::Timestamp,
                 ),
-                new_column_schema(<span class="string">&quot;k0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"k0"</span>, ColumnDataType::Int64, SemanticType::Tag),
             ],
             rows: <span class="macro">vec!</span>[Row {
                 values: <span class="macro">vec!</span>[ts_ms_value(<span class="number">1</span>), Value { value_data: <span class="prelude-val">None </span>}],
@@ -2230,7 +2231,7 @@
         builder
             .push_column_metadata(ColumnMetadata {
                 column_schema: datatypes::schema::ColumnSchema::new(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ConcreteDataType::timestamp_millisecond_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -2239,7 +2240,7 @@
             })
             .push_column_metadata(ColumnMetadata {
                 column_schema: datatypes::schema::ColumnSchema::new(
-                    <span class="string">&quot;k0&quot;</span>,
+                    <span class="string">"k0"</span>,
                     ConcreteDataType::int64_datatype(),
                     <span class="bool-val">true</span>,
                 ),
@@ -2255,7 +2256,7 @@
         builder
             .push_column_metadata(ColumnMetadata {
                 column_schema: datatypes::schema::ColumnSchema::new(
-                    <span class="string">&quot;f0&quot;</span>,
+                    <span class="string">"f0"</span>,
                     ConcreteDataType::int64_datatype(),
                     <span class="bool-val">true</span>,
                 ),
@@ -2265,7 +2266,7 @@
             <span class="comment">// Column is not nullable.
             </span>.push_column_metadata(ColumnMetadata {
                 column_schema: datatypes::schema::ColumnSchema::new(
-                    <span class="string">&quot;f1&quot;</span>,
+                    <span class="string">"f1"</span>,
                     ConcreteDataType::int64_datatype(),
                     <span class="bool-val">false</span>,
                 )
@@ -2283,7 +2284,7 @@
     </span><span class="kw">fn </span>test_fill_missing_for_delete() {
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[new_column_schema(
-                <span class="string">&quot;ts&quot;</span>,
+                <span class="string">"ts"</span>,
                 ColumnDataType::TimestampMillisecond,
                 SemanticType::Timestamp,
             )],
@@ -2295,15 +2296,15 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>request = WriteRequest::new(RegionId::new(<span class="number">1</span>, <span class="number">1</span>), OpType::Delete, rows).unwrap();
         <span class="kw">let </span>err = request.check_schema(<span class="kw-2">&amp;</span>metadata).unwrap_err();
-        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">&quot;delete requests need column k0&quot;</span>);
+        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">"delete requests need column k0"</span>);
         <span class="kw">let </span>err = request.fill_missing_columns(<span class="kw-2">&amp;</span>metadata).unwrap_err();
-        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">&quot;delete requests need column k0&quot;</span>);
+        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">"delete requests need column k0"</span>);
 
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[
-                new_column_schema(<span class="string">&quot;k0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"k0"</span>, ColumnDataType::Int64, SemanticType::Tag),
                 new_column_schema(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ColumnDataType::TimestampMillisecond,
                     SemanticType::Timestamp,
                 ),
@@ -2319,14 +2320,14 @@
 
         <span class="kw">let </span>expect_rows = Rows {
             schema: <span class="macro">vec!</span>[
-                new_column_schema(<span class="string">&quot;k0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"k0"</span>, ColumnDataType::Int64, SemanticType::Tag),
                 new_column_schema(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ColumnDataType::TimestampMillisecond,
                     SemanticType::Timestamp,
                 ),
-                new_column_schema(<span class="string">&quot;f0&quot;</span>, ColumnDataType::Int64, SemanticType::Field),
-                new_column_schema(<span class="string">&quot;f1&quot;</span>, ColumnDataType::Int64, SemanticType::Field),
+                new_column_schema(<span class="string">"f0"</span>, ColumnDataType::Int64, SemanticType::Field),
+                new_column_schema(<span class="string">"f1"</span>, ColumnDataType::Int64, SemanticType::Field),
             ],
             <span class="comment">// Column f1 is not nullable and we use 0 for padding.
             </span>rows: <span class="macro">vec!</span>[Row {
@@ -2348,17 +2349,17 @@
             <span class="comment">// f0 is nullable.
             </span>.push_column_metadata(ColumnMetadata {
                 column_schema: datatypes::schema::ColumnSchema::new(
-                    <span class="string">&quot;f0&quot;</span>,
+                    <span class="string">"f0"</span>,
                     ConcreteDataType::int64_datatype(),
                     <span class="bool-val">true</span>,
                 ),
                 semantic_type: SemanticType::Field,
                 column_id: <span class="number">3</span>,
             })
-            <span class="comment">// f1 is not nullable and don&#39;t has default.
+            <span class="comment">// f1 is not nullable and don't has default.
             </span>.push_column_metadata(ColumnMetadata {
                 column_schema: datatypes::schema::ColumnSchema::new(
-                    <span class="string">&quot;f1&quot;</span>,
+                    <span class="string">"f1"</span>,
                     ConcreteDataType::int64_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -2369,9 +2370,9 @@
 
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[
-                new_column_schema(<span class="string">&quot;k0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"k0"</span>, ColumnDataType::Int64, SemanticType::Tag),
                 new_column_schema(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ColumnDataType::TimestampMillisecond,
                     SemanticType::Timestamp,
                 ),
@@ -2388,14 +2389,14 @@
 
         <span class="kw">let </span>expect_rows = Rows {
             schema: <span class="macro">vec!</span>[
-                new_column_schema(<span class="string">&quot;k0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"k0"</span>, ColumnDataType::Int64, SemanticType::Tag),
                 new_column_schema(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ColumnDataType::TimestampMillisecond,
                     SemanticType::Timestamp,
                 ),
-                new_column_schema(<span class="string">&quot;f0&quot;</span>, ColumnDataType::Int64, SemanticType::Field),
-                new_column_schema(<span class="string">&quot;f1&quot;</span>, ColumnDataType::Int64, SemanticType::Field),
+                new_column_schema(<span class="string">"f0"</span>, ColumnDataType::Int64, SemanticType::Field),
+                new_column_schema(<span class="string">"f1"</span>, ColumnDataType::Int64, SemanticType::Field),
             ],
             <span class="comment">// Column f1 is not nullable and we use 0 for padding.
             </span>rows: <span class="macro">vec!</span>[Row {
@@ -2414,7 +2415,7 @@
     </span><span class="kw">fn </span>test_no_default() {
         <span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[new_column_schema(
-                <span class="string">&quot;k0&quot;</span>,
+                <span class="string">"k0"</span>,
                 ColumnDataType::Int64,
                 SemanticType::Tag,
             )],
@@ -2426,7 +2427,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>request = WriteRequest::new(RegionId::new(<span class="number">1</span>, <span class="number">1</span>), OpType::Put, rows).unwrap();
         <span class="kw">let </span>err = request.fill_missing_columns(<span class="kw-2">&amp;</span>metadata).unwrap_err();
-        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">&quot;column ts does not have default value&quot;</span>);
+        check_invalid_request(<span class="kw-2">&amp;</span>err, <span class="string">"column ts does not have default value"</span>);
     }
 
     <span class="attr">#[test]
@@ -2434,20 +2435,20 @@
         <span class="comment">// Missing f0 and f1 has invalid type (string).
         </span><span class="kw">let </span>rows = Rows {
             schema: <span class="macro">vec!</span>[
-                new_column_schema(<span class="string">&quot;k0&quot;</span>, ColumnDataType::Int64, SemanticType::Tag),
+                new_column_schema(<span class="string">"k0"</span>, ColumnDataType::Int64, SemanticType::Tag),
                 new_column_schema(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ColumnDataType::TimestampMillisecond,
                     SemanticType::Timestamp,
                 ),
-                new_column_schema(<span class="string">&quot;f1&quot;</span>, ColumnDataType::String, SemanticType::Field),
+                new_column_schema(<span class="string">"f1"</span>, ColumnDataType::String, SemanticType::Field),
             ],
             rows: <span class="macro">vec!</span>[Row {
                 values: <span class="macro">vec!</span>[
                     i64_value(<span class="number">100</span>),
                     ts_ms_value(<span class="number">1</span>),
                     Value {
-                        value_data: <span class="prelude-val">Some</span>(ValueData::StringValue(<span class="string">&quot;xxxxx&quot;</span>.to_string())),
+                        value_data: <span class="prelude-val">Some</span>(ValueData::StringValue(<span class="string">"xxxxx"</span>.to_string())),
                     },
                 ],
             }],
@@ -2458,7 +2459,7 @@
         <span class="kw">let </span>err = request.check_schema(<span class="kw-2">&amp;</span>metadata).unwrap_err();
         check_invalid_request(
             <span class="kw-2">&amp;</span>err,
-            <span class="string">&quot;column f1 expect type Int64(Int64Type), given: STRING(12)&quot;</span>,
+            <span class="string">"column f1 expect type Int64(Int64Type), given: STRING(12)"</span>,
         );
     }
 }

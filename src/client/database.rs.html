@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/client/src/database.rs`."><title>database.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="client" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/client/src/database.rs`."><title>database.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="client" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -362,14 +363,14 @@
 <a href="#362" id="362">362</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -401,8 +402,8 @@
 
 <span class="attr">#[derive(Clone, Debug, Default)]
 </span><span class="kw">pub struct </span>Database {
-    <span class="comment">// The &quot;catalog&quot; and &quot;schema&quot; to be used in processing the requests at the server side.
-    // They are the &quot;hint&quot; or &quot;context&quot;, just like how the &quot;database&quot; in &quot;USE&quot; statement is treated in MySQL.
+    <span class="comment">// The "catalog" and "schema" to be used in processing the requests at the server side.
+    // They are the "hint" or "context", just like how the "database" in "USE" statement is treated in MySQL.
     // They will be carried in the request header.
     </span>catalog: String,
     schema: String,
@@ -420,7 +421,7 @@
         <span class="self">Self </span>{
             catalog: catalog.into(),
             schema: schema.into(),
-            dbname: <span class="string">&quot;&quot;</span>.to_string(),
+            dbname: <span class="string">""</span>.to_string(),
             client,
             ctx: FlightContext::default(),
         }
@@ -435,8 +436,8 @@
     /// environment
     </span><span class="kw">pub fn </span>new_with_dbname(dbname: <span class="kw">impl </span>Into&lt;String&gt;, client: Client) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            catalog: <span class="string">&quot;&quot;</span>.to_string(),
-            schema: <span class="string">&quot;&quot;</span>.to_string(),
+            catalog: <span class="string">""</span>.to_string(),
+            schema: <span class="string">""</span>.to_string(),
             dbname: dbname.into(),
             client,
             ctx: FlightContext::default(),
@@ -621,7 +622,7 @@
                 source: BoxedError::new(ServerSnafu { code, msg }.build()),
             };
             <span class="macro">logging::error!</span>(
-                <span class="string">&quot;Failed to do Flight get, addr: {}, code: {}, source: {:?}&quot;</span>,
+                <span class="string">"Failed to do Flight get, addr: {}, code: {}, source: {:?}"</span>,
                 client.addr(),
                 tonic_code,
                 error
@@ -640,7 +641,7 @@
 
         <span class="kw">let </span><span class="prelude-val">Some</span>(first_flight_message) = flight_message_stream.next().<span class="kw">await else </span>{
             <span class="kw">return </span>IllegalFlightMessagesSnafu {
-                reason: <span class="string">&quot;Expect the response not to be empty&quot;</span>,
+                reason: <span class="string">"Expect the response not to be empty"</span>,
             }
             .fail();
         };
@@ -652,13 +653,13 @@
                 <span class="macro">ensure!</span>(
                     flight_message_stream.next().<span class="kw">await</span>.is_none(),
                     IllegalFlightMessagesSnafu {
-                        reason: <span class="string">&quot;Expect &#39;AffectedRows&#39; Flight messages to be the one and the only!&quot;
+                        reason: <span class="string">"Expect 'AffectedRows' Flight messages to be the one and the only!"
                     </span>}
                 );
                 <span class="prelude-val">Ok</span>(Output::AffectedRows(rows))
             }
             FlightMessage::Recordbatch(<span class="kw">_</span>) =&gt; IllegalFlightMessagesSnafu {
-                reason: <span class="string">&quot;The first flight message cannot be a RecordBatch message&quot;</span>,
+                reason: <span class="string">"The first flight message cannot be a RecordBatch message"</span>,
             }
             .fail(),
             FlightMessage::Schema(schema) =&gt; {
@@ -668,7 +669,7 @@
                             .map_err(BoxedError::new)
                             .context(ExternalSnafu)<span class="question-mark">?</span>;
                         <span class="kw">let </span>FlightMessage::Recordbatch(record_batch) = flight_message <span class="kw">else </span>{
-                            <span class="kw">yield </span>IllegalFlightMessagesSnafu {reason: <span class="string">&quot;A Schema message must be succeeded exclusively by a set of RecordBatch messages&quot;</span>}
+                            <span class="kw">yield </span>IllegalFlightMessagesSnafu {reason: <span class="string">"A Schema message must be succeeded exclusively by a set of RecordBatch messages"</span>}
                                         .fail()
                                         .map_err(BoxedError::new)
                                         .context(ExternalSnafu);
@@ -706,8 +707,8 @@
         <span class="macro">assert!</span>(ctx.auth_header.is_none());
 
         <span class="kw">let </span>basic = AuthScheme::Basic(Basic {
-            username: <span class="string">&quot;u&quot;</span>.to_string(),
-            password: <span class="string">&quot;p&quot;</span>.to_string(),
+            username: <span class="string">"u"</span>.to_string(),
+            password: <span class="string">"p"</span>.to_string(),
         });
 
         ctx.auth_header = <span class="prelude-val">Some</span>(AuthHeader {

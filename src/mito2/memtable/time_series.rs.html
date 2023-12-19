@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/memtable/time_series.rs`."><title>time_series.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/memtable/time_series.rs`."><title>time_series.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1138,14 +1139,14 @@
 <a href="#1138" id="1138">1138</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -1303,8 +1304,8 @@
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>TimeSeriesMemtable {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
-        f.debug_struct(<span class="string">&quot;TimeSeriesMemtable&quot;</span>).finish()
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
+        f.debug_struct(<span class="string">"TimeSeriesMemtable"</span>).finish()
     }
 }
 
@@ -1393,7 +1394,7 @@
             .data_type
             .clone()
             .as_timestamp()
-            .expect(<span class="string">&quot;Timestamp column must have timestamp type&quot;</span>);
+            .expect(<span class="string">"Timestamp column must have timestamp type"</span>);
         <span class="kw">let </span>max_timestamp = ts_type.create_timestamp(<span class="self">self</span>.max_timestamp.load(Ordering::Relaxed));
         <span class="kw">let </span>min_timestamp = ts_type.create_timestamp(<span class="self">self</span>.min_timestamp.load(Ordering::Relaxed));
         MemtableStats {
@@ -1464,7 +1465,7 @@
     }
 }
 
-<span class="doccomment">/// Creates primary key array builders and arrow&#39;s schema for primary keys of given region schema.
+<span class="doccomment">/// Creates primary key array builders and arrow's schema for primary keys of given region schema.
 </span><span class="kw">fn </span>primary_key_builders(
     region_metadata: <span class="kw-2">&amp;</span>RegionMetadataRef,
     num_pk_rows: usize,
@@ -1517,15 +1518,15 @@
 <span class="kw">impl </span>Drop <span class="kw">for </span>Iter {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="macro">debug!</span>(
-            <span class="string">&quot;Iter {} time series memtable, metrics: {:?}&quot;</span>,
+            <span class="string">"Iter {} time series memtable, metrics: {:?}"</span>,
             <span class="self">self</span>.metadata.region_id, <span class="self">self</span>.metrics
         );
 
         READ_ROWS_TOTAL
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">&quot;time_series_memtable&quot;</span>])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"time_series_memtable"</span>])
             .inc_by(<span class="self">self</span>.metrics.num_rows <span class="kw">as </span>u64);
         READ_STAGE_ELAPSED
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">&quot;scan_memtable&quot;</span>])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"scan_memtable"</span>])
             .observe(<span class="self">self</span>.metrics.scan_cost.as_secs_f64());
     }
 }
@@ -1599,7 +1600,7 @@
         <span class="kw">let </span>rb = <span class="kw">match </span>pk_to_record_batch(codec, pk, builders, pk_schema) {
             <span class="prelude-val">Ok</span>(rb) =&gt; rb,
             <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="macro">error!</span>(e; <span class="string">&quot;Failed to build record batch from primary keys&quot;</span>);
+                <span class="macro">error!</span>(e; <span class="string">"Failed to build record batch from primary keys"</span>);
                 <span class="kw">return </span><span class="bool-val">true</span>;
             }
         };
@@ -1627,11 +1628,11 @@
             <span class="comment">// result was a column
             </span>ColumnarValue::Scalar(ScalarValue::Boolean(v)) =&gt; v.unwrap_or(<span class="bool-val">true</span>),
             <span class="kw">_ </span>=&gt; {
-                <span class="macro">unreachable!</span>(<span class="string">&quot;Unexpected primary key record batch evaluation result: {:?}, primary key: {:?}&quot;</span>, eva, primary_key);
+                <span class="macro">unreachable!</span>(<span class="string">"Unexpected primary key record batch evaluation result: {:?}, primary key: {:?}"</span>, eva, primary_key);
             }
         };
         <span class="macro">trace!</span>(
-            <span class="string">&quot;Evaluate primary key {:?} against filter: {:?}, result: {:?}&quot;</span>,
+            <span class="string">"Evaluate primary key {:?} against filter: {:?}, result: {:?}"</span>,
             primary_key,
             expr,
             result
@@ -1772,7 +1773,7 @@
     }
 
     <span class="doccomment">/// Pushes a new row to `ValueBuilder`.
-    /// We don&#39;t need primary keys since they&#39;ve already be encoded.
+    /// We don't need primary keys since they've already be encoded.
     </span><span class="kw">fn </span>push(<span class="kw-2">&amp;mut </span><span class="self">self</span>, ts: ValueRef, sequence: u64, op_type: u8, fields: Vec&lt;ValueRef&gt;) {
         <span class="macro">debug_assert_eq!</span>(fields.len(), <span class="self">self</span>.fields.len());
         <span class="self">self</span>.timestamp.push_value_ref(ts);
@@ -1911,18 +1912,18 @@
         <span class="kw">let </span><span class="kw-2">mut </span>builder = RegionMetadataBuilder::new(RegionId::new(<span class="number">123</span>, <span class="number">456</span>));
         builder
             .push_column_metadata(ColumnMetadata {
-                column_schema: ColumnSchema::new(<span class="string">&quot;k0&quot;</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
+                column_schema: ColumnSchema::new(<span class="string">"k0"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
                 semantic_type: SemanticType::Tag,
                 column_id: <span class="number">0</span>,
             })
             .push_column_metadata(ColumnMetadata {
-                column_schema: ColumnSchema::new(<span class="string">&quot;k1&quot;</span>, ConcreteDataType::int64_datatype(), <span class="bool-val">false</span>),
+                column_schema: ColumnSchema::new(<span class="string">"k1"</span>, ConcreteDataType::int64_datatype(), <span class="bool-val">false</span>),
                 semantic_type: SemanticType::Tag,
                 column_id: <span class="number">1</span>,
             })
             .push_column_metadata(ColumnMetadata {
                 column_schema: ColumnSchema::new(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ConcreteDataType::timestamp_millisecond_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -1930,12 +1931,12 @@
                 column_id: <span class="number">2</span>,
             })
             .push_column_metadata(ColumnMetadata {
-                column_schema: ColumnSchema::new(<span class="string">&quot;v0&quot;</span>, ConcreteDataType::int64_datatype(), <span class="bool-val">true</span>),
+                column_schema: ColumnSchema::new(<span class="string">"v0"</span>, ConcreteDataType::int64_datatype(), <span class="bool-val">true</span>),
                 semantic_type: SemanticType::Field,
                 column_id: <span class="number">3</span>,
             })
             .push_column_metadata(ColumnMetadata {
-                column_schema: ColumnSchema::new(<span class="string">&quot;v1&quot;</span>, ConcreteDataType::float64_datatype(), <span class="bool-val">true</span>),
+                column_schema: ColumnSchema::new(<span class="string">"v1"</span>, ConcreteDataType::float64_datatype(), <span class="bool-val">true</span>),
                 semantic_type: SemanticType::Field,
                 column_id: <span class="number">4</span>,
             })
@@ -1944,11 +1945,11 @@
         Arc::new(region_metadata)
     }
 
-    <span class="kw">fn </span>ts_value_ref(val: i64) -&gt; ValueRef&lt;<span class="lifetime">&#39;static</span>&gt; {
+    <span class="kw">fn </span>ts_value_ref(val: i64) -&gt; ValueRef&lt;<span class="lifetime">'static</span>&gt; {
         ValueRef::Timestamp(Timestamp::new_millisecond(val))
     }
 
-    <span class="kw">fn </span>field_value_ref(v0: i64, v1: f64) -&gt; Vec&lt;ValueRef&lt;<span class="lifetime">&#39;static</span>&gt;&gt; {
+    <span class="kw">fn </span>field_value_ref(v0: i64, v1: f64) -&gt; Vec&lt;ValueRef&lt;<span class="lifetime">'static</span>&gt;&gt; {
         <span class="macro">vec!</span>[ValueRef::Int64(v0), ValueRef::Float64(OrderedFloat(v1))]
     }
 
@@ -2044,7 +2045,7 @@
         };
 
         <span class="kw">let </span>batch = values
-            .to_batch(<span class="string">b&quot;test&quot;</span>, <span class="kw-2">&amp;</span>schema, <span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>].into_iter().collect())
+            .to_batch(<span class="string">b"test"</span>, <span class="kw-2">&amp;</span>schema, <span class="kw-2">&amp;</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>].into_iter().collect())
             .unwrap();
         check_value(
             <span class="kw-2">&amp;</span>batch,
@@ -2146,7 +2147,7 @@
             <span class="kw">let </span>handle = std::thread::spawn(<span class="kw">move </span>|| {
                 <span class="kw">for </span>j <span class="kw">in </span>i * <span class="number">100</span>..(i + <span class="number">1</span>) * <span class="number">100 </span>{
                     <span class="kw">let </span>pk = j % pk_num;
-                    <span class="kw">let </span>primary_key = <span class="macro">format!</span>(<span class="string">&quot;pk-{}&quot;</span>, pk).as_bytes().to_vec();
+                    <span class="kw">let </span>primary_key = <span class="macro">format!</span>(<span class="string">"pk-{}"</span>, pk).as_bytes().to_vec();
                     <span class="kw">let </span>(series, <span class="kw">_</span>) = set.get_or_add_series(primary_key);
                     <span class="kw">let </span><span class="kw-2">mut </span>guard = series.write().unwrap();
                     guard.push(
@@ -2169,7 +2170,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>v0 = Vec::with_capacity(concurrency * <span class="number">100</span>);
 
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..pk_num {
-            <span class="kw">let </span>pk = <span class="macro">format!</span>(<span class="string">&quot;pk-{}&quot;</span>, i).as_bytes().to_vec();
+            <span class="kw">let </span>pk = <span class="macro">format!</span>(<span class="string">"pk-{}"</span>, i).as_bytes().to_vec();
             <span class="kw">let </span>(series, <span class="kw">_</span>) = set.get_or_add_series(pk);
             <span class="kw">let </span><span class="kw-2">mut </span>guard = series.write().unwrap();
             <span class="kw">let </span>values = guard.compact(<span class="kw-2">&amp;</span>schema).unwrap();
@@ -2179,7 +2180,7 @@
             v0.extend(
                 values
                     .fields
-                    .get(<span class="number">0</span>)
+                    .first()
                     .unwrap()
                     .as_any()
                     .downcast_ref::&lt;Int64Vector&gt;()
@@ -2209,7 +2210,7 @@
     </span><span class="kw">fn </span>test_memtable() {
         common_telemetry::init_default_ut_logging();
         <span class="kw">let </span>schema = schema_for_test();
-        <span class="kw">let </span>kvs = build_key_values(<span class="kw-2">&amp;</span>schema, <span class="string">&quot;hello&quot;</span>.to_string(), <span class="number">42</span>, <span class="number">100</span>);
+        <span class="kw">let </span>kvs = build_key_values(<span class="kw-2">&amp;</span>schema, <span class="string">"hello"</span>.to_string(), <span class="number">42</span>, <span class="number">100</span>);
         <span class="kw">let </span>memtable = TimeSeriesMemtable::new(schema, <span class="number">42</span>, <span class="prelude-val">None</span>);
         memtable.write(<span class="kw-2">&amp;</span>kvs).unwrap();
 
@@ -2250,7 +2251,7 @@
     </span><span class="kw">fn </span>test_memtable_projection() {
         common_telemetry::init_default_ut_logging();
         <span class="kw">let </span>schema = schema_for_test();
-        <span class="kw">let </span>kvs = build_key_values(<span class="kw-2">&amp;</span>schema, <span class="string">&quot;hello&quot;</span>.to_string(), <span class="number">42</span>, <span class="number">100</span>);
+        <span class="kw">let </span>kvs = build_key_values(<span class="kw-2">&amp;</span>schema, <span class="string">"hello"</span>.to_string(), <span class="number">42</span>, <span class="number">100</span>);
         <span class="kw">let </span>memtable = TimeSeriesMemtable::new(schema, <span class="number">42</span>, <span class="prelude-val">None</span>);
         memtable.write(<span class="kw-2">&amp;</span>kvs).unwrap();
 
@@ -2263,7 +2264,7 @@
             <span class="macro">assert_eq!</span>(<span class="number">1</span>, batch.fields().len());
             <span class="kw">let </span>v0 = batch
                 .fields()
-                .get(<span class="number">0</span>)
+                .first()
                 .unwrap()
                 .data
                 .as_any()

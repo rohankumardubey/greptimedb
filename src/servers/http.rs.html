@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/servers/src/http.rs`."><title>http.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="servers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/servers/src/http.rs`."><title>http.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="servers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1093,14 +1094,14 @@
 <a href="#1093" id="1093">1093</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -1117,7 +1118,7 @@
 <span class="kw">pub mod </span>prometheus;
 <span class="kw">pub mod </span>script;
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;dashboard&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"dashboard"</span>)]
 </span><span class="kw">mod </span>dashboard;
 <span class="kw">pub mod </span>influxdb_result_v1;
 
@@ -1177,13 +1178,13 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::server::Server;
 
-<span class="kw">pub const </span>HTTP_API_VERSION: <span class="kw-2">&amp;</span>str = <span class="string">&quot;v1&quot;</span>;
-<span class="kw">pub const </span>HTTP_API_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">&quot;/v1/&quot;</span>;
+<span class="kw">pub const </span>HTTP_API_VERSION: <span class="kw-2">&amp;</span>str = <span class="string">"v1"</span>;
+<span class="kw">pub const </span>HTTP_API_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">"/v1/"</span>;
 <span class="doccomment">/// Default http body limit (64M).
 </span><span class="kw">const </span>DEFAULT_BODY_LIMIT: ReadableSize = ReadableSize::mb(<span class="number">64</span>);
 
 <span class="comment">// TODO(fys): This is a temporary workaround, it will be improved later
-</span><span class="kw">pub static </span>PUBLIC_APIS: [<span class="kw-2">&amp;</span>str; <span class="number">2</span>] = [<span class="string">&quot;/v1/influxdb/ping&quot;</span>, <span class="string">&quot;/v1/influxdb/health&quot;</span>];
+</span><span class="kw">pub static </span>PUBLIC_APIS: [<span class="kw-2">&amp;</span>str; <span class="number">2</span>] = [<span class="string">"/v1/influxdb/ping"</span>, <span class="string">"/v1/influxdb/health"</span>];
 
 <span class="attr">#[derive(Default)]
 </span><span class="kw">pub struct </span>HttpServer {
@@ -1208,7 +1209,7 @@
 </span><span class="kw">pub struct </span>HttpOptions {
     <span class="kw">pub </span>addr: String,
 
-    <span class="attr">#[serde(with = <span class="string">&quot;humantime_serde&quot;</span>)]
+    <span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
     </span><span class="kw">pub </span>timeout: Duration,
 
     <span class="attr">#[serde(skip)]
@@ -1220,7 +1221,7 @@
 <span class="kw">impl </span>Default <span class="kw">for </span>HttpOptions {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            addr: <span class="string">&quot;127.0.0.1:4000&quot;</span>.to_string(),
+            addr: <span class="string">"127.0.0.1:4000"</span>.to_string(),
             timeout: Duration::from_secs(<span class="number">30</span>),
             disable_dashboard: <span class="bool-val">false</span>,
             body_limit: DEFAULT_BODY_LIMIT,
@@ -1331,7 +1332,7 @@
 }
 
 <span class="attr">#[derive(Serialize, Deserialize, Debug, JsonSchema, Eq, PartialEq)]
-#[serde(rename_all = <span class="string">&quot;lowercase&quot;</span>)]
+#[serde(rename_all = <span class="string">"lowercase"</span>)]
 </span><span class="kw">pub enum </span>JsonOutput {
     AffectedRows(usize),
     Records(HttpRecordsOutput),
@@ -1340,11 +1341,11 @@
 <span class="attr">#[derive(Serialize, Deserialize, Debug, JsonSchema)]
 </span><span class="kw">pub struct </span>GreptimedbV1Response {
     code: u32,
-    <span class="attr">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    <span class="attr">#[serde(skip_serializing_if = <span class="string">"Option::is_none"</span>)]
     </span>error: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    <span class="attr">#[serde(skip_serializing_if = <span class="string">&quot;Vec::is_empty&quot;</span>, default)]
+    <span class="attr">#[serde(skip_serializing_if = <span class="string">"Vec::is_empty"</span>, default)]
     </span>output: Vec&lt;JsonOutput&gt;,
-    <span class="attr">#[serde(skip_serializing_if = <span class="string">&quot;Option::is_none&quot;</span>)]
+    <span class="attr">#[serde(skip_serializing_if = <span class="string">"Option::is_none"</span>)]
     </span>execution_time_ms: <span class="prelude-ty">Option</span>&lt;u64&gt;,
 }
 
@@ -1352,9 +1353,9 @@
     <span class="kw">pub fn </span>with_error(error: <span class="kw">impl </span>ErrorExt) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>code = error.status_code();
         <span class="kw">if </span>code.should_log_error() {
-            <span class="macro">error!</span>(error; <span class="string">&quot;Failed to handle HTTP request&quot;</span>);
+            <span class="macro">error!</span>(error; <span class="string">"Failed to handle HTTP request"</span>);
         } <span class="kw">else </span>{
-            <span class="macro">debug!</span>(<span class="string">&quot;Failed to handle HTTP request, err: {:?}&quot;</span>, error);
+            <span class="macro">debug!</span>(<span class="string">"Failed to handle HTTP request, err: {:?}"</span>, error);
         }
 
         GreptimedbV1Response {
@@ -1462,8 +1463,8 @@
 <span class="kw">impl </span>ResponseFormat {
     <span class="kw">pub fn </span>parse(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">match </span>s {
-            <span class="string">&quot;greptimedb_v1&quot; </span>=&gt; <span class="prelude-val">Some</span>(ResponseFormat::GreptimedbV1),
-            <span class="string">&quot;influxdb_v1&quot; </span>=&gt; <span class="prelude-val">Some</span>(ResponseFormat::InfluxdbV1),
+            <span class="string">"greptimedb_v1" </span>=&gt; <span class="prelude-val">Some</span>(ResponseFormat::GreptimedbV1),
+            <span class="string">"influxdb_v1" </span>=&gt; <span class="prelude-val">Some</span>(ResponseFormat::InfluxdbV1),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
@@ -1484,10 +1485,10 @@
         // For details, see the Influxdb documents.
         // https://docs.influxdata.com/influxdb/v1/tools/api/#query-string-parameters-1
         </span><span class="kw">match </span>s {
-            <span class="string">&quot;ns&quot; </span>=&gt; <span class="prelude-val">Some</span>(Epoch::Nanosecond),
-            <span class="string">&quot;u&quot; </span>| <span class="string">&quot;µ&quot; </span>=&gt; <span class="prelude-val">Some</span>(Epoch::Microsecond),
-            <span class="string">&quot;ms&quot; </span>=&gt; <span class="prelude-val">Some</span>(Epoch::Millisecond),
-            <span class="string">&quot;s&quot; </span>=&gt; <span class="prelude-val">Some</span>(Epoch::Second),
+            <span class="string">"ns" </span>=&gt; <span class="prelude-val">Some</span>(Epoch::Nanosecond),
+            <span class="string">"u" </span>| <span class="string">"µ" </span>=&gt; <span class="prelude-val">Some</span>(Epoch::Microsecond),
+            <span class="string">"ms" </span>=&gt; <span class="prelude-val">Some</span>(Epoch::Millisecond),
+            <span class="string">"s" </span>=&gt; <span class="prelude-val">Some</span>(Epoch::Second),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>, <span class="comment">// just returns None for other cases
         </span>}
     }
@@ -1503,18 +1504,18 @@
 }
 
 <span class="kw">impl </span>Display <span class="kw">for </span>Epoch {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; std::fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
-            Epoch::Nanosecond =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Epoch::Nanosecond&quot;</span>),
-            Epoch::Microsecond =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Epoch::Microsecond&quot;</span>),
-            Epoch::Millisecond =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Epoch::Millisecond&quot;</span>),
-            Epoch::Second =&gt; <span class="macro">write!</span>(f, <span class="string">&quot;Epoch::Second&quot;</span>),
+            Epoch::Nanosecond =&gt; <span class="macro">write!</span>(f, <span class="string">"Epoch::Nanosecond"</span>),
+            Epoch::Microsecond =&gt; <span class="macro">write!</span>(f, <span class="string">"Epoch::Microsecond"</span>),
+            Epoch::Millisecond =&gt; <span class="macro">write!</span>(f, <span class="string">"Epoch::Millisecond"</span>),
+            Epoch::Second =&gt; <span class="macro">write!</span>(f, <span class="string">"Epoch::Second"</span>),
         }
     }
 }
 
 <span class="attr">#[derive(Serialize, Deserialize, Debug, JsonSchema)]
-#[serde(tag = <span class="string">&quot;type&quot;</span>)]
+#[serde(tag = <span class="string">"type"</span>)]
 </span><span class="kw">pub enum </span>JsonResponse {
     GreptimedbV1(GreptimedbV1Response),
     InfluxdbV1(InfluxdbV1Response),
@@ -1583,7 +1584,7 @@
 }
 
 <span class="kw">async fn </span>serve_docs() -&gt; Html&lt;String&gt; {
-    Html(<span class="macro">include_str!</span>(<span class="string">&quot;http/redoc.html&quot;</span>).to_owned())
+    Html(<span class="macro">include_str!</span>(<span class="string">"http/redoc.html"</span>).to_owned())
 }
 
 <span class="attr">#[derive(Clone)]
@@ -1693,13 +1694,13 @@
     <span class="kw">pub fn </span>make_app(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Router {
         <span class="kw">let </span><span class="kw-2">mut </span>api = OpenApi {
             info: Info {
-                title: <span class="string">&quot;GreptimeDB HTTP API&quot;</span>.to_string(),
-                description: <span class="prelude-val">Some</span>(<span class="string">&quot;HTTP APIs to interact with GreptimeDB&quot;</span>.to_string()),
+                title: <span class="string">"GreptimeDB HTTP API"</span>.to_string(),
+                description: <span class="prelude-val">Some</span>(<span class="string">"HTTP APIs to interact with GreptimeDB"</span>.to_string()),
                 version: HTTP_API_VERSION.to_string(),
                 ..Info::default()
             },
             servers: <span class="macro">vec!</span>[OpenAPIServer {
-                url: <span class="macro">format!</span>(<span class="string">&quot;/{HTTP_API_VERSION}&quot;</span>),
+                url: <span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}"</span>),
                 ..OpenAPIServer::default()
             }],
             ..OpenApi::default()
@@ -1715,50 +1716,50 @@
                 })
                 .finish_api(<span class="kw-2">&amp;mut </span>api)
                 .layer(Extension(api.clone()));
-            router = router.nest(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;/{HTTP_API_VERSION}&quot;</span>), sql_router);
+            router = router.nest(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}"</span>), sql_router);
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(opentsdb_handler) = <span class="self">self</span>.opentsdb_handler.clone() {
             router = router.nest(
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;/{HTTP_API_VERSION}/opentsdb&quot;</span>),
+                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}/opentsdb"</span>),
                 <span class="self">self</span>.route_opentsdb(opentsdb_handler),
             );
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(influxdb_handler) = <span class="self">self</span>.influxdb_handler.clone() {
             router = router.nest(
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;/{HTTP_API_VERSION}/influxdb&quot;</span>),
+                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}/influxdb"</span>),
                 <span class="self">self</span>.route_influxdb(influxdb_handler),
             );
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(prom_handler) = <span class="self">self</span>.prom_handler.clone() {
             router = router.nest(
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;/{HTTP_API_VERSION}/prometheus&quot;</span>),
+                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}/prometheus"</span>),
                 <span class="self">self</span>.route_prom(prom_handler),
             );
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(prometheus_handler) = <span class="self">self</span>.prometheus_handler.clone() {
             router = router.nest(
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;/{HTTP_API_VERSION}/prometheus/api/v1&quot;</span>),
+                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}/prometheus/api/v1"</span>),
                 <span class="self">self</span>.route_prometheus(prometheus_handler),
             );
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(otlp_handler) = <span class="self">self</span>.otlp_handler.clone() {
             router = router.nest(
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;/{HTTP_API_VERSION}/otlp&quot;</span>),
+                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}/otlp"</span>),
                 <span class="self">self</span>.route_otlp(otlp_handler),
             );
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(metrics_handler) = <span class="self">self</span>.metrics_handler {
-            router = router.nest(<span class="string">&quot;&quot;</span>, <span class="self">self</span>.route_metrics(metrics_handler));
+            router = router.nest(<span class="string">""</span>, <span class="self">self</span>.route_metrics(metrics_handler));
         }
 
         router = router.route(
-            <span class="string">&quot;/health&quot;</span>,
+            <span class="string">"/health"</span>,
             routing::get(handler::health).post(handler::health),
         );
 
@@ -1767,25 +1768,25 @@
                 greptime_config_options: <span class="self">self
                     </span>.greptime_config_options
                     .clone()
-                    .unwrap_or(<span class="string">&quot;&quot;</span>.to_string()),
+                    .unwrap_or(<span class="string">""</span>.to_string()),
             })
             .finish_api(<span class="kw-2">&amp;mut </span>api);
 
-        router = router.nest(<span class="string">&quot;&quot;</span>, config_router);
+        router = router.nest(<span class="string">""</span>, config_router);
 
-        router = router.route(<span class="string">&quot;/status&quot;</span>, routing::get(handler::status));
+        router = router.route(<span class="string">"/status"</span>, routing::get(handler::status));
 
-        <span class="attr">#[cfg(feature = <span class="string">&quot;dashboard&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"dashboard"</span>)]
         </span>{
             <span class="kw">if </span>!<span class="self">self</span>.options.disable_dashboard {
-                <span class="macro">info!</span>(<span class="string">&quot;Enable dashboard service at &#39;/dashboard&#39;&quot;</span>);
-                router = router.nest(<span class="string">&quot;/dashboard&quot;</span>, dashboard::dashboard());
+                <span class="macro">info!</span>(<span class="string">"Enable dashboard service at '/dashboard'"</span>);
+                router = router.nest(<span class="string">"/dashboard"</span>, dashboard::dashboard());
 
-                <span class="comment">// &quot;/dashboard&quot; and &quot;/dashboard/&quot; are two different paths in Axum.
-                // We cannot nest &quot;/dashboard/&quot;, because we already mapping &quot;/dashboard/*x&quot; while nesting &quot;/dashboard&quot;.
-                // So we explicitly route &quot;/dashboard/&quot; here.
+                <span class="comment">// "/dashboard" and "/dashboard/" are two different paths in Axum.
+                // We cannot nest "/dashboard/", because we already mapping "/dashboard/*x" while nesting "/dashboard".
+                // So we explicitly route "/dashboard/" here.
                 </span>router = router.route(
-                    <span class="string">&quot;/dashboard/&quot;</span>,
+                    <span class="string">"/dashboard/"</span>,
                     routing::get(dashboard::static_handler).post(dashboard::static_handler),
                 );
             }
@@ -1818,16 +1819,16 @@
                         authorize::check_http_auth,
                     )),
             )
-            <span class="comment">// Handlers for debug, we don&#39;t expect a timeout.
+            <span class="comment">// Handlers for debug, we don't expect a timeout.
             </span>.nest(
-                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;/{HTTP_API_VERSION}/prof&quot;</span>),
+                <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}/prof"</span>),
                 Router::new()
                     .route(
-                        <span class="string">&quot;/cpu&quot;</span>,
+                        <span class="string">"/cpu"</span>,
                         routing::get(pprof::pprof_handler).post(pprof::pprof_handler),
                     )
                     .route(
-                        <span class="string">&quot;/mem&quot;</span>,
+                        <span class="string">"/mem"</span>,
                         routing::get(mem_prof::mem_prof_handler).post(mem_prof::mem_prof_handler),
                     ),
             )
@@ -1835,41 +1836,41 @@
 
     <span class="kw">fn </span>route_metrics&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, metrics_handler: MetricsHandler) -&gt; Router&lt;S&gt; {
         Router::new()
-            .route(<span class="string">&quot;/metrics&quot;</span>, routing::get(handler::metrics))
+            .route(<span class="string">"/metrics"</span>, routing::get(handler::metrics))
             .with_state(metrics_handler)
     }
 
     <span class="kw">fn </span>route_sql&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, api_state: ApiState) -&gt; ApiRouter&lt;S&gt; {
         ApiRouter::new()
             .api_route(
-                <span class="string">&quot;/sql&quot;</span>,
+                <span class="string">"/sql"</span>,
                 apirouting::get_with(handler::sql, handler::sql_docs)
                     .post_with(handler::sql, handler::sql_docs),
             )
             .api_route(
-                <span class="string">&quot;/promql&quot;</span>,
+                <span class="string">"/promql"</span>,
                 apirouting::get_with(handler::promql, handler::sql_docs)
                     .post_with(handler::promql, handler::sql_docs),
             )
-            .api_route(<span class="string">&quot;/scripts&quot;</span>, apirouting::post(script::scripts))
-            .api_route(<span class="string">&quot;/run-script&quot;</span>, apirouting::post(script::run_script))
-            .route(<span class="string">&quot;/private/api.json&quot;</span>, apirouting::get(serve_api))
-            .route(<span class="string">&quot;/private/docs&quot;</span>, apirouting::get(serve_docs))
+            .api_route(<span class="string">"/scripts"</span>, apirouting::post(script::scripts))
+            .api_route(<span class="string">"/run-script"</span>, apirouting::post(script::run_script))
+            .route(<span class="string">"/private/api.json"</span>, apirouting::get(serve_api))
+            .route(<span class="string">"/private/docs"</span>, apirouting::get(serve_docs))
             .with_state(api_state)
     }
 
     <span class="kw">fn </span>route_prometheus&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, prometheus_handler: PrometheusHandlerRef) -&gt; Router&lt;S&gt; {
         Router::new()
             .route(
-                <span class="string">&quot;/format_query&quot;</span>,
+                <span class="string">"/format_query"</span>,
                 routing::post(format_query).get(format_query),
             )
-            .route(<span class="string">&quot;/query&quot;</span>, routing::post(instant_query).get(instant_query))
-            .route(<span class="string">&quot;/query_range&quot;</span>, routing::post(range_query).get(range_query))
-            .route(<span class="string">&quot;/labels&quot;</span>, routing::post(labels_query).get(labels_query))
-            .route(<span class="string">&quot;/series&quot;</span>, routing::post(series_query).get(series_query))
+            .route(<span class="string">"/query"</span>, routing::post(instant_query).get(instant_query))
+            .route(<span class="string">"/query_range"</span>, routing::post(range_query).get(range_query))
+            .route(<span class="string">"/labels"</span>, routing::post(labels_query).get(labels_query))
+            .route(<span class="string">"/series"</span>, routing::post(series_query).get(series_query))
             .route(
-                <span class="string">&quot;/label/:label_name/values&quot;</span>,
+                <span class="string">"/label/:label_name/values"</span>,
                 routing::get(label_values_query),
             )
             .with_state(prometheus_handler)
@@ -1877,36 +1878,36 @@
 
     <span class="kw">fn </span>route_prom&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, prom_handler: PromStoreProtocolHandlerRef) -&gt; Router&lt;S&gt; {
         Router::new()
-            .route(<span class="string">&quot;/write&quot;</span>, routing::post(prom_store::remote_write))
-            .route(<span class="string">&quot;/read&quot;</span>, routing::post(prom_store::remote_read))
+            .route(<span class="string">"/write"</span>, routing::post(prom_store::remote_write))
+            .route(<span class="string">"/read"</span>, routing::post(prom_store::remote_read))
             .with_state(prom_handler)
     }
 
     <span class="kw">fn </span>route_influxdb&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, influxdb_handler: InfluxdbLineProtocolHandlerRef) -&gt; Router&lt;S&gt; {
         Router::new()
-            .route(<span class="string">&quot;/write&quot;</span>, routing::post(influxdb_write_v1))
-            .route(<span class="string">&quot;/api/v2/write&quot;</span>, routing::post(influxdb_write_v2))
-            .route(<span class="string">&quot;/ping&quot;</span>, routing::get(influxdb_ping))
-            .route(<span class="string">&quot;/health&quot;</span>, routing::get(influxdb_health))
+            .route(<span class="string">"/write"</span>, routing::post(influxdb_write_v1))
+            .route(<span class="string">"/api/v2/write"</span>, routing::post(influxdb_write_v2))
+            .route(<span class="string">"/ping"</span>, routing::get(influxdb_ping))
+            .route(<span class="string">"/health"</span>, routing::get(influxdb_health))
             .with_state(influxdb_handler)
     }
 
     <span class="kw">fn </span>route_opentsdb&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, opentsdb_handler: OpentsdbProtocolHandlerRef) -&gt; Router&lt;S&gt; {
         Router::new()
-            .route(<span class="string">&quot;/api/put&quot;</span>, routing::post(opentsdb::put))
+            .route(<span class="string">"/api/put"</span>, routing::post(opentsdb::put))
             .with_state(opentsdb_handler)
     }
 
     <span class="kw">fn </span>route_otlp&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, otlp_handler: OpenTelemetryProtocolHandlerRef) -&gt; Router&lt;S&gt; {
         Router::new()
-            .route(<span class="string">&quot;/v1/metrics&quot;</span>, routing::post(otlp::metrics))
-            .route(<span class="string">&quot;/v1/traces&quot;</span>, routing::post(otlp::traces))
+            .route(<span class="string">"/v1/metrics"</span>, routing::post(otlp::metrics))
+            .route(<span class="string">"/v1/traces"</span>, routing::post(otlp::traces))
             .with_state(otlp_handler)
     }
 
     <span class="kw">fn </span>route_config&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: GreptimeOptionsConfigState) -&gt; ApiRouter&lt;S&gt; {
         ApiRouter::new()
-            .route(<span class="string">&quot;/config&quot;</span>, apirouting::get(handler::config))
+            .route(<span class="string">"/config"</span>, apirouting::get(handler::config))
             .with_state(state)
     }
 }
@@ -1915,7 +1916,7 @@
 </span><span class="comment">// Based on https://github.com/tokio-rs/axum/blob/axum-v0.6.16/examples/prometheus-metrics/src/main.rs
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>track_metrics&lt;B&gt;(req: Request&lt;B&gt;, next: Next&lt;B&gt;) -&gt; <span class="kw">impl </span>IntoResponse {
     <span class="kw">let </span>_timer = HTTP_TRACK_METRICS
-        .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">&quot;value&quot;</span>])
+        .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"value"</span>])
         .start_timer();
     <span class="kw">let </span>start = Instant::now();
     <span class="kw">let </span>path = <span class="kw">if let </span><span class="prelude-val">Some</span>(matched_path) = req.extensions().get::&lt;MatchedPath&gt;() {
@@ -1940,7 +1941,7 @@
     response
 }
 
-<span class="kw">pub const </span>HTTP_SERVER: <span class="kw-2">&amp;</span>str = <span class="string">&quot;HTTP_SERVER&quot;</span>;
+<span class="kw">pub const </span>HTTP_SERVER: <span class="kw-2">&amp;</span>str = <span class="string">"HTTP_SERVER"</span>;
 
 <span class="attr">#[async_trait]
 </span><span class="kw">impl </span>Server <span class="kw">for </span>HttpServer {
@@ -1948,10 +1949,10 @@
         <span class="kw">let </span><span class="kw-2">mut </span>shutdown_tx = <span class="self">self</span>.shutdown_tx.lock().<span class="kw">await</span>;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(tx) = shutdown_tx.take() {
             <span class="kw">if </span>tx.send(()).is_err() {
-                <span class="macro">info!</span>(<span class="string">&quot;Receiver dropped, the HTTP server has already existed&quot;</span>);
+                <span class="macro">info!</span>(<span class="string">"Receiver dropped, the HTTP server has already existed"</span>);
             }
         }
-        <span class="macro">info!</span>(<span class="string">&quot;Shutdown HTTP server&quot;</span>);
+        <span class="macro">info!</span>(<span class="string">"Shutdown HTTP server"</span>);
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -1962,7 +1963,7 @@
             <span class="kw">let </span><span class="kw-2">mut </span>shutdown_tx = <span class="self">self</span>.shutdown_tx.lock().<span class="kw">await</span>;
             <span class="macro">ensure!</span>(
                 shutdown_tx.is_none(),
-                AlreadyStartedSnafu { server: <span class="string">&quot;HTTP&quot; </span>}
+                AlreadyStartedSnafu { server: <span class="string">"HTTP" </span>}
             );
 
             <span class="kw">let </span><span class="kw-2">mut </span>app = <span class="self">self</span>.make_app();
@@ -1979,7 +1980,7 @@
             server
         };
         <span class="kw">let </span>listening = server.local_addr();
-        <span class="macro">info!</span>(<span class="string">&quot;HTTP server is bound to {}&quot;</span>, listening);
+        <span class="macro">info!</span>(<span class="string">"HTTP server is bound to {}"</span>, listening);
 
         <span class="kw">let </span>graceful = server.with_graceful_shutdown(rx.map(drop));
         graceful.<span class="kw">await</span>.context(StartHttpSnafu)<span class="question-mark">?</span>;
@@ -1994,10 +1995,10 @@
 
 <span class="doccomment">/// handle error middleware
 </span><span class="kw">async fn </span>handle_error(err: BoxError) -&gt; Json&lt;JsonResponse&gt; {
-    <span class="macro">error!</span>(err; <span class="string">&quot;Unhandled internal error&quot;</span>);
+    <span class="macro">error!</span>(err; <span class="string">"Unhandled internal error"</span>);
 
     Json(JsonResponse::with_error_message(
-        <span class="macro">format!</span>(<span class="string">&quot;Unhandled internal error: {err}&quot;</span>),
+        <span class="macro">format!</span>(<span class="string">"Unhandled internal error: {err}"</span>),
         StatusCode::Unexpected,
         ResponseFormat::GreptimedbV1,
     ))
@@ -2099,7 +2100,7 @@
             .with_grpc_handler(grpc_instance)
             .build();
         server.build(server.make_app()).route(
-            <span class="string">&quot;/test/timeout&quot;</span>,
+            <span class="string">"/test/timeout"</span>,
             get(forever.layer(
                 ServiceBuilder::new()
                     .layer(HandleErrorLayer::new(|<span class="kw">_</span>: BoxError| <span class="kw">async </span>{
@@ -2113,7 +2114,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_http_options_default() {
         <span class="kw">let </span>default = HttpOptions::default();
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;127.0.0.1:4000&quot;</span>.to_string(), default.addr);
+        <span class="macro">assert_eq!</span>(<span class="string">"127.0.0.1:4000"</span>.to_string(), default.addr);
         <span class="macro">assert_eq!</span>(Duration::from_secs(<span class="number">30</span>), default.timeout)
     }
 
@@ -2122,23 +2123,23 @@
         <span class="kw">let </span>(tx, _rx) = mpsc::channel(<span class="number">100</span>);
         <span class="kw">let </span>app = make_test_app(tx);
         <span class="kw">let </span>client = TestClient::new(app);
-        <span class="kw">let </span>res = client.get(<span class="string">&quot;/test/timeout&quot;</span>).send().<span class="kw">await</span>;
+        <span class="kw">let </span>res = client.get(<span class="string">"/test/timeout"</span>).send().<span class="kw">await</span>;
         <span class="macro">assert_eq!</span>(res.status(), StatusCode::REQUEST_TIMEOUT);
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_recordbatches_conversion() {
         <span class="kw">let </span>column_schemas = <span class="macro">vec!</span>[
-            ColumnSchema::new(<span class="string">&quot;numbers&quot;</span>, ConcreteDataType::uint32_datatype(), <span class="bool-val">false</span>),
-            ColumnSchema::new(<span class="string">&quot;strings&quot;</span>, ConcreteDataType::string_datatype(), <span class="bool-val">true</span>),
+            ColumnSchema::new(<span class="string">"numbers"</span>, ConcreteDataType::uint32_datatype(), <span class="bool-val">false</span>),
+            ColumnSchema::new(<span class="string">"strings"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">true</span>),
         ];
         <span class="kw">let </span>schema = Arc::new(Schema::new(column_schemas));
         <span class="kw">let </span>columns: Vec&lt;VectorRef&gt; = <span class="macro">vec!</span>[
             Arc::new(UInt32Vector::from_slice(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>])),
             Arc::new(StringVector::from(<span class="macro">vec!</span>[
                 <span class="prelude-val">None</span>,
-                <span class="prelude-val">Some</span>(<span class="string">&quot;hello&quot;</span>),
-                <span class="prelude-val">Some</span>(<span class="string">&quot;greptime&quot;</span>),
+                <span class="prelude-val">Some</span>(<span class="string">"hello"</span>),
+                <span class="prelude-val">Some</span>(<span class="string">"greptime"</span>),
                 <span class="prelude-val">None</span>,
             ])),
         ];
@@ -2161,19 +2162,19 @@
                         <span class="macro">assert_eq!</span>(r.num_rows(), <span class="number">4</span>);
                         <span class="macro">assert_eq!</span>(r.num_cols(), <span class="number">2</span>);
                         <span class="kw">let </span>schema = r.schema.as_ref().unwrap();
-                        <span class="macro">assert_eq!</span>(schema.column_schemas[<span class="number">0</span>].name, <span class="string">&quot;numbers&quot;</span>);
-                        <span class="macro">assert_eq!</span>(schema.column_schemas[<span class="number">0</span>].data_type, <span class="string">&quot;UInt32&quot;</span>);
+                        <span class="macro">assert_eq!</span>(schema.column_schemas[<span class="number">0</span>].name, <span class="string">"numbers"</span>);
+                        <span class="macro">assert_eq!</span>(schema.column_schemas[<span class="number">0</span>].data_type, <span class="string">"UInt32"</span>);
                         <span class="macro">assert_eq!</span>(r.rows[<span class="number">0</span>][<span class="number">0</span>], serde_json::Value::from(<span class="number">1</span>));
                         <span class="macro">assert_eq!</span>(r.rows[<span class="number">0</span>][<span class="number">1</span>], serde_json::Value::Null);
                     } <span class="kw">else </span>{
-                        <span class="macro">panic!</span>(<span class="string">&quot;invalid output type&quot;</span>);
+                        <span class="macro">panic!</span>(<span class="string">"invalid output type"</span>);
                     }
                 }
                 JsonResponse::InfluxdbV1(json_resp) =&gt; {
                     <span class="kw">let </span>json_output = <span class="kw-2">&amp;</span>json_resp.results()[<span class="number">0</span>];
                     <span class="macro">assert_eq!</span>(json_output.num_rows(), <span class="number">4</span>);
                     <span class="macro">assert_eq!</span>(json_output.num_cols(), <span class="number">2</span>);
-                    <span class="macro">assert_eq!</span>(json_output.series[<span class="number">0</span>].columns.clone()[<span class="number">0</span>], <span class="string">&quot;numbers&quot;</span>);
+                    <span class="macro">assert_eq!</span>(json_output.series[<span class="number">0</span>].columns.clone()[<span class="number">0</span>], <span class="string">"numbers"</span>);
                     <span class="macro">assert_eq!</span>(
                         json_output.series[<span class="number">0</span>].values[<span class="number">0</span>][<span class="number">0</span>],
                         serde_json::Value::from(<span class="number">1</span>)

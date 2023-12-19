@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/manifest/manager.rs`."><title>manager.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/manifest/manager.rs`."><title>manager.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -662,14 +663,14 @@
 <a href="#662" id="662">662</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -708,7 +709,7 @@
 // trait MetaActionIterator -&gt; struct MetaActionIteratorImpl
 
 </span><span class="attr">#[cfg_attr(doc, aquamarine::aquamarine)]
-</span><span class="doccomment">/// Manage region&#39;s manifest. Provide APIs to access (create/modify/recover) region&#39;s persisted
+</span><span class="doccomment">/// Manage region's manifest. Provide APIs to access (create/modify/recover) region's persisted
 /// metadata.
 ///
 /// ```mermaid
@@ -774,7 +775,7 @@
 }
 
 <span class="kw">impl </span>RegionManifestManager {
-    <span class="doccomment">/// Construct a region&#39;s manifest and persist it.
+    <span class="doccomment">/// Construct a region's manifest and persist it.
     </span><span class="kw">pub async fn </span>new(metadata: RegionMetadataRef, options: RegionManifestOptions) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>inner = RegionManifestManagerInner::new(metadata, options).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
@@ -861,7 +862,7 @@
         );
 
         <span class="macro">info!</span>(
-            <span class="string">&quot;Creating region manifest in {} with metadata {:?}&quot;</span>,
+            <span class="string">"Creating region manifest in {} with metadata {:?}"</span>,
             options.manifest_dir, metadata
         );
 
@@ -877,7 +878,7 @@
         <span class="kw">let </span>manifest = manifest_builder.try_build()<span class="question-mark">?</span>;
 
         <span class="macro">debug!</span>(
-            <span class="string">&quot;Build region manifest in {}, manifest: {:?}&quot;</span>,
+            <span class="string">"Build region manifest in {}, manifest: {:?}"</span>,
             options.manifest_dir, manifest
         );
 
@@ -917,14 +918,14 @@
             .unwrap_or(MIN_VERSION);
         <span class="kw">let </span><span class="kw-2">mut </span>manifest_builder = <span class="kw">if let </span><span class="prelude-val">Some</span>(checkpoint) = checkpoint {
             <span class="macro">info!</span>(
-                <span class="string">&quot;Recover region manifest {} from checkpoint version {}&quot;</span>,
+                <span class="string">"Recover region manifest {} from checkpoint version {}"</span>,
                 options.manifest_dir, checkpoint.last_version
             );
             version = version.max(checkpoint.last_version + <span class="number">1</span>);
             RegionManifestBuilder::with_checkpoint(checkpoint.checkpoint)
         } <span class="kw">else </span>{
             <span class="macro">info!</span>(
-                <span class="string">&quot;Checkpoint not found in {}, build manifest from scratch&quot;</span>,
+                <span class="string">"Checkpoint not found in {}, build manifest from scratch"</span>,
                 options.manifest_dir
             );
             RegionManifestBuilder::default()
@@ -948,7 +949,7 @@
                     }
                     RegionMetaAction::Remove(<span class="kw">_</span>) =&gt; {
                         <span class="macro">debug!</span>(
-                            <span class="string">&quot;Unhandled action in {}, action: {:?}&quot;</span>,
+                            <span class="string">"Unhandled action in {}, action: {:?}"</span>,
                             options.manifest_dir, action
                         );
                     }
@@ -961,13 +962,13 @@
 
         <span class="comment">// set the initial metadata if necessary
         </span><span class="kw">if </span>!manifest_builder.contains_metadata() {
-            <span class="macro">debug!</span>(<span class="string">&quot;No region manifest in {}&quot;</span>, options.manifest_dir);
+            <span class="macro">debug!</span>(<span class="string">"No region manifest in {}"</span>, options.manifest_dir);
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         }
 
         <span class="kw">let </span>manifest = manifest_builder.try_build()<span class="question-mark">?</span>;
         <span class="macro">debug!</span>(
-            <span class="string">&quot;Recovered region manifest from {}, manifest: {:?}&quot;</span>,
+            <span class="string">"Recovered region manifest from {}, manifest: {:?}"</span>,
             options.manifest_dir, manifest
         );
         <span class="kw">let </span>version = manifest.manifest_version;
@@ -1002,7 +1003,7 @@
                 }
                 RegionMetaAction::Remove(<span class="kw">_</span>) =&gt; {
                     <span class="macro">debug!</span>(
-                        <span class="string">&quot;Unhandled action for region {}, action: {:?}&quot;</span>,
+                        <span class="string">"Unhandled action for region {}, action: {:?}"</span>,
                         <span class="self">self</span>.manifest.metadata.region_id, action
                     );
                 }
@@ -1036,7 +1037,7 @@
             &amp;&amp; <span class="self">self</span>.options.checkpoint_distance != <span class="number">0
         </span>{
             <span class="macro">debug!</span>(
-                <span class="string">&quot;Going to do checkpoint for version [{} ~ {}]&quot;</span>,
+                <span class="string">"Going to do checkpoint for version [{} ~ {}]"</span>,
                 <span class="self">self</span>.last_checkpoint_version, version
             );
             <span class="kw">if let </span><span class="prelude-val">Some</span>(checkpoint) = <span class="self">self</span>.do_checkpoint().<span class="kw">await</span><span class="question-mark">? </span>{
@@ -1084,7 +1085,7 @@
                     }
                     RegionMetaAction::Remove(<span class="kw">_</span>) =&gt; {
                         <span class="macro">debug!</span>(
-                            <span class="string">&quot;Unhandled action for region {}, action: {:?}&quot;</span>,
+                            <span class="string">"Unhandled action for region {}, action: {:?}"</span>,
                             <span class="self">self</span>.manifest.metadata.region_id, action
                         );
                     }
@@ -1115,7 +1116,7 @@
         </span><span class="self">self</span>.store.delete_until(last_version, <span class="bool-val">true</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="macro">info!</span>(
-            <span class="string">&quot;Done manifest checkpoint for region {}, version: [{}, {}], current latest version: {}, compacted {} actions.&quot;</span>,
+            <span class="string">"Done manifest checkpoint for region {}, version: [{}, {}], current latest version: {}, compacted {} actions."</span>,
             <span class="self">self</span>.manifest.metadata.region_id, start_version, end_version, last_version, compacted_actions
         );
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(checkpoint))
@@ -1206,7 +1207,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>new_metadata_builder = RegionMetadataBuilder::from_existing((<span class="kw-2">*</span>metadata).clone());
         new_metadata_builder.push_column_metadata(ColumnMetadata {
-            column_schema: ColumnSchema::new(<span class="string">&quot;val2&quot;</span>, ConcreteDataType::float64_datatype(), <span class="bool-val">false</span>),
+            column_schema: ColumnSchema::new(<span class="string">"val2"</span>, ConcreteDataType::float64_datatype(), <span class="bool-val">false</span>),
             semantic_type: SemanticType::Field,
             column_id: <span class="number">252</span>,
         });
@@ -1241,9 +1242,9 @@
             };
             <span class="kw">if </span>entry.file_type().<span class="kw">await</span>.unwrap().is_file() {
                 <span class="kw">let </span>file_name = entry.file_name().into_string().unwrap();
-                <span class="kw">if </span>file_name.contains(<span class="string">&quot;.checkpoint&quot;</span>) || file_name.contains(<span class="string">&quot;.json&quot;</span>) {
+                <span class="kw">if </span>file_name.contains(<span class="string">".checkpoint"</span>) || file_name.contains(<span class="string">".json"</span>) {
                     <span class="kw">let </span>file_size = entry.metadata().<span class="kw">await</span>.unwrap().len() <span class="kw">as </span>usize;
-                    <span class="macro">debug!</span>(<span class="string">&quot;File: {file_name:?}, size: {file_size}&quot;</span>);
+                    <span class="macro">debug!</span>(<span class="string">"File: {file_name:?}, size: {file_size}"</span>);
                     size += file_size;
                 }
             }
@@ -1254,11 +1255,11 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_manifest_size() {
         <span class="kw">let </span>metadata = Arc::new(basic_region_metadata());
-        <span class="kw">let </span>data_home = create_temp_dir(<span class="string">&quot;&quot;</span>);
+        <span class="kw">let </span>data_home = create_temp_dir(<span class="string">""</span>);
         <span class="kw">let </span>data_home_path = data_home.path().to_str().unwrap().to_string();
         <span class="kw">let </span>env = TestEnv::with_data_home(data_home);
 
-        <span class="kw">let </span>manifest_dir = <span class="macro">format!</span>(<span class="string">&quot;{}/manifest&quot;</span>, data_home_path);
+        <span class="kw">let </span>manifest_dir = <span class="macro">format!</span>(<span class="string">"{}/manifest"</span>, data_home_path);
 
         <span class="kw">let </span>manager = env
             .create_manifest_manager(CompressionType::Uncompressed, <span class="number">10</span>, <span class="prelude-val">Some</span>(metadata.clone()))
@@ -1268,7 +1269,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>new_metadata_builder = RegionMetadataBuilder::from_existing((<span class="kw-2">*</span>metadata).clone());
         new_metadata_builder.push_column_metadata(ColumnMetadata {
-            column_schema: ColumnSchema::new(<span class="string">&quot;val2&quot;</span>, ConcreteDataType::float64_datatype(), <span class="bool-val">false</span>),
+            column_schema: ColumnSchema::new(<span class="string">"val2"</span>, ConcreteDataType::float64_datatype(), <span class="bool-val">false</span>),
             semantic_type: SemanticType::Field,
             column_id: <span class="number">252</span>,
         });

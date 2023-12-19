@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/servers/src/metrics.rs`."><title>metrics.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="servers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/servers/src/metrics.rs`."><title>metrics.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="servers" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -264,14 +265,14 @@
 <a href="#264" id="264">264</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -291,180 +292,180 @@
 <span class="kw">use </span>tonic::body::BoxBody;
 <span class="kw">use </span>tower::{Layer, Service};
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_DB_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;db&quot;</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_CODE_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;code&quot;</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_TYPE_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;type&quot;</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_PROTOCOL_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;protocol&quot;</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_ERROR_COUNTER_LABEL_MYSQL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;mysql&quot;</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_MYSQL_SUBPROTOCOL_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;subprotocol&quot;</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_MYSQL_BINQUERY: <span class="kw-2">&amp;</span>str = <span class="string">&quot;binquery&quot;</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_MYSQL_TEXTQUERY: <span class="kw-2">&amp;</span>str = <span class="string">&quot;textquery&quot;</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_POSTGRES_SUBPROTOCOL_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;subprotocol&quot;</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_POSTGRES_SIMPLE_QUERY: <span class="kw-2">&amp;</span>str = <span class="string">&quot;simple&quot;</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_POSTGRES_EXTENDED_QUERY: <span class="kw-2">&amp;</span>str = <span class="string">&quot;extended&quot;</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_METHOD_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;method&quot;</span>;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_PATH_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">&quot;path&quot;</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_DB_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">"db"</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_CODE_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">"code"</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_TYPE_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">"type"</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_PROTOCOL_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">"protocol"</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_ERROR_COUNTER_LABEL_MYSQL: <span class="kw-2">&amp;</span>str = <span class="string">"mysql"</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_MYSQL_SUBPROTOCOL_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">"subprotocol"</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_MYSQL_BINQUERY: <span class="kw-2">&amp;</span>str = <span class="string">"binquery"</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_MYSQL_TEXTQUERY: <span class="kw-2">&amp;</span>str = <span class="string">"textquery"</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_POSTGRES_SUBPROTOCOL_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">"subprotocol"</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_POSTGRES_SIMPLE_QUERY: <span class="kw-2">&amp;</span>str = <span class="string">"simple"</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_POSTGRES_EXTENDED_QUERY: <span class="kw-2">&amp;</span>str = <span class="string">"extended"</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_METHOD_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">"method"</span>;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>METRIC_PATH_LABEL: <span class="kw-2">&amp;</span>str = <span class="string">"path"</span>;
 
 <span class="macro">lazy_static! </span>{
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_ERROR_COUNTER: IntCounterVec =
-        <span class="macro">register_int_counter_vec!</span>(<span class="string">&quot;servers_error&quot;</span>, <span class="string">&quot;servers error&quot;</span>, <span class="kw-2">&amp;</span>[METRIC_PROTOCOL_LABEL])
+        <span class="macro">register_int_counter_vec!</span>(<span class="string">"servers_error"</span>, <span class="string">"servers error"</span>, <span class="kw-2">&amp;</span>[METRIC_PROTOCOL_LABEL])
             .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_SQL_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;servers_http_sql_elapsed&quot;</span>,
-        <span class="string">&quot;servers http sql elapsed&quot;</span>,
+        <span class="string">"servers_http_sql_elapsed"</span>,
+        <span class="string">"servers http sql elapsed"</span>,
         <span class="kw-2">&amp;</span>[METRIC_DB_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_PROMQL_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;servers_http_promql_elapsed&quot;</span>,
-        <span class="string">&quot;servers http promql elapsed&quot;</span>,
+        <span class="string">"servers_http_promql_elapsed"</span>,
+        <span class="string">"servers http promql elapsed"</span>,
         <span class="kw-2">&amp;</span>[METRIC_DB_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_AUTH_FAILURE: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-        <span class="string">&quot;servers_auth_failure_count&quot;</span>,
-        <span class="string">&quot;servers auth failure count&quot;</span>,
+        <span class="string">"servers_auth_failure_count"</span>,
+        <span class="string">"servers auth failure count"</span>,
         <span class="kw-2">&amp;</span>[METRIC_CODE_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_INFLUXDB_WRITE_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;servers_http_influxdb_write_elapsed&quot;</span>,
-        <span class="string">&quot;servers http influxdb write elapsed&quot;</span>,
+        <span class="string">"servers_http_influxdb_write_elapsed"</span>,
+        <span class="string">"servers http influxdb write elapsed"</span>,
         <span class="kw-2">&amp;</span>[METRIC_DB_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_PROM_STORE_WRITE_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;servers_http_prometheus_write_elapsed&quot;</span>,
-        <span class="string">&quot;servers http prometheus write elapsed&quot;</span>,
+        <span class="string">"servers_http_prometheus_write_elapsed"</span>,
+        <span class="string">"servers http prometheus write elapsed"</span>,
         <span class="kw-2">&amp;</span>[METRIC_DB_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_PROM_STORE_READ_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;servers_http_prometheus_read_elapsed&quot;</span>,
-        <span class="string">&quot;servers http prometheus read elapsed&quot;</span>,
+        <span class="string">"servers_http_prometheus_read_elapsed"</span>,
+        <span class="string">"servers http prometheus read elapsed"</span>,
         <span class="kw-2">&amp;</span>[METRIC_DB_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_OPENTELEMETRY_METRICS_ELAPSED: HistogramVec =
         <span class="macro">register_histogram_vec!</span>(
-            <span class="string">&quot;servers_http_otlp_metrics_elapsed&quot;</span>,
-            <span class="string">&quot;servers_http_otlp_metrics_elapsed&quot;</span>,
+            <span class="string">"servers_http_otlp_metrics_elapsed"</span>,
+            <span class="string">"servers_http_otlp_metrics_elapsed"</span>,
             <span class="kw-2">&amp;</span>[METRIC_DB_LABEL]
         )
         .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_OPENTELEMETRY_TRACES_ELAPSED: HistogramVec =
         <span class="macro">register_histogram_vec!</span>(
-            <span class="string">&quot;servers_http_otlp_traces_elapsed&quot;</span>,
-            <span class="string">&quot;servers http otlp traces elapsed&quot;</span>,
+            <span class="string">"servers_http_otlp_traces_elapsed"</span>,
+            <span class="string">"servers http otlp traces elapsed"</span>,
             <span class="kw-2">&amp;</span>[METRIC_DB_LABEL]
         )
         .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_TCP_OPENTSDB_LINE_WRITE_ELAPSED: Histogram = <span class="macro">register_histogram!</span>(
-        <span class="string">&quot;servers_opentsdb_line_write_elapsed&quot;</span>,
-        <span class="string">&quot;servers opentsdb line write elapsed&quot;
+        <span class="string">"servers_opentsdb_line_write_elapsed"</span>,
+        <span class="string">"servers opentsdb line write elapsed"
     </span>)
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_PROMQL_FORMAT_QUERY_ELAPSED: Histogram = <span class="macro">register_histogram!</span>(
-        <span class="string">&quot;servers_http_promql_format_query_elapsed&quot;</span>,
-        <span class="string">&quot;servers http promql format query elapsed&quot;
+        <span class="string">"servers_http_promql_format_query_elapsed"</span>,
+        <span class="string">"servers http promql format query elapsed"
     </span>)
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_PROMQL_INSTANT_QUERY_ELAPSED: Histogram = <span class="macro">register_histogram!</span>(
-        <span class="string">&quot;servers_http_promql_instant_query_elapsed&quot;</span>,
-        <span class="string">&quot;servers http promql instant query elapsed&quot;
+        <span class="string">"servers_http_promql_instant_query_elapsed"</span>,
+        <span class="string">"servers http promql instant query elapsed"
     </span>)
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_PROMQL_RANGE_QUERY_ELAPSED: Histogram = <span class="macro">register_histogram!</span>(
-        <span class="string">&quot;servers_http_promql_range_query_elapsed&quot;</span>,
-        <span class="string">&quot;servers http promql range query elapsed&quot;
+        <span class="string">"servers_http_promql_range_query_elapsed"</span>,
+        <span class="string">"servers http promql range query elapsed"
     </span>)
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_PROMQL_LABEL_QUERY_ELAPSED: Histogram = <span class="macro">register_histogram!</span>(
-        <span class="string">&quot;servers_http_promql_label_query_elapsed&quot;</span>,
-        <span class="string">&quot;servers http promql label query elapsed&quot;
+        <span class="string">"servers_http_promql_label_query_elapsed"</span>,
+        <span class="string">"servers http promql label query elapsed"
     </span>)
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_PROMQL_SERIES_QUERY_ELAPSED: Histogram = <span class="macro">register_histogram!</span>(
-        <span class="string">&quot;servers_http_promql_series_query_elapsed&quot;</span>,
-        <span class="string">&quot;servers http promql series query elapsed&quot;
+        <span class="string">"servers_http_promql_series_query_elapsed"</span>,
+        <span class="string">"servers http promql series query elapsed"
     </span>)
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_PROMQL_LABEL_VALUE_QUERY_ELAPSED: Histogram = <span class="macro">register_histogram!</span>(
-        <span class="string">&quot;servers_http_promql_label_value_query_elapsed&quot;</span>,
-        <span class="string">&quot;servers http promql label value query elapsed&quot;
+        <span class="string">"servers_http_promql_label_value_query_elapsed"</span>,
+        <span class="string">"servers http promql label value query elapsed"
     </span>)
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_MYSQL_CONNECTIONS: IntGauge = <span class="macro">register_int_gauge!</span>(
-        <span class="string">&quot;servers_mysql_connection_count&quot;</span>,
-        <span class="string">&quot;servers mysql connection count&quot;
+        <span class="string">"servers_mysql_connection_count"</span>,
+        <span class="string">"servers mysql connection count"
     </span>)
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_MYSQL_QUERY_TIMER: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;servers_mysql_query_elapsed&quot;</span>,
-        <span class="string">&quot;servers mysql query elapsed&quot;</span>,
+        <span class="string">"servers_mysql_query_elapsed"</span>,
+        <span class="string">"servers mysql query elapsed"</span>,
         <span class="kw-2">&amp;</span>[METRIC_MYSQL_SUBPROTOCOL_LABEL, METRIC_DB_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_MYSQL_PREPARED_COUNT: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-        <span class="string">&quot;servers_mysql_prepared_count&quot;</span>,
-        <span class="string">&quot;servers mysql prepared count&quot;</span>,
+        <span class="string">"servers_mysql_prepared_count"</span>,
+        <span class="string">"servers mysql prepared count"</span>,
         <span class="kw-2">&amp;</span>[METRIC_DB_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_POSTGRES_CONNECTIONS: IntGauge = <span class="macro">register_int_gauge!</span>(
-        <span class="string">&quot;servers_postgres_connection_count&quot;</span>,
-        <span class="string">&quot;servers postgres connection count&quot;
+        <span class="string">"servers_postgres_connection_count"</span>,
+        <span class="string">"servers postgres connection count"
     </span>)
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_POSTGRES_QUERY_TIMER: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;servers_postgres_query_elapsed&quot;</span>,
-        <span class="string">&quot;servers postgres query elapsed&quot;</span>,
+        <span class="string">"servers_postgres_query_elapsed"</span>,
+        <span class="string">"servers postgres query elapsed"</span>,
         <span class="kw-2">&amp;</span>[METRIC_POSTGRES_SUBPROTOCOL_LABEL, METRIC_DB_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_POSTGRES_PREPARED_COUNT: IntCounter = <span class="macro">register_int_counter!</span>(
-        <span class="string">&quot;servers_postgres_prepared_count&quot;</span>,
-        <span class="string">&quot;servers postgres prepared count&quot;
+        <span class="string">"servers_postgres_prepared_count"</span>,
+        <span class="string">"servers postgres prepared count"
     </span>)
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_SERVER_GRPC_DB_REQUEST_TIMER: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;servers_grpc_db_request_elapsed&quot;</span>,
-        <span class="string">&quot;servers grpc db request elapsed&quot;</span>,
+        <span class="string">"servers_grpc_db_request_elapsed"</span>,
+        <span class="string">"servers grpc db request elapsed"</span>,
         <span class="kw-2">&amp;</span>[METRIC_DB_LABEL, METRIC_TYPE_LABEL, METRIC_CODE_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_SERVER_GRPC_PROM_REQUEST_TIMER: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;servers_grpc_prom_request_elapsed&quot;</span>,
-        <span class="string">&quot;servers grpc prom request elapsed&quot;</span>,
+        <span class="string">"servers_grpc_prom_request_elapsed"</span>,
+        <span class="string">"servers grpc prom request elapsed"</span>,
         <span class="kw-2">&amp;</span>[METRIC_DB_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_REQUESTS_TOTAL: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-        <span class="string">&quot;servers_http_requests_total&quot;</span>,
-        <span class="string">&quot;servers http requests total&quot;</span>,
+        <span class="string">"servers_http_requests_total"</span>,
+        <span class="string">"servers http requests total"</span>,
         <span class="kw-2">&amp;</span>[METRIC_METHOD_LABEL, METRIC_PATH_LABEL, METRIC_CODE_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_HTTP_REQUESTS_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;servers_http_requests_elapsed&quot;</span>,
-        <span class="string">&quot;servers http requests elapsed&quot;</span>,
+        <span class="string">"servers_http_requests_elapsed"</span>,
+        <span class="string">"servers http requests elapsed"</span>,
         <span class="kw-2">&amp;</span>[METRIC_METHOD_LABEL, METRIC_PATH_LABEL, METRIC_CODE_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_GRPC_REQUESTS_TOTAL: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-        <span class="string">&quot;servers_grpc_requests_total&quot;</span>,
-        <span class="string">&quot;servers grpc requests total&quot;</span>,
+        <span class="string">"servers_grpc_requests_total"</span>,
+        <span class="string">"servers grpc requests total"</span>,
         <span class="kw-2">&amp;</span>[METRIC_PATH_LABEL, METRIC_CODE_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>METRIC_GRPC_REQUESTS_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">&quot;servers_grpc_requests_elapsed&quot;</span>,
-        <span class="string">&quot;servers grpc requests elapsed&quot;</span>,
+        <span class="string">"servers_grpc_requests_elapsed"</span>,
+        <span class="string">"servers grpc requests elapsed"</span>,
         <span class="kw-2">&amp;</span>[METRIC_PATH_LABEL, METRIC_CODE_LABEL]
     )
     .unwrap();
     <span class="kw">pub static </span><span class="kw-2">ref </span>HTTP_TRACK_METRICS: HistogramVec =
-        <span class="macro">register_histogram_vec!</span>(<span class="string">&quot;http_track_metrics&quot;</span>, <span class="string">&quot;http track metrics&quot;</span>, <span class="kw-2">&amp;</span>[<span class="string">&quot;tag&quot;</span>]).unwrap();
+        <span class="macro">register_histogram_vec!</span>(<span class="string">"http_track_metrics"</span>, <span class="string">"http track metrics"</span>, <span class="kw-2">&amp;</span>[<span class="string">"tag"</span>]).unwrap();
 }
 
 <span class="comment">// Based on https://github.com/hyperium/tonic/blob/master/examples/src/tower/server.rs
@@ -488,14 +489,14 @@
 
 <span class="kw">impl</span>&lt;S&gt; Service&lt;hyper::Request&lt;Body&gt;&gt; <span class="kw">for </span>MetricsMiddleware&lt;S&gt;
 <span class="kw">where
-    </span>S: Service&lt;hyper::Request&lt;Body&gt;, Response = hyper::Response&lt;BoxBody&gt;&gt; + Clone + Send + <span class="lifetime">&#39;static</span>,
-    S::Future: Send + <span class="lifetime">&#39;static</span>,
+    </span>S: Service&lt;hyper::Request&lt;Body&gt;, Response = hyper::Response&lt;BoxBody&gt;&gt; + Clone + Send + <span class="lifetime">'static</span>,
+    S::Future: Send + <span class="lifetime">'static</span>,
 {
     <span class="kw">type </span>Response = S::Response;
     <span class="kw">type </span>Error = S::Error;
-    <span class="kw">type </span>Future = futures::future::BoxFuture&lt;<span class="lifetime">&#39;static</span>, <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Response, <span class="self">Self</span>::Error&gt;&gt;;
+    <span class="kw">type </span>Future = futures::future::BoxFuture&lt;<span class="lifetime">'static</span>, <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>::Response, <span class="self">Self</span>::Error&gt;&gt;;
 
-    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
+    <span class="kw">fn </span>poll_ready(<span class="kw-2">&amp;mut </span><span class="self">self</span>, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Result</span>&lt;(), <span class="self">Self</span>::Error&gt;&gt; {
         <span class="self">self</span>.inner.poll_ready(cx)
     }
 

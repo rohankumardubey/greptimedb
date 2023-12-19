@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/common/meta/src/key/table_name.rs`."><title>table_name.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="common_meta" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/common/meta/src/key/table_name.rs`."><title>table_name.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="common_meta" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -290,14 +291,14 @@
 <a href="#290" id="290">290</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -318,14 +319,14 @@
 <span class="kw">use </span><span class="kw">crate</span>::table_name::TableName;
 
 <span class="attr">#[derive(Debug, Clone, Copy)]
-</span><span class="kw">pub struct </span>TableNameKey&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub </span>catalog: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
-    <span class="kw">pub </span>schema: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
-    <span class="kw">pub </span>table: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
+</span><span class="kw">pub struct </span>TableNameKey&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub </span>catalog: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
+    <span class="kw">pub </span>schema: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
+    <span class="kw">pub </span>table: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TableNameKey&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub fn </span>new(catalog: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str, schema: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str, table: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TableNameKey&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub fn </span>new(catalog: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str, schema: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str, table: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             catalog,
             schema,
@@ -334,14 +335,14 @@
     }
 
     <span class="kw">pub fn </span>prefix_to_table(catalog: <span class="kw-2">&amp;</span>str, schema: <span class="kw-2">&amp;</span>str) -&gt; String {
-        <span class="macro">format!</span>(<span class="string">&quot;{}/{}/{}&quot;</span>, TABLE_NAME_KEY_PREFIX, catalog, schema)
+        <span class="macro">format!</span>(<span class="string">"{}/{}/{}"</span>, TABLE_NAME_KEY_PREFIX, catalog, schema)
     }
 
     <span class="kw">fn </span>strip_table_name(raw_key: <span class="kw-2">&amp;</span>[u8]) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
         <span class="kw">let </span>key = String::from_utf8(raw_key.to_vec()).map_err(|e| {
             InvalidTableMetadataSnafu {
                 err_msg: <span class="macro">format!</span>(
-                    <span class="string">&quot;TableNameKey &#39;{}&#39; is not a valid UTF8 string: {e}&quot;</span>,
+                    <span class="string">"TableNameKey '{}' is not a valid UTF8 string: {e}"</span>,
                     String::from_utf8_lossy(raw_key)
                 ),
             }
@@ -351,17 +352,17 @@
             TABLE_NAME_KEY_PATTERN
                 .captures(<span class="kw-2">&amp;</span>key)
                 .context(InvalidTableMetadataSnafu {
-                    err_msg: <span class="macro">format!</span>(<span class="string">&quot;Invalid TableNameKey &#39;{key}&#39;&quot;</span>),
+                    err_msg: <span class="macro">format!</span>(<span class="string">"Invalid TableNameKey '{key}'"</span>),
                 })<span class="question-mark">?</span>;
         <span class="comment">// Safety: pass the regex check above
         </span><span class="prelude-val">Ok</span>(captures[<span class="number">3</span>].to_string())
     }
 }
 
-<span class="kw">impl </span>TableMetaKey <span class="kw">for </span>TableNameKey&lt;<span class="lifetime">&#39;_</span>&gt; {
+<span class="kw">impl </span>TableMetaKey <span class="kw">for </span>TableNameKey&lt;<span class="lifetime">'_</span>&gt; {
     <span class="kw">fn </span>as_raw_key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;u8&gt; {
         <span class="macro">format!</span>(
-            <span class="string">&quot;{}/{}&quot;</span>,
+            <span class="string">"{}/{}"</span>,
             <span class="self">Self</span>::prefix_to_table(<span class="self">self</span>.catalog, <span class="self">self</span>.schema),
             <span class="self">self</span>.table
         )
@@ -369,8 +370,8 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>TableName&gt; <span class="kw">for </span>TableNameKey&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">fn </span>from(value: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>TableName) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; From&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>TableName&gt; <span class="kw">for </span>TableNameKey&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">fn </span>from(value: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>TableName) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             catalog: <span class="kw-2">&amp;</span>value.catalog_name,
             schema: <span class="kw-2">&amp;</span>value.schema_name,
@@ -379,8 +380,8 @@
     }
 }
 
-<span class="kw">impl </span>From&lt;TableNameKey&lt;<span class="lifetime">&#39;_</span>&gt;&gt; <span class="kw">for </span>TableName {
-    <span class="kw">fn </span>from(value: TableNameKey&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="self">Self </span>{
+<span class="kw">impl </span>From&lt;TableNameKey&lt;<span class="lifetime">'_</span>&gt;&gt; <span class="kw">for </span>TableName {
+    <span class="kw">fn </span>from(value: TableNameKey&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             catalog_name: value.catalog.to_string(),
             schema_name: value.schema.to_string(),
@@ -389,14 +390,14 @@
     }
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str&gt; <span class="kw">for </span>TableNameKey&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TryFrom&lt;<span class="kw-2">&amp;</span><span class="lifetime">'a </span>str&gt; <span class="kw">for </span>TableNameKey&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>Error = Error;
 
-    <span class="kw">fn </span>try_from(s: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">fn </span>try_from(s: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>captures = TABLE_NAME_KEY_PATTERN
             .captures(s)
             .context(InvalidTableMetadataSnafu {
-                err_msg: <span class="macro">format!</span>(<span class="string">&quot;Illegal TableNameKey format: &#39;{s}&#39;&quot;</span>),
+                err_msg: <span class="macro">format!</span>(<span class="string">"Illegal TableNameKey format: '{s}'"</span>),
             })<span class="question-mark">?</span>;
         <span class="comment">// Safety: pass the regex check above
         </span><span class="prelude-val">Ok</span>(<span class="self">Self </span>{
@@ -440,7 +441,7 @@
     <span class="doccomment">/// Builds a create table name transaction. It only executes while the primary keys comparing successes.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>build_create_txn(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        key: <span class="kw-2">&amp;</span>TableNameKey&lt;<span class="lifetime">&#39;_</span>&gt;,
+        key: <span class="kw-2">&amp;</span>TableNameKey&lt;<span class="lifetime">'_</span>&gt;,
         table_id: TableId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Txn&gt; {
         <span class="kw">let </span>raw_key = key.as_raw_key();
@@ -455,8 +456,8 @@
     <span class="doccomment">/// Builds a update table name transaction. It only executes while the primary keys comparing successes.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>build_update_txn(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        key: <span class="kw-2">&amp;</span>TableNameKey&lt;<span class="lifetime">&#39;_</span>&gt;,
-        new_key: <span class="kw-2">&amp;</span>TableNameKey&lt;<span class="lifetime">&#39;_</span>&gt;,
+        key: <span class="kw-2">&amp;</span>TableNameKey&lt;<span class="lifetime">'_</span>&gt;,
+        new_key: <span class="kw-2">&amp;</span>TableNameKey&lt;<span class="lifetime">'_</span>&gt;,
         table_id: TableId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Txn&gt; {
         <span class="kw">let </span>raw_key = key.as_raw_key();
@@ -474,7 +475,7 @@
     <span class="doccomment">/// Builds a delete table name transaction. It only executes while the primary keys comparing successes.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>build_delete_txn(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        key: <span class="kw-2">&amp;</span>TableNameKey&lt;<span class="lifetime">&#39;_</span>&gt;,
+        key: <span class="kw-2">&amp;</span>TableNameKey&lt;<span class="lifetime">'_</span>&gt;,
         table_id: TableId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Txn&gt; {
         <span class="kw">let </span>raw_key = key.as_raw_key();
@@ -490,7 +491,7 @@
         <span class="prelude-val">Ok</span>(txn)
     }
 
-    <span class="kw">pub async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: TableNameKey&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;TableNameValue&gt;&gt; {
+    <span class="kw">pub async fn </span>get(<span class="kw-2">&amp;</span><span class="self">self</span>, key: TableNameKey&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;TableNameValue&gt;&gt; {
         <span class="kw">let </span>raw_key = key.as_raw_key();
         <span class="self">self</span>.kv_backend
             .get(<span class="kw-2">&amp;</span>raw_key)
@@ -499,7 +500,7 @@
             .transpose()
     }
 
-    <span class="kw">pub async fn </span>exists(<span class="kw-2">&amp;</span><span class="self">self</span>, key: TableNameKey&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
+    <span class="kw">pub async fn </span>exists(<span class="kw-2">&amp;</span><span class="self">self</span>, key: TableNameKey&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
         <span class="kw">let </span>raw_key = key.as_raw_key();
         <span class="self">self</span>.kv_backend.exists(<span class="kw-2">&amp;</span>raw_key).<span class="kw">await
     </span>}
@@ -535,44 +536,44 @@
             <span class="macro">assert!</span>(TableNameKey::strip_table_name(raw_key).is_err());
         }
 
-        test_err(<span class="string">b&quot;&quot;</span>);
+        test_err(<span class="string">b""</span>);
         test_err(<span class="macro">vec!</span>[<span class="number">0u8</span>, <span class="number">159</span>, <span class="number">146</span>, <span class="number">150</span>].as_slice()); <span class="comment">// invalid UTF8 string
-        </span>test_err(<span class="string">b&quot;invalid_prefix/my_catalog/my_schema/my_table&quot;</span>);
-        test_err(<span class="string">b&quot;__table_name/&quot;</span>);
-        test_err(<span class="string">b&quot;__table_name/invalid_len_1&quot;</span>);
-        test_err(<span class="string">b&quot;__table_name/invalid_len_2/x&quot;</span>);
-        test_err(<span class="string">b&quot;__table_name/invalid_len_4/x/y/z&quot;</span>);
-        test_err(<span class="string">b&quot;__table_name/000_invalid_catalog/y/z&quot;</span>);
-        test_err(<span class="string">b&quot;__table_name/x/000_invalid_schema/z&quot;</span>);
-        test_err(<span class="string">b&quot;__table_name/x/y/000_invalid_table&quot;</span>);
+        </span>test_err(<span class="string">b"invalid_prefix/my_catalog/my_schema/my_table"</span>);
+        test_err(<span class="string">b"__table_name/"</span>);
+        test_err(<span class="string">b"__table_name/invalid_len_1"</span>);
+        test_err(<span class="string">b"__table_name/invalid_len_2/x"</span>);
+        test_err(<span class="string">b"__table_name/invalid_len_4/x/y/z"</span>);
+        test_err(<span class="string">b"__table_name/000_invalid_catalog/y/z"</span>);
+        test_err(<span class="string">b"__table_name/x/000_invalid_schema/z"</span>);
+        test_err(<span class="string">b"__table_name/x/y/000_invalid_table"</span>);
 
         <span class="kw">fn </span>test_ok(table_name: <span class="kw-2">&amp;</span>str) {
             <span class="macro">assert_eq!</span>(
                 table_name,
                 TableNameKey::strip_table_name(
-                    <span class="macro">format!</span>(<span class="string">&quot;__table_name/my_catalog/my_schema/{}&quot;</span>, table_name).as_bytes()
+                    <span class="macro">format!</span>(<span class="string">"__table_name/my_catalog/my_schema/{}"</span>, table_name).as_bytes()
                 )
                 .unwrap()
             );
         }
-        test_ok(<span class="string">&quot;my_table&quot;</span>);
-        test_ok(<span class="string">&quot;cpu:metrics&quot;</span>);
-        test_ok(<span class="string">&quot;:cpu:metrics&quot;</span>);
-        test_ok(<span class="string">&quot;sys.cpu.system&quot;</span>);
-        test_ok(<span class="string">&quot;foo-bar&quot;</span>);
+        test_ok(<span class="string">"my_table"</span>);
+        test_ok(<span class="string">"cpu:metrics"</span>);
+        test_ok(<span class="string">":cpu:metrics"</span>);
+        test_ok(<span class="string">"sys.cpu.system"</span>);
+        test_ok(<span class="string">"foo-bar"</span>);
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_serde() {
-        <span class="kw">let </span>key = TableNameKey::new(<span class="string">&quot;my_catalog&quot;</span>, <span class="string">&quot;my_schema&quot;</span>, <span class="string">&quot;my_table&quot;</span>);
+        <span class="kw">let </span>key = TableNameKey::new(<span class="string">"my_catalog"</span>, <span class="string">"my_schema"</span>, <span class="string">"my_table"</span>);
         <span class="kw">let </span>raw_key = key.as_raw_key();
         <span class="macro">assert_eq!</span>(
-            <span class="string">b&quot;__table_name/my_catalog/my_schema/my_table&quot;</span>,
+            <span class="string">b"__table_name/my_catalog/my_schema/my_table"</span>,
             raw_key.as_slice()
         );
 
         <span class="kw">let </span>value = TableNameValue::new(<span class="number">1</span>);
-        <span class="kw">let </span>literal = <span class="string">br#&quot;{&quot;table_id&quot;:1}&quot;#</span>;
+        <span class="kw">let </span>literal = <span class="string">br#"{"table_id":1}"#</span>;
 
         <span class="macro">assert_eq!</span>(value.try_as_raw_value().unwrap(), literal);
         <span class="macro">assert_eq!</span>(TableNameValue::try_from_raw_value(literal).unwrap(), value);

@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/operator/src/statement/ddl.rs`."><title>ddl.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="operator" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/operator/src/statement/ddl.rs`."><title>ddl.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="operator" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -713,14 +714,14 @@
 <a href="#713" id="713">713</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -770,7 +771,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::expr_factory;
 
 <span class="macro">lazy_static! </span>{
-    <span class="kw">static </span><span class="kw-2">ref </span>NAME_PATTERN_REG: Regex = Regex::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;^{NAME_PATTERN}$&quot;</span>)).unwrap();
+    <span class="kw">static </span><span class="kw-2">ref </span>NAME_PATTERN_REG: Regex = Regex::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"^{NAME_PATTERN}$"</span>)).unwrap();
 }
 
 <span class="kw">impl </span>StatementExecutor {
@@ -845,7 +846,7 @@
         <span class="macro">ensure!</span>(
             NAME_PATTERN_REG.is_match(<span class="kw-2">&amp;</span>create_table.table_name),
             error::UnexpectedSnafu {
-                violated: <span class="macro">format!</span>(<span class="string">&quot;Invalid table name: {}&quot;</span>, create_table.table_name)
+                violated: <span class="macro">format!</span>(<span class="string">"Invalid table name: {}"</span>, create_table.table_name)
             }
         );
 
@@ -866,9 +867,9 @@
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>table_id = resp.table_id.context(error::UnexpectedSnafu {
-            violated: <span class="string">&quot;expected table_id&quot;</span>,
+            violated: <span class="string">"expected table_id"</span>,
         })<span class="question-mark">?</span>;
-        <span class="macro">info!</span>(<span class="string">&quot;Successfully created table &#39;{table_name}&#39; with table id {table_id}&quot;</span>);
+        <span class="macro">info!</span>(<span class="string">"Successfully created table '{table_name}' with table id {table_id}"</span>);
 
         table_info.ident.table_id = table_id;
 
@@ -958,7 +959,7 @@
             <span class="macro">ensure!</span>(
                 NAME_PATTERN_REG.is_match(new_table_name),
                 error::UnexpectedSnafu {
-                    violated: <span class="macro">format!</span>(<span class="string">&quot;Invalid table name: {}&quot;</span>, new_table_name)
+                    violated: <span class="macro">format!</span>(<span class="string">"Invalid table name: {}"</span>, new_table_name)
                 }
             );
         }
@@ -1011,7 +1012,7 @@
         <span class="self">self</span>.verify_alter(table_id, table.table_info(), expr.clone())<span class="question-mark">?</span>;
 
         <span class="macro">info!</span>(
-            <span class="string">&quot;Table info before alter is {:?}, expr: {:?}&quot;</span>,
+            <span class="string">"Table info before alter is {:?}, expr: {:?}"</span>,
             table.table_info(),
             expr
         );
@@ -1112,14 +1113,14 @@
         <span class="macro">ensure!</span>(
             NAME_PATTERN_REG.is_match(catalog),
             error::UnexpectedSnafu {
-                violated: <span class="macro">format!</span>(<span class="string">&quot;Invalid catalog name: {}&quot;</span>, catalog)
+                violated: <span class="macro">format!</span>(<span class="string">"Invalid catalog name: {}"</span>, catalog)
             }
         );
 
         <span class="macro">ensure!</span>(
             NAME_PATTERN_REG.is_match(database),
             error::UnexpectedSnafu {
-                violated: <span class="macro">format!</span>(<span class="string">&quot;Invalid database name: {}&quot;</span>, database)
+                violated: <span class="macro">format!</span>(<span class="string">"Invalid database name: {}"</span>, database)
             }
         );
 
@@ -1160,7 +1161,7 @@
             .all(|col| <span class="kw-2">&amp;</span>create_table.time_index == col || create_table.primary_keys.contains(col)),
         InvalidPartitionColumnsSnafu {
             table: <span class="kw-2">&amp;</span>create_table.table_name,
-            reason: <span class="string">&quot;partition column must belongs to primary keys or equals to time index&quot;
+            reason: <span class="string">"partition column must belongs to primary keys or equals to time index"
         </span>}
     );
     <span class="prelude-val">Ok</span>(())
@@ -1259,7 +1260,7 @@
 
     <span class="kw">let </span>table_info = RawTableInfo {
         ident: metadata::TableIdent {
-            <span class="comment">// The table id of distributed table is assigned by Meta, set &quot;0&quot; here as a placeholder.
+            <span class="comment">// The table id of distributed table is assigned by Meta, set "0" here as a placeholder.
             </span>table_id: <span class="number">0</span>,
             version: <span class="number">0</span>,
         },
@@ -1317,7 +1318,7 @@
         <span class="kw">for </span>e <span class="kw">in </span>partitions.entries.iter() {
             <span class="kw">let </span><span class="kw-2">mut </span>values = Vec::with_capacity(e.value_list.len());
             <span class="kw">for </span>(i, v) <span class="kw">in </span>e.value_list.iter().enumerate() {
-                <span class="comment">// indexing is safe here because we have checked that &quot;value_list&quot; and &quot;column_list&quot; are matched in size
+                <span class="comment">// indexing is safe here because we have checked that "value_list" and "column_list" are matched in size
                 </span><span class="kw">let </span>(column_name, data_type) = <span class="kw-2">&amp;</span>column_name_and_type[i];
                 <span class="kw">let </span>v = <span class="kw">match </span>v {
                     SqlValue::Number(n, <span class="kw">_</span>) <span class="kw">if </span>n == MAXVALUE =&gt; PartitionBound::MaxValue,
@@ -1353,33 +1354,33 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_name_is_match() {
-        <span class="macro">assert!</span>(!NAME_PATTERN_REG.is_match(<span class="string">&quot;/adaf&quot;</span>));
-        <span class="macro">assert!</span>(!NAME_PATTERN_REG.is_match(<span class="string">&quot;🈲&quot;</span>));
-        <span class="macro">assert!</span>(NAME_PATTERN_REG.is_match(<span class="string">&quot;hello&quot;</span>));
+        <span class="macro">assert!</span>(!NAME_PATTERN_REG.is_match(<span class="string">"/adaf"</span>));
+        <span class="macro">assert!</span>(!NAME_PATTERN_REG.is_match(<span class="string">"🈲"</span>));
+        <span class="macro">assert!</span>(NAME_PATTERN_REG.is_match(<span class="string">"hello"</span>));
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_validate_partition_columns() {
         <span class="kw">let </span>create_table = CreateTableExpr {
-            table_name: <span class="string">&quot;my_table&quot;</span>.to_string(),
-            time_index: <span class="string">&quot;ts&quot;</span>.to_string(),
-            primary_keys: <span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>.to_string(), <span class="string">&quot;b&quot;</span>.to_string()],
+            table_name: <span class="string">"my_table"</span>.to_string(),
+            time_index: <span class="string">"ts"</span>.to_string(),
+            primary_keys: <span class="macro">vec!</span>[<span class="string">"a"</span>.to_string(), <span class="string">"b"</span>.to_string()],
             ..Default::default()
         };
 
         <span class="macro">assert!</span>(validate_partition_columns(<span class="kw-2">&amp;</span>create_table, <span class="kw-2">&amp;</span>[]).is_ok());
-        <span class="macro">assert!</span>(validate_partition_columns(<span class="kw-2">&amp;</span>create_table, <span class="kw-2">&amp;</span>[<span class="string">&quot;ts&quot;</span>.to_string()]).is_ok());
-        <span class="macro">assert!</span>(validate_partition_columns(<span class="kw-2">&amp;</span>create_table, <span class="kw-2">&amp;</span>[<span class="string">&quot;a&quot;</span>.to_string()]).is_ok());
+        <span class="macro">assert!</span>(validate_partition_columns(<span class="kw-2">&amp;</span>create_table, <span class="kw-2">&amp;</span>[<span class="string">"ts"</span>.to_string()]).is_ok());
+        <span class="macro">assert!</span>(validate_partition_columns(<span class="kw-2">&amp;</span>create_table, <span class="kw-2">&amp;</span>[<span class="string">"a"</span>.to_string()]).is_ok());
         <span class="macro">assert!</span>(
-            validate_partition_columns(<span class="kw-2">&amp;</span>create_table, <span class="kw-2">&amp;</span>[<span class="string">&quot;b&quot;</span>.to_string(), <span class="string">&quot;a&quot;</span>.to_string()]).is_ok()
+            validate_partition_columns(<span class="kw-2">&amp;</span>create_table, <span class="kw-2">&amp;</span>[<span class="string">"b"</span>.to_string(), <span class="string">"a"</span>.to_string()]).is_ok()
         );
 
         <span class="macro">assert_eq!</span>(
-            validate_partition_columns(<span class="kw-2">&amp;</span>create_table, <span class="kw-2">&amp;</span>[<span class="string">&quot;a&quot;</span>.to_string(), <span class="string">&quot;c&quot;</span>.to_string()])
+            validate_partition_columns(<span class="kw-2">&amp;</span>create_table, <span class="kw-2">&amp;</span>[<span class="string">"a"</span>.to_string(), <span class="string">"c"</span>.to_string()])
                 .unwrap_err()
                 .to_string(),
-            <span class="string">&quot;Invalid partition columns when creating table &#39;my_table&#39;, \
-            reason: partition column must belongs to primary keys or equals to time index&quot;</span>,
+            <span class="string">"Invalid partition columns when creating table 'my_table', \
+            reason: partition column must belongs to primary keys or equals to time index"</span>,
         );
     }
 
@@ -1388,26 +1389,26 @@
         common_telemetry::init_default_ut_logging();
         <span class="kw">let </span>cases = [
             (
-                <span class="string">r&quot;
+                <span class="string">r"
 CREATE TABLE rcx ( a INT, b STRING, c TIMESTAMP, TIME INDEX (c) )
 PARTITION BY RANGE COLUMNS (b) (
-  PARTITION r0 VALUES LESS THAN (&#39;hz&#39;),
-  PARTITION r1 VALUES LESS THAN (&#39;sh&#39;),
+  PARTITION r0 VALUES LESS THAN ('hz'),
+  PARTITION r1 VALUES LESS THAN ('sh'),
   PARTITION r2 VALUES LESS THAN (MAXVALUE),
 )
-ENGINE=mito&quot;</span>,
-                <span class="string">r#&quot;[{&quot;column_list&quot;:[&quot;b&quot;],&quot;value_list&quot;:[&quot;{\&quot;Value\&quot;:{\&quot;String\&quot;:\&quot;hz\&quot;}}&quot;]},{&quot;column_list&quot;:[&quot;b&quot;],&quot;value_list&quot;:[&quot;{\&quot;Value\&quot;:{\&quot;String\&quot;:\&quot;sh\&quot;}}&quot;]},{&quot;column_list&quot;:[&quot;b&quot;],&quot;value_list&quot;:[&quot;\&quot;MaxValue\&quot;&quot;]}]&quot;#</span>,
+ENGINE=mito"</span>,
+                <span class="string">r#"[{"column_list":["b"],"value_list":["{\"Value\":{\"String\":\"hz\"}}"]},{"column_list":["b"],"value_list":["{\"Value\":{\"String\":\"sh\"}}"]},{"column_list":["b"],"value_list":["\"MaxValue\""]}]"#</span>,
             ),
             (
-                <span class="string">r&quot;
+                <span class="string">r"
 CREATE TABLE rcx ( a INT, b STRING, c TIMESTAMP, TIME INDEX (c) )
 PARTITION BY RANGE COLUMNS (b, a) (
-  PARTITION r0 VALUES LESS THAN (&#39;hz&#39;, 10),
-  PARTITION r1 VALUES LESS THAN (&#39;sh&#39;, 20),
+  PARTITION r0 VALUES LESS THAN ('hz', 10),
+  PARTITION r1 VALUES LESS THAN ('sh', 20),
   PARTITION r2 VALUES LESS THAN (MAXVALUE, MAXVALUE),
 )
-ENGINE=mito&quot;</span>,
-                <span class="string">r#&quot;[{&quot;column_list&quot;:[&quot;b&quot;,&quot;a&quot;],&quot;value_list&quot;:[&quot;{\&quot;Value\&quot;:{\&quot;String\&quot;:\&quot;hz\&quot;}}&quot;,&quot;{\&quot;Value\&quot;:{\&quot;Int32\&quot;:10}}&quot;]},{&quot;column_list&quot;:[&quot;b&quot;,&quot;a&quot;],&quot;value_list&quot;:[&quot;{\&quot;Value\&quot;:{\&quot;String\&quot;:\&quot;sh\&quot;}}&quot;,&quot;{\&quot;Value\&quot;:{\&quot;Int32\&quot;:20}}&quot;]},{&quot;column_list&quot;:[&quot;b&quot;,&quot;a&quot;],&quot;value_list&quot;:[&quot;\&quot;MaxValue\&quot;&quot;,&quot;\&quot;MaxValue\&quot;&quot;]}]&quot;#</span>,
+ENGINE=mito"</span>,
+                <span class="string">r#"[{"column_list":["b","a"],"value_list":["{\"Value\":{\"String\":\"hz\"}}","{\"Value\":{\"Int32\":10}}"]},{"column_list":["b","a"],"value_list":["{\"Value\":{\"String\":\"sh\"}}","{\"Value\":{\"Int32\":20}}"]},{"column_list":["b","a"],"value_list":["\"MaxValue\"","\"MaxValue\""]}]"#</span>,
             ),
         ];
         <span class="kw">for </span>(sql, expected) <span class="kw">in </span>cases {

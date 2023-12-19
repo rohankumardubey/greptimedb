@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/meta-srv/src/procedure/region_migration/update_metadata/upgrade_candidate_region.rs`."><title>upgrade_candidate_region.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="meta_srv" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/meta-srv/src/procedure/region_migration/update_metadata/upgrade_candidate_region.rs`."><title>upgrade_candidate_region.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../../../" data-static-root-path="../../../../../static.files/" data-current-crate="meta_srv" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../../src-files.js"></script><script defer src="../../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -493,14 +494,14 @@
 <a href="#493" id="493">493</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -544,13 +545,13 @@
                 .take_if(|old_leader| old_leader.id == expected_old_leader.id)
                 .is_some(),
                 error::UnexpectedSnafu{
-                    violated: <span class="macro">format!</span>(<span class="string">&quot;Unexpected region leader: {:?} during the upgrading candidate metadata, expected: {:?}&quot;</span>, region_route.leader_peer, expected_old_leader),
+                    violated: <span class="macro">format!</span>(<span class="string">"Unexpected region leader: {:?} during the upgrading candidate metadata, expected: {:?}"</span>, region_route.leader_peer, expected_old_leader),
                 }
             );
 
         region_route.leader_peer = <span class="prelude-val">Some</span>(candidate.clone());
         <span class="macro">info!</span>(
-            <span class="string">&quot;Upgrading candidate region to leader region: {:?} for region: {}&quot;</span>,
+            <span class="string">"Upgrading candidate region to leader region: {:?} for region: {}"</span>,
             candidate, region_id
         );
 
@@ -562,7 +563,7 @@
 
         <span class="kw">if </span>removed.len() &gt; <span class="number">1 </span>{
             <span class="macro">warn!</span>(
-                    <span class="string">&quot;Removes duplicated regions: {removed:?} during the upgrading candidate metadata for region: {region_id}&quot;
+                    <span class="string">"Removes duplicated regions: {removed:?} during the upgrading candidate metadata for region: {region_id}"
                 </span>);
         }
 
@@ -584,7 +585,7 @@
             .leader_peer
             .as_ref()
             .context(error::UnexpectedSnafu {
-                violated: <span class="macro">format!</span>(<span class="string">&quot;The leader peer of region {region_id} is not found during the update metadata for upgrading&quot;</span>),
+                violated: <span class="macro">format!</span>(<span class="string">"The leader peer of region {region_id} is not found during the update metadata for upgrading"</span>),
             })<span class="question-mark">?</span>;
 
         <span class="kw">let </span>candidate_peer_id = ctx.persistent_ctx.to_peer.id;
@@ -593,7 +594,7 @@
             <span class="macro">ensure!</span>(
                 !region_route.is_leader_downgraded(),
                 error::UnexpectedSnafu {
-                    violated: <span class="macro">format!</span>(<span class="string">&quot;Unexpected intermediate state is found during the update metadata for upgrading region {region_id}&quot;</span>),
+                    violated: <span class="macro">format!</span>(<span class="string">"Unexpected intermediate state is found during the update metadata for upgrading region {region_id}"</span>),
                 }
             );
 
@@ -607,7 +608,7 @@
     ///
     /// Abort(non-retry):
     /// - TableRoute or RegionRoute is not found.
-    /// Typically, it&#39;s impossible, there is no other DDL procedure executed concurrently for the current table.
+    /// Typically, it's impossible, there is no other DDL procedure executed concurrently for the current table.
     ///
     /// Retry:
     /// - Failed to update [TableRouteValue](common_meta::key::table_region::TableRegionValue).
@@ -649,7 +650,7 @@
         {
             <span class="macro">debug_assert!</span>(ctx.remove_table_route_value());
             <span class="kw">return </span>error::RetryLaterSnafu {
-                    reason: <span class="macro">format!</span>(<span class="string">&quot;Failed to update the table route during the upgrading candidate region, error: {err}&quot;</span>)
+                    reason: <span class="macro">format!</span>(<span class="string">"Failed to update the table route during the upgrading candidate region, error: {err}"</span>)
                 }.fail();
         };
 
@@ -754,7 +755,7 @@
 
         <span class="macro">assert_matches!</span>(err, Error::Unexpected { .. });
         <span class="macro">assert!</span>(!err.is_retryable());
-        <span class="macro">assert!</span>(err.to_string().contains(<span class="string">&quot;Unexpected region leader&quot;</span>));
+        <span class="macro">assert!</span>(err.to_string().contains(<span class="string">"Unexpected region leader"</span>));
     }
 
     <span class="attr">#[tokio::test]
@@ -853,7 +854,7 @@
         <span class="macro">assert_matches!</span>(err, Error::RetryLater { .. });
 
         <span class="macro">assert!</span>(err.is_retryable());
-        <span class="macro">assert!</span>(err.to_string().contains(<span class="string">&quot;Failed to update the table route&quot;</span>));
+        <span class="macro">assert!</span>(err.to_string().contains(<span class="string">"Failed to update the table route"</span>));
     }
 
     <span class="attr">#[tokio::test]
@@ -932,7 +933,7 @@
 
         <span class="kw">let </span>err = state.check_metadata_updated(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap_err();
         <span class="macro">assert_matches!</span>(err, Error::Unexpected { .. });
-        <span class="macro">assert!</span>(err.to_string().contains(<span class="string">&quot;intermediate state&quot;</span>));
+        <span class="macro">assert!</span>(err.to_string().contains(<span class="string">"intermediate state"</span>));
     }
 
     <span class="attr">#[tokio::test]

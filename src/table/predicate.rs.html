@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/table/src/predicate.rs`."><title>predicate.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="table" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/table/src/predicate.rs`."><title>predicate.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="table" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -767,17 +768,16 @@
 <a href="#767" id="767">767</a>
 <a href="#768" id="768">768</a>
 <a href="#769" id="769">769</a>
-<a href="#770" id="770">770</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -877,12 +877,12 @@
                             }
                         }
                         <span class="prelude-val">Err</span>(e) =&gt; {
-                            <span class="macro">warn!</span>(<span class="string">&quot;Failed to prune row groups, error: {:?}&quot;</span>, e);
+                            <span class="macro">warn!</span>(<span class="string">"Failed to prune row groups, error: {:?}"</span>, e);
                         }
                     }
                 }
                 <span class="prelude-val">Err</span>(e) =&gt; {
-                    <span class="macro">error!</span>(<span class="string">&quot;Failed to create predicate for expr, error: {:?}&quot;</span>, e);
+                    <span class="macro">error!</span>(<span class="string">"Failed to create predicate for expr, error: {:?}"</span>, e);
                 }
             }
         }
@@ -910,11 +910,11 @@
                 <span class="comment">// result was a column
                 </span>ColumnarValue::Scalar(ScalarValue::Boolean(v)) =&gt; v.unwrap_or(<span class="bool-val">true</span>),
                 <span class="kw">_ </span>=&gt; {
-                    <span class="macro">unreachable!</span>(<span class="string">&quot;Unexpected primary key record batch evaluation result: {:?}, primary key: {:?}&quot;</span>, eva, primary_key);
+                    <span class="macro">unreachable!</span>(<span class="string">"Unexpected primary key record batch evaluation result: {:?}, primary key: {:?}"</span>, eva, primary_key);
                 }
             };
             <span class="macro">debug!</span>(
-                <span class="string">&quot;Evaluate primary key {:?} against filter: {:?}, result: {:?}&quot;</span>,
+                <span class="string">"Evaluate primary key {:?} against filter: {:?}, result: {:?}"</span>,
                 primary_key, expr, result
             );
             <span class="kw">if </span>!result {
@@ -935,7 +935,7 @@
         <span class="kw">let </span>physical_exprs = <span class="kw">match </span><span class="self">self</span>.to_physical_exprs(schema) {
             <span class="prelude-val">Ok</span>(expr) =&gt; expr,
             <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="macro">warn!</span>(e; <span class="string">&quot;Failed to build physical expr from predicates: {:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.exprs);
+                <span class="macro">warn!</span>(e; <span class="string">"Failed to build physical expr from predicates: {:?}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.exprs);
                 <span class="kw">return </span>res;
             }
         };
@@ -949,11 +949,11 @@
                         }
                     }
                     <span class="prelude-val">Err</span>(e) =&gt; {
-                        <span class="macro">warn!</span>(<span class="string">&quot;Failed to prune row groups, error: {:?}&quot;</span>, e);
+                        <span class="macro">warn!</span>(<span class="string">"Failed to prune row groups, error: {:?}"</span>, e);
                     }
                 },
                 <span class="prelude-val">Err</span>(e) =&gt; {
-                    <span class="macro">error!</span>(<span class="string">&quot;Failed to create predicate for expr, error: {:?}&quot;</span>, e);
+                    <span class="macro">error!</span>(<span class="string">"Failed to create predicate for expr, error: {:?}"</span>, e);
                 }
             }
         }
@@ -965,14 +965,14 @@
 // since it requires query engine to convert sql to filters.
 </span><span class="doccomment">/// `TimeRangePredicateBuilder` extracts time range from logical exprs to facilitate fast
 /// time range pruning.
-</span><span class="kw">pub struct </span>TimeRangePredicateBuilder&lt;<span class="lifetime">&#39;a</span>&gt; {
-    ts_col_name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str,
+</span><span class="kw">pub struct </span>TimeRangePredicateBuilder&lt;<span class="lifetime">'a</span>&gt; {
+    ts_col_name: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
     ts_col_unit: TimeUnit,
-    filters: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[Expr],
+    filters: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Expr],
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TimeRangePredicateBuilder&lt;<span class="lifetime">&#39;a</span>&gt; {
-    <span class="kw">pub fn </span>new(ts_col_name: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>str, ts_col_unit: TimeUnit, filters: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>[Expr]) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TimeRangePredicateBuilder&lt;<span class="lifetime">'a</span>&gt; {
+    <span class="kw">pub fn </span>new(ts_col_name: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str, ts_col_unit: TimeUnit, filters: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>[Expr]) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             ts_col_name,
             ts_col_unit,
@@ -1203,7 +1203,6 @@
 
     <span class="kw">use </span>common_test_util::temp_dir::{create_temp_dir, TempDir};
     <span class="kw">use </span>datafusion::parquet::arrow::ArrowWriter;
-    <span class="kw">pub use </span>datafusion::parquet::schema::types::BasicTypeInfo;
     <span class="kw">use </span>datafusion_common::{Column, ScalarValue};
     <span class="kw">use </span>datafusion_expr::{col, lit, BinaryExpr, Literal, Operator};
     <span class="kw">use </span>datatypes::arrow::array::Int32Array;
@@ -1218,7 +1217,7 @@
     <span class="kw">fn </span>check_build_predicate(expr: DfExpr, expect: TimestampRange) {
         <span class="macro">assert_eq!</span>(
             expect,
-            TimeRangePredicateBuilder::new(<span class="string">&quot;ts&quot;</span>, TimeUnit::Millisecond, <span class="kw-2">&amp;</span>[Expr::from(expr)])
+            TimeRangePredicateBuilder::new(<span class="string">"ts"</span>, TimeUnit::Millisecond, <span class="kw-2">&amp;</span>[Expr::from(expr)])
                 .build()
         );
     }
@@ -1227,37 +1226,37 @@
     </span><span class="kw">fn </span>test_gt() {
         <span class="comment">// ts &gt; 1ms
         </span>check_build_predicate(
-            col(<span class="string">&quot;ts&quot;</span>).gt(lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
+            col(<span class="string">"ts"</span>).gt(lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
             TimestampRange::from_start(Timestamp::new_millisecond(<span class="number">2</span>)),
         );
 
         <span class="comment">// 1ms &gt; ts
         </span>check_build_predicate(
-            lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).gt(col(<span class="string">&quot;ts&quot;</span>)),
+            lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).gt(col(<span class="string">"ts"</span>)),
             TimestampRange::until_end(Timestamp::new_millisecond(<span class="number">1</span>), <span class="bool-val">false</span>),
         );
 
         <span class="comment">// 1001us &gt; ts
         </span>check_build_predicate(
-            lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>)).gt(col(<span class="string">&quot;ts&quot;</span>)),
+            lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>)).gt(col(<span class="string">"ts"</span>)),
             TimestampRange::until_end(Timestamp::new_millisecond(<span class="number">1</span>), <span class="bool-val">true</span>),
         );
 
         <span class="comment">// ts &gt; 1001us
         </span>check_build_predicate(
-            col(<span class="string">&quot;ts&quot;</span>).gt(lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>))),
+            col(<span class="string">"ts"</span>).gt(lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>))),
             TimestampRange::from_start(Timestamp::new_millisecond(<span class="number">2</span>)),
         );
 
         <span class="comment">// 1s &gt; ts
         </span>check_build_predicate(
-            lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).gt(col(<span class="string">&quot;ts&quot;</span>)),
+            lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).gt(col(<span class="string">"ts"</span>)),
             TimestampRange::until_end(Timestamp::new_millisecond(<span class="number">1000</span>), <span class="bool-val">false</span>),
         );
 
         <span class="comment">// ts &gt; 1s
         </span>check_build_predicate(
-            col(<span class="string">&quot;ts&quot;</span>).gt(lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
+            col(<span class="string">"ts"</span>).gt(lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
             TimestampRange::from_start(Timestamp::new_millisecond(<span class="number">1001</span>)),
         );
     }
@@ -1266,37 +1265,37 @@
     </span><span class="kw">fn </span>test_gt_eq() {
         <span class="comment">// ts &gt;= 1ms
         </span>check_build_predicate(
-            col(<span class="string">&quot;ts&quot;</span>).gt_eq(lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
+            col(<span class="string">"ts"</span>).gt_eq(lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
             TimestampRange::from_start(Timestamp::new_millisecond(<span class="number">1</span>)),
         );
 
         <span class="comment">// 1ms &gt;= ts
         </span>check_build_predicate(
-            lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).gt_eq(col(<span class="string">&quot;ts&quot;</span>)),
+            lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).gt_eq(col(<span class="string">"ts"</span>)),
             TimestampRange::until_end(Timestamp::new_millisecond(<span class="number">1</span>), <span class="bool-val">true</span>),
         );
 
         <span class="comment">// 1001us &gt;= ts
         </span>check_build_predicate(
-            lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>)).gt_eq(col(<span class="string">&quot;ts&quot;</span>)),
+            lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>)).gt_eq(col(<span class="string">"ts"</span>)),
             TimestampRange::until_end(Timestamp::new_millisecond(<span class="number">1</span>), <span class="bool-val">true</span>),
         );
 
         <span class="comment">// ts &gt;= 1001us
         </span>check_build_predicate(
-            col(<span class="string">&quot;ts&quot;</span>).gt_eq(lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>))),
+            col(<span class="string">"ts"</span>).gt_eq(lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>))),
             TimestampRange::from_start(Timestamp::new_millisecond(<span class="number">2</span>)),
         );
 
         <span class="comment">// 1s &gt;= ts
         </span>check_build_predicate(
-            lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).gt_eq(col(<span class="string">&quot;ts&quot;</span>)),
+            lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).gt_eq(col(<span class="string">"ts"</span>)),
             TimestampRange::until_end(Timestamp::new_millisecond(<span class="number">1000</span>), <span class="bool-val">true</span>),
         );
 
         <span class="comment">// ts &gt;= 1s
         </span>check_build_predicate(
-            col(<span class="string">&quot;ts&quot;</span>).gt_eq(lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
+            col(<span class="string">"ts"</span>).gt_eq(lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
             TimestampRange::from_start(Timestamp::new_millisecond(<span class="number">1000</span>)),
         );
     }
@@ -1305,37 +1304,37 @@
     </span><span class="kw">fn </span>test_lt() {
         <span class="comment">// ts &lt; 1ms
         </span>check_build_predicate(
-            col(<span class="string">&quot;ts&quot;</span>).lt(lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
+            col(<span class="string">"ts"</span>).lt(lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
             TimestampRange::until_end(Timestamp::new_millisecond(<span class="number">1</span>), <span class="bool-val">false</span>),
         );
 
         <span class="comment">// 1ms &lt; ts
         </span>check_build_predicate(
-            lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).lt(col(<span class="string">&quot;ts&quot;</span>)),
+            lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).lt(col(<span class="string">"ts"</span>)),
             TimestampRange::from_start(Timestamp::new_millisecond(<span class="number">2</span>)),
         );
 
         <span class="comment">// 1001us &lt; ts
         </span>check_build_predicate(
-            lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>)).lt(col(<span class="string">&quot;ts&quot;</span>)),
+            lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>)).lt(col(<span class="string">"ts"</span>)),
             TimestampRange::from_start(Timestamp::new_millisecond(<span class="number">2</span>)),
         );
 
         <span class="comment">// ts &lt; 1001us
         </span>check_build_predicate(
-            col(<span class="string">&quot;ts&quot;</span>).lt(lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>))),
+            col(<span class="string">"ts"</span>).lt(lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>))),
             TimestampRange::until_end(Timestamp::new_millisecond(<span class="number">1</span>), <span class="bool-val">true</span>),
         );
 
         <span class="comment">// 1s &lt; ts
         </span>check_build_predicate(
-            lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).lt(col(<span class="string">&quot;ts&quot;</span>)),
+            lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).lt(col(<span class="string">"ts"</span>)),
             TimestampRange::from_start(Timestamp::new_millisecond(<span class="number">1001</span>)),
         );
 
         <span class="comment">// ts &lt; 1s
         </span>check_build_predicate(
-            col(<span class="string">&quot;ts&quot;</span>).lt(lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
+            col(<span class="string">"ts"</span>).lt(lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
             TimestampRange::until_end(Timestamp::new_millisecond(<span class="number">1000</span>), <span class="bool-val">false</span>),
         );
     }
@@ -1343,37 +1342,37 @@
     </span><span class="kw">fn </span>test_lt_eq() {
         <span class="comment">// ts &lt;= 1ms
         </span>check_build_predicate(
-            col(<span class="string">&quot;ts&quot;</span>).lt_eq(lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
+            col(<span class="string">"ts"</span>).lt_eq(lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
             TimestampRange::until_end(Timestamp::new_millisecond(<span class="number">1</span>), <span class="bool-val">true</span>),
         );
 
         <span class="comment">// 1ms &lt;= ts
         </span>check_build_predicate(
-            lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).lt_eq(col(<span class="string">&quot;ts&quot;</span>)),
+            lit(ScalarValue::TimestampMillisecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).lt_eq(col(<span class="string">"ts"</span>)),
             TimestampRange::from_start(Timestamp::new_millisecond(<span class="number">1</span>)),
         );
 
         <span class="comment">// 1001us &lt;= ts
         </span>check_build_predicate(
-            lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>)).lt_eq(col(<span class="string">&quot;ts&quot;</span>)),
+            lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>)).lt_eq(col(<span class="string">"ts"</span>)),
             TimestampRange::from_start(Timestamp::new_millisecond(<span class="number">2</span>)),
         );
 
         <span class="comment">// ts &lt;= 1001us
         </span>check_build_predicate(
-            col(<span class="string">&quot;ts&quot;</span>).lt_eq(lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>))),
+            col(<span class="string">"ts"</span>).lt_eq(lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">1001</span>), <span class="prelude-val">None</span>))),
             TimestampRange::until_end(Timestamp::new_millisecond(<span class="number">1</span>), <span class="bool-val">true</span>),
         );
 
         <span class="comment">// 1s &lt;= ts
         </span>check_build_predicate(
-            lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).lt_eq(col(<span class="string">&quot;ts&quot;</span>)),
+            lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>)).lt_eq(col(<span class="string">"ts"</span>)),
             TimestampRange::from_start(Timestamp::new_millisecond(<span class="number">1000</span>)),
         );
 
         <span class="comment">// ts &lt;= 1s
         </span>check_build_predicate(
-            col(<span class="string">&quot;ts&quot;</span>).lt_eq(lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
+            col(<span class="string">"ts"</span>).lt_eq(lit(ScalarValue::TimestampSecond(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="prelude-val">None</span>))),
             TimestampRange::until_end(Timestamp::new_millisecond(<span class="number">1000</span>), <span class="bool-val">true</span>),
         );
     }
@@ -1381,12 +1380,12 @@
     <span class="kw">async fn </span>gen_test_parquet_file(dir: <span class="kw-2">&amp;</span>TempDir, cnt: usize) -&gt; (String, Arc&lt;Schema&gt;) {
         <span class="kw">let </span>path = dir
             .path()
-            .join(<span class="string">&quot;test-prune.parquet&quot;</span>)
+            .join(<span class="string">"test-prune.parquet"</span>)
             .to_string_lossy()
             .to_string();
 
-        <span class="kw">let </span>name_field = Field::new(<span class="string">&quot;name&quot;</span>, DataType::Utf8, <span class="bool-val">true</span>);
-        <span class="kw">let </span>count_field = Field::new(<span class="string">&quot;cnt&quot;</span>, DataType::Int32, <span class="bool-val">true</span>);
+        <span class="kw">let </span>name_field = Field::new(<span class="string">"name"</span>, DataType::Utf8, <span class="bool-val">true</span>);
+        <span class="kw">let </span>count_field = Field::new(<span class="string">"cnt"</span>, DataType::Int32, <span class="bool-val">true</span>);
         <span class="kw">let </span>schema = Arc::new(Schema::new(<span class="macro">vec!</span>[name_field, count_field]));
 
         <span class="kw">let </span>file = std::fs::OpenOptions::new()
@@ -1421,7 +1420,7 @@
         filters: Vec&lt;common_query::logical_plan::Expr&gt;,
         expect: Vec&lt;bool&gt;,
     ) {
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">&quot;prune_parquet&quot;</span>);
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"prune_parquet"</span>);
         <span class="kw">let </span>(path, schema) = gen_test_parquet_file(<span class="kw-2">&amp;</span>dir, array_cnt).<span class="kw">await</span>;
         <span class="kw">let </span>schema = Arc::new(datatypes::schema::Schema::try_from(schema).unwrap());
         <span class="kw">let </span>arrow_predicate = Predicate::new(filters);
@@ -1443,7 +1442,7 @@
     <span class="kw">fn </span>gen_predicate(max_val: i32, op: Operator) -&gt; Vec&lt;common_query::logical_plan::Expr&gt; {
         <span class="macro">vec!</span>[common_query::logical_plan::Expr::from(
             datafusion_expr::Expr::BinaryExpr(BinaryExpr {
-                left: Box::new(datafusion_expr::Expr::Column(Column::from_name(<span class="string">&quot;cnt&quot;</span>))),
+                left: Box::new(datafusion_expr::Expr::Column(Column::from_name(<span class="string">"cnt"</span>))),
                 op,
                 right: Box::new(datafusion_expr::Expr::Literal(ScalarValue::Int32(<span class="prelude-val">Some</span>(
                     max_val,
@@ -1515,21 +1514,21 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_or() {
         <span class="comment">// cnt &gt; 30 or cnt &lt; 20
-        </span><span class="kw">let </span>e = datafusion_expr::Expr::Column(Column::from_name(<span class="string">&quot;cnt&quot;</span>))
+        </span><span class="kw">let </span>e = datafusion_expr::Expr::Column(Column::from_name(<span class="string">"cnt"</span>))
             .gt(<span class="number">30</span>.lit())
-            .or(datafusion_expr::Expr::Column(Column::from_name(<span class="string">&quot;cnt&quot;</span>)).lt(<span class="number">20</span>.lit()));
+            .or(datafusion_expr::Expr::Column(Column::from_name(<span class="string">"cnt"</span>)).lt(<span class="number">20</span>.lit()));
         assert_prune(<span class="number">40</span>, <span class="macro">vec!</span>[e.into()], <span class="macro">vec!</span>[<span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="bool-val">false</span>, <span class="bool-val">true</span>]).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_to_physical_expr() {
         <span class="kw">let </span>predicate = Predicate::new(<span class="macro">vec!</span>[
-            Expr::from(col(<span class="string">&quot;host&quot;</span>).eq(lit(<span class="string">&quot;host_a&quot;</span>))),
-            Expr::from(col(<span class="string">&quot;ts&quot;</span>).gt(lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">123</span>), <span class="prelude-val">None</span>)))),
+            Expr::from(col(<span class="string">"host"</span>).eq(lit(<span class="string">"host_a"</span>))),
+            Expr::from(col(<span class="string">"ts"</span>).gt(lit(ScalarValue::TimestampMicrosecond(<span class="prelude-val">Some</span>(<span class="number">123</span>), <span class="prelude-val">None</span>)))),
         ]);
 
         <span class="kw">let </span>schema = Arc::new(arrow::datatypes::Schema::new(<span class="macro">vec!</span>[Field::new(
-            <span class="string">&quot;host&quot;</span>,
+            <span class="string">"host"</span>,
             arrow::datatypes::DataType::Utf8,
             <span class="bool-val">false</span>,
         )]));

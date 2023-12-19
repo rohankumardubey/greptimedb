@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/read/merge.rs`."><title>merge.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/read/merge.rs`."><title>merge.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -904,14 +905,14 @@
 <a href="#904" id="904">904</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -937,7 +938,7 @@
 /// The merge reader merges [Batch]es from multiple sources that yield sorted batches.
 /// 1. Batch is ordered by primary key, time index, sequence desc, op type desc (we can
 /// ignore op type as sequence is already unique).
-/// 2. Batch doesn&#39;t have duplicate elements (elements with the same primary key and time index).
+/// 2. Batch doesn't have duplicate elements (elements with the same primary key and time index).
 /// 3. Batches from sources **must** not be empty.
 </span><span class="kw">pub struct </span>MergeReader {
     <span class="doccomment">/// Holds [Node]s whose key range of current batch **is** overlapped with the merge window.
@@ -946,7 +947,7 @@
     /// [Node] in this heap **must** not be empty. A `merge window` is the (primary key, timestamp)
     /// range of the **root node** in the `hot` heap.
     </span>hot: BinaryHeap&lt;Node&gt;,
-    <span class="doccomment">/// Holds `Node` whose key range of current batch **isn&#39;t** overlapped with the merge window.
+    <span class="doccomment">/// Holds `Node` whose key range of current batch **isn't** overlapped with the merge window.
     ///
     /// `Node` in this heap **must** not be empty.
     </span>cold: BinaryHeap&lt;Node&gt;,
@@ -986,16 +987,16 @@
 
 <span class="kw">impl </span>Drop <span class="kw">for </span>MergeReader {
     <span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="macro">debug!</span>(<span class="string">&quot;Merge reader finished, metrics: {:?}&quot;</span>, <span class="self">self</span>.metrics);
+        <span class="macro">debug!</span>(<span class="string">"Merge reader finished, metrics: {:?}"</span>, <span class="self">self</span>.metrics);
 
         MERGE_FILTER_ROWS_TOTAL
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">&quot;dedup&quot;</span>])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"dedup"</span>])
             .inc_by(<span class="self">self</span>.metrics.num_duplicate_rows <span class="kw">as </span>u64);
         MERGE_FILTER_ROWS_TOTAL
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">&quot;delete&quot;</span>])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"delete"</span>])
             .inc_by(<span class="self">self</span>.metrics.num_deleted_rows <span class="kw">as </span>u64);
         READ_STAGE_ELAPSED
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">&quot;merge&quot;</span>])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"merge"</span>])
             .observe(<span class="self">self</span>.metrics.scan_cost.as_secs_f64());
     }
 }
@@ -1011,7 +1012,7 @@
         <span class="kw">for </span>source <span class="kw">in </span>sources {
             <span class="kw">let </span>node = Node::new(source, <span class="kw-2">&amp;mut </span>metrics).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="kw">if </span>!node.is_eof() {
-                <span class="comment">// Ensure `cold` don&#39;t have eof nodes.
+                <span class="comment">// Ensure `cold` don't have eof nodes.
                 </span>cold.push(node);
             }
         }
@@ -1083,7 +1084,7 @@
         </span><span class="kw">match </span>timestamps.binary_search(<span class="kw-2">&amp;</span>next_min_ts.value()) {
             <span class="prelude-val">Ok</span>(pos) =&gt; {
                 <span class="comment">// They have duplicate timestamps. Outputs timestamps before the duplicated timestamp.
-                // Batch itself doesn&#39;t contain duplicate timestamps so timestamps before `pos`
+                // Batch itself doesn't contain duplicate timestamps so timestamps before `pos`
                 // must be less than `next_min_ts`.
                 </span><span class="self">Self</span>::maybe_output_batch(
                     top.slice(<span class="number">0</span>, pos),
@@ -1168,17 +1169,17 @@
     <span class="doccomment">/// Push the node popped from `hot` back to a proper heap.
     </span><span class="kw">fn </span>reheap(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: Node) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if </span>node.is_eof() {
-            <span class="comment">// If the node is EOF, don&#39;t put it into the heap again.
+            <span class="comment">// If the node is EOF, don't put it into the heap again.
             // The merge window would be updated, need to refill the hot heap.
             </span><span class="self">self</span>.refill_hot();
         } <span class="kw">else </span>{
             <span class="comment">// Find a proper heap for this node.
             </span><span class="kw">let </span>node_is_cold = <span class="kw">if let </span><span class="prelude-val">Some</span>(hottest) = <span class="self">self</span>.hot.peek() {
-                <span class="comment">// If key range of this node is behind the hottest node&#39;s then we can
+                <span class="comment">// If key range of this node is behind the hottest node's then we can
                 // push it to the cold heap. Otherwise we should push it to the hot heap.
                 </span>node.is_behind(hottest)
             } <span class="kw">else </span>{
-                <span class="comment">// The hot heap is empty, but we don&#39;t known whether the current
+                <span class="comment">// The hot heap is empty, but we don't known whether the current
                 // batch of this node is still the hottest.
                 </span><span class="bool-val">true
             </span>};
@@ -1355,7 +1356,7 @@
         <span class="macro">debug_assert!</span>(!other.current_batch().is_empty());
 
         <span class="comment">// We only compare pk and timestamp so nodes in the cold
-        // heap don&#39;t have overlapping timestamps with the hottest node
+        // heap don't have overlapping timestamps with the hottest node
         // in the hot heap.
         </span><span class="self">self</span>.primary_key().cmp(other.primary_key()).then_with(|| {
             <span class="self">self</span>.current_batch()
@@ -1364,7 +1365,7 @@
         }) == Ordering::Greater
     }
 
-    <span class="doccomment">/// Skips first `num_to_skip` rows from node&#39;s current batch. If current batch is empty it fetches
+    <span class="doccomment">/// Skips first `num_to_skip` rows from node's current batch. If current batch is empty it fetches
     /// next batch from the node.
     ///
     /// # Panics
@@ -1458,21 +1459,21 @@
     </span><span class="kw">async fn </span>test_merge_non_overlapping() {
         <span class="kw">let </span>reader1 = VecBatchReader::new(<span class="kw-2">&amp;</span>[
             new_batch(
-                <span class="string">b&quot;k1&quot;</span>,
+                <span class="string">b"k1"</span>,
                 <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>],
                 <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">12</span>],
                 <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
                 <span class="kw-2">&amp;</span>[<span class="number">21</span>, <span class="number">22</span>],
             ),
             new_batch(
-                <span class="string">b&quot;k1&quot;</span>,
+                <span class="string">b"k1"</span>,
                 <span class="kw-2">&amp;</span>[<span class="number">7</span>, <span class="number">8</span>],
                 <span class="kw-2">&amp;</span>[<span class="number">17</span>, <span class="number">18</span>],
                 <span class="kw-2">&amp;</span>[OpType::Put, OpType::Delete],
                 <span class="kw-2">&amp;</span>[<span class="number">27</span>, <span class="number">28</span>],
             ),
             new_batch(
-                <span class="string">b&quot;k2&quot;</span>,
+                <span class="string">b"k2"</span>,
                 <span class="kw-2">&amp;</span>[<span class="number">2</span>, <span class="number">3</span>],
                 <span class="kw-2">&amp;</span>[<span class="number">12</span>, <span class="number">13</span>],
                 <span class="kw-2">&amp;</span>[OpType::Delete, OpType::Put],
@@ -1480,7 +1481,7 @@
             ),
         ]);
         <span class="kw">let </span>reader2 = VecBatchReader::new(<span class="kw-2">&amp;</span>[new_batch(
-            <span class="string">b&quot;k1&quot;</span>,
+            <span class="string">b"k1"</span>,
             <span class="kw-2">&amp;</span>[<span class="number">4</span>, <span class="number">5</span>],
             <span class="kw-2">&amp;</span>[<span class="number">14</span>, <span class="number">15</span>],
             <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
@@ -1496,21 +1497,21 @@
             <span class="kw-2">&amp;mut </span>reader,
             <span class="kw-2">&amp;</span>[
                 new_batch(
-                    <span class="string">b&quot;k1&quot;</span>,
+                    <span class="string">b"k1"</span>,
                     <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>],
                     <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">12</span>],
                     <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
                     <span class="kw-2">&amp;</span>[<span class="number">21</span>, <span class="number">22</span>],
                 ),
                 new_batch(
-                    <span class="string">b&quot;k1&quot;</span>,
+                    <span class="string">b"k1"</span>,
                     <span class="kw-2">&amp;</span>[<span class="number">4</span>, <span class="number">5</span>],
                     <span class="kw-2">&amp;</span>[<span class="number">14</span>, <span class="number">15</span>],
                     <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
                     <span class="kw-2">&amp;</span>[<span class="number">24</span>, <span class="number">25</span>],
                 ),
-                new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">7</span>], <span class="kw-2">&amp;</span>[<span class="number">17</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">27</span>]),
-                new_batch(<span class="string">b&quot;k2&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">13</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">23</span>]),
+                new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[<span class="number">7</span>], <span class="kw-2">&amp;</span>[<span class="number">17</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">27</span>]),
+                new_batch(<span class="string">b"k2"</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">13</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">23</span>]),
             ],
         )
         .<span class="kw">await</span>;
@@ -1524,16 +1525,16 @@
     </span><span class="kw">async fn </span>test_merge_reheap_hot() {
         <span class="kw">let </span>reader1 = VecBatchReader::new(<span class="kw-2">&amp;</span>[
             new_batch(
-                <span class="string">b&quot;k1&quot;</span>,
+                <span class="string">b"k1"</span>,
                 <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">3</span>],
                 <span class="kw-2">&amp;</span>[<span class="number">10</span>, <span class="number">10</span>],
                 <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
                 <span class="kw-2">&amp;</span>[<span class="number">21</span>, <span class="number">23</span>],
             ),
-            new_batch(<span class="string">b&quot;k2&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">23</span>]),
+            new_batch(<span class="string">b"k2"</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">23</span>]),
         ]);
         <span class="kw">let </span>reader2 = VecBatchReader::new(<span class="kw-2">&amp;</span>[new_batch(
-            <span class="string">b&quot;k1&quot;</span>,
+            <span class="string">b"k1"</span>,
             <span class="kw-2">&amp;</span>[<span class="number">2</span>, <span class="number">4</span>],
             <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">11</span>],
             <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
@@ -1548,11 +1549,11 @@
         check_reader_result(
             <span class="kw-2">&amp;mut </span>reader,
             <span class="kw-2">&amp;</span>[
-                new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">21</span>]),
-                new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">2</span>], <span class="kw-2">&amp;</span>[<span class="number">11</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">32</span>]),
-                new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">23</span>]),
-                new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">4</span>], <span class="kw-2">&amp;</span>[<span class="number">11</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">34</span>]),
-                new_batch(<span class="string">b&quot;k2&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">23</span>]),
+                new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">21</span>]),
+                new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[<span class="number">2</span>], <span class="kw-2">&amp;</span>[<span class="number">11</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">32</span>]),
+                new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">23</span>]),
+                new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[<span class="number">4</span>], <span class="kw-2">&amp;</span>[<span class="number">11</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">34</span>]),
+                new_batch(<span class="string">b"k2"</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">23</span>]),
             ],
         )
         .<span class="kw">await</span>;
@@ -1562,14 +1563,14 @@
     </span><span class="kw">async fn </span>test_merge_overlapping() {
         <span class="kw">let </span>reader1 = VecBatchReader::new(<span class="kw-2">&amp;</span>[
             new_batch(
-                <span class="string">b&quot;k1&quot;</span>,
+                <span class="string">b"k1"</span>,
                 <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>],
                 <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">12</span>],
                 <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
                 <span class="kw-2">&amp;</span>[<span class="number">21</span>, <span class="number">22</span>],
             ),
             new_batch(
-                <span class="string">b&quot;k1&quot;</span>,
+                <span class="string">b"k1"</span>,
                 <span class="kw-2">&amp;</span>[<span class="number">4</span>, <span class="number">5</span>],
                 <span class="kw-2">&amp;</span>[<span class="number">14</span>, <span class="number">15</span>],
                 <span class="comment">// This override 4 and deletes 5.
@@ -1577,7 +1578,7 @@
                 <span class="kw-2">&amp;</span>[<span class="number">24</span>, <span class="number">25</span>],
             ),
             new_batch(
-                <span class="string">b&quot;k2&quot;</span>,
+                <span class="string">b"k2"</span>,
                 <span class="kw-2">&amp;</span>[<span class="number">2</span>, <span class="number">3</span>],
                 <span class="kw-2">&amp;</span>[<span class="number">12</span>, <span class="number">13</span>],
                 <span class="comment">// This delete 2.
@@ -1587,14 +1588,14 @@
         ]);
         <span class="kw">let </span>reader2 = VecBatchReader::new(<span class="kw-2">&amp;</span>[
             new_batch(
-                <span class="string">b&quot;k1&quot;</span>,
+                <span class="string">b"k1"</span>,
                 <span class="kw-2">&amp;</span>[<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>],
                 <span class="kw-2">&amp;</span>[<span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>],
                 <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put, OpType::Put],
                 <span class="kw-2">&amp;</span>[<span class="number">33</span>, <span class="number">34</span>, <span class="number">35</span>],
             ),
             new_batch(
-                <span class="string">b&quot;k2&quot;</span>,
+                <span class="string">b"k2"</span>,
                 <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">10</span>],
                 <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">20</span>],
                 <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
@@ -1611,17 +1612,17 @@
             <span class="kw-2">&amp;mut </span>reader,
             <span class="kw-2">&amp;</span>[
                 new_batch(
-                    <span class="string">b&quot;k1&quot;</span>,
+                    <span class="string">b"k1"</span>,
                     <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>],
                     <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">12</span>],
                     <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
                     <span class="kw-2">&amp;</span>[<span class="number">21</span>, <span class="number">22</span>],
                 ),
-                new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">33</span>]),
-                new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">4</span>], <span class="kw-2">&amp;</span>[<span class="number">14</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">24</span>]),
-                new_batch(<span class="string">b&quot;k2&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">11</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">21</span>]),
-                new_batch(<span class="string">b&quot;k2&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">13</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">23</span>]),
-                new_batch(<span class="string">b&quot;k2&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[<span class="number">20</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">30</span>]),
+                new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">33</span>]),
+                new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[<span class="number">4</span>], <span class="kw-2">&amp;</span>[<span class="number">14</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">24</span>]),
+                new_batch(<span class="string">b"k2"</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">11</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">21</span>]),
+                new_batch(<span class="string">b"k2"</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">13</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">23</span>]),
+                new_batch(<span class="string">b"k2"</span>, <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[<span class="number">20</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">30</span>]),
             ],
         )
         .<span class="kw">await</span>;
@@ -1636,14 +1637,14 @@
     </span><span class="kw">async fn </span>test_merge_deleted() {
         <span class="kw">let </span>reader1 = VecBatchReader::new(<span class="kw-2">&amp;</span>[
             new_batch(
-                <span class="string">b&quot;k1&quot;</span>,
+                <span class="string">b"k1"</span>,
                 <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>],
                 <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">12</span>],
                 <span class="kw-2">&amp;</span>[OpType::Delete, OpType::Delete],
                 <span class="kw-2">&amp;</span>[<span class="number">21</span>, <span class="number">22</span>],
             ),
             new_batch(
-                <span class="string">b&quot;k2&quot;</span>,
+                <span class="string">b"k2"</span>,
                 <span class="kw-2">&amp;</span>[<span class="number">2</span>, <span class="number">3</span>],
                 <span class="kw-2">&amp;</span>[<span class="number">12</span>, <span class="number">13</span>],
                 <span class="kw-2">&amp;</span>[OpType::Delete, OpType::Put],
@@ -1651,7 +1652,7 @@
             ),
         ]);
         <span class="kw">let </span>reader2 = VecBatchReader::new(<span class="kw-2">&amp;</span>[new_batch(
-            <span class="string">b&quot;k1&quot;</span>,
+            <span class="string">b"k1"</span>,
             <span class="kw-2">&amp;</span>[<span class="number">4</span>, <span class="number">5</span>],
             <span class="kw-2">&amp;</span>[<span class="number">14</span>, <span class="number">15</span>],
             <span class="kw-2">&amp;</span>[OpType::Delete, OpType::Delete],
@@ -1665,7 +1666,7 @@
             </span>.unwrap();
         check_reader_result(
             <span class="kw-2">&amp;mut </span>reader,
-            <span class="kw-2">&amp;</span>[new_batch(<span class="string">b&quot;k2&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">13</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">23</span>])],
+            <span class="kw-2">&amp;</span>[new_batch(<span class="string">b"k2"</span>, <span class="kw-2">&amp;</span>[<span class="number">3</span>], <span class="kw-2">&amp;</span>[<span class="number">13</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">23</span>])],
         )
         .<span class="kw">await</span>;
     }
@@ -1673,14 +1674,14 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_merge_next_node_empty() {
         <span class="kw">let </span>reader1 = VecBatchReader::new(<span class="kw-2">&amp;</span>[new_batch(
-            <span class="string">b&quot;k1&quot;</span>,
+            <span class="string">b"k1"</span>,
             <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>],
             <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">12</span>],
             <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
             <span class="kw-2">&amp;</span>[<span class="number">21</span>, <span class="number">22</span>],
         )]);
         <span class="comment">// This reader will be empty after skipping the timestamp.
-        </span><span class="kw">let </span>reader2 = VecBatchReader::new(<span class="kw-2">&amp;</span>[new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">33</span>])]);
+        </span><span class="kw">let </span>reader2 = VecBatchReader::new(<span class="kw-2">&amp;</span>[new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">33</span>])]);
         <span class="kw">let </span><span class="kw-2">mut </span>reader = MergeReaderBuilder::new()
             .push_batch_reader(Box::new(reader1))
             .push_batch_iter(Box::new(reader2))
@@ -1690,7 +1691,7 @@
         check_reader_result(
             <span class="kw-2">&amp;mut </span>reader,
             <span class="kw-2">&amp;</span>[new_batch(
-                <span class="string">b&quot;k1&quot;</span>,
+                <span class="string">b"k1"</span>,
                 <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>],
                 <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">12</span>],
                 <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
@@ -1704,14 +1705,14 @@
     </span><span class="kw">async fn </span>test_merge_top_node_empty() {
         <span class="comment">// This reader will be empty after skipping the timestamp 2.
         </span><span class="kw">let </span>reader1 = VecBatchReader::new(<span class="kw-2">&amp;</span>[new_batch(
-            <span class="string">b&quot;k1&quot;</span>,
+            <span class="string">b"k1"</span>,
             <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>],
             <span class="kw-2">&amp;</span>[<span class="number">10</span>, <span class="number">10</span>],
             <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
             <span class="kw-2">&amp;</span>[<span class="number">21</span>, <span class="number">22</span>],
         )]);
         <span class="kw">let </span>reader2 = VecBatchReader::new(<span class="kw-2">&amp;</span>[new_batch(
-            <span class="string">b&quot;k1&quot;</span>,
+            <span class="string">b"k1"</span>,
             <span class="kw-2">&amp;</span>[<span class="number">2</span>, <span class="number">3</span>],
             <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">11</span>],
             <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
@@ -1726,9 +1727,9 @@
         check_reader_result(
             <span class="kw-2">&amp;mut </span>reader,
             <span class="kw-2">&amp;</span>[
-                new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">21</span>]),
+                new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">21</span>]),
                 new_batch(
-                    <span class="string">b&quot;k1&quot;</span>,
+                    <span class="string">b"k1"</span>,
                     <span class="kw-2">&amp;</span>[<span class="number">2</span>, <span class="number">3</span>],
                     <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">11</span>],
                     <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
@@ -1742,23 +1743,23 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_merge_large_range() {
         <span class="kw">let </span>reader1 = VecBatchReader::new(<span class="kw-2">&amp;</span>[new_batch(
-            <span class="string">b&quot;k1&quot;</span>,
+            <span class="string">b"k1"</span>,
             <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">10</span>],
             <span class="kw-2">&amp;</span>[<span class="number">10</span>, <span class="number">10</span>],
             <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
             <span class="kw-2">&amp;</span>[<span class="number">21</span>, <span class="number">30</span>],
         )]);
         <span class="kw">let </span>reader2 = VecBatchReader::new(<span class="kw-2">&amp;</span>[new_batch(
-            <span class="string">b&quot;k1&quot;</span>,
+            <span class="string">b"k1"</span>,
             <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">20</span>],
             <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">11</span>],
             <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
             <span class="kw-2">&amp;</span>[<span class="number">31</span>, <span class="number">40</span>],
         )]);
-        <span class="comment">// The hot heap have a node that doesn&#39;t have duplicate
+        <span class="comment">// The hot heap have a node that doesn't have duplicate
         // timestamps.
         </span><span class="kw">let </span>reader3 = VecBatchReader::new(<span class="kw-2">&amp;</span>[new_batch(
-            <span class="string">b&quot;k1&quot;</span>,
+            <span class="string">b"k1"</span>,
             <span class="kw-2">&amp;</span>[<span class="number">6</span>, <span class="number">8</span>],
             <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">11</span>],
             <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
@@ -1774,16 +1775,16 @@
         check_reader_result(
             <span class="kw-2">&amp;mut </span>reader,
             <span class="kw-2">&amp;</span>[
-                new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">11</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">31</span>]),
+                new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>], <span class="kw-2">&amp;</span>[<span class="number">11</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">31</span>]),
                 new_batch(
-                    <span class="string">b&quot;k1&quot;</span>,
+                    <span class="string">b"k1"</span>,
                     <span class="kw-2">&amp;</span>[<span class="number">6</span>, <span class="number">8</span>],
                     <span class="kw-2">&amp;</span>[<span class="number">11</span>, <span class="number">11</span>],
                     <span class="kw-2">&amp;</span>[OpType::Put, OpType::Put],
                     <span class="kw-2">&amp;</span>[<span class="number">36</span>, <span class="number">38</span>],
                 ),
-                new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">30</span>]),
-                new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[<span class="number">20</span>], <span class="kw-2">&amp;</span>[<span class="number">11</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">40</span>]),
+                new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[<span class="number">10</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">30</span>]),
+                new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[<span class="number">20</span>], <span class="kw-2">&amp;</span>[<span class="number">11</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">40</span>]),
             ],
         )
         .<span class="kw">await</span>;
@@ -1794,14 +1795,14 @@
         <span class="kw">let </span><span class="kw-2">mut </span>builder = MergeReaderBuilder::new();
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">10 </span>{
             <span class="kw">let </span>batches: Vec&lt;<span class="kw">_</span>&gt; = (<span class="number">0</span>..<span class="number">8</span>)
-                .map(|ts| new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[ts], <span class="kw-2">&amp;</span>[i], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">100</span>]))
+                .map(|ts| new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[ts], <span class="kw-2">&amp;</span>[i], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">100</span>]))
                 .collect();
             <span class="kw">let </span>reader = VecBatchReader::new(<span class="kw-2">&amp;</span>batches);
             builder.push_batch_reader(Box::new(reader));
         }
         <span class="kw">let </span><span class="kw-2">mut </span>reader = builder.build().<span class="kw">await</span>.unwrap();
         <span class="kw">let </span>expect: Vec&lt;<span class="kw">_</span>&gt; = (<span class="number">0</span>..<span class="number">8</span>)
-            .map(|ts| new_batch(<span class="string">b&quot;k1&quot;</span>, <span class="kw-2">&amp;</span>[ts], <span class="kw-2">&amp;</span>[<span class="number">9</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">100</span>]))
+            .map(|ts| new_batch(<span class="string">b"k1"</span>, <span class="kw-2">&amp;</span>[ts], <span class="kw-2">&amp;</span>[<span class="number">9</span>], <span class="kw-2">&amp;</span>[OpType::Put], <span class="kw-2">&amp;</span>[<span class="number">100</span>]))
             .collect();
         check_reader_result(<span class="kw-2">&amp;mut </span>reader, <span class="kw-2">&amp;</span>expect).<span class="kw">await</span>;
     }

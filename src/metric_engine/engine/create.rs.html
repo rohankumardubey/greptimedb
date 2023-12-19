@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/metric-engine/src/engine/create.rs`."><title>create.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="metric_engine" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/metric-engine/src/engine/create.rs`."><title>create.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="metric_engine" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -563,14 +564,14 @@
 <a href="#563" id="563">563</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -665,7 +666,7 @@
                 region_type: DATA_REGION_SUBDIR,
             })<span class="question-mark">?</span>;
 
-        <span class="macro">info!</span>(<span class="string">&quot;Created physical metric region {region_id:?}&quot;</span>);
+        <span class="macro">info!</span>(<span class="string">"Created physical metric region {region_id:?}"</span>);
         PHYSICAL_REGION_COUNT.inc();
 
         <span class="comment">// remember this table
@@ -682,7 +683,7 @@
     /// Physical table and logical table can have multiple regions, and their
     /// region number should be the same. Thus we can infer the physical region
     /// id by simply replace the table id part in the given region id, which
-    /// represent the &quot;logical region&quot; to request.
+    /// represent the "logical region" to request.
     ///
     /// This method will alter the data region to add columns if necessary.
     ///
@@ -711,7 +712,7 @@
             .is_logical_region_exists(metadata_region_id, logical_region_id)
             .<span class="kw">await</span><span class="question-mark">?
         </span>{
-            <span class="macro">info!</span>(<span class="string">&quot;Create a existing logical region {logical_region_id}. Skipped&quot;</span>);
+            <span class="macro">info!</span>(<span class="string">"Create a existing logical region {logical_region_id}. Skipped"</span>);
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
 
@@ -732,7 +733,7 @@
                 }
             }
         }
-        <span class="macro">info!</span>(<span class="string">&quot;Found new columns {new_columns:?} to add to physical region {data_region_id}&quot;</span>);
+        <span class="macro">info!</span>(<span class="string">"Found new columns {new_columns:?} to add to physical region {data_region_id}"</span>);
 
         <span class="self">self</span>.add_columns_to_physical_data_region(
             data_region_id,
@@ -763,7 +764,7 @@
             .write()
             .<span class="kw">await
             </span>.add_logical_region(physical_region_id, logical_region_id);
-        <span class="macro">info!</span>(<span class="string">&quot;Created new logical region {logical_region_id} on physical region {data_region_id}&quot;</span>);
+        <span class="macro">info!</span>(<span class="string">"Created new logical region {logical_region_id} on physical region {data_region_id}"</span>);
         LOGICAL_REGION_COUNT.inc();
 
         <span class="prelude-val">Ok</span>(())
@@ -800,7 +801,7 @@
                 .iter()
                 .map(|meta| meta.column_schema.name.clone()),
         );
-        <span class="macro">info!</span>(<span class="string">&quot;Create region {logical_region_id} leads to adding columns {new_columns:?} to physical region {data_region_id}&quot;</span>);
+        <span class="macro">info!</span>(<span class="string">"Create region {logical_region_id} leads to adding columns {new_columns:?} to physical region {data_region_id}"</span>);
         PHYSICAL_COLUMN_COUNT.add(new_columns.len() <span class="kw">as _</span>);
 
         <span class="prelude-val">Ok</span>(())
@@ -1005,7 +1006,7 @@
                     ),
                 },
             ],
-            region_dir: <span class="string">&quot;test_dir&quot;</span>.to_string(),
+            region_dir: <span class="string">"test_dir"</span>.to_string(),
             engine: METRIC_ENGINE_NAME.to_string(),
             primary_key: <span class="macro">vec!</span>[],
             options: HashMap::new(),
@@ -1014,7 +1015,7 @@
         <span class="macro">assert!</span>(result.is_err());
         <span class="macro">assert_eq!</span>(
             result.unwrap_err().to_string(),
-            <span class="string">&quot;Internal column __table_id is reserved&quot;</span>.to_string()
+            <span class="string">"Internal column __table_id is reserved"</span>.to_string()
         );
 
         <span class="comment">// valid request
@@ -1033,13 +1034,13 @@
                     column_id: <span class="number">1</span>,
                     semantic_type: SemanticType::Tag,
                     column_schema: ColumnSchema::new(
-                        <span class="string">&quot;column1&quot;</span>.to_string(),
+                        <span class="string">"column1"</span>.to_string(),
                         ConcreteDataType::string_datatype(),
                         <span class="bool-val">false</span>,
                     ),
                 },
             ],
-            region_dir: <span class="string">&quot;test_dir&quot;</span>.to_string(),
+            region_dir: <span class="string">"test_dir"</span>.to_string(),
             engine: METRIC_ENGINE_NAME.to_string(),
             primary_key: <span class="macro">vec!</span>[],
             options: [(PHYSICAL_TABLE_METADATA_KEY.to_string(), String::new())]
@@ -1054,7 +1055,7 @@
     </span><span class="kw">fn </span>test_verify_region_create_request_options() {
         <span class="kw">let </span><span class="kw-2">mut </span>request = RegionCreateRequest {
             column_metadatas: <span class="macro">vec!</span>[],
-            region_dir: <span class="string">&quot;test_dir&quot;</span>.to_string(),
+            region_dir: <span class="string">"test_dir"</span>.to_string(),
             engine: METRIC_ENGINE_NAME.to_string(),
             primary_key: <span class="macro">vec!</span>[],
             options: HashMap::new(),
@@ -1063,12 +1064,12 @@
         <span class="macro">assert!</span>(result.is_err());
 
         <span class="kw">let </span><span class="kw-2">mut </span>options = HashMap::new();
-        options.insert(PHYSICAL_TABLE_METADATA_KEY.to_string(), <span class="string">&quot;value&quot;</span>.to_string());
+        options.insert(PHYSICAL_TABLE_METADATA_KEY.to_string(), <span class="string">"value"</span>.to_string());
         request.options = options.clone();
         <span class="kw">let </span>result = MetricEngineInner::verify_region_create_request(<span class="kw-2">&amp;</span>request);
         <span class="macro">assert!</span>(result.is_ok());
 
-        options.insert(LOGICAL_TABLE_METADATA_KEY.to_string(), <span class="string">&quot;value&quot;</span>.to_string());
+        options.insert(LOGICAL_TABLE_METADATA_KEY.to_string(), <span class="string">"value"</span>.to_string());
         request.options = options.clone();
         <span class="kw">let </span>result = MetricEngineInner::verify_region_create_request(<span class="kw-2">&amp;</span>request);
         <span class="macro">assert!</span>(result.is_err());
@@ -1088,7 +1089,7 @@
                     column_id: <span class="number">0</span>,
                     semantic_type: SemanticType::Timestamp,
                     column_schema: ColumnSchema::new(
-                        <span class="string">&quot;timestamp&quot;</span>,
+                        <span class="string">"timestamp"</span>,
                         ConcreteDataType::timestamp_millisecond_datatype(),
                         <span class="bool-val">false</span>,
                     ),
@@ -1097,7 +1098,7 @@
                     column_id: <span class="number">1</span>,
                     semantic_type: SemanticType::Tag,
                     column_schema: ColumnSchema::new(
-                        <span class="string">&quot;tag&quot;</span>,
+                        <span class="string">"tag"</span>,
                         ConcreteDataType::string_datatype(),
                         <span class="bool-val">false</span>,
                     ),
@@ -1105,7 +1106,7 @@
             ],
             primary_key: <span class="macro">vec!</span>[<span class="number">0</span>],
             options: HashMap::new(),
-            region_dir: <span class="string">&quot;test_dir&quot;</span>.to_string(),
+            region_dir: <span class="string">"test_dir"</span>.to_string(),
         };
 
         <span class="kw">let </span>env = TestEnv::new().<span class="kw">await</span>;
@@ -1115,7 +1116,7 @@
 
         <span class="macro">assert_eq!</span>(
             data_region_request.region_dir,
-            <span class="string">&quot;/test_dir/data/&quot;</span>.to_string()
+            <span class="string">"/test_dir/data/"</span>.to_string()
         );
         <span class="macro">assert_eq!</span>(data_region_request.column_metadatas.len(), <span class="number">4</span>);
         <span class="macro">assert_eq!</span>(

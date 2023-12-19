@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/manifest/action.rs`."><title>action.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/manifest/action.rs`."><title>action.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -300,14 +301,14 @@
 <a href="#300" id="300">300</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -330,9 +331,9 @@
 <span class="doccomment">/// Actions that can be applied to region manifest.
 </span><span class="attr">#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 </span><span class="kw">pub enum </span>RegionMetaAction {
-    <span class="doccomment">/// Change region&#39;s metadata for request like ALTER
+    <span class="doccomment">/// Change region's metadata for request like ALTER
     </span>Change(RegionChange),
-    <span class="doccomment">/// Edit region&#39;s state for changing options or file list.
+    <span class="doccomment">/// Edit region's state for changing options or file list.
     </span>Edit(RegionEdit),
     <span class="doccomment">/// Remove the region.
     </span>Remove(RegionRemove),
@@ -350,7 +351,7 @@
 </span><span class="kw">pub struct </span>RegionEdit {
     <span class="kw">pub </span>files_to_add: Vec&lt;FileMeta&gt;,
     <span class="kw">pub </span>files_to_remove: Vec&lt;FileMeta&gt;,
-    <span class="attr">#[serde(with = <span class="string">&quot;humantime_serde&quot;</span>)]
+    <span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
     </span><span class="kw">pub </span>compaction_time_window: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
     <span class="kw">pub </span>flushed_entry_id: <span class="prelude-ty">Option</span>&lt;EntryId&gt;,
     <span class="kw">pub </span>flushed_sequence: <span class="prelude-ty">Option</span>&lt;SequenceNumber&gt;,
@@ -387,7 +388,7 @@
     <span class="doccomment">/// Last WAL entry id of truncated data.
     </span><span class="kw">pub </span>truncated_entry_id: <span class="prelude-ty">Option</span>&lt;EntryId&gt;,
     <span class="doccomment">/// Inferred compaction time window.
-    </span><span class="attr">#[serde(with = <span class="string">&quot;humantime_serde&quot;</span>)]
+    </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
     </span><span class="kw">pub </span>compaction_time_window: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
 }
 
@@ -547,44 +548,44 @@
     // modification to manifest-related structs is compatible with older manifests.
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_region_manifest_compatibility() {
-        <span class="kw">let </span>region_edit = <span class="string">r#&quot;{
-            &quot;flushed_entry_id&quot;:null,
-            &quot;compaction_time_window&quot;:null,
-            &quot;files_to_add&quot;:[
-            {&quot;region_id&quot;:4402341478400,&quot;file_id&quot;:&quot;4b220a70-2b03-4641-9687-b65d94641208&quot;,&quot;time_range&quot;:[{&quot;value&quot;:1451609210000,&quot;unit&quot;:&quot;Millisecond&quot;},{&quot;value&quot;:1451609520000,&quot;unit&quot;:&quot;Millisecond&quot;}],&quot;level&quot;:1,&quot;file_size&quot;:100}
+        <span class="kw">let </span>region_edit = <span class="string">r#"{
+            "flushed_entry_id":null,
+            "compaction_time_window":null,
+            "files_to_add":[
+            {"region_id":4402341478400,"file_id":"4b220a70-2b03-4641-9687-b65d94641208","time_range":[{"value":1451609210000,"unit":"Millisecond"},{"value":1451609520000,"unit":"Millisecond"}],"level":1,"file_size":100}
             ],
-            &quot;files_to_remove&quot;:[
-            {&quot;region_id&quot;:4402341478400,&quot;file_id&quot;:&quot;34b6ebb9-b8a5-4a4b-b744-56f67defad02&quot;,&quot;time_range&quot;:[{&quot;value&quot;:1451609210000,&quot;unit&quot;:&quot;Millisecond&quot;},{&quot;value&quot;:1451609520000,&quot;unit&quot;:&quot;Millisecond&quot;}],&quot;level&quot;:0,&quot;file_size&quot;:100}
+            "files_to_remove":[
+            {"region_id":4402341478400,"file_id":"34b6ebb9-b8a5-4a4b-b744-56f67defad02","time_range":[{"value":1451609210000,"unit":"Millisecond"},{"value":1451609520000,"unit":"Millisecond"}],"level":0,"file_size":100}
             ]
-        }&quot;#</span>;
+        }"#</span>;
         <span class="kw">let _ </span>= serde_json::from_str::&lt;RegionEdit&gt;(region_edit).unwrap();
 
-        <span class="kw">let </span>region_edit = <span class="string">r#&quot;{
-            &quot;flushed_entry_id&quot;:10,
-            &quot;flushed_sequence&quot;:10,
-            &quot;compaction_time_window&quot;:null,
-            &quot;files_to_add&quot;:[
-            {&quot;region_id&quot;:4402341478400,&quot;file_id&quot;:&quot;4b220a70-2b03-4641-9687-b65d94641208&quot;,&quot;time_range&quot;:[{&quot;value&quot;:1451609210000,&quot;unit&quot;:&quot;Millisecond&quot;},{&quot;value&quot;:1451609520000,&quot;unit&quot;:&quot;Millisecond&quot;}],&quot;level&quot;:1,&quot;file_size&quot;:100}
+        <span class="kw">let </span>region_edit = <span class="string">r#"{
+            "flushed_entry_id":10,
+            "flushed_sequence":10,
+            "compaction_time_window":null,
+            "files_to_add":[
+            {"region_id":4402341478400,"file_id":"4b220a70-2b03-4641-9687-b65d94641208","time_range":[{"value":1451609210000,"unit":"Millisecond"},{"value":1451609520000,"unit":"Millisecond"}],"level":1,"file_size":100}
             ],
-            &quot;files_to_remove&quot;:[
-            {&quot;region_id&quot;:4402341478400,&quot;file_id&quot;:&quot;34b6ebb9-b8a5-4a4b-b744-56f67defad02&quot;,&quot;time_range&quot;:[{&quot;value&quot;:1451609210000,&quot;unit&quot;:&quot;Millisecond&quot;},{&quot;value&quot;:1451609520000,&quot;unit&quot;:&quot;Millisecond&quot;}],&quot;level&quot;:0,&quot;file_size&quot;:100}
+            "files_to_remove":[
+            {"region_id":4402341478400,"file_id":"34b6ebb9-b8a5-4a4b-b744-56f67defad02","time_range":[{"value":1451609210000,"unit":"Millisecond"},{"value":1451609520000,"unit":"Millisecond"}],"level":0,"file_size":100}
             ]
-        }&quot;#</span>;
+        }"#</span>;
         <span class="kw">let _ </span>= serde_json::from_str::&lt;RegionEdit&gt;(region_edit).unwrap();
 
-        <span class="kw">let </span>region_change = <span class="string">r#&quot; {
-            &quot;metadata&quot;:{
-                &quot;column_metadatas&quot;:[
-                {&quot;column_schema&quot;:{&quot;name&quot;:&quot;a&quot;,&quot;data_type&quot;:{&quot;Int64&quot;:{}},&quot;is_nullable&quot;:false,&quot;is_time_index&quot;:false,&quot;default_constraint&quot;:null,&quot;metadata&quot;:{}},&quot;semantic_type&quot;:&quot;Tag&quot;,&quot;column_id&quot;:1},{&quot;column_schema&quot;:{&quot;name&quot;:&quot;b&quot;,&quot;data_type&quot;:{&quot;Float64&quot;:{}},&quot;is_nullable&quot;:false,&quot;is_time_index&quot;:false,&quot;default_constraint&quot;:null,&quot;metadata&quot;:{}},&quot;semantic_type&quot;:&quot;Field&quot;,&quot;column_id&quot;:2},{&quot;column_schema&quot;:{&quot;name&quot;:&quot;c&quot;,&quot;data_type&quot;:{&quot;Timestamp&quot;:{&quot;Millisecond&quot;:null}},&quot;is_nullable&quot;:false,&quot;is_time_index&quot;:false,&quot;default_constraint&quot;:null,&quot;metadata&quot;:{}},&quot;semantic_type&quot;:&quot;Timestamp&quot;,&quot;column_id&quot;:3}
+        <span class="kw">let </span>region_change = <span class="string">r#" {
+            "metadata":{
+                "column_metadatas":[
+                {"column_schema":{"name":"a","data_type":{"Int64":{}},"is_nullable":false,"is_time_index":false,"default_constraint":null,"metadata":{}},"semantic_type":"Tag","column_id":1},{"column_schema":{"name":"b","data_type":{"Float64":{}},"is_nullable":false,"is_time_index":false,"default_constraint":null,"metadata":{}},"semantic_type":"Field","column_id":2},{"column_schema":{"name":"c","data_type":{"Timestamp":{"Millisecond":null}},"is_nullable":false,"is_time_index":false,"default_constraint":null,"metadata":{}},"semantic_type":"Timestamp","column_id":3}
                 ],
-                &quot;primary_key&quot;:[1],
-                &quot;region_id&quot;:5299989648942,
-                &quot;schema_version&quot;:0
+                "primary_key":[1],
+                "region_id":5299989648942,
+                "schema_version":0
             }
-            }&quot;#</span>;
+            }"#</span>;
         <span class="kw">let _ </span>= serde_json::from_str::&lt;RegionChange&gt;(region_change).unwrap();
 
-        <span class="kw">let </span>region_remove = <span class="string">r#&quot;{&quot;region_id&quot;:42}&quot;#</span>;
+        <span class="kw">let </span>region_remove = <span class="string">r#"{"region_id":42}"#</span>;
         <span class="kw">let _ </span>= serde_json::from_str::&lt;RegionRemove&gt;(region_remove).unwrap();
     }
 

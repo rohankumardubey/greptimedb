@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/error.rs`."><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/mito2/src/error.rs`."><title>error.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="mito2" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -487,14 +488,14 @@
 <a href="#487" id="487">487</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -522,14 +523,14 @@
 #[snafu(visibility(<span class="kw">pub</span>))]
 #[stack_trace_debug]
 </span><span class="kw">pub enum </span>Error {
-    <span class="attr">#[snafu(display(<span class="string">&quot;OpenDAL operator failed&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"OpenDAL operator failed"</span>))]
     </span>OpenDal {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: object_store::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Fail to compress object by {}, path: {}&quot;</span>, compress_type, path))]
+    <span class="attr">#[snafu(display(<span class="string">"Fail to compress object by {}, path: {}"</span>, compress_type, path))]
     </span>CompressObject {
         compress_type: CompressionType,
         path: String,
@@ -537,7 +538,7 @@
         </span>error: std::io::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Fail to decompress object by {}, path: {}&quot;</span>, compress_type, path))]
+    <span class="attr">#[snafu(display(<span class="string">"Fail to decompress object by {}, path: {}"</span>, compress_type, path))]
     </span>DecompressObject {
         compress_type: CompressionType,
         path: String,
@@ -545,70 +546,70 @@
         </span>error: std::io::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to ser/de json object&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to ser/de json object"</span>))]
     </span>SerdeJson {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: serde_json::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid scan index, start: {}, end: {}&quot;</span>, start, end))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid scan index, start: {}, end: {}"</span>, start, end))]
     </span>InvalidScanIndex {
         start: ManifestVersion,
         end: ManifestVersion,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid UTF-8 content&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid UTF-8 content"</span>))]
     </span>Utf8 {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: std::str::Utf8Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Cannot find RegionMetadata&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Cannot find RegionMetadata"</span>))]
     </span>RegionMetadataNotFound { location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to join handle&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to join handle"</span>))]
     </span>Join {
         <span class="attr">#[snafu(source)]
         </span>error: common_runtime::JoinError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Worker {} is stopped&quot;</span>, id))]
+    <span class="attr">#[snafu(display(<span class="string">"Worker {} is stopped"</span>, id))]
     </span>WorkerStopped { id: WorkerId, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to recv result&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to recv result"</span>))]
     </span>Recv {
         <span class="attr">#[snafu(source)]
         </span>error: tokio::sync::oneshot::error::RecvError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid metadata, {}&quot;</span>, reason))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid metadata, {}"</span>, reason))]
     </span>InvalidMeta { reason: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid region metadata&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid region metadata"</span>))]
     </span>InvalidMetadata {
         source: store_api::metadata::MetadataError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to create RecordBatch from vectors&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to create RecordBatch from vectors"</span>))]
     </span>NewRecordBatch {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: ArrowError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to write to buffer&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to write to buffer"</span>))]
     </span>WriteBuffer {
         location: Location,
         source: common_datasource::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to read parquet file, path: {}&quot;</span>, path))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to read parquet file, path: {}"</span>, path))]
     </span>ReadParquet {
         path: String,
         <span class="attr">#[snafu(source)]
@@ -616,26 +617,26 @@
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Region {} not found&quot;</span>, region_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Region {} not found"</span>, region_id))]
     </span>RegionNotFound {
         region_id: RegionId,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Object store not found: {}&quot;</span>, object_store))]
+    <span class="attr">#[snafu(display(<span class="string">"Object store not found: {}"</span>, object_store))]
     </span>ObjectStoreNotFound {
         object_store: String,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Region {} is corrupted, reason: {}&quot;</span>, region_id, reason))]
+    <span class="attr">#[snafu(display(<span class="string">"Region {} is corrupted, reason: {}"</span>, region_id, reason))]
     </span>RegionCorrupted {
         region_id: RegionId,
         reason: String,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid request to region {}, reason: {}&quot;</span>, region_id, reason))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid request to region {}, reason: {}"</span>, region_id, reason))]
     </span>InvalidRequest {
         region_id: RegionId,
         reason: String,
@@ -643,7 +644,7 @@
     },
 
     <span class="attr">#[snafu(display(
-        <span class="string">&quot;Failed to convert ConcreteDataType to ColumnDataType, reason: {}&quot;</span>,
+        <span class="string">"Failed to convert ConcreteDataType to ColumnDataType, reason: {}"</span>,
         reason
     ))]
     </span>ConvertColumnDataType {
@@ -654,14 +655,14 @@
 
     <span class="doccomment">/// An error type to indicate that schema is changed and we need
     /// to fill default values again.
-    </span><span class="attr">#[snafu(display(<span class="string">&quot;Need to fill default value for region {}&quot;</span>, region_id))]
+    </span><span class="attr">#[snafu(display(<span class="string">"Need to fill default value for region {}"</span>, region_id))]
     </span>FillDefault {
         region_id: RegionId,
-        <span class="comment">// The error is for internal use so we don&#39;t need a location.
+        <span class="comment">// The error is for internal use so we don't need a location.
     </span>},
 
     <span class="attr">#[snafu(display(
-        <span class="string">&quot;Failed to create default value for column {} of region {}&quot;</span>,
+        <span class="string">"Failed to create default value for column {} of region {}"</span>,
         column,
         region_id
     ))]
@@ -671,7 +672,7 @@
         source: datatypes::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to encode WAL entry, region_id: {}&quot;</span>, region_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to encode WAL entry, region_id: {}"</span>, region_id))]
     </span>EncodeWal {
         region_id: RegionId,
         location: Location,
@@ -679,20 +680,20 @@
         </span>error: EncodeError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to write WAL&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to write WAL"</span>))]
     </span>WriteWal {
         location: Location,
         source: BoxedError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to read WAL, region_id: {}&quot;</span>, region_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to read WAL, region_id: {}"</span>, region_id))]
     </span>ReadWal {
         region_id: RegionId,
         location: Location,
         source: BoxedError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to decode WAL entry, region_id: {}&quot;</span>, region_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to decode WAL entry, region_id: {}"</span>, region_id))]
     </span>DecodeWal {
         region_id: RegionId,
         location: Location,
@@ -700,7 +701,7 @@
         </span>error: DecodeError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to delete WAL, region_id: {}&quot;</span>, region_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to delete WAL, region_id: {}"</span>, region_id))]
     </span>DeleteWal {
         region_id: RegionId,
         location: Location,
@@ -708,13 +709,13 @@
     },
 
     <span class="comment">// Shared error for each writer in the write group.
-    </span><span class="attr">#[snafu(display(<span class="string">&quot;Failed to write region&quot;</span>))]
+    </span><span class="attr">#[snafu(display(<span class="string">"Failed to write region"</span>))]
     </span>WriteGroup { source: Arc&lt;Error&gt; },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Row value mismatches field data type&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Row value mismatches field data type"</span>))]
     </span>FieldTypeMismatch { source: datatypes::error::Error },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to serialize field&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to serialize field"</span>))]
     </span>SerializeField {
         <span class="attr">#[snafu(source)]
         </span>error: memcomparable::Error,
@@ -722,7 +723,7 @@
     },
 
     <span class="attr">#[snafu(display(
-        <span class="string">&quot;Data type: {} does not support serialization/deserialization&quot;</span>,
+        <span class="string">"Data type: {} does not support serialization/deserialization"</span>,
         data_type,
     ))]
     </span>NotSupportedField {
@@ -730,66 +731,66 @@
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to deserialize field&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to deserialize field"</span>))]
     </span>DeserializeField {
         <span class="attr">#[snafu(source)]
         </span>error: memcomparable::Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid parquet SST file {}, reason: {}&quot;</span>, file, reason))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid parquet SST file {}, reason: {}"</span>, file, reason))]
     </span>InvalidParquet {
         file: String,
         reason: String,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid batch, {}&quot;</span>, reason))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid batch, {}"</span>, reason))]
     </span>InvalidBatch { reason: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid arrow record batch, {}&quot;</span>, reason))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid arrow record batch, {}"</span>, reason))]
     </span>InvalidRecordBatch { reason: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to convert array to vector&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to convert array to vector"</span>))]
     </span>ConvertVector {
         location: Location,
         source: datatypes::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to compute arrow arrays&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to compute arrow arrays"</span>))]
     </span>ComputeArrow {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: datatypes::arrow::error::ArrowError,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to compute vector&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to compute vector"</span>))]
     </span>ComputeVector {
         location: Location,
         source: datatypes::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Primary key length mismatch, expect: {}, actual: {}&quot;</span>, expect, actual))]
+    <span class="attr">#[snafu(display(<span class="string">"Primary key length mismatch, expect: {}, actual: {}"</span>, expect, actual))]
     </span>PrimaryKeyLengthMismatch {
         expect: usize,
         actual: usize,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid sender&quot;</span>,))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid sender"</span>,))]
     </span>InvalidSender { location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid scheduler state&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid scheduler state"</span>))]
     </span>InvalidSchedulerState { location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to stop scheduler&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to stop scheduler"</span>))]
     </span>StopScheduler {
         <span class="attr">#[snafu(source)]
         </span>error: JoinError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to delete SST file, file id: {}&quot;</span>, file_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to delete SST file, file id: {}"</span>, file_id))]
     </span>DeleteSst {
         file_id: FileId,
         <span class="attr">#[snafu(source)]
@@ -797,33 +798,33 @@
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to flush region {}&quot;</span>, region_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to flush region {}"</span>, region_id))]
     </span>FlushRegion {
         region_id: RegionId,
         source: Arc&lt;Error&gt;,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Region {} is dropped&quot;</span>, region_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Region {} is dropped"</span>, region_id))]
     </span>RegionDropped {
         region_id: RegionId,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Region {} is closed&quot;</span>, region_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Region {} is closed"</span>, region_id))]
     </span>RegionClosed {
         region_id: RegionId,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Region {} is truncated&quot;</span>, region_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Region {} is truncated"</span>, region_id))]
     </span>RegionTruncated {
         region_id: RegionId,
         location: Location,
     },
 
     <span class="attr">#[snafu(display(
-        <span class="string">&quot;Engine write buffer is full, rejecting write requests of region {}&quot;</span>,
+        <span class="string">"Engine write buffer is full, rejecting write requests of region {}"</span>,
         region_id,
     ))]
     </span>RejectWrite {
@@ -831,7 +832,7 @@
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to compact region {}&quot;</span>, region_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to compact region {}"</span>, region_id))]
     </span>CompactRegion {
         region_id: RegionId,
         source: Arc&lt;Error&gt;,
@@ -839,7 +840,7 @@
     },
 
     <span class="attr">#[snafu(display(
-        <span class="string">&quot;Failed to compat readers for region {}, reason: {}&quot;</span>,
+        <span class="string">"Failed to compat readers for region {}, reason: {}"</span>,
         region_id,
         reason,
     ))]
@@ -849,19 +850,19 @@
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalue region req&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalue region req"</span>))]
     </span>InvalidRegionRequest {
         source: store_api::metadata::MetadataError,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Region {} is read only&quot;</span>, region_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Region {} is read only"</span>, region_id))]
     </span>RegionReadonly {
         region_id: RegionId,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid options&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid options"</span>))]
     </span>JsonOptions {
         <span class="attr">#[snafu(source)]
         </span>error: serde_json::Error,
@@ -869,7 +870,7 @@
     },
 
     <span class="attr">#[snafu(display(
-        <span class="string">&quot;Empty region directory, region_id: {}, region_dir: {}&quot;</span>,
+        <span class="string">"Empty region directory, region_id: {}, region_dir: {}"</span>,
         region_id,
         region_dir,
     ))]
@@ -879,7 +880,7 @@
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to read arrow record batch from parquet file {}&quot;</span>, path))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to read arrow record batch from parquet file {}"</span>, path))]
     </span>ArrowReader {
         path: String,
         <span class="attr">#[snafu(source)]

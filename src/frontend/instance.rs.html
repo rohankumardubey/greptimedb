@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/frontend/src/instance.rs`."><title>instance.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frontend" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/frontend/src/instance.rs`."><title>instance.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="frontend" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -599,14 +600,14 @@
 <a href="#599" id="599">599</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -696,7 +697,7 @@
     + PrometheusHandler
     + Send
     + Sync
-    + <span class="lifetime">&#39;static
+    + <span class="lifetime">'static
 </span>{
     <span class="kw">async fn </span>start(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt;;
 }
@@ -722,7 +723,7 @@
         meta_client_options: <span class="kw-2">&amp;</span>MetaClientOptions,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Arc&lt;MetaClient&gt;&gt; {
         <span class="macro">info!</span>(
-            <span class="string">&quot;Creating Frontend instance in distributed mode with Meta server addr {:?}&quot;</span>,
+            <span class="string">"Creating Frontend instance in distributed mode with Meta server addr {:?}"</span>,
             meta_client_options.metasrv_addrs
         );
 
@@ -822,7 +823,7 @@
         <span class="self">self</span>.script_executor.start(<span class="self">self</span>)<span class="question-mark">?</span>;
 
         futures::future::try_join_all(<span class="self">self</span>.servers.iter().map(|(name, handler)| <span class="kw">async move </span>{
-            <span class="macro">info!</span>(<span class="string">&quot;Starting service: {name}&quot;</span>);
+            <span class="macro">info!</span>(<span class="string">"Starting service: {name}"</span>);
             start_server(handler).<span class="kw">await
         </span>}))
         .<span class="kw">await
@@ -896,7 +897,7 @@
                         }
                         <span class="prelude-val">Err</span>(e) =&gt; {
                             <span class="kw">let </span>redacted = sql::util::redact_sql_secrets(query.as_ref());
-                            <span class="macro">error!</span>(e; <span class="string">&quot;Failed to execute query: {redacted}&quot;</span>);
+                            <span class="macro">error!</span>(e; <span class="string">"Failed to execute query: {redacted}"</span>);
 
                             results.push(<span class="prelude-val">Err</span>(e));
                             <span class="kw">break</span>;
@@ -914,7 +915,7 @@
     <span class="kw">async fn </span>do_exec_plan(<span class="kw-2">&amp;</span><span class="self">self</span>, plan: LogicalPlan, query_ctx: QueryContextRef) -&gt; <span class="prelude-ty">Result</span>&lt;Output&gt; {
         <span class="kw">let </span>_timer = metrics::METRIC_EXEC_PLAN_ELAPSED.start_timer();
         <span class="comment">// plan should be prepared before exec
-        // we&#39;ll do check there
+        // we'll do check there
         </span><span class="self">self</span>.query_engine
             .execute(plan, query_ctx)
             .<span class="kw">await
@@ -926,11 +927,11 @@
         query: <span class="kw-2">&amp;</span>PromQuery,
         query_ctx: QueryContextRef,
     ) -&gt; Vec&lt;<span class="prelude-ty">Result</span>&lt;Output&gt;&gt; {
-        <span class="comment">// check will be done in prometheus handler&#39;s do_query
+        <span class="comment">// check will be done in prometheus handler's do_query
         </span><span class="kw">let </span>result = PrometheusHandler::do_query(<span class="self">self</span>, query, query_ctx)
             .<span class="kw">await
             </span>.with_context(|<span class="kw">_</span>| ExecutePromqlSnafu {
-                query: <span class="macro">format!</span>(<span class="string">&quot;{query:?}&quot;</span>),
+                query: <span class="macro">format!</span>(<span class="string">"{query:?}"</span>),
             });
         <span class="macro">vec!</span>[result]
     }
@@ -1003,7 +1004,7 @@
             .<span class="kw">await
             </span>.map_err(BoxedError::new)
             .with_context(|<span class="kw">_</span>| ExecuteQuerySnafu {
-                query: <span class="macro">format!</span>(<span class="string">&quot;{query:?}&quot;</span>),
+                query: <span class="macro">format!</span>(<span class="string">"{query:?}"</span>),
             })<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(interceptor.post_execute(output, query_ctx)<span class="question-mark">?</span>)
@@ -1031,7 +1032,7 @@
     <span class="kw">match </span>stmt {
         <span class="comment">// These are executed by query engine, and will be checked there.
         </span>Statement::Query(<span class="kw">_</span>) | Statement::Explain(<span class="kw">_</span>) | Statement::Tql(<span class="kw">_</span>) | Statement::Delete(<span class="kw">_</span>) =&gt; {}
-        <span class="comment">// database ops won&#39;t be checked
+        <span class="comment">// database ops won't be checked
         </span>Statement::CreateDatabase(<span class="kw">_</span>) | Statement::ShowDatabases(<span class="kw">_</span>) =&gt; {}
         <span class="comment">// show create table and alter are not supported yet
         </span>Statement::ShowCreateTable(<span class="kw">_</span>) | Statement::CreateExternalTable(<span class="kw">_</span>) | Statement::Alter(<span class="kw">_</span>) =&gt; {
@@ -1102,12 +1103,12 @@
             disallow_cross_schema_query: <span class="bool-val">true</span>,
         });
 
-        <span class="kw">let </span>sql = <span class="string">r#&quot;
+        <span class="kw">let </span>sql = <span class="string">r#"
         SELECT * FROM demo;
         EXPLAIN SELECT * FROM demo;
         CREATE DATABASE test_database;
         SHOW DATABASES;
-        &quot;#</span>;
+        "#</span>;
         <span class="kw">let </span>stmts = parse_stmt(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
         <span class="macro">assert_eq!</span>(stmts.len(), <span class="number">4</span>);
         <span class="kw">for </span>stmt <span class="kw">in </span>stmts {
@@ -1115,10 +1116,10 @@
             re.unwrap();
         }
 
-        <span class="kw">let </span>sql = <span class="string">r#&quot;
+        <span class="kw">let </span>sql = <span class="string">r#"
         SHOW CREATE TABLE demo;
         ALTER TABLE demo ADD COLUMN new_col INT;
-        &quot;#</span>;
+        "#</span>;
         <span class="kw">let </span>stmts = parse_stmt(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
         <span class="macro">assert_eq!</span>(stmts.len(), <span class="number">2</span>);
         <span class="kw">for </span>stmt <span class="kw">in </span>stmts {
@@ -1128,17 +1129,17 @@
 
         <span class="kw">fn </span>replace_test(template_sql: <span class="kw-2">&amp;</span>str, plugins: Plugins, query_ctx: <span class="kw-2">&amp;</span>QueryContextRef) {
             <span class="comment">// test right
-            </span><span class="kw">let </span>right = <span class="macro">vec!</span>[(<span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>), (<span class="string">&quot;&quot;</span>, <span class="string">&quot;public.&quot;</span>), (<span class="string">&quot;greptime.&quot;</span>, <span class="string">&quot;public.&quot;</span>)];
+            </span><span class="kw">let </span>right = <span class="macro">vec!</span>[(<span class="string">""</span>, <span class="string">""</span>), (<span class="string">""</span>, <span class="string">"public."</span>), (<span class="string">"greptime."</span>, <span class="string">"public."</span>)];
             <span class="kw">for </span>(catalog, schema) <span class="kw">in </span>right {
                 <span class="kw">let </span>sql = do_fmt(template_sql, catalog, schema);
                 do_test(<span class="kw-2">&amp;</span>sql, plugins.clone(), query_ctx, <span class="bool-val">true</span>);
             }
 
             <span class="kw">let </span>wrong = <span class="macro">vec!</span>[
-                (<span class="string">&quot;&quot;</span>, <span class="string">&quot;wrongschema.&quot;</span>),
-                (<span class="string">&quot;greptime.&quot;</span>, <span class="string">&quot;wrongschema.&quot;</span>),
-                (<span class="string">&quot;wrongcatalog.&quot;</span>, <span class="string">&quot;public.&quot;</span>),
-                (<span class="string">&quot;wrongcatalog.&quot;</span>, <span class="string">&quot;wrongschema.&quot;</span>),
+                (<span class="string">""</span>, <span class="string">"wrongschema."</span>),
+                (<span class="string">"greptime."</span>, <span class="string">"wrongschema."</span>),
+                (<span class="string">"wrongcatalog."</span>, <span class="string">"public."</span>),
+                (<span class="string">"wrongcatalog."</span>, <span class="string">"wrongschema."</span>),
             ];
             <span class="kw">for </span>(catalog, schema) <span class="kw">in </span>wrong {
                 <span class="kw">let </span>sql = do_fmt(template_sql, catalog, schema);
@@ -1148,8 +1149,8 @@
 
         <span class="kw">fn </span>do_fmt(template: <span class="kw-2">&amp;</span>str, catalog: <span class="kw-2">&amp;</span>str, schema: <span class="kw-2">&amp;</span>str) -&gt; String {
             <span class="kw">let </span>vars = HashMap::from([
-                (<span class="string">&quot;catalog&quot;</span>.to_string(), catalog),
-                (<span class="string">&quot;schema&quot;</span>.to_string(), schema),
+                (<span class="string">"catalog"</span>.to_string(), catalog),
+                (<span class="string">"schema"</span>.to_string(), schema),
             ]);
             template.format(<span class="kw-2">&amp;</span>vars).unwrap()
         }
@@ -1165,34 +1166,34 @@
         }
 
         <span class="comment">// test insert
-        </span><span class="kw">let </span>sql = <span class="string">&quot;INSERT INTO {catalog}{schema}monitor(host) VALUES (&#39;host1&#39;);&quot;</span>;
+        </span><span class="kw">let </span>sql = <span class="string">"INSERT INTO {catalog}{schema}monitor(host) VALUES ('host1');"</span>;
         replace_test(sql, plugins.clone(), <span class="kw-2">&amp;</span>query_ctx);
 
         <span class="comment">// test create table
-        </span><span class="kw">let </span>sql = <span class="string">r#&quot;CREATE TABLE {catalog}{schema}demo(
+        </span><span class="kw">let </span>sql = <span class="string">r#"CREATE TABLE {catalog}{schema}demo(
                             host STRING,
                             ts TIMESTAMP,
                             TIME INDEX (ts),
                             PRIMARY KEY(host)
-                        ) engine=mito with(regions=1);&quot;#</span>;
+                        ) engine=mito with(regions=1);"#</span>;
         replace_test(sql, plugins.clone(), <span class="kw-2">&amp;</span>query_ctx);
 
         <span class="comment">// test drop table
-        </span><span class="kw">let </span>sql = <span class="string">&quot;DROP TABLE {catalog}{schema}demo;&quot;</span>;
+        </span><span class="kw">let </span>sql = <span class="string">"DROP TABLE {catalog}{schema}demo;"</span>;
         replace_test(sql, plugins.clone(), <span class="kw-2">&amp;</span>query_ctx);
 
         <span class="comment">// test show tables
-        </span><span class="kw">let </span>sql = <span class="string">&quot;SHOW TABLES FROM public&quot;</span>;
+        </span><span class="kw">let </span>sql = <span class="string">"SHOW TABLES FROM public"</span>;
         <span class="kw">let </span>stmt = parse_stmt(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
         check_permission(plugins.clone(), <span class="kw-2">&amp;</span>stmt[<span class="number">0</span>], <span class="kw-2">&amp;</span>query_ctx).unwrap();
 
-        <span class="kw">let </span>sql = <span class="string">&quot;SHOW TABLES FROM wrongschema&quot;</span>;
+        <span class="kw">let </span>sql = <span class="string">"SHOW TABLES FROM wrongschema"</span>;
         <span class="kw">let </span>stmt = parse_stmt(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
         <span class="kw">let </span>re = check_permission(plugins.clone(), <span class="kw-2">&amp;</span>stmt[<span class="number">0</span>], <span class="kw-2">&amp;</span>query_ctx);
         <span class="macro">assert!</span>(re.is_err());
 
         <span class="comment">// test describe table
-        </span><span class="kw">let </span>sql = <span class="string">&quot;DESC TABLE {catalog}{schema}demo;&quot;</span>;
+        </span><span class="kw">let </span>sql = <span class="string">"DESC TABLE {catalog}{schema}demo;"</span>;
         replace_test(sql, plugins, <span class="kw-2">&amp;</span>query_ctx);
     }
 }

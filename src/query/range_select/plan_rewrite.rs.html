@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/query/src/range_select/plan_rewrite.rs`."><title>plan_rewrite.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="query" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/query/src/range_select/plan_rewrite.rs`."><title>plan_rewrite.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="query" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -761,14 +762,14 @@
 <a href="#761" id="761">761</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -809,17 +810,17 @@
 <span class="doccomment">/// `RangeExprRewriter` will recursively search certain `Expr`, find all `range_fn` scalar udf contained in `Expr`,
 /// and collect the information required by the RangeSelect query,
 /// and finally modify the `range_fn` scalar udf to an ordinary column field.
-</span><span class="kw">pub struct </span>RangeExprRewriter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    input_plan: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Arc&lt;LogicalPlan&gt;,
+</span><span class="kw">pub struct </span>RangeExprRewriter&lt;<span class="lifetime">'a</span>&gt; {
+    input_plan: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Arc&lt;LogicalPlan&gt;,
     align: Duration,
     align_to: i64,
     by: Vec&lt;Expr&gt;,
-    <span class="doccomment">/// Use `BTreeSet` to avoid in case like `avg(a) RANGE &#39;5m&#39; + avg(a) RANGE &#39;5m&#39;`, duplicate range expr `avg(a) RANGE &#39;5m&#39;` be calculate twice
+    <span class="doccomment">/// Use `BTreeSet` to avoid in case like `avg(a) RANGE '5m' + avg(a) RANGE '5m'`, duplicate range expr `avg(a) RANGE '5m'` be calculate twice
     </span>range_fn: BTreeSet&lt;RangeFn&gt;,
-    sub_aggr: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>Aggregate,
+    sub_aggr: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>Aggregate,
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; RangeExprRewriter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; RangeExprRewriter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub fn </span>get_range_expr(<span class="kw-2">&amp;</span><span class="self">self</span>, args: <span class="kw-2">&amp;</span>[Expr], i: usize) -&gt; DFResult&lt;Expr&gt; {
         <span class="kw">match </span>args.get(i) {
             <span class="prelude-val">Some</span>(Expr::Column(column)) =&gt; {
@@ -830,7 +831,7 @@
                     .get(index - len)
                     .cloned()
                     .ok_or(DataFusionError::Plan(
-                        <span class="string">&quot;Range expr not found in underlying Aggregate Plan&quot;</span>.into(),
+                        <span class="string">"Range expr not found in underlying Aggregate Plan"</span>.into(),
                     ))
             }
             other =&gt; <span class="prelude-val">Err</span>(dispose_parse_error(other)),
@@ -843,11 +844,11 @@
     DataFusionError::Plan(
         expr.map(|x| {
             <span class="macro">format!</span>(
-                <span class="string">&quot;Illegal argument `{}` in range select query&quot;</span>,
+                <span class="string">"Illegal argument `{}` in range select query"</span>,
                 x.display_name().unwrap_or_default()
             )
         })
-        .unwrap_or(<span class="string">&quot;Missing argument in range select query&quot;</span>.into()),
+        .unwrap_or(<span class="string">"Missing argument in range select query"</span>.into()),
     )
 }
 
@@ -867,8 +868,8 @@
 }
 
 <span class="doccomment">/// Parse a duraion expr:
-/// 1. duration string (e.g. `&#39;1h&#39;`)
-/// 2. Interval expr (e.g. `INTERVAL &#39;1 year 3 hours 20 minutes&#39;`)
+/// 1. duration string (e.g. `'1h'`)
+/// 2. Interval expr (e.g. `INTERVAL '1 year 3 hours 20 minutes'`)
 </span><span class="kw">fn </span>parse_duration_expr(args: <span class="kw-2">&amp;</span>[Expr], i: usize) -&gt; DFResult&lt;Duration&gt; {
     <span class="kw">let </span>interval_to_duration = |interval: Interval| -&gt; Duration {
         Duration::from_millis((interval.to_nanosecond() / NANOS_PER_MILLI <span class="kw">as </span>i128) <span class="kw">as </span>u64)
@@ -899,19 +900,19 @@
     <span class="kw">let </span>s = parse_str_expr(args, i)<span class="question-mark">?</span>;
     <span class="kw">let </span>upper = s.to_uppercase();
     <span class="kw">match </span>upper.as_str() {
-        <span class="string">&quot;NOW&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Timestamp::current_millis().value()),
+        <span class="string">"NOW" </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(Timestamp::current_millis().value()),
         <span class="comment">// default align to unix epoch 0
-        </span><span class="string">&quot;&quot; </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="number">0</span>),
+        </span><span class="string">"" </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="number">0</span>),
         <span class="kw">_ </span>=&gt; (),
     }
     Timestamp::from_str(s)
         .map_err(|e| {
             DataFusionError::Plan(<span class="macro">format!</span>(
-                <span class="string">&quot;Illegal `align to` argument `{}` in range select query, can&#39;t be parse as NOW/CALENDAR/Timestamp, error: {}&quot;</span>,
+                <span class="string">"Illegal `align to` argument `{}` in range select query, can't be parse as NOW/CALENDAR/Timestamp, error: {}"</span>,
                 s, e
             ))
         })<span class="question-mark">?</span>.convert_to(TimeUnit::Millisecond).map(|x|x.value()).ok_or(DataFusionError::Plan(<span class="macro">format!</span>(
-            <span class="string">&quot;Illegal `align to` argument `{}` in range select query, can&#39;t be convert to a valid Timestamp&quot;</span>,
+            <span class="string">"Illegal `align to` argument `{}` in range select query, can't be convert to a valid Timestamp"</span>,
             s
         ))
         )
@@ -941,9 +942,9 @@
         <span class="kw">if </span><span class="macro-nonterminal">$cond </span>&amp;&amp; <span class="macro-nonterminal">$self</span>.<span class="macro-nonterminal">$name </span>!= <span class="macro-nonterminal">$name </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(DataFusionError::Plan(
                 <span class="macro">concat!</span>(
-                    <span class="string">&quot;Inconsistent &quot;</span>,
+                    <span class="string">"Inconsistent "</span>,
                     <span class="macro">stringify!</span>(<span class="macro-nonterminal">$name</span>),
-                    <span class="string">&quot; given in Range Function Rewrite&quot;
+                    <span class="string">" given in Range Function Rewrite"
                 </span>)
                 .into(),
             ));
@@ -953,12 +954,12 @@
     };
 }
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; TreeNodeRewriter <span class="kw">for </span>RangeExprRewriter&lt;<span class="lifetime">&#39;a</span>&gt; {
+<span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; TreeNodeRewriter <span class="kw">for </span>RangeExprRewriter&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">type </span>N = Expr;
 
     <span class="kw">fn </span>mutate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, node: Expr) -&gt; DFResult&lt;Expr&gt; {
         <span class="kw">if let </span>Expr::ScalarUDF(func) = <span class="kw-2">&amp;</span>node {
-            <span class="kw">if </span>func.fun.name == <span class="string">&quot;range_fn&quot; </span>{
+            <span class="kw">if </span>func.fun.name == <span class="string">"range_fn" </span>{
                 <span class="comment">// `range_fn(func, range, fill, byc, [byv], align, to)`
                 // `[byv]` are variadic arguments, byc indicate the length of arguments
                 </span><span class="kw">let </span>range_expr = <span class="self">self</span>.get_range_expr(<span class="kw-2">&amp;</span>func.args, <span class="number">0</span>)<span class="question-mark">?</span>;
@@ -980,7 +981,7 @@
                 <span class="macro">inconsistent_check!</span>(<span class="self">self</span>.align_to, <span class="self">self</span>.align_to != <span class="number">0</span>);
                 <span class="kw">let </span>range_fn = RangeFn {
                     name: <span class="macro">format!</span>(
-                        <span class="string">&quot;{} RANGE {} FILL {}&quot;</span>,
+                        <span class="string">"{} RANGE {} FILL {}"</span>,
                         range_expr.display_name()<span class="question-mark">?</span>,
                         parse_expr_to_string(<span class="kw-2">&amp;</span>func.args, <span class="number">1</span>)<span class="question-mark">?</span>,
                         fill
@@ -1000,7 +1001,7 @@
     }
 }
 
-<span class="doccomment">/// In order to implement RangeSelect query like `avg(field_0) RANGE &#39;5m&#39; FILL NULL`,
+<span class="doccomment">/// In order to implement RangeSelect query like `avg(field_0) RANGE '5m' FILL NULL`,
 /// All RangeSelect query items are converted into udf scalar function in sql parse stage, with format like `range_fn(avg(field_0), .....)`.
 /// `range_fn` contains all the parameters we need to execute RangeSelect.
 /// In order to correctly execute the query process of range select, we need to modify the query plan generated by datafusion.
@@ -1034,17 +1035,17 @@
                 <span class="kw">if </span>have_range_in_exprs(expr) =&gt;
             {
                 <span class="kw">let </span>(aggr_plan, input) = <span class="kw">if let </span>LogicalPlan::Aggregate(aggr) = input.as_ref() {
-                    <span class="comment">// Expr like `rate(max(a) RANGE &#39;6m&#39;) RANGE &#39;6m&#39;` have legal syntax but illegal semantic.
+                    <span class="comment">// Expr like `rate(max(a) RANGE '6m') RANGE '6m'` have legal syntax but illegal semantic.
                     </span><span class="kw">if </span>have_range_in_exprs(<span class="kw-2">&amp;</span>aggr.aggr_expr) {
                         <span class="kw">return </span>RangeQuerySnafu {
-                            msg: <span class="string">&quot;Nest Range Query is not allowed&quot;</span>,
+                            msg: <span class="string">"Nest Range Query is not allowed"</span>,
                         }
                         .fail();
                     }
                     (aggr, aggr.input.clone())
                 } <span class="kw">else </span>{
                     <span class="kw">return </span>RangeQuerySnafu {
-                        msg: <span class="string">&quot;Window functions is not allowed in Range Query&quot;</span>,
+                        msg: <span class="string">"Window functions is not allowed in Range Query"</span>,
                     }
                     .fail();
                 };
@@ -1107,7 +1108,7 @@
                             <span class="macro">ensure!</span>(
                                 inputs.len() == <span class="number">1</span>,
                                 RangeQuerySnafu {
-                                    msg: <span class="string">&quot;Illegal subplan nums when rewrite Analyze logical plan&quot;</span>,
+                                    msg: <span class="string">"Illegal subplan nums when rewrite Analyze logical plan"</span>,
                                 }
                             );
                             LogicalPlanBuilder::from(inputs[<span class="number">0</span>].clone())
@@ -1119,7 +1120,7 @@
                             <span class="macro">ensure!</span>(
                                 inputs.len() == <span class="number">1</span>,
                                 RangeQuerySnafu {
-                                    msg: <span class="string">&quot;Illegal subplan nums when rewrite Explain logical plan&quot;</span>,
+                                    msg: <span class="string">"Illegal subplan nums when rewrite Explain logical plan"</span>,
                                 }
                             );
                             LogicalPlanBuilder::from(inputs[<span class="number">0</span>].clone())
@@ -1167,7 +1168,7 @@
                         .with_context(|| TimeIndexNotFoundSnafu {
                             table: table_ref.to_string(),
                         })<span class="question-mark">?</span>;
-                <span class="comment">// assert time_index&#39;s datatype is timestamp
+                <span class="comment">// assert time_index's datatype is timestamp
                 </span><span class="kw">if let </span>ConcreteDataType::Timestamp(<span class="kw">_</span>) = time_index_column.data_type {
                     default_by = table
                         .table_info()
@@ -1204,7 +1205,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>find_range = <span class="bool-val">false</span>;
         <span class="kw">let _ </span>= expr.apply(<span class="kw-2">&amp;mut </span>|expr| {
             <span class="kw">if let </span>Expr::ScalarUDF(ScalarUDF { fun, .. }) = expr {
-                <span class="kw">if </span>fun.name == <span class="string">&quot;range_fn&quot; </span>{
+                <span class="kw">if </span>fun.name == <span class="string">"range_fn" </span>{
                     find_range = <span class="bool-val">true</span>;
                     <span class="kw">return </span><span class="prelude-val">Ok</span>(VisitRecursion::Stop);
                 }
@@ -1235,18 +1236,18 @@
     <span class="kw">use crate</span>::{QueryEngineFactory, QueryEngineRef};
 
     <span class="kw">async fn </span>create_test_engine() -&gt; QueryEngineRef {
-        <span class="kw">let </span>table_name = <span class="string">&quot;test&quot;</span>.to_string();
+        <span class="kw">let </span>table_name = <span class="string">"test"</span>.to_string();
         <span class="kw">let </span><span class="kw-2">mut </span>columns = <span class="macro">vec!</span>[];
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">5 </span>{
             columns.push(ColumnSchema::new(
-                <span class="macro">format!</span>(<span class="string">&quot;tag_{i}&quot;</span>),
+                <span class="macro">format!</span>(<span class="string">"tag_{i}"</span>),
                 ConcreteDataType::string_datatype(),
                 <span class="bool-val">false</span>,
             ));
         }
         columns.push(
             ColumnSchema::new(
-                <span class="string">&quot;timestamp&quot;</span>.to_string(),
+                <span class="string">"timestamp"</span>.to_string(),
                 ConcreteDataType::timestamp_millisecond_datatype(),
                 <span class="bool-val">false</span>,
             )
@@ -1254,7 +1255,7 @@
         );
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">5 </span>{
             columns.push(ColumnSchema::new(
-                <span class="macro">format!</span>(<span class="string">&quot;field_{i}&quot;</span>),
+                <span class="macro">format!</span>(<span class="string">"field_{i}"</span>),
                 ConcreteDataType::float64_datatype(),
                 <span class="bool-val">true</span>,
             ));
@@ -1299,21 +1300,21 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_no_project() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT timestamp, tag_0, tag_1, avg(field_0 + field_1) RANGE &#39;5m&#39; FROM test ALIGN &#39;1h&#39; by (tag_0,tag_1);&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT timestamp, tag_0, tag_1, avg(field_0 + field_1) RANGE '5m' FROM test ALIGN '1h' by (tag_0,tag_1);"#</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;RangeSelect: range_exprs=[AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL], align=3600000ms, align_to=0ms, align_by=[test.tag_0, test.tag_1], time_index=timestamp [timestamp:Timestamp(Millisecond, None), tag_0:Utf8, tag_1:Utf8, AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL:Float64;N]\
-            \n  TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]&quot;
+            <span class="string">"RangeSelect: range_exprs=[AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL], align=3600000ms, align_to=0ms, align_by=[test.tag_0, test.tag_1], time_index=timestamp [timestamp:Timestamp(Millisecond, None), tag_0:Utf8, tag_1:Utf8, AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL:Float64;N]\
+            \n  TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]"
         </span>);
         query_plan_compare(query, expected).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_expr_calculation() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT (avg(field_0 + field_1)/4) RANGE &#39;5m&#39; FROM test ALIGN &#39;1h&#39; by (tag_0,tag_1);&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT (avg(field_0 + field_1)/4) RANGE '5m' FROM test ALIGN '1h' by (tag_0,tag_1);"#</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL / Int64(4) [AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL / Int64(4):Float64;N]\
+            <span class="string">"Projection: AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL / Int64(4) [AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL / Int64(4):Float64;N]\
             \n  RangeSelect: range_exprs=[AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL], align=3600000ms, align_to=0ms, align_by=[test.tag_0, test.tag_1], time_index=timestamp [AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL:Float64;N, timestamp:Timestamp(Millisecond, None), tag_0:Utf8, tag_1:Utf8]\
-            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]&quot;
+            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]"
         </span>);
         query_plan_compare(query, expected).<span class="kw">await</span>;
     }
@@ -1321,120 +1322,120 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_multi_args() {
         <span class="kw">let </span>query =
-            <span class="string">r#&quot;SELECT (covar(field_0 + field_1, field_1)/4) RANGE &#39;5m&#39; FROM test ALIGN &#39;1h&#39;;&quot;#</span>;
+            <span class="string">r#"SELECT (covar(field_0 + field_1, field_1)/4) RANGE '5m' FROM test ALIGN '1h';"#</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: COVARIANCE(test.field_0 + test.field_1,test.field_1) RANGE 5m FILL NULL / Int64(4) [COVARIANCE(test.field_0 + test.field_1,test.field_1) RANGE 5m FILL NULL / Int64(4):Float64;N]\
+            <span class="string">"Projection: COVARIANCE(test.field_0 + test.field_1,test.field_1) RANGE 5m FILL NULL / Int64(4) [COVARIANCE(test.field_0 + test.field_1,test.field_1) RANGE 5m FILL NULL / Int64(4):Float64;N]\
             \n  RangeSelect: range_exprs=[COVARIANCE(test.field_0 + test.field_1,test.field_1) RANGE 5m FILL NULL], align=3600000ms, align_to=0ms, align_by=[test.tag_0, test.tag_1, test.tag_2, test.tag_3, test.tag_4], time_index=timestamp [COVARIANCE(test.field_0 + test.field_1,test.field_1) RANGE 5m FILL NULL:Float64;N, timestamp:Timestamp(Millisecond, None), tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8]\
-            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]&quot;
+            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]"
         </span>);
         query_plan_compare(query, expected).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_calculation() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT ((avg(field_0)+sum(field_1))/4) RANGE &#39;5m&#39; FROM test ALIGN &#39;1h&#39; by (tag_0,tag_1) FILL NULL;&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT ((avg(field_0)+sum(field_1))/4) RANGE '5m' FROM test ALIGN '1h' by (tag_0,tag_1) FILL NULL;"#</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: (AVG(test.field_0) RANGE 5m FILL NULL + SUM(test.field_1) RANGE 5m FILL NULL) / Int64(4) [AVG(test.field_0) RANGE 5m FILL NULL + SUM(test.field_1) RANGE 5m FILL NULL / Int64(4):Float64;N]\
+            <span class="string">"Projection: (AVG(test.field_0) RANGE 5m FILL NULL + SUM(test.field_1) RANGE 5m FILL NULL) / Int64(4) [AVG(test.field_0) RANGE 5m FILL NULL + SUM(test.field_1) RANGE 5m FILL NULL / Int64(4):Float64;N]\
             \n  RangeSelect: range_exprs=[AVG(test.field_0) RANGE 5m FILL NULL, SUM(test.field_1) RANGE 5m FILL NULL], align=3600000ms, align_to=0ms, align_by=[test.tag_0, test.tag_1], time_index=timestamp [AVG(test.field_0) RANGE 5m FILL NULL:Float64;N, SUM(test.field_1) RANGE 5m FILL NULL:Float64;N, timestamp:Timestamp(Millisecond, None), tag_0:Utf8, tag_1:Utf8]\
-            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]&quot;
+            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]"
         </span>);
         query_plan_compare(query, expected).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_as_sub_query() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT foo + 1 from (SELECT ((avg(field_0)+sum(field_1))/4) RANGE &#39;5m&#39; as foo FROM test ALIGN &#39;1h&#39; by (tag_0,tag_1) FILL NULL) where foo &gt; 1;&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT foo + 1 from (SELECT ((avg(field_0)+sum(field_1))/4) RANGE '5m' as foo FROM test ALIGN '1h' by (tag_0,tag_1) FILL NULL) where foo &gt; 1;"#</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: foo + Int64(1) [foo + Int64(1):Float64;N]\
+            <span class="string">"Projection: foo + Int64(1) [foo + Int64(1):Float64;N]\
             \n  Filter: foo &gt; Int64(1) [foo:Float64;N]\
             \n    Projection: (AVG(test.field_0) RANGE 5m FILL NULL + SUM(test.field_1) RANGE 5m FILL NULL) / Int64(4) AS foo [foo:Float64;N]\
             \n      RangeSelect: range_exprs=[AVG(test.field_0) RANGE 5m FILL NULL, SUM(test.field_1) RANGE 5m FILL NULL], align=3600000ms, align_to=0ms, align_by=[test.tag_0, test.tag_1], time_index=timestamp [AVG(test.field_0) RANGE 5m FILL NULL:Float64;N, SUM(test.field_1) RANGE 5m FILL NULL:Float64;N, timestamp:Timestamp(Millisecond, None), tag_0:Utf8, tag_1:Utf8]\
-            \n        TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]&quot;
+            \n        TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]"
         </span>);
         query_plan_compare(query, expected).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_from_nest_query() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT ((avg(a)+sum(b))/4) RANGE &#39;5m&#39; FROM (SELECT field_0 as a, field_1 as b, tag_0 as c, tag_1 as d, timestamp from test where field_0 &gt; 1.0) ALIGN &#39;1h&#39; by (c, d) FILL NULL;&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT ((avg(a)+sum(b))/4) RANGE '5m' FROM (SELECT field_0 as a, field_1 as b, tag_0 as c, tag_1 as d, timestamp from test where field_0 &gt; 1.0) ALIGN '1h' by (c, d) FILL NULL;"#</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: (AVG(a) RANGE 5m FILL NULL + SUM(b) RANGE 5m FILL NULL) / Int64(4) [AVG(a) RANGE 5m FILL NULL + SUM(b) RANGE 5m FILL NULL / Int64(4):Float64;N]\
+            <span class="string">"Projection: (AVG(a) RANGE 5m FILL NULL + SUM(b) RANGE 5m FILL NULL) / Int64(4) [AVG(a) RANGE 5m FILL NULL + SUM(b) RANGE 5m FILL NULL / Int64(4):Float64;N]\
             \n  RangeSelect: range_exprs=[AVG(a) RANGE 5m FILL NULL, SUM(b) RANGE 5m FILL NULL], align=3600000ms, align_to=0ms, align_by=[c, d], time_index=timestamp [AVG(a) RANGE 5m FILL NULL:Float64;N, SUM(b) RANGE 5m FILL NULL:Float64;N, timestamp:Timestamp(Millisecond, None), c:Utf8, d:Utf8]\
             \n    Projection: test.field_0 AS a, test.field_1 AS b, test.tag_0 AS c, test.tag_1 AS d, test.timestamp [a:Float64;N, b:Float64;N, c:Utf8, d:Utf8, timestamp:Timestamp(Millisecond, None)]\
             \n      Filter: test.field_0 &gt; Float64(1) [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]\
-            \n        TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]&quot;
+            \n        TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]"
          </span>);
         query_plan_compare(query, expected).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_in_expr() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT sin(avg(field_0 + field_1) RANGE &#39;5m&#39; + 1) FROM test ALIGN &#39;1h&#39; by (tag_0,tag_1);&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT sin(avg(field_0 + field_1) RANGE '5m' + 1) FROM test ALIGN '1h' by (tag_0,tag_1);"#</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: sin(AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL + Int64(1)) [sin(AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL + Int64(1)):Float64;N]\
+            <span class="string">"Projection: sin(AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL + Int64(1)) [sin(AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL + Int64(1)):Float64;N]\
             \n  RangeSelect: range_exprs=[AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL], align=3600000ms, align_to=0ms, align_by=[test.tag_0, test.tag_1], time_index=timestamp [AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL:Float64;N, timestamp:Timestamp(Millisecond, None), tag_0:Utf8, tag_1:Utf8]\
-            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]&quot;
+            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]"
         </span>);
         query_plan_compare(query, expected).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>duplicate_range_expr() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT avg(field_0) RANGE &#39;5m&#39; FILL 6.0 + avg(field_0) RANGE &#39;5m&#39; FILL 6.0 FROM test ALIGN &#39;1h&#39; by (tag_0,tag_1);&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT avg(field_0) RANGE '5m' FILL 6.0 + avg(field_0) RANGE '5m' FILL 6.0 FROM test ALIGN '1h' by (tag_0,tag_1);"#</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: AVG(test.field_0) RANGE 5m FILL 6 + AVG(test.field_0) RANGE 5m FILL 6 [AVG(test.field_0) RANGE 5m FILL 6 + AVG(test.field_0) RANGE 5m FILL 6:Float64]\
+            <span class="string">"Projection: AVG(test.field_0) RANGE 5m FILL 6 + AVG(test.field_0) RANGE 5m FILL 6 [AVG(test.field_0) RANGE 5m FILL 6 + AVG(test.field_0) RANGE 5m FILL 6:Float64]\
             \n  RangeSelect: range_exprs=[AVG(test.field_0) RANGE 5m FILL 6], align=3600000ms, align_to=0ms, align_by=[test.tag_0, test.tag_1], time_index=timestamp [AVG(test.field_0) RANGE 5m FILL 6:Float64, timestamp:Timestamp(Millisecond, None), tag_0:Utf8, tag_1:Utf8]\
-            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]&quot;
+            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]"
         </span>);
         query_plan_compare(query, expected).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>deep_nest_range_expr() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT round(sin(avg(field_0 + field_1) RANGE &#39;5m&#39; + 1)) FROM test ALIGN &#39;1h&#39; by (tag_0,tag_1);&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT round(sin(avg(field_0 + field_1) RANGE '5m' + 1)) FROM test ALIGN '1h' by (tag_0,tag_1);"#</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: round(sin(AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL + Int64(1))) [round(sin(AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL + Int64(1))):Float64;N]\
+            <span class="string">"Projection: round(sin(AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL + Int64(1))) [round(sin(AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL + Int64(1))):Float64;N]\
             \n  RangeSelect: range_exprs=[AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL], align=3600000ms, align_to=0ms, align_by=[test.tag_0, test.tag_1], time_index=timestamp [AVG(test.field_0 + test.field_1) RANGE 5m FILL NULL:Float64;N, timestamp:Timestamp(Millisecond, None), tag_0:Utf8, tag_1:Utf8]\
-            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]&quot;
+            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]"
         </span>);
         query_plan_compare(query, expected).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>complex_range_expr() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT gcd(CAST(max(field_0 + 1) Range &#39;5m&#39; FILL NULL AS Int64), CAST(tag_0 AS Int64)) + round(max(field_2+1) Range &#39;6m&#39; FILL NULL + 1) + max(field_2+3) Range &#39;10m&#39; FILL NULL * CAST(tag_1 AS Float64) + 1 FROM test ALIGN &#39;1h&#39; by (tag_0, tag_1);&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT gcd(CAST(max(field_0 + 1) Range '5m' FILL NULL AS Int64), CAST(tag_0 AS Int64)) + round(max(field_2+1) Range '6m' FILL NULL + 1) + max(field_2+3) Range '10m' FILL NULL * CAST(tag_1 AS Float64) + 1 FROM test ALIGN '1h' by (tag_0, tag_1);"#</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;Projection: gcd(CAST(MAX(test.field_0 + Int64(1)) RANGE 5m FILL NULL AS Int64), CAST(test.tag_0 AS Int64)) + round(MAX(test.field_2 + Int64(1)) RANGE 6m FILL NULL + Int64(1)) + MAX(test.field_2 + Int64(3)) RANGE 10m FILL NULL * CAST(test.tag_1 AS Float64) + Int64(1) [gcd(MAX(test.field_0 + Int64(1)) RANGE 5m FILL NULL,test.tag_0) + round(MAX(test.field_2 + Int64(1)) RANGE 6m FILL NULL + Int64(1)) + MAX(test.field_2 + Int64(3)) RANGE 10m FILL NULL * test.tag_1 + Int64(1):Float64;N]\
+            <span class="string">"Projection: gcd(CAST(MAX(test.field_0 + Int64(1)) RANGE 5m FILL NULL AS Int64), CAST(test.tag_0 AS Int64)) + round(MAX(test.field_2 + Int64(1)) RANGE 6m FILL NULL + Int64(1)) + MAX(test.field_2 + Int64(3)) RANGE 10m FILL NULL * CAST(test.tag_1 AS Float64) + Int64(1) [gcd(MAX(test.field_0 + Int64(1)) RANGE 5m FILL NULL,test.tag_0) + round(MAX(test.field_2 + Int64(1)) RANGE 6m FILL NULL + Int64(1)) + MAX(test.field_2 + Int64(3)) RANGE 10m FILL NULL * test.tag_1 + Int64(1):Float64;N]\
             \n  RangeSelect: range_exprs=[MAX(test.field_0 + Int64(1)) RANGE 5m FILL NULL, MAX(test.field_2 + Int64(1)) RANGE 6m FILL NULL, MAX(test.field_2 + Int64(3)) RANGE 10m FILL NULL], align=3600000ms, align_to=0ms, align_by=[test.tag_0, test.tag_1], time_index=timestamp [MAX(test.field_0 + Int64(1)) RANGE 5m FILL NULL:Float64;N, MAX(test.field_2 + Int64(1)) RANGE 6m FILL NULL:Float64;N, MAX(test.field_2 + Int64(3)) RANGE 10m FILL NULL:Float64;N, timestamp:Timestamp(Millisecond, None), tag_0:Utf8, tag_1:Utf8]\
-            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]&quot;
+            \n    TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]"
         </span>);
         query_plan_compare(query, expected).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_linear_on_integer() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT min(CAST(field_0 AS Int64) + CAST(field_1 AS Int64)) RANGE &#39;5m&#39; FILL LINEAR FROM test ALIGN &#39;1h&#39; by (tag_0,tag_1);&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT min(CAST(field_0 AS Int64) + CAST(field_1 AS Int64)) RANGE '5m' FILL LINEAR FROM test ALIGN '1h' by (tag_0,tag_1);"#</span>;
         <span class="kw">let </span>expected = String::from(
-            <span class="string">&quot;RangeSelect: range_exprs=[MIN(test.field_0 + test.field_1) RANGE 5m FILL LINEAR], align=3600000ms, align_to=0ms, align_by=[test.tag_0, test.tag_1], time_index=timestamp [MIN(test.field_0 + test.field_1) RANGE 5m FILL LINEAR:Float64;N]\
-            \n  TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]&quot;
+            <span class="string">"RangeSelect: range_exprs=[MIN(test.field_0 + test.field_1) RANGE 5m FILL LINEAR], align=3600000ms, align_to=0ms, align_by=[test.tag_0, test.tag_1], time_index=timestamp [MIN(test.field_0 + test.field_1) RANGE 5m FILL LINEAR:Float64;N]\
+            \n  TableScan: test [tag_0:Utf8, tag_1:Utf8, tag_2:Utf8, tag_3:Utf8, tag_4:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, field_1:Float64;N, field_2:Float64;N, field_3:Float64;N, field_4:Float64;N]"
         </span>);
         query_plan_compare(query, expected).<span class="kw">await</span>;
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_nest_range_err() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT sum(avg(field_0 + field_1) RANGE &#39;5m&#39; + 1) RANGE &#39;5m&#39; + 1 FROM test ALIGN &#39;1h&#39; by (tag_0,tag_1);&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT sum(avg(field_0 + field_1) RANGE '5m' + 1) RANGE '5m' + 1 FROM test ALIGN '1h' by (tag_0,tag_1);"#</span>;
         <span class="macro">assert_eq!</span>(
             do_query(query).<span class="kw">await</span>.unwrap_err().to_string(),
-            <span class="string">&quot;Range Query: Nest Range Query is not allowed&quot;
+            <span class="string">"Range Query: Nest Range Query is not allowed"
         </span>)
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="doccomment">/// Start directly from the rewritten SQL and check whether the error reported by the range expression rewriting is as expected.
-    /// the right argument is `range_fn(avg(field_0), &#39;5m&#39;, &#39;NULL&#39;, &#39;0&#39;, &#39;1h&#39;)`
+    /// the right argument is `range_fn(avg(field_0), '5m', 'NULL', '0', '1h')`
     </span><span class="kw">async fn </span>range_argument_err_1() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT range_fn(&#39;5m&#39;, avg(field_0), &#39;NULL&#39;, &#39;1&#39;, tag_0, &#39;1h&#39;) FROM test group by tag_0;&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT range_fn('5m', avg(field_0), 'NULL', '1', tag_0, '1h') FROM test group by tag_0;"#</span>;
         <span class="kw">let </span>error = do_query(query)
             .<span class="kw">await
             </span>.unwrap_err()
@@ -1443,13 +1444,13 @@
             .to_string();
         <span class="macro">assert_eq!</span>(
             error,
-            <span class="string">&quot;Error during planning: Illegal argument `Utf8(\&quot;5m\&quot;)` in range select query&quot;
+            <span class="string">"Error during planning: Illegal argument `Utf8(\"5m\")` in range select query"
         </span>)
     }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>range_argument_err_2() {
-        <span class="kw">let </span>query = <span class="string">r#&quot;SELECT range_fn(avg(field_0), 5, &#39;NULL&#39;, &#39;1&#39;, tag_0, &#39;1h&#39;) FROM test group by tag_0;&quot;#</span>;
+        <span class="kw">let </span>query = <span class="string">r#"SELECT range_fn(avg(field_0), 5, 'NULL', '1', tag_0, '1h') FROM test group by tag_0;"#</span>;
         <span class="kw">let </span>error = do_query(query)
             .<span class="kw">await
             </span>.unwrap_err()
@@ -1458,7 +1459,7 @@
             .to_string();
         <span class="macro">assert_eq!</span>(
             error,
-            <span class="string">&quot;Error during planning: Illegal argument `Int64(5)` in range select query&quot;
+            <span class="string">"Error during planning: Illegal argument `Int64(5)` in range select query"
         </span>)
     }
 
@@ -1495,10 +1496,10 @@
             interval_to_ms(interval)
         );
         <span class="comment">// test Duration
-        </span><span class="kw">let </span>args = <span class="macro">vec!</span>[Expr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">&quot;1y4w&quot;</span>.into())))];
+        </span><span class="kw">let </span>args = <span class="macro">vec!</span>[Expr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">"1y4w"</span>.into())))];
         <span class="macro">assert_eq!</span>(
             parse_duration_expr(<span class="kw-2">&amp;</span>args, <span class="number">0</span>).unwrap(),
-            parse_duration(<span class="string">&quot;1y4w&quot;</span>).unwrap()
+            parse_duration(<span class="string">"1y4w"</span>).unwrap()
         );
         <span class="comment">// test err
         </span><span class="macro">assert!</span>(parse_duration_expr(<span class="kw-2">&amp;</span>args, <span class="number">10</span>).is_err());
@@ -1507,15 +1508,15 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_parse_align_to() {
         <span class="comment">// test NOW
-        </span><span class="kw">let </span>args = <span class="macro">vec!</span>[Expr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">&quot;NOW&quot;</span>.into())))];
+        </span><span class="kw">let </span>args = <span class="macro">vec!</span>[Expr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">"NOW"</span>.into())))];
         <span class="kw">let </span>epsinon = parse_align_to(<span class="kw-2">&amp;</span>args, <span class="number">0</span>).unwrap() - Timestamp::current_millis().value();
         <span class="macro">assert!</span>(epsinon.abs() &lt; <span class="number">100</span>);
         <span class="comment">// test default
-        </span><span class="kw">let </span>args = <span class="macro">vec!</span>[Expr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">&quot;&quot;</span>.into())))];
+        </span><span class="kw">let </span>args = <span class="macro">vec!</span>[Expr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(<span class="string">""</span>.into())))];
         <span class="macro">assert!</span>(parse_align_to(<span class="kw-2">&amp;</span>args, <span class="number">0</span>).unwrap() == <span class="number">0</span>);
         <span class="comment">// test Timestamp
         </span><span class="kw">let </span>args = <span class="macro">vec!</span>[Expr::Literal(ScalarValue::Utf8(<span class="prelude-val">Some</span>(
-            <span class="string">&quot;1970-01-01T00:00:00+08:00&quot;</span>.into(),
+            <span class="string">"1970-01-01T00:00:00+08:00"</span>.into(),
         )))];
         <span class="macro">assert!</span>(parse_align_to(<span class="kw-2">&amp;</span>args, <span class="number">0</span>).unwrap() == -<span class="number">8 </span>* <span class="number">60 </span>* <span class="number">60 </span>* <span class="number">1000</span>);
     }

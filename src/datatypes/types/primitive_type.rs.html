@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/datatypes/src/types/primitive_type.rs`."><title>primitive_type.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="datatypes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/datatypes/src/types/primitive_type.rs`."><title>primitive_type.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="datatypes" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -690,14 +691,14 @@
 <a href="#690" id="690">690</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -721,7 +722,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::value::{Value, ValueRef};
 <span class="kw">use </span><span class="kw">crate</span>::vectors::{MutableVector, PrimitiveVector, PrimitiveVectorBuilder, Vector};
 
-<span class="doccomment">/// Data types that can be used as arrow&#39;s native type.
+<span class="doccomment">/// Data types that can be used as arrow's native type.
 </span><span class="kw">pub trait </span>NativeType: ArrowNativeType + NumCast {}
 
 <span class="macro">macro_rules! </span>impl_native_type {
@@ -750,10 +751,10 @@
     + Send
     + Sync
     + fmt::Debug
-    + <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; Scalar&lt;RefType&lt;<span class="lifetime">&#39;a</span>&gt; = <span class="self">Self</span>&gt;
+    + <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; Scalar&lt;RefType&lt;<span class="lifetime">'a</span>&gt; = <span class="self">Self</span>&gt;
     + PartialEq
     + Into&lt;Value&gt;
-    + Into&lt;ValueRef&lt;<span class="lifetime">&#39;static</span>&gt;&gt;
+    + Into&lt;ValueRef&lt;<span class="lifetime">'static</span>&gt;&gt;
     + Serialize
     + Into&lt;serde_json::Value&gt;
 {
@@ -770,15 +771,15 @@
 }
 
 <span class="doccomment">/// Trait bridging the logical primitive type with [ArrowPrimitiveType].
-</span><span class="kw">pub trait </span>LogicalPrimitiveType: <span class="lifetime">&#39;static </span>+ Sized {
+</span><span class="kw">pub trait </span>LogicalPrimitiveType: <span class="lifetime">'static </span>+ Sized {
     <span class="doccomment">/// Arrow primitive type of this logical type.
     </span><span class="kw">type </span>ArrowPrimitive: ArrowPrimitiveType&lt;Native = <span class="self">Self</span>::Native&gt;;
     <span class="doccomment">/// Native (physical) type of this logical type.
     </span><span class="kw">type </span>Native: NativeType;
     <span class="doccomment">/// Wrapper type that the vector returns.
     </span><span class="kw">type </span>Wrapper: WrapperType&lt;LogicalType = <span class="self">Self</span>, Native = <span class="self">Self</span>::Native&gt;
-        + <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; Scalar&lt;VectorType = PrimitiveVector&lt;<span class="self">Self</span>&gt;, RefType&lt;<span class="lifetime">&#39;a</span>&gt; = <span class="self">Self</span>::Wrapper&gt;
-        + <span class="kw">for</span>&lt;<span class="lifetime">&#39;a</span>&gt; ScalarRef&lt;<span class="lifetime">&#39;a</span>, ScalarType = <span class="self">Self</span>::Wrapper&gt;;
+        + <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; Scalar&lt;VectorType = PrimitiveVector&lt;<span class="self">Self</span>&gt;, RefType&lt;<span class="lifetime">'a</span>&gt; = <span class="self">Self</span>::Wrapper&gt;
+        + <span class="kw">for</span>&lt;<span class="lifetime">'a</span>&gt; ScalarRef&lt;<span class="lifetime">'a</span>, ScalarType = <span class="self">Self</span>::Wrapper&gt;;
     <span class="doccomment">/// Largest type this primitive type can cast to.
     </span><span class="kw">type </span>LargestType: LogicalPrimitiveType;
 
@@ -786,7 +787,7 @@
     </span><span class="kw">fn </span>build_data_type() -&gt; ConcreteDataType;
 
     <span class="doccomment">/// Return the name of the type.
-    </span><span class="kw">fn </span>type_name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str;
+    </span><span class="kw">fn </span>type_name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str;
 
     <span class="doccomment">/// Dynamic cast the vector to the concrete vector type.
     </span><span class="kw">fn </span>cast_vector(vector: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Vector) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>PrimitiveVector&lt;<span class="self">Self</span>&gt;&gt;;
@@ -901,7 +902,7 @@
                 ConcreteDataType::<span class="macro-nonterminal">$TypeId</span>(<span class="macro-nonterminal">$DataType::default</span>())
             }
 
-            <span class="kw">fn </span>type_name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str {
+            <span class="kw">fn </span>type_name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
                 <span class="macro">stringify!</span>(<span class="macro-nonterminal">$TypeId</span>)
             }
 
@@ -911,7 +912,7 @@
                     .downcast_ref::&lt;PrimitiveVector&lt;<span class="macro-nonterminal">$DataType</span>&gt;&gt;()
                     .with_context(|| error::CastTypeSnafu {
                         msg: <span class="macro">format!</span>(
-                            <span class="string">&quot;Failed to cast {} to vector of primitive type {}&quot;</span>,
+                            <span class="string">"Failed to cast {} to vector of primitive type {}"</span>,
                             vector.vector_type_name(),
                             <span class="macro">stringify!</span>(<span class="macro-nonterminal">$TypeId</span>)
                         ),
@@ -924,7 +925,7 @@
                     ValueRef::<span class="macro-nonterminal">$TypeId</span>(v) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(v.into())),
                     other =&gt; error::CastTypeSnafu {
                         msg: <span class="macro">format!</span>(
-                            <span class="string">&quot;Failed to cast value {:?} to primitive type {}&quot;</span>,
+                            <span class="string">"Failed to cast value {:?} to primitive type {}"</span>,
                             other,
                             <span class="macro">stringify!</span>(<span class="macro-nonterminal">$TypeId</span>),
                         ),
@@ -1041,7 +1042,7 @@
 
 <span class="kw">impl </span>DataType <span class="kw">for </span>Int64Type {
     <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
-        <span class="string">&quot;Int64&quot;</span>.to_string()
+        <span class="string">"Int64"</span>.to_string()
     }
 
     <span class="kw">fn </span>logical_type_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LogicalTypeId {
@@ -1088,7 +1089,7 @@
 
 <span class="kw">impl </span>DataType <span class="kw">for </span>Int32Type {
     <span class="kw">fn </span>name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
-        <span class="string">&quot;Int32&quot;</span>.to_string()
+        <span class="string">"Int32"</span>.to_string()
     }
 
     <span class="kw">fn </span>logical_type_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LogicalTypeId {
@@ -1327,52 +1328,52 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_string_cast_to_primitive() {
         <span class="macro">assert_primitive_cast!</span>(
-            Value::String(<span class="string">&quot;123&quot;</span>.into()),
+            Value::String(<span class="string">"123"</span>.into()),
             ConcreteDataType::uint8_datatype(),
             Value::UInt8(<span class="number">123</span>)
         );
         <span class="macro">assert_primitive_cast!</span>(
-            Value::String(<span class="string">&quot;123&quot;</span>.into()),
+            Value::String(<span class="string">"123"</span>.into()),
             ConcreteDataType::uint16_datatype(),
             Value::UInt16(<span class="number">123</span>)
         );
         <span class="macro">assert_primitive_cast!</span>(
-            Value::String(<span class="string">&quot;123&quot;</span>.into()),
+            Value::String(<span class="string">"123"</span>.into()),
             ConcreteDataType::uint32_datatype(),
             Value::UInt32(<span class="number">123</span>)
         );
         <span class="macro">assert_primitive_cast!</span>(
-            Value::String(<span class="string">&quot;123&quot;</span>.into()),
+            Value::String(<span class="string">"123"</span>.into()),
             ConcreteDataType::uint64_datatype(),
             Value::UInt64(<span class="number">123</span>)
         );
         <span class="macro">assert_primitive_cast!</span>(
-            Value::String(<span class="string">&quot;123&quot;</span>.into()),
+            Value::String(<span class="string">"123"</span>.into()),
             ConcreteDataType::int8_datatype(),
             Value::Int8(<span class="number">123</span>)
         );
         <span class="macro">assert_primitive_cast!</span>(
-            Value::String(<span class="string">&quot;123&quot;</span>.into()),
+            Value::String(<span class="string">"123"</span>.into()),
             ConcreteDataType::int16_datatype(),
             Value::Int16(<span class="number">123</span>)
         );
         <span class="macro">assert_primitive_cast!</span>(
-            Value::String(<span class="string">&quot;123&quot;</span>.into()),
+            Value::String(<span class="string">"123"</span>.into()),
             ConcreteDataType::int32_datatype(),
             Value::Int32(<span class="number">123</span>)
         );
         <span class="macro">assert_primitive_cast!</span>(
-            Value::String(<span class="string">&quot;123&quot;</span>.into()),
+            Value::String(<span class="string">"123"</span>.into()),
             ConcreteDataType::int64_datatype(),
             Value::Int64(<span class="number">123</span>)
         );
         <span class="macro">assert_primitive_cast!</span>(
-            Value::String(<span class="string">&quot;1.23&quot;</span>.into()),
+            Value::String(<span class="string">"1.23"</span>.into()),
             ConcreteDataType::float32_datatype(),
             Value::Float32(OrderedFloat(<span class="number">1.23</span>))
         );
         <span class="macro">assert_primitive_cast!</span>(
-            Value::String(<span class="string">&quot;1.23&quot;</span>.into()),
+            Value::String(<span class="string">"1.23"</span>.into()),
             ConcreteDataType::float64_datatype(),
             Value::Float64(OrderedFloat(<span class="number">1.23</span>))
         );

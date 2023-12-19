@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/store-api/src/metadata.rs`."><title>metadata.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-deb46770fd761b69.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="store_api" data-themes="" data-resource-suffix="" data-rustdoc-version="1.75.0-nightly (249624b50 2023-10-20)" data-channel="nightly" data-search-js="search-8fbf244ebcf71464.js" data-settings-js="settings-74424d7eec62a23e.js" ><script src="../../static.files/storage-fec3eaa3851e447d.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-5f34af1a0ee6bacd.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-5d8b3c7633ad77ba.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/store-api/src/metadata.rs`."><title>metadata.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="store_api" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1146,14 +1147,14 @@
 <a href="#1146" id="1146">1146</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
-// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+// distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
@@ -1197,10 +1198,10 @@
 }
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>ColumnMetadata {
-    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">&#39;_</span>&gt;) -&gt; fmt::Result {
+    <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="macro">write!</span>(
             f,
-            <span class="string">&quot;[{:?} {:?} {:?}]&quot;</span>,
+            <span class="string">"[{:?} {:?} {:?}]"</span>,
             <span class="self">self</span>.column_schema, <span class="self">self</span>.semantic_type, <span class="self">self</span>.column_id,
         )
     }
@@ -1214,7 +1215,7 @@
         <span class="kw">let </span>column_def = column_def
             .column_def
             .context(InvalidRawRegionRequestSnafu {
-                err: <span class="string">&quot;column_def is absent&quot;</span>,
+                err: <span class="string">"column_def is absent"</span>,
             })<span class="question-mark">?</span>;
 
         <span class="kw">let </span>semantic_type = column_def.semantic_type();
@@ -1273,12 +1274,12 @@
     </span><span class="attr">#[serde(skip)]
     </span><span class="kw">pub </span>schema: SchemaRef,
 
-    <span class="comment">// We don&#39;t pub `time_index` and `id_to_index` and always construct them via [SkippedFields]
+    <span class="comment">// We don't pub `time_index` and `id_to_index` and always construct them via [SkippedFields]
     // so we can assumes they are valid.
     </span><span class="doccomment">/// Id of the time index column.
     </span><span class="attr">#[serde(skip)]
     </span>time_index: ColumnId,
-    <span class="doccomment">/// Map column id to column&#39;s index in [column_metadatas](RegionMetadata::column_metadatas).
+    <span class="doccomment">/// Map column id to column's index in [column_metadatas](RegionMetadata::column_metadatas).
     </span><span class="attr">#[serde(skip)]
     </span>id_to_index: HashMap&lt;ColumnId, usize&gt;,
 
@@ -1298,22 +1299,22 @@
 
 <span class="kw">impl </span>fmt::Debug <span class="kw">for </span>RegionMetadata {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter) -&gt; fmt::Result {
-        f.debug_struct(<span class="string">&quot;RegionMetadata&quot;</span>)
-            .field(<span class="string">&quot;column_metadatas&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.column_metadatas)
-            .field(<span class="string">&quot;time_index&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.time_index)
-            .field(<span class="string">&quot;primary_key&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.primary_key)
-            .field(<span class="string">&quot;region_id&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.region_id)
-            .field(<span class="string">&quot;schema_version&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.schema_version)
+        f.debug_struct(<span class="string">"RegionMetadata"</span>)
+            .field(<span class="string">"column_metadatas"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.column_metadatas)
+            .field(<span class="string">"time_index"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.time_index)
+            .field(<span class="string">"primary_key"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.primary_key)
+            .field(<span class="string">"region_id"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.region_id)
+            .field(<span class="string">"schema_version"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.schema_version)
             .finish()
     }
 }
 
 <span class="kw">pub type </span>RegionMetadataRef = Arc&lt;RegionMetadata&gt;;
 
-<span class="kw">impl</span>&lt;<span class="lifetime">&#39;de</span>&gt; Deserialize&lt;<span class="lifetime">&#39;de</span>&gt; <span class="kw">for </span>RegionMetadata {
+<span class="kw">impl</span>&lt;<span class="lifetime">'de</span>&gt; Deserialize&lt;<span class="lifetime">'de</span>&gt; <span class="kw">for </span>RegionMetadata {
     <span class="kw">fn </span>deserialize&lt;D&gt;(deserializer: D) -&gt; std::result::Result&lt;<span class="self">Self</span>, D::Error&gt;
     <span class="kw">where
-        </span>D: Deserializer&lt;<span class="lifetime">&#39;de</span>&gt;,
+        </span>D: Deserializer&lt;<span class="lifetime">'de</span>&gt;,
     {
         <span class="comment">// helper internal struct for deserialization
         </span><span class="attr">#[derive(Deserialize)]
@@ -1400,7 +1401,7 @@
             .filter(|column| column.semantic_type == SemanticType::Field)
     }
 
-    <span class="doccomment">/// Returns a column&#39;s index in primary key if it is a primary key column.
+    <span class="doccomment">/// Returns a column's index in primary key if it is a primary key column.
     ///
     /// This does a linear search.
     </span><span class="kw">pub fn </span>primary_key_index(<span class="kw-2">&amp;</span><span class="self">self</span>, column_id: ColumnId) -&gt; <span class="prelude-ty">Option</span>&lt;usize&gt; {
@@ -1421,7 +1422,7 @@
                 !id_names.contains_key(<span class="kw-2">&amp;</span>col.column_id),
                 InvalidMetaSnafu {
                     reason: <span class="macro">format!</span>(
-                        <span class="string">&quot;column {} and {} have the same column id {}&quot;</span>,
+                        <span class="string">"column {} and {} have the same column id {}"</span>,
                         id_names[<span class="kw-2">&amp;</span>col.column_id], col.column_schema.name, col.column_id,
                     ),
                 }
@@ -1438,7 +1439,7 @@
         <span class="macro">ensure!</span>(
             num_time_index == <span class="number">1</span>,
             InvalidMetaSnafu {
-                reason: <span class="macro">format!</span>(<span class="string">&quot;expect only one time index, found {}&quot;</span>, num_time_index),
+                reason: <span class="macro">format!</span>(<span class="string">"expect only one time index, found {}"</span>, num_time_index),
             }
         );
 
@@ -1447,7 +1448,7 @@
             !<span class="self">self</span>.time_index_column().column_schema.is_nullable(),
             InvalidMetaSnafu {
                 reason: <span class="macro">format!</span>(
-                    <span class="string">&quot;time index column {} must be NOT NULL&quot;</span>,
+                    <span class="string">"time index column {} must be NOT NULL"</span>,
                     <span class="self">self</span>.time_index_column().column_schema.name
                 ),
             }
@@ -1461,7 +1462,7 @@
                 </span><span class="macro">ensure!</span>(
                     id_names.contains_key(column_id),
                     InvalidMetaSnafu {
-                        reason: <span class="macro">format!</span>(<span class="string">&quot;unknown column id {}&quot;</span>, column_id),
+                        reason: <span class="macro">format!</span>(<span class="string">"unknown column id {}"</span>, column_id),
                     }
                 );
 
@@ -1472,7 +1473,7 @@
                     !pk_ids.contains(<span class="kw-2">&amp;</span>column_id),
                     InvalidMetaSnafu {
                         reason: <span class="macro">format!</span>(
-                            <span class="string">&quot;duplicate column {} in primary key&quot;</span>,
+                            <span class="string">"duplicate column {} in primary key"</span>,
                             column.column_schema.name
                         ),
                     }
@@ -1483,7 +1484,7 @@
                     <span class="kw-2">*</span>column_id != <span class="self">self</span>.time_index,
                     InvalidMetaSnafu {
                         reason: <span class="macro">format!</span>(
-                            <span class="string">&quot;column {} is already a time index column&quot;</span>,
+                            <span class="string">"column {} is already a time index column"</span>,
                             column.column_schema.name,
                         ),
                     }
@@ -1494,7 +1495,7 @@
                     column.semantic_type == SemanticType::Tag,
                     InvalidMetaSnafu {
                         reason: <span class="macro">format!</span>(
-                            <span class="string">&quot;semantic type of column {} should be Tag, not {:?}&quot;</span>,
+                            <span class="string">"semantic type of column {} should be Tag, not {:?}"</span>,
                             column.column_schema.name, column.semantic_type
                         ),
                     }
@@ -1514,7 +1515,7 @@
             num_tag == <span class="self">self</span>.primary_key.len(),
             InvalidMetaSnafu {
                 reason: <span class="macro">format!</span>(
-                    <span class="string">&quot;number of primary key columns {} not equal to tag columns {}&quot;</span>,
+                    <span class="string">"number of primary key columns {} not equal to tag columns {}"</span>,
                     <span class="self">self</span>.primary_key.len(),
                     num_tag
                 ),
@@ -1531,7 +1532,7 @@
                 column_metadata.column_schema.data_type.is_timestamp(),
                 InvalidMetaSnafu {
                     reason: <span class="macro">format!</span>(
-                        <span class="string">&quot;column `{}` is not timestamp type&quot;</span>,
+                        <span class="string">"column `{}` is not timestamp type"</span>,
                         column_metadata.column_schema.name
                     ),
                 }
@@ -1542,7 +1543,7 @@
             !is_internal_column(<span class="kw-2">&amp;</span>column_metadata.column_schema.name),
             InvalidMetaSnafu {
                 reason: <span class="macro">format!</span>(
-                    <span class="string">&quot;{} is internal column name that can not be used&quot;</span>,
+                    <span class="string">"{} is internal column name that can not be used"</span>,
                     column_metadata.column_schema.name
                 ),
             }
@@ -1581,7 +1582,7 @@
         }
     }
 
-    <span class="doccomment">/// Pushes a new column metadata to this region&#39;s metadata.
+    <span class="doccomment">/// Pushes a new column metadata to this region's metadata.
     </span><span class="kw">pub fn </span>push_column_metadata(<span class="kw-2">&amp;mut </span><span class="self">self</span>, column_metadata: ColumnMetadata) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
         <span class="self">self</span>.column_metadatas.push(column_metadata);
         <span class="self">self
@@ -1661,7 +1662,7 @@
                         .context(InvalidRegionRequestSnafu {
                             region_id: <span class="self">self</span>.region_id,
                             err: <span class="macro">format!</span>(
-                                <span class="string">&quot;column {} not found, failed to add column {} after it&quot;</span>,
+                                <span class="string">"column {} not found, failed to add column {} after it"</span>,
                                 column_name, add_column.column_metadata.column_schema.name
                             ),
                         })<span class="question-mark">?</span>;
@@ -1694,7 +1695,7 @@
     </span>schema: SchemaRef,
     <span class="doccomment">/// Id of the time index column.
     </span>time_index: ColumnId,
-    <span class="doccomment">/// Map column id to column&#39;s index in [column_metadatas](RegionMetadata::column_metadatas).
+    <span class="doccomment">/// Map column id to column's index in [column_metadatas](RegionMetadata::column_metadatas).
     </span>id_to_index: HashMap&lt;ColumnId, usize&gt;,
 }
 
@@ -1716,7 +1717,7 @@
                 </span>}
             })
             .context(InvalidMetaSnafu {
-                reason: <span class="string">&quot;time index not found&quot;</span>,
+                reason: <span class="string">"time index not found"</span>,
             })<span class="question-mark">?</span>;
         <span class="kw">let </span>id_to_index = column_metadatas
             .iter()
@@ -1736,32 +1737,32 @@
 #[snafu(visibility(<span class="kw">pub</span>))]
 #[stack_trace_debug]
 </span><span class="kw">pub enum </span>MetadataError {
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid schema&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid schema"</span>))]
     </span>InvalidSchema {
         source: datatypes::error::Error,
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid metadata, {}&quot;</span>, reason))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid metadata, {}"</span>, reason))]
     </span>InvalidMeta { reason: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to ser/de json object&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to ser/de json object"</span>))]
     </span>SerdeJson {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: serde_json::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Failed to convert struct from datatypes&quot;</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to convert struct from datatypes"</span>))]
     </span>ConvertDatatypes {
         location: Location,
         source: datatypes::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid raw region request, err: {}&quot;</span>, err))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid raw region request, err: {}"</span>, err))]
     </span>InvalidRawRegionRequest { err: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">&quot;Invalid region request, region_id: {}, err: {}&quot;</span>, region_id, err))]
+    <span class="attr">#[snafu(display(<span class="string">"Invalid region request, region_id: {}, err: {}"</span>, region_id, err))]
     </span>InvalidRegionRequest {
         region_id: RegionId,
         err: String,
@@ -1794,18 +1795,18 @@
         <span class="kw">let </span><span class="kw-2">mut </span>builder = create_builder();
         builder
             .push_column_metadata(ColumnMetadata {
-                column_schema: ColumnSchema::new(<span class="string">&quot;a&quot;</span>, ConcreteDataType::int64_datatype(), <span class="bool-val">false</span>),
+                column_schema: ColumnSchema::new(<span class="string">"a"</span>, ConcreteDataType::int64_datatype(), <span class="bool-val">false</span>),
                 semantic_type: SemanticType::Tag,
                 column_id: <span class="number">1</span>,
             })
             .push_column_metadata(ColumnMetadata {
-                column_schema: ColumnSchema::new(<span class="string">&quot;b&quot;</span>, ConcreteDataType::float64_datatype(), <span class="bool-val">false</span>),
+                column_schema: ColumnSchema::new(<span class="string">"b"</span>, ConcreteDataType::float64_datatype(), <span class="bool-val">false</span>),
                 semantic_type: SemanticType::Field,
                 column_id: <span class="number">2</span>,
             })
             .push_column_metadata(ColumnMetadata {
                 column_schema: ColumnSchema::new(
-                    <span class="string">&quot;c&quot;</span>,
+                    <span class="string">"c"</span>,
                     ConcreteDataType::timestamp_millisecond_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -1819,9 +1820,9 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_region_metadata() {
         <span class="kw">let </span>region_metadata = build_test_region_metadata();
-        <span class="macro">assert_eq!</span>(<span class="string">&quot;c&quot;</span>, region_metadata.time_index_column().column_schema.name);
+        <span class="macro">assert_eq!</span>(<span class="string">"c"</span>, region_metadata.time_index_column().column_schema.name);
         <span class="macro">assert_eq!</span>(
-            <span class="string">&quot;a&quot;</span>,
+            <span class="string">"a"</span>,
             region_metadata.column_by_id(<span class="number">1</span>).unwrap().column_schema.name
         );
         <span class="macro">assert_eq!</span>(<span class="prelude-val">None</span>, region_metadata.column_by_id(<span class="number">10</span>));
@@ -1839,7 +1840,7 @@
     </span><span class="kw">fn </span>test_column_metadata_validate() {
         <span class="kw">let </span><span class="kw-2">mut </span>builder = create_builder();
         <span class="kw">let </span>col = ColumnMetadata {
-            column_schema: ColumnSchema::new(<span class="string">&quot;ts&quot;</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
+            column_schema: ColumnSchema::new(<span class="string">"ts"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
             semantic_type: SemanticType::Timestamp,
             column_id: <span class="number">1</span>,
         };
@@ -1848,8 +1849,8 @@
         <span class="kw">let </span>err = builder.build().unwrap_err();
         <span class="macro">assert!</span>(
             err.to_string()
-                .contains(<span class="string">&quot;column `ts` is not timestamp type&quot;</span>),
-            <span class="string">&quot;unexpected err: {err}&quot;</span>,
+                .contains(<span class="string">"column `ts` is not timestamp type"</span>),
+            <span class="string">"unexpected err: {err}"</span>,
         );
     }
 
@@ -1859,8 +1860,8 @@
         <span class="kw">let </span>err = builder.build().unwrap_err();
         <span class="comment">// A region must have a time index.
         </span><span class="macro">assert!</span>(
-            err.to_string().contains(<span class="string">&quot;time index not found&quot;</span>),
-            <span class="string">&quot;unexpected err: {err}&quot;</span>,
+            err.to_string().contains(<span class="string">"time index not found"</span>),
+            <span class="string">"unexpected err: {err}"</span>,
         );
     }
 
@@ -1869,13 +1870,13 @@
         <span class="kw">let </span><span class="kw-2">mut </span>builder = create_builder();
         builder
             .push_column_metadata(ColumnMetadata {
-                column_schema: ColumnSchema::new(<span class="string">&quot;a&quot;</span>, ConcreteDataType::int64_datatype(), <span class="bool-val">false</span>),
+                column_schema: ColumnSchema::new(<span class="string">"a"</span>, ConcreteDataType::int64_datatype(), <span class="bool-val">false</span>),
                 semantic_type: SemanticType::Tag,
                 column_id: <span class="number">1</span>,
             })
             .push_column_metadata(ColumnMetadata {
                 column_schema: ColumnSchema::new(
-                    <span class="string">&quot;b&quot;</span>,
+                    <span class="string">"b"</span>,
                     ConcreteDataType::timestamp_millisecond_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -1885,8 +1886,8 @@
         <span class="kw">let </span>err = builder.build().unwrap_err();
         <span class="macro">assert!</span>(
             err.to_string()
-                .contains(<span class="string">&quot;column a and b have the same column id&quot;</span>),
-            <span class="string">&quot;unexpected err: {err}&quot;</span>,
+                .contains(<span class="string">"column a and b have the same column id"</span>),
+            <span class="string">"unexpected err: {err}"</span>,
         );
     }
 
@@ -1896,7 +1897,7 @@
         builder
             .push_column_metadata(ColumnMetadata {
                 column_schema: ColumnSchema::new(
-                    <span class="string">&quot;a&quot;</span>,
+                    <span class="string">"a"</span>,
                     ConcreteDataType::timestamp_millisecond_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -1905,7 +1906,7 @@
             })
             .push_column_metadata(ColumnMetadata {
                 column_schema: ColumnSchema::new(
-                    <span class="string">&quot;b&quot;</span>,
+                    <span class="string">"b"</span>,
                     ConcreteDataType::timestamp_millisecond_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -1914,8 +1915,8 @@
             });
         <span class="kw">let </span>err = builder.build().unwrap_err();
         <span class="macro">assert!</span>(
-            err.to_string().contains(<span class="string">&quot;expect only one time index&quot;</span>),
-            <span class="string">&quot;unexpected err: {err}&quot;</span>,
+            err.to_string().contains(<span class="string">"expect only one time index"</span>),
+            <span class="string">"unexpected err: {err}"</span>,
         );
     }
 
@@ -1924,13 +1925,13 @@
         <span class="kw">let </span><span class="kw-2">mut </span>builder = create_builder();
         builder
             .push_column_metadata(ColumnMetadata {
-                column_schema: ColumnSchema::new(<span class="string">&quot;a&quot;</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
+                column_schema: ColumnSchema::new(<span class="string">"a"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
                 semantic_type: SemanticType::Tag,
                 column_id: <span class="number">1</span>,
             })
             .push_column_metadata(ColumnMetadata {
                 column_schema: ColumnSchema::new(
-                    <span class="string">&quot;b&quot;</span>,
+                    <span class="string">"b"</span>,
                     ConcreteDataType::timestamp_millisecond_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -1940,8 +1941,8 @@
             .primary_key(<span class="macro">vec!</span>[<span class="number">3</span>]);
         <span class="kw">let </span>err = builder.build().unwrap_err();
         <span class="macro">assert!</span>(
-            err.to_string().contains(<span class="string">&quot;unknown column id 3&quot;</span>),
-            <span class="string">&quot;unexpected err: {err}&quot;</span>,
+            err.to_string().contains(<span class="string">"unknown column id 3"</span>),
+            <span class="string">"unexpected err: {err}"</span>,
         );
     }
 
@@ -1950,13 +1951,13 @@
         <span class="kw">let </span><span class="kw-2">mut </span>builder = create_builder();
         builder
             .push_column_metadata(ColumnMetadata {
-                column_schema: ColumnSchema::new(<span class="string">&quot;a&quot;</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
+                column_schema: ColumnSchema::new(<span class="string">"a"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
                 semantic_type: SemanticType::Tag,
                 column_id: <span class="number">1</span>,
             })
             .push_column_metadata(ColumnMetadata {
                 column_schema: ColumnSchema::new(
-                    <span class="string">&quot;b&quot;</span>,
+                    <span class="string">"b"</span>,
                     ConcreteDataType::timestamp_millisecond_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -1967,8 +1968,8 @@
         <span class="kw">let </span>err = builder.build().unwrap_err();
         <span class="macro">assert!</span>(
             err.to_string()
-                .contains(<span class="string">&quot;duplicate column a in primary key&quot;</span>),
-            <span class="string">&quot;unexpected err: {err}&quot;</span>,
+                .contains(<span class="string">"duplicate column a in primary key"</span>),
+            <span class="string">"unexpected err: {err}"</span>,
         );
     }
 
@@ -1978,7 +1979,7 @@
         builder
             .push_column_metadata(ColumnMetadata {
                 column_schema: ColumnSchema::new(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ConcreteDataType::timestamp_millisecond_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -1989,8 +1990,8 @@
         <span class="kw">let </span>err = builder.build().unwrap_err();
         <span class="macro">assert!</span>(
             err.to_string()
-                .contains(<span class="string">&quot;column ts is already a time index column&quot;</span>),
-            <span class="string">&quot;unexpected err: {err}&quot;</span>,
+                .contains(<span class="string">"column ts is already a time index column"</span>),
+            <span class="string">"unexpected err: {err}"</span>,
         );
     }
 
@@ -1999,7 +2000,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>builder = create_builder();
         builder.push_column_metadata(ColumnMetadata {
             column_schema: ColumnSchema::new(
-                <span class="string">&quot;ts&quot;</span>,
+                <span class="string">"ts"</span>,
                 ConcreteDataType::timestamp_millisecond_datatype(),
                 <span class="bool-val">true</span>,
             ),
@@ -2009,8 +2010,8 @@
         <span class="kw">let </span>err = builder.build().unwrap_err();
         <span class="macro">assert!</span>(
             err.to_string()
-                .contains(<span class="string">&quot;time index column ts must be NOT NULL&quot;</span>),
-            <span class="string">&quot;unexpected err: {err}&quot;</span>,
+                .contains(<span class="string">"time index column ts must be NOT NULL"</span>),
+            <span class="string">"unexpected err: {err}"</span>,
         );
     }
 
@@ -2020,7 +2021,7 @@
         builder
             .push_column_metadata(ColumnMetadata {
                 column_schema: ColumnSchema::new(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ConcreteDataType::timestamp_millisecond_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -2028,7 +2029,7 @@
                 column_id: <span class="number">1</span>,
             })
             .push_column_metadata(ColumnMetadata {
-                column_schema: ColumnSchema::new(<span class="string">&quot;a&quot;</span>, ConcreteDataType::float64_datatype(), <span class="bool-val">true</span>),
+                column_schema: ColumnSchema::new(<span class="string">"a"</span>, ConcreteDataType::float64_datatype(), <span class="bool-val">true</span>),
                 semantic_type: SemanticType::Field,
                 column_id: <span class="number">2</span>,
             })
@@ -2036,8 +2037,8 @@
         <span class="kw">let </span>err = builder.build().unwrap_err();
         <span class="macro">assert!</span>(
             err.to_string()
-                .contains(<span class="string">&quot;semantic type of column a should be Tag, not Field&quot;</span>),
-            <span class="string">&quot;unexpected err: {err}&quot;</span>,
+                .contains(<span class="string">"semantic type of column a should be Tag, not Field"</span>),
+            <span class="string">"unexpected err: {err}"</span>,
         );
     }
 
@@ -2047,7 +2048,7 @@
         builder
             .push_column_metadata(ColumnMetadata {
                 column_schema: ColumnSchema::new(
-                    <span class="string">&quot;ts&quot;</span>,
+                    <span class="string">"ts"</span>,
                     ConcreteDataType::timestamp_millisecond_datatype(),
                     <span class="bool-val">false</span>,
                 ),
@@ -2055,12 +2056,12 @@
                 column_id: <span class="number">1</span>,
             })
             .push_column_metadata(ColumnMetadata {
-                column_schema: ColumnSchema::new(<span class="string">&quot;a&quot;</span>, ConcreteDataType::string_datatype(), <span class="bool-val">true</span>),
+                column_schema: ColumnSchema::new(<span class="string">"a"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">true</span>),
                 semantic_type: SemanticType::Tag,
                 column_id: <span class="number">2</span>,
             })
             .push_column_metadata(ColumnMetadata {
-                column_schema: ColumnSchema::new(<span class="string">&quot;b&quot;</span>, ConcreteDataType::string_datatype(), <span class="bool-val">true</span>),
+                column_schema: ColumnSchema::new(<span class="string">"b"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">true</span>),
                 semantic_type: SemanticType::Tag,
                 column_id: <span class="number">3</span>,
             })
@@ -2068,8 +2069,8 @@
         <span class="kw">let </span>err = builder.build().unwrap_err();
         <span class="macro">assert!</span>(
             err.to_string()
-                .contains(<span class="string">&quot;number of primary key columns 1 not equal to tag columns 2&quot;</span>),
-            <span class="string">&quot;unexpected err: {err}&quot;</span>,
+                .contains(<span class="string">"number of primary key columns 1 not equal to tag columns 2"</span>),
+            <span class="string">"unexpected err: {err}"</span>,
         );
     }
 
@@ -2114,68 +2115,68 @@
         </span>builder
             .alter(AlterKind::AddColumns {
                 columns: <span class="macro">vec!</span>[AddColumn {
-                    column_metadata: new_column_metadata(<span class="string">&quot;d&quot;</span>, <span class="bool-val">true</span>, <span class="number">4</span>),
+                    column_metadata: new_column_metadata(<span class="string">"d"</span>, <span class="bool-val">true</span>, <span class="number">4</span>),
                     location: <span class="prelude-val">None</span>,
                 }],
             })
             .unwrap();
         <span class="kw">let </span>metadata = builder.build().unwrap();
-        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>]);
+        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>]);
         <span class="macro">assert_eq!</span>([<span class="number">1</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>metadata.primary_key[..]);
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = RegionMetadataBuilder::from_existing(metadata);
         builder
             .alter(AlterKind::AddColumns {
                 columns: <span class="macro">vec!</span>[AddColumn {
-                    column_metadata: new_column_metadata(<span class="string">&quot;e&quot;</span>, <span class="bool-val">false</span>, <span class="number">5</span>),
+                    column_metadata: new_column_metadata(<span class="string">"e"</span>, <span class="bool-val">false</span>, <span class="number">5</span>),
                     location: <span class="prelude-val">Some</span>(AddColumnLocation::First),
                 }],
             })
             .unwrap();
         <span class="kw">let </span>metadata = builder.build().unwrap();
-        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">&quot;e&quot;</span>, <span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>]);
+        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">"e"</span>, <span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>]);
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = RegionMetadataBuilder::from_existing(metadata);
         builder
             .alter(AlterKind::AddColumns {
                 columns: <span class="macro">vec!</span>[AddColumn {
-                    column_metadata: new_column_metadata(<span class="string">&quot;f&quot;</span>, <span class="bool-val">false</span>, <span class="number">6</span>),
+                    column_metadata: new_column_metadata(<span class="string">"f"</span>, <span class="bool-val">false</span>, <span class="number">6</span>),
                     location: <span class="prelude-val">Some</span>(AddColumnLocation::After {
-                        column_name: <span class="string">&quot;b&quot;</span>.to_string(),
+                        column_name: <span class="string">"b"</span>.to_string(),
                     }),
                 }],
             })
             .unwrap();
         <span class="kw">let </span>metadata = builder.build().unwrap();
-        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">&quot;e&quot;</span>, <span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;f&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>]);
+        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">"e"</span>, <span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"f"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>]);
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = RegionMetadataBuilder::from_existing(metadata);
         builder
             .alter(AlterKind::AddColumns {
                 columns: <span class="macro">vec!</span>[AddColumn {
-                    column_metadata: new_column_metadata(<span class="string">&quot;g&quot;</span>, <span class="bool-val">false</span>, <span class="number">7</span>),
+                    column_metadata: new_column_metadata(<span class="string">"g"</span>, <span class="bool-val">false</span>, <span class="number">7</span>),
                     location: <span class="prelude-val">Some</span>(AddColumnLocation::After {
-                        column_name: <span class="string">&quot;d&quot;</span>.to_string(),
+                        column_name: <span class="string">"d"</span>.to_string(),
                     }),
                 }],
             })
             .unwrap();
         <span class="kw">let </span>metadata = builder.build().unwrap();
-        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">&quot;e&quot;</span>, <span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;f&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="string">&quot;g&quot;</span>]);
+        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">"e"</span>, <span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"f"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>, <span class="string">"g"</span>]);
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = RegionMetadataBuilder::from_existing(metadata);
         builder
             .alter(AlterKind::DropColumns {
-                names: <span class="macro">vec!</span>[<span class="string">&quot;g&quot;</span>.to_string(), <span class="string">&quot;e&quot;</span>.to_string()],
+                names: <span class="macro">vec!</span>[<span class="string">"g"</span>.to_string(), <span class="string">"e"</span>.to_string()],
             })
             .unwrap();
         <span class="kw">let </span>metadata = builder.build().unwrap();
-        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;f&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>]);
+        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"f"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>]);
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = RegionMetadataBuilder::from_existing(metadata);
         builder
             .alter(AlterKind::DropColumns {
-                names: <span class="macro">vec!</span>[<span class="string">&quot;a&quot;</span>.to_string()],
+                names: <span class="macro">vec!</span>[<span class="string">"a"</span>.to_string()],
             })
             .unwrap();
         <span class="comment">// Build returns error as the primary key contains a.
@@ -2193,18 +2194,18 @@
             .alter(AlterKind::AddColumns {
                 columns: <span class="macro">vec!</span>[
                     AddColumn {
-                        column_metadata: new_column_metadata(<span class="string">&quot;d&quot;</span>, <span class="bool-val">true</span>, <span class="number">4</span>),
+                        column_metadata: new_column_metadata(<span class="string">"d"</span>, <span class="bool-val">true</span>, <span class="number">4</span>),
                         location: <span class="prelude-val">None</span>,
                     },
                     AddColumn {
-                        column_metadata: new_column_metadata(<span class="string">&quot;d&quot;</span>, <span class="bool-val">true</span>, <span class="number">4</span>),
+                        column_metadata: new_column_metadata(<span class="string">"d"</span>, <span class="bool-val">true</span>, <span class="number">4</span>),
                         location: <span class="prelude-val">None</span>,
                     },
                 ],
             })
             .unwrap();
         <span class="kw">let </span>metadata = builder.build().unwrap();
-        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>]);
+        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>]);
         <span class="macro">assert_eq!</span>([<span class="number">1</span>, <span class="number">4</span>], <span class="kw-2">&amp;</span>metadata.primary_key[..]);
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = RegionMetadataBuilder::from_existing(metadata);
@@ -2212,13 +2213,13 @@
         </span>builder
             .alter(AlterKind::AddColumns {
                 columns: <span class="macro">vec!</span>[AddColumn {
-                    column_metadata: new_column_metadata(<span class="string">&quot;b&quot;</span>, <span class="bool-val">false</span>, <span class="number">2</span>),
+                    column_metadata: new_column_metadata(<span class="string">"b"</span>, <span class="bool-val">false</span>, <span class="number">2</span>),
                     location: <span class="prelude-val">None</span>,
                 }],
             })
             .unwrap();
         <span class="kw">let </span>metadata = builder.build().unwrap();
-        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>]);
+        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>]);
     }
 
     <span class="attr">#[test]
@@ -2231,36 +2232,36 @@
             .alter(AlterKind::AddColumns {
                 columns: <span class="macro">vec!</span>[
                     AddColumn {
-                        column_metadata: new_column_metadata(<span class="string">&quot;d&quot;</span>, <span class="bool-val">false</span>, <span class="number">4</span>),
+                        column_metadata: new_column_metadata(<span class="string">"d"</span>, <span class="bool-val">false</span>, <span class="number">4</span>),
                         location: <span class="prelude-val">None</span>,
                     },
                     AddColumn {
-                        column_metadata: new_column_metadata(<span class="string">&quot;e&quot;</span>, <span class="bool-val">false</span>, <span class="number">5</span>),
+                        column_metadata: new_column_metadata(<span class="string">"e"</span>, <span class="bool-val">false</span>, <span class="number">5</span>),
                         location: <span class="prelude-val">None</span>,
                     },
                 ],
             })
             .unwrap();
         <span class="kw">let </span>metadata = builder.build().unwrap();
-        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="string">&quot;e&quot;</span>]);
+        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>, <span class="string">"e"</span>]);
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = RegionMetadataBuilder::from_existing(metadata);
         builder
             .alter(AlterKind::DropColumns {
-                names: <span class="macro">vec!</span>[<span class="string">&quot;b&quot;</span>.to_string(), <span class="string">&quot;b&quot;</span>.to_string()],
+                names: <span class="macro">vec!</span>[<span class="string">"b"</span>.to_string(), <span class="string">"b"</span>.to_string()],
             })
             .unwrap();
         <span class="kw">let </span>metadata = builder.build().unwrap();
-        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="string">&quot;e&quot;</span>]);
+        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">"a"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>, <span class="string">"e"</span>]);
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = RegionMetadataBuilder::from_existing(metadata);
         builder
             .alter(AlterKind::DropColumns {
-                names: <span class="macro">vec!</span>[<span class="string">&quot;b&quot;</span>.to_string(), <span class="string">&quot;e&quot;</span>.to_string()],
+                names: <span class="macro">vec!</span>[<span class="string">"b"</span>.to_string(), <span class="string">"e"</span>.to_string()],
             })
             .unwrap();
         <span class="kw">let </span>metadata = builder.build().unwrap();
-        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">&quot;a&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>]);
+        check_columns(<span class="kw-2">&amp;</span>metadata, <span class="kw-2">&amp;</span>[<span class="string">"a"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>]);
     }
 
     <span class="attr">#[test]
@@ -2268,7 +2269,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>builder = create_builder();
         builder.push_column_metadata(ColumnMetadata {
             column_schema: ColumnSchema::new(
-                <span class="string">&quot;__sequence&quot;</span>,
+                <span class="string">"__sequence"</span>,
                 ConcreteDataType::timestamp_millisecond_datatype(),
                 <span class="bool-val">false</span>,
             ),
@@ -2278,16 +2279,16 @@
         <span class="kw">let </span>err = builder.build().unwrap_err();
         <span class="macro">assert!</span>(
             err.to_string()
-                .contains(<span class="string">&quot;internal column name that can not be used&quot;</span>),
-            <span class="string">&quot;unexpected err: {err}&quot;</span>,
+                .contains(<span class="string">"internal column name that can not be used"</span>),
+            <span class="string">"unexpected err: {err}"</span>,
         );
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_debug_for_column_metadata() {
         <span class="kw">let </span>region_metadata = build_test_region_metadata();
-        <span class="kw">let </span>formatted = <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, region_metadata);
-        <span class="macro">assert_eq!</span>(formatted, <span class="string">&quot;RegionMetadata { column_metadatas: [[a Int64 not null Tag 1], [b Float64 not null Field 2], [c TimestampMillisecond not null Timestamp 3]], time_index: 3, primary_key: [1], region_id: 5299989648942(1234, 5678), schema_version: 0 }&quot;</span>);
+        <span class="kw">let </span>formatted = <span class="macro">format!</span>(<span class="string">"{:?}"</span>, region_metadata);
+        <span class="macro">assert_eq!</span>(formatted, <span class="string">"RegionMetadata { column_metadatas: [[a Int64 not null Tag 1], [b Float64 not null Field 2], [c TimestampMillisecond not null Timestamp 3]], time_index: 3, primary_key: [1], region_id: 5299989648942(1234, 5678), schema_version: 0 }"</span>);
     }
 }
 </code></pre></div></section></main></body></html>
