@@ -572,6 +572,11 @@
 <a href="#571" id="571">571</a>
 <a href="#572" id="572">572</a>
 <a href="#573" id="573">573</a>
+<a href="#574" id="574">574</a>
+<a href="#575" id="575">575</a>
+<a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -586,7 +591,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::sync::Arc;
+</span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>clap::Parser;
@@ -969,6 +975,9 @@
         <span class="kw">let </span>region_distribution: RegionDistribution =
             value.regions_id_map.clone().into_iter().collect();
 
+        <span class="comment">// TODO(niebayes): properly fetch or construct wal options.
+        </span><span class="kw">let </span>region_wal_options = HashMap::default();
+
         <span class="kw">let </span>datanode_table_kvs = region_distribution
             .into_iter()
             .map(|(datanode_id, regions)| {
@@ -983,6 +992,7 @@
                             engine: engine.to_string(),
                             region_storage_path: region_storage_path.clone(),
                             region_options: (<span class="kw-2">&amp;</span>value.table_info.meta.options).into(),
+                            region_wal_options: region_wal_options.clone(),
                         },
                     ),
                 )

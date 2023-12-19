@@ -702,6 +702,17 @@
 <a href="#701" id="701">701</a>
 <a href="#702" id="702">702</a>
 <a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -723,6 +734,7 @@
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>common_catalog::consts::MIN_USER_TABLE_ID;
 <span class="kw">use </span>common_config::{metadata_store_dir, KvBackendConfig, WalConfig};
+<span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_meta::cache_invalidator::DummyCacheInvalidator;
 <span class="kw">use </span>common_meta::datanode_manager::DatanodeManagerRef;
 <span class="kw">use </span>common_meta::ddl::{DdlTaskExecutorRef, TableMetadataAllocatorRef};
@@ -731,6 +743,7 @@
 <span class="kw">use </span>common_meta::kv_backend::KvBackendRef;
 <span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeper;
 <span class="kw">use </span>common_meta::sequence::SequenceBuilder;
+<span class="kw">use </span>common_meta::wal::build_wal_options_allocator;
 <span class="kw">use </span>common_procedure::ProcedureManagerRef;
 <span class="kw">use </span>common_telemetry::info;
 <span class="kw">use </span>common_telemetry::logging::LoggingOptions;
@@ -739,7 +752,7 @@
 <span class="kw">use </span>file_engine::config::EngineConfig <span class="kw">as </span>FileEngineConfig;
 <span class="kw">use </span>frontend::frontend::FrontendOptions;
 <span class="kw">use </span>frontend::instance::builder::FrontendBuilder;
-<span class="kw">use </span>frontend::instance::standalone::StandaloneTableMetadataCreator;
+<span class="kw">use </span>frontend::instance::standalone::StandaloneTableMetadataAllocator;
 <span class="kw">use </span>frontend::instance::{FrontendInstance, Instance <span class="kw">as </span>FeInstance, StandaloneDatanodeManager};
 <span class="kw">use </span>frontend::service_config::{
     GrpcOptions, InfluxdbOptions, MysqlOptions, OpentsdbOptions, PostgresOptions, PromStoreOptions,
@@ -752,7 +765,7 @@
 <span class="kw">use </span>snafu::ResultExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
-    CreateDirSnafu, IllegalConfigSnafu, InitDdlManagerSnafu, InitMetadataSnafu, <span class="prelude-ty">Result</span>,
+    CreateDirSnafu, IllegalConfigSnafu, InitDdlManagerSnafu, InitMetadataSnafu, OtherSnafu, <span class="prelude-ty">Result</span>,
     ShutdownDatanodeSnafu, ShutdownFrontendSnafu, StartDatanodeSnafu, StartFrontendSnafu,
     StartProcedureManagerSnafu, StopProcedureManagerSnafu,
 };
@@ -1076,7 +1089,16 @@
                 .step(<span class="number">10</span>)
                 .build(),
         );
-        <span class="kw">let </span>table_meta_allocator = Arc::new(StandaloneTableMetadataCreator::new(table_id_sequence));
+        <span class="comment">// TODO(niebayes): add a wal config into the MixOptions and pass it to the allocator builder.
+        </span><span class="kw">let </span>wal_options_allocator =
+            build_wal_options_allocator(<span class="kw-2">&amp;</span>common_meta::wal::WalConfig::default(), <span class="kw-2">&amp;</span>kv_backend)
+                .<span class="kw">await
+                </span>.map_err(BoxedError::new)
+                .context(OtherSnafu)<span class="question-mark">?</span>;
+        <span class="kw">let </span>table_meta_allocator = Arc::new(StandaloneTableMetadataAllocator::new(
+            table_id_sequence,
+            wal_options_allocator,
+        ));
 
         <span class="kw">let </span>ddl_task_executor = <span class="self">Self</span>::create_ddl_task_executor(
             kv_backend.clone(),

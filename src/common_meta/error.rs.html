@@ -377,6 +377,19 @@
 <a href="#376" id="376">376</a>
 <a href="#377" id="377">377</a>
 <a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -402,6 +415,7 @@
 <span class="kw">use </span>table::metadata::TableId;
 
 <span class="kw">use </span><span class="kw">crate</span>::peer::Peer;
+<span class="kw">use </span><span class="kw">crate</span>::wal::WalOptions;
 <span class="kw">use </span><span class="kw">crate</span>::DatanodeId;
 
 <span class="attr">#[derive(Snafu)]
@@ -663,6 +677,17 @@
 
     <span class="attr">#[snafu(display(<span class="string">"Retry later"</span>))]
     </span>RetryLater { source: BoxedError },
+
+    <span class="attr">#[snafu(display(
+        <span class="string">"Failed to encode a wal options to json string, wal_options: {:?}"</span>,
+        wal_options
+    ))]
+    </span>EncodeWalOptionsToJson {
+        wal_options: WalOptions,
+        <span class="attr">#[snafu(source)]
+        </span>error: serde_json::Error,
+        location: Location,
+    },
 }
 
 <span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T&gt; = std::result::Result&lt;T, Error&gt;;
@@ -697,7 +722,8 @@
             | BuildTableMeta { .. }
             | TableRouteNotFound { .. }
             | ConvertRawTableInfo { .. }
-            | RegionOperatingRace { .. } =&gt; StatusCode::Unexpected,
+            | RegionOperatingRace { .. }
+            | EncodeWalOptionsToJson { .. } =&gt; StatusCode::Unexpected,
 
             SendMessage { .. }
             | GetKvCache { .. }

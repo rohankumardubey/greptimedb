@@ -431,6 +431,9 @@
 <a href="#430" id="430">430</a>
 <a href="#431" id="431">431</a>
 <a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -459,6 +462,7 @@
 <span class="kw">use </span>common_meta::key::TableMetadataManagerRef;
 <span class="kw">use </span>common_meta::kv_backend::{KvBackendRef, ResettableKvBackend, ResettableKvBackendRef};
 <span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeperRef;
+<span class="kw">use </span>common_meta::wal::WalConfig;
 <span class="kw">use </span>common_procedure::options::ProcedureConfig;
 <span class="kw">use </span>common_procedure::ProcedureManagerRef;
 <span class="kw">use </span>common_telemetry::logging::LoggingOptions;
@@ -503,6 +507,7 @@
     <span class="kw">pub </span>datanode: DatanodeOptions,
     <span class="kw">pub </span>enable_telemetry: bool,
     <span class="kw">pub </span>data_home: String,
+    <span class="kw">pub </span>wal: WalConfig,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>MetaSrvOptions {
@@ -527,6 +532,7 @@
             datanode: DatanodeOptions::default(),
             enable_telemetry: <span class="bool-val">true</span>,
             data_home: METASRV_HOME.to_string(),
+            wal: WalConfig::default(),
         }
     }
 }

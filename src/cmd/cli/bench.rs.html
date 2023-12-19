@@ -161,6 +161,13 @@
 <a href="#160" id="160">160</a>
 <a href="#161" id="161">161</a>
 <a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -175,7 +182,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::collections::BTreeMap;
+</span><span class="kw">use </span>std::collections::{BTreeMap, HashMap};
 <span class="kw">use </span>std::future::Future;
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::Duration;
@@ -191,6 +198,7 @@
 <span class="kw">use </span>datatypes::data_type::ConcreteDataType;
 <span class="kw">use </span>datatypes::schema::{ColumnSchema, RawSchema};
 <span class="kw">use </span>rand::Rng;
+<span class="kw">use </span>store_api::storage::RegionNumber;
 <span class="kw">use </span>table::metadata::{RawTableInfo, RawTableMeta, TableId, TableIdent, TableType};
 
 <span class="kw">use </span><span class="self">self</span>::metadata::TableMetadataBencher;
@@ -300,12 +308,12 @@
     }
 }
 
-<span class="kw">fn </span>create_region_routes() -&gt; Vec&lt;RegionRoute&gt; {
-    <span class="kw">let </span><span class="kw-2">mut </span>regions = Vec::with_capacity(<span class="number">100</span>);
+<span class="kw">fn </span>create_region_routes(regions: Vec&lt;RegionNumber&gt;) -&gt; Vec&lt;RegionRoute&gt; {
+    <span class="kw">let </span><span class="kw-2">mut </span>region_routes = Vec::with_capacity(<span class="number">100</span>);
     <span class="kw">let </span><span class="kw-2">mut </span>rng = rand::thread_rng();
 
-    <span class="kw">for </span>region_id <span class="kw">in </span><span class="number">0</span>..<span class="number">64u64 </span>{
-        regions.push(RegionRoute {
+    <span class="kw">for </span>region_id <span class="kw">in </span>regions.into_iter().map(u64::from) {
+        region_routes.push(RegionRoute {
             region: Region {
                 id: region_id.into(),
                 name: String::new(),
@@ -321,6 +329,12 @@
         });
     }
 
-    regions
+    region_routes
+}
+
+<span class="kw">fn </span>create_region_wal_options(regions: Vec&lt;RegionNumber&gt;) -&gt; HashMap&lt;RegionNumber, String&gt; {
+    <span class="comment">// TODO(niebayes): construct region wal options for benchmark.
+    </span><span class="kw">let _ </span>= regions;
+    HashMap::default()
 }
 </code></pre></div></section></main></body></html>

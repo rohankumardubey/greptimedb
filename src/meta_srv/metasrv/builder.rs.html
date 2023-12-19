@@ -411,6 +411,13 @@
 <a href="#410" id="410">410</a>
 <a href="#411" id="411">411</a>
 <a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -432,6 +439,7 @@
 <span class="kw">use </span>client::client_manager::DatanodeClients;
 <span class="kw">use </span>common_base::Plugins;
 <span class="kw">use </span>common_catalog::consts::MIN_USER_TABLE_ID;
+<span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_grpc::channel_manager::ChannelConfig;
 <span class="kw">use </span>common_meta::datanode_manager::DatanodeManagerRef;
 <span class="kw">use </span>common_meta::ddl::TableMetadataAllocatorRef;
@@ -443,13 +451,14 @@
 <span class="kw">use </span>common_meta::region_keeper::{MemoryRegionKeeper, MemoryRegionKeeperRef};
 <span class="kw">use </span>common_meta::sequence::SequenceBuilder;
 <span class="kw">use </span>common_meta::state_store::KvStateStore;
+<span class="kw">use </span>common_meta::wal::build_wal_options_allocator;
 <span class="kw">use </span>common_procedure::local::{LocalManager, ManagerConfig};
 <span class="kw">use </span>common_procedure::ProcedureManagerRef;
 <span class="kw">use </span>snafu::ResultExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::cache_invalidator::MetasrvCacheInvalidator;
 <span class="kw">use </span><span class="kw">crate</span>::cluster::{MetaPeerClientBuilder, MetaPeerClientRef};
-<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, OtherSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::greptimedb_telemetry::get_greptimedb_telemetry_task;
 <span class="kw">use </span><span class="kw">crate</span>::handler::check_leader_handler::CheckLeaderHandler;
 <span class="kw">use </span><span class="kw">crate</span>::handler::collect_stats_handler::CollectStatsHandler;
@@ -617,6 +626,10 @@
             table_id: <span class="prelude-val">None</span>,
         };
 
+        <span class="kw">let </span>wal_options_allocator = build_wal_options_allocator(<span class="kw-2">&amp;</span>options.wal, <span class="kw-2">&amp;</span>kv_backend)
+            .<span class="kw">await
+            </span>.map_err(BoxedError::new)
+            .context(OtherSnafu)<span class="question-mark">?</span>;
         <span class="kw">let </span>table_metadata_allocator = table_metadata_allocator.unwrap_or_else(|| {
             <span class="kw">let </span>sequence = Arc::new(
                 SequenceBuilder::new(TABLE_ID_SEQ, kv_backend.clone())
@@ -627,7 +640,8 @@
             Arc::new(MetaSrvTableMetadataAllocator::new(
                 selector_ctx.clone(),
                 selector.clone(),
-                sequence,
+                sequence.clone(),
+                wal_options_allocator,
             ))
         });
 

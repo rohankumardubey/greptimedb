@@ -691,7 +691,7 @@
         <span class="kw">let </span>keeper = new_test_keeper();
         <span class="kw">let </span>table_metadata_manager = keeper.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, <span class="macro">vec!</span>[region_route.clone()])
+            .create_table_metadata(table_info, <span class="macro">vec!</span>[region_route.clone()], HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 
@@ -778,7 +778,7 @@
         <span class="kw">let </span>keeper = new_test_keeper();
         <span class="kw">let </span>table_metadata_manager = keeper.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, <span class="macro">vec!</span>[region_route.clone()])
+            .create_table_metadata(table_info, <span class="macro">vec!</span>[region_route.clone()], HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 

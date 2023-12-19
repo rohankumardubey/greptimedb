@@ -135,6 +135,11 @@
 <a href="#134" id="134">134</a>
 <a href="#135" id="135">135</a>
 <a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -154,7 +159,9 @@
 <span class="kw">use </span>common_meta::key::TableMetadataManagerRef;
 <span class="kw">use </span>common_meta::table_name::TableName;
 
-<span class="kw">use super</span>::{bench_self_recorded, create_region_routes, create_table_info};
+<span class="kw">use </span><span class="kw">crate</span>::cli::bench::{
+    bench_self_recorded, create_region_routes, create_region_wal_options, create_table_info,
+};
 
 <span class="kw">pub struct </span>TableMetadataBencher {
     table_metadata_manager: TableMetadataManagerRef,
@@ -180,12 +187,15 @@
                 <span class="kw">let </span>table_name = <span class="macro">format!</span>(<span class="string">"bench_table_name_{}"</span>, i);
                 <span class="kw">let </span>table_name = TableName::new(<span class="string">"bench_catalog"</span>, <span class="string">"bench_schema"</span>, table_name);
                 <span class="kw">let </span>table_info = create_table_info(i, table_name);
-                <span class="kw">let </span>region_routes = create_region_routes();
+
+                <span class="kw">let </span>regions: Vec&lt;<span class="kw">_</span>&gt; = (<span class="number">0</span>..<span class="number">64</span>).collect();
+                <span class="kw">let </span>region_routes = create_region_routes(regions.clone());
+                <span class="kw">let </span>region_wal_options = create_region_wal_options(regions);
 
                 <span class="kw">let </span>start = Instant::now();
 
                 <span class="self">self</span>.table_metadata_manager
-                    .create_table_metadata(table_info, region_routes)
+                    .create_table_metadata(table_info, region_routes, region_wal_options)
                     .<span class="kw">await
                     </span>.unwrap();
 

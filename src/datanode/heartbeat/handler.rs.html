@@ -433,6 +433,10 @@
 <a href="#432" id="432">432</a>
 <a href="#433" id="433">433</a>
 <a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -488,14 +492,17 @@
             Instruction::OpenRegion(OpenRegion {
                 region_ident,
                 region_storage_path,
-                options,
+                region_options,
+                region_wal_options,
             }) =&gt; <span class="prelude-val">Ok</span>(Box::new(|region_server| {
                 Box::pin(<span class="kw">async move </span>{
                     <span class="kw">let </span>region_id = <span class="self">Self</span>::region_ident_to_region_id(<span class="kw-2">&amp;</span>region_ident);
+                    <span class="comment">// TODO(niebayes): extends region options with region_wal_options.
+                    </span><span class="kw">let _ </span>= region_wal_options;
                     <span class="kw">let </span>request = RegionRequest::Open(RegionOpenRequest {
                         engine: region_ident.engine,
                         region_dir: region_dir(<span class="kw-2">&amp;</span>region_storage_path, region_id),
-                        options,
+                        options: region_options,
                     });
                     <span class="kw">let </span>result = region_server.handle_request(region_id, request).<span class="kw">await</span>;
 
@@ -673,6 +680,7 @@
                 engine: MITO_ENGINE_NAME.to_string(),
             },
             path,
+            HashMap::new(),
             HashMap::new(),
         ))
     }

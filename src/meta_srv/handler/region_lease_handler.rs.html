@@ -532,7 +532,7 @@
         <span class="kw">let </span>table_metadata_manager = keeper.table_metadata_manager();
 
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 
@@ -674,7 +674,7 @@
         <span class="kw">let </span>table_metadata_manager = keeper.table_metadata_manager();
 
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 

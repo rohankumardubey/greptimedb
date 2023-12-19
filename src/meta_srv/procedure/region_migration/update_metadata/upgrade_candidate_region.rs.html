@@ -492,6 +492,12 @@
 <a href="#491" id="491">491</a>
 <a href="#492" id="492">492</a>
 <a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
+<a href="#497" id="497">497</a>
+<a href="#498" id="498">498</a>
+<a href="#499" id="499">499</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -630,6 +636,9 @@
         <span class="kw">let </span>engine = table_info.meta.engine.clone();
         <span class="kw">let </span>region_options: HashMap&lt;String, String&gt; = (<span class="kw-2">&amp;</span>table_info.meta.options).into();
 
+        <span class="comment">// TODO(niebayes): properly fetch or construct region wal options.
+        </span><span class="kw">let </span>region_wal_options = HashMap::new();
+
         <span class="comment">// No remote fetch.
         </span><span class="kw">let </span>table_route_value = ctx.get_table_route_value().<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -640,10 +649,12 @@
                     engine: engine.to_string(),
                     region_storage_path: region_storage_path.to_string(),
                     region_options: region_options.clone(),
+                    region_wal_options: region_wal_options.clone(),
                 },
                 table_route_value,
                 region_routes,
                 <span class="kw-2">&amp;</span>region_options,
+                <span class="kw-2">&amp;</span>region_wal_options,
             )
             .<span class="kw">await
             </span>.context(error::TableMetadataManagerSnafu)
@@ -665,6 +676,7 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::assert_matches::assert_matches;
+    <span class="kw">use </span>std::collections::HashMap;
 
     <span class="kw">use </span>common_meta::key::test_utils::new_test_table_info;
     <span class="kw">use </span>common_meta::peer::Peer;
@@ -715,7 +727,7 @@
 
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 
@@ -744,7 +756,7 @@
 
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 
@@ -775,7 +787,7 @@
 
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 
@@ -816,7 +828,7 @@
 
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 
@@ -875,7 +887,7 @@
 
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 
@@ -901,7 +913,7 @@
 
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 
@@ -927,7 +939,7 @@
 
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 
@@ -960,7 +972,7 @@
 
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 

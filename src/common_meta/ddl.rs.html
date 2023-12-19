@@ -74,6 +74,18 @@
 <a href="#73" id="73">73</a>
 <a href="#74" id="74">74</a>
 <a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -88,11 +100,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::sync::Arc;
+</span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>api::v1::meta::Partition;
 <span class="kw">use </span>common_telemetry::tracing_context::W3cTrace;
-<span class="kw">use </span>store_api::storage::TableId;
+<span class="kw">use </span>store_api::storage::{RegionNumber, TableId};
 <span class="kw">use </span>table::metadata::RawTableInfo;
 
 <span class="kw">use </span><span class="kw">crate</span>::cache_invalidator::CacheInvalidatorRef;
@@ -130,6 +143,17 @@
     <span class="kw">pub </span>cluster_id: u64,
 }
 
+<span class="doccomment">/// Metadata allocated to a table.
+</span><span class="kw">pub struct </span>TableMetadata {
+    <span class="doccomment">/// Table id.
+    </span><span class="kw">pub </span>table_id: TableId,
+    <span class="doccomment">/// Route information for each region of the table.
+    </span><span class="kw">pub </span>region_routes: Vec&lt;RegionRoute&gt;,
+    <span class="doccomment">/// The encoded wal options for regions of the table.
+    </span><span class="comment">// If a region does not have an associated wal options, no key for the region would be found in the map.
+    </span><span class="kw">pub </span>region_wal_options: HashMap&lt;RegionNumber, String&gt;,
+}
+
 <span class="attr">#[async_trait::async_trait]
 </span><span class="kw">pub trait </span>TableMetadataAllocator: Send + Sync {
     <span class="kw">async fn </span>create(
@@ -137,7 +161,7 @@
         ctx: <span class="kw-2">&amp;</span>TableMetadataAllocatorContext,
         table_info: <span class="kw-2">&amp;mut </span>RawTableInfo,
         partitions: <span class="kw-2">&amp;</span>[Partition],
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;(TableId, Vec&lt;RegionRoute&gt;)&gt;;
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;TableMetadata&gt;;
 }
 
 <span class="kw">pub type </span>TableMetadataAllocatorRef = Arc&lt;<span class="kw">dyn </span>TableMetadataAllocator&gt;;

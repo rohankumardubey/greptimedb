@@ -432,6 +432,10 @@
 <a href="#431" id="431">431</a>
 <a href="#432" id="432">432</a>
 <a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -510,6 +514,8 @@
 
         <span class="kw">let </span>engine = table_info.meta.engine.clone();
         <span class="kw">let </span>region_options: HashMap&lt;String, String&gt; = (<span class="kw-2">&amp;</span>table_info.meta.options).into();
+        <span class="comment">// TODO(niebayes): properly fetch or construct region wal options.
+        </span><span class="kw">let </span>region_wal_options = HashMap::new();
 
         <span class="kw">let </span>open_instruction = Instruction::OpenRegion(OpenRegion::new(
             RegionIdent {
@@ -521,6 +527,7 @@
             },
             <span class="kw-2">&amp;</span>region_storage_path,
             region_options,
+            region_wal_options,
         ));
 
         <span class="prelude-val">Ok</span>(open_instruction)
@@ -644,7 +651,8 @@
                 engine: MITO2_ENGINE.to_string(),
             },
             region_storage_path: <span class="string">"/bar/foo/region/"</span>.to_string(),
-            options: Default::default(),
+            region_options: Default::default(),
+            region_wal_options: Default::default(),
         })
     }
 
@@ -837,7 +845,7 @@
         }];
 
         env.table_metadata_manager()
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 

@@ -783,6 +783,7 @@
 <a href="#782" id="782">782</a>
 <a href="#783" id="783">783</a>
 <a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1405,6 +1406,7 @@
                         serde_json::to_string(<span class="kw-2">&amp;</span>Instruction::OpenRegion(OpenRegion::new(
                             opening_region,
                             <span class="kw-2">&amp;</span>path,
+                            HashMap::new(),
                             HashMap::new(),
                         )))
                         .unwrap(),

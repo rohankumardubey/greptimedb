@@ -148,6 +148,29 @@
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -162,7 +185,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::sync::Arc;
+</span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>api::v1::meta::Partition;
 <span class="kw">use </span>api::v1::region::{QueryRequest, RegionRequest, RegionResponse};
@@ -170,18 +194,20 @@
 <span class="kw">use </span>client::region::check_response_header;
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_meta::datanode_manager::{AffectedRows, Datanode, DatanodeManager, DatanodeRef};
-<span class="kw">use </span>common_meta::ddl::{TableMetadataAllocator, TableMetadataAllocatorContext};
+<span class="kw">use </span>common_meta::ddl::{TableMetadata, TableMetadataAllocator, TableMetadataAllocatorContext};
 <span class="kw">use </span>common_meta::error::{<span class="self">self </span><span class="kw">as </span>meta_error, <span class="prelude-ty">Result </span><span class="kw">as </span>MetaResult};
 <span class="kw">use </span>common_meta::peer::Peer;
 <span class="kw">use </span>common_meta::rpc::router::{Region, RegionRoute};
 <span class="kw">use </span>common_meta::sequence::SequenceRef;
+<span class="kw">use </span>common_meta::wal::options_allocator::build_region_wal_options;
+<span class="kw">use </span>common_meta::wal::WalOptionsAllocator;
 <span class="kw">use </span>common_recordbatch::SendableRecordBatchStream;
-<span class="kw">use </span>common_telemetry::tracing;
 <span class="kw">use </span>common_telemetry::tracing_context::{FutureExt, TracingContext};
+<span class="kw">use </span>common_telemetry::{debug, tracing};
 <span class="kw">use </span>datanode::region_server::RegionServer;
 <span class="kw">use </span>servers::grpc::region_server::RegionServerHandler;
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
-<span class="kw">use </span>store_api::storage::{RegionId, TableId};
+<span class="kw">use </span>store_api::storage::RegionId;
 <span class="kw">use </span>table::metadata::RawTableInfo;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{InvalidRegionRequestSnafu, InvokeRegionServerSnafu, <span class="prelude-ty">Result</span>};
@@ -254,24 +280,28 @@
     }
 }
 
-<span class="kw">pub struct </span>StandaloneTableMetadataCreator {
+<span class="kw">pub struct </span>StandaloneTableMetadataAllocator {
     table_id_sequence: SequenceRef,
+    wal_options_allocator: WalOptionsAllocator,
 }
 
-<span class="kw">impl </span>StandaloneTableMetadataCreator {
-    <span class="kw">pub fn </span>new(table_id_sequence: SequenceRef) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ table_id_sequence }
+<span class="kw">impl </span>StandaloneTableMetadataAllocator {
+    <span class="kw">pub fn </span>new(table_id_sequence: SequenceRef, wal_options_allocator: WalOptionsAllocator) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            table_id_sequence,
+            wal_options_allocator,
+        }
     }
 }
 
 <span class="attr">#[async_trait]
-</span><span class="kw">impl </span>TableMetadataAllocator <span class="kw">for </span>StandaloneTableMetadataCreator {
+</span><span class="kw">impl </span>TableMetadataAllocator <span class="kw">for </span>StandaloneTableMetadataAllocator {
     <span class="kw">async fn </span>create(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         _ctx: <span class="kw-2">&amp;</span>TableMetadataAllocatorContext,
         raw_table_info: <span class="kw-2">&amp;mut </span>RawTableInfo,
         partitions: <span class="kw-2">&amp;</span>[Partition],
-    ) -&gt; MetaResult&lt;(TableId, Vec&lt;RegionRoute&gt;)&gt; {
+    ) -&gt; MetaResult&lt;TableMetadata&gt; {
         <span class="kw">let </span>table_id = <span class="self">self</span>.table_id_sequence.next().<span class="kw">await</span><span class="question-mark">? </span><span class="kw">as </span>u32;
         raw_table_info.ident.table_id = table_id;
         <span class="kw">let </span>region_routes = partitions
@@ -294,7 +324,23 @@
             })
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
 
-        <span class="prelude-val">Ok</span>((table_id, region_routes))
+        <span class="kw">let </span>region_numbers = region_routes
+            .iter()
+            .map(|route| route.region.id.region_number())
+            .collect();
+        <span class="kw">let </span>region_wal_options =
+            build_region_wal_options(region_numbers, <span class="kw-2">&amp;</span><span class="self">self</span>.wal_options_allocator)<span class="question-mark">?</span>;
+
+        <span class="macro">debug!</span>(
+            <span class="string">"Allocated region wal options {:?} for table {}"</span>,
+            region_wal_options, table_id
+        );
+
+        <span class="prelude-val">Ok</span>(TableMetadata {
+            table_id,
+            region_routes,
+            region_wal_options: HashMap::default(),
+        })
     }
 }
 </code></pre></div></section></main></body></html>

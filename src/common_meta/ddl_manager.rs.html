@@ -510,6 +510,24 @@
 <a href="#509" id="509">509</a>
 <a href="#510" id="510">510</a>
 <a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -524,12 +542,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::sync::Arc;
+</span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>common_procedure::{watcher, ProcedureId, ProcedureManagerRef, ProcedureWithId};
 <span class="kw">use </span>common_telemetry::tracing_context::{FutureExt, TracingContext};
 <span class="kw">use </span>common_telemetry::{info, tracing};
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
+<span class="kw">use </span>store_api::storage::RegionNumber;
 
 <span class="kw">use </span><span class="kw">crate</span>::cache_invalidator::CacheInvalidatorRef;
 <span class="kw">use </span><span class="kw">crate</span>::datanode_manager::DatanodeManagerRef;
@@ -538,7 +558,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::ddl::drop_table::DropTableProcedure;
 <span class="kw">use </span><span class="kw">crate</span>::ddl::truncate_table::TruncateTableProcedure;
 <span class="kw">use </span><span class="kw">crate</span>::ddl::{
-    DdlContext, DdlTaskExecutor, ExecutorContext, TableMetadataAllocatorContext,
+    DdlContext, DdlTaskExecutor, ExecutorContext, TableMetadata, TableMetadataAllocatorContext,
     TableMetadataAllocatorRef,
 };
 <span class="kw">use </span><span class="kw">crate</span>::error::{
@@ -564,7 +584,7 @@
     datanode_manager: DatanodeManagerRef,
     cache_invalidator: CacheInvalidatorRef,
     table_metadata_manager: TableMetadataManagerRef,
-    table_meta_allocator: TableMetadataAllocatorRef,
+    table_metadata_allocator: TableMetadataAllocatorRef,
     memory_region_keeper: MemoryRegionKeeperRef,
 }
 
@@ -575,7 +595,7 @@
         datanode_clients: DatanodeManagerRef,
         cache_invalidator: CacheInvalidatorRef,
         table_metadata_manager: TableMetadataManagerRef,
-        table_meta_allocator: TableMetadataAllocatorRef,
+        table_metadata_allocator: TableMetadataAllocatorRef,
         memory_region_keeper: MemoryRegionKeeperRef,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>manager = <span class="self">Self </span>{
@@ -583,7 +603,7 @@
             datanode_manager: datanode_clients,
             cache_invalidator,
             table_metadata_manager,
-            table_meta_allocator,
+            table_metadata_allocator,
             memory_region_keeper,
         };
         manager.register_loaders()<span class="question-mark">?</span>;
@@ -688,11 +708,17 @@
         cluster_id: u64,
         create_table_task: CreateTableTask,
         region_routes: Vec&lt;RegionRoute&gt;,
+        region_wal_options: HashMap&lt;RegionNumber, String&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ProcedureId&gt; {
         <span class="kw">let </span>context = <span class="self">self</span>.create_context();
 
-        <span class="kw">let </span>procedure =
-            CreateTableProcedure::new(cluster_id, create_table_task, region_routes, context);
+        <span class="kw">let </span>procedure = CreateTableProcedure::new(
+            cluster_id,
+            create_table_task,
+            region_routes,
+            region_wal_options,
+            context,
+        );
 
         <span class="kw">let </span>procedure_with_id = ProcedureWithId::with_random_id(Box::new(procedure));
 
@@ -886,8 +912,8 @@
     cluster_id: u64,
     <span class="kw-2">mut </span>create_table_task: CreateTableTask,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;SubmitDdlTaskResponse&gt; {
-    <span class="kw">let </span>(table_id, region_routes) = ddl_manager
-        .table_meta_allocator
+    <span class="kw">let </span>table_meta = ddl_manager
+        .table_metadata_allocator
         .create(
             <span class="kw-2">&amp;</span>TableMetadataAllocatorContext { cluster_id },
             <span class="kw-2">&amp;mut </span>create_table_task.table_info,
@@ -895,8 +921,19 @@
         )
         .<span class="kw">await</span><span class="question-mark">?</span>;
 
+    <span class="kw">let </span>TableMetadata {
+        table_id,
+        region_routes,
+        region_wal_options,
+    } = table_meta;
+
     <span class="kw">let </span>id = ddl_manager
-        .submit_create_table_task(cluster_id, create_table_task, region_routes)
+        .submit_create_table_task(
+            cluster_id,
+            create_table_task,
+            region_routes,
+            region_wal_options,
+        )
         .<span class="kw">await</span><span class="question-mark">?</span>;
 
     <span class="macro">info!</span>(<span class="string">"Table: {table_id:?} is created via procedure_id {id:?}"</span>);
@@ -949,7 +986,7 @@
 
     <span class="kw">use </span>api::v1::meta::Partition;
     <span class="kw">use </span>common_procedure::local::LocalManager;
-    <span class="kw">use </span>table::metadata::{RawTableInfo, TableId};
+    <span class="kw">use </span>table::metadata::RawTableInfo;
 
     <span class="kw">use </span><span class="kw">super</span>::DdlManager;
     <span class="kw">use </span><span class="kw">crate</span>::cache_invalidator::DummyCacheInvalidator;
@@ -958,13 +995,12 @@
     <span class="kw">use </span><span class="kw">crate</span>::ddl::create_table::CreateTableProcedure;
     <span class="kw">use </span><span class="kw">crate</span>::ddl::drop_table::DropTableProcedure;
     <span class="kw">use </span><span class="kw">crate</span>::ddl::truncate_table::TruncateTableProcedure;
-    <span class="kw">use </span><span class="kw">crate</span>::ddl::{TableMetadataAllocator, TableMetadataAllocatorContext};
+    <span class="kw">use </span><span class="kw">crate</span>::ddl::{TableMetadata, TableMetadataAllocator, TableMetadataAllocatorContext};
     <span class="kw">use </span><span class="kw">crate</span>::error::Result;
     <span class="kw">use </span><span class="kw">crate</span>::key::TableMetadataManager;
     <span class="kw">use </span><span class="kw">crate</span>::kv_backend::memory::MemoryKvBackend;
     <span class="kw">use </span><span class="kw">crate</span>::peer::Peer;
     <span class="kw">use </span><span class="kw">crate</span>::region_keeper::MemoryRegionKeeper;
-    <span class="kw">use </span><span class="kw">crate</span>::rpc::router::RegionRoute;
     <span class="kw">use </span><span class="kw">crate</span>::state_store::KvStateStore;
 
     <span class="doccomment">/// A dummy implemented [DatanodeManager].
@@ -987,7 +1023,7 @@
             _ctx: <span class="kw-2">&amp;</span>TableMetadataAllocatorContext,
             _table_info: <span class="kw-2">&amp;mut </span>RawTableInfo,
             _partitions: <span class="kw-2">&amp;</span>[Partition],
-        ) -&gt; <span class="prelude-ty">Result</span>&lt;(TableId, Vec&lt;RegionRoute&gt;)&gt; {
+        ) -&gt; <span class="prelude-ty">Result</span>&lt;TableMetadata&gt; {
             <span class="macro">unimplemented!</span>()
         }
     }

@@ -257,6 +257,7 @@
 <a href="#256" id="256">256</a>
 <a href="#257" id="257">257</a>
 <a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -333,6 +334,7 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::assert_matches::assert_matches;
+    <span class="kw">use </span>std::collections::HashMap;
 
     <span class="kw">use </span>common_meta::key::test_utils::new_test_table_info;
     <span class="kw">use </span>common_meta::peer::Peer;
@@ -396,7 +398,7 @@
 
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 
@@ -450,7 +452,7 @@
 
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 
@@ -493,7 +495,7 @@
 
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes)
+            .create_table_metadata(table_info, region_routes, HashMap::default())
             .<span class="kw">await
             </span>.unwrap();
 

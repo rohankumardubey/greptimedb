@@ -304,6 +304,21 @@
 <a href="#303" id="303">303</a>
 <a href="#304" id="304">304</a>
 <a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -347,8 +362,10 @@
     // the new leader node needs to remark the failed region as "inactive"
     // to prevent it from renewing the lease.
     </span>remark_inactive_region: bool,
-    region_storage_path: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="comment">// An `None` option stands for uninitialized.
+    </span>region_storage_path: <span class="prelude-ty">Option</span>&lt;String&gt;,
     region_options: <span class="prelude-ty">Option</span>&lt;HashMap&lt;String, String&gt;&gt;,
+    region_wal_options: <span class="prelude-ty">Option</span>&lt;HashMap&lt;String, String&gt;&gt;,
 }
 
 <span class="kw">impl </span>ActivateRegion {
@@ -358,6 +375,7 @@
             remark_inactive_region: <span class="bool-val">false</span>,
             region_storage_path: <span class="prelude-val">None</span>,
             region_options: <span class="prelude-val">None</span>,
+            region_wal_options: <span class="prelude-val">None</span>,
         }
     }
 
@@ -387,14 +405,19 @@
         };
         <span class="macro">info!</span>(<span class="string">"Activating region: {candidate_ident:?}"</span>);
         <span class="kw">let </span>region_options: HashMap&lt;String, String&gt; = (<span class="kw-2">&amp;</span>table_info.meta.options).into();
+        <span class="comment">// TODO(niebayes): properly fetch or construct region wal options.
+        </span><span class="kw">let </span>region_wal_options = HashMap::new();
         <span class="kw">let </span>instruction = Instruction::OpenRegion(OpenRegion::new(
             candidate_ident.clone(),
             <span class="kw-2">&amp;</span>region_storage_path,
             region_options.clone(),
+            region_wal_options.clone(),
         ));
 
         <span class="self">self</span>.region_storage_path = <span class="prelude-val">Some</span>(region_storage_path);
         <span class="self">self</span>.region_options = <span class="prelude-val">Some</span>(region_options);
+        <span class="self">self</span>.region_wal_options = <span class="prelude-val">Some</span>(region_wal_options);
+
         <span class="kw">let </span>msg = MailboxMessage::json_message(
             <span class="string">"Activate Region"</span>,
             <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"Metasrv@{}"</span>, ctx.selector_ctx.server_addr),
@@ -442,6 +465,11 @@
                             .clone()
                             .context(error::UnexpectedSnafu {
                                 violated: <span class="string">"expected region_options"</span>,
+                            })<span class="question-mark">?</span>,
+                        <span class="self">self</span>.region_wal_options
+                            .clone()
+                            .context(error::UnexpectedSnafu {
+                                violated: <span class="string">"expected region_wal_options"</span>,
                             })<span class="question-mark">?</span>,
                     )))
                 } <span class="kw">else </span>{
@@ -528,6 +556,7 @@
                     },
                     <span class="kw-2">&amp;</span>env.path,
                     HashMap::new(),
+                    HashMap::new(),
                 )))
                 .unwrap(),
             ))
@@ -562,7 +591,7 @@
             </span>.unwrap();
         <span class="macro">assert_eq!</span>(
             <span class="macro">format!</span>(<span class="string">"{next_state:?}"</span>),
-            <span class="string">r#"UpdateRegionMetadata { candidate: Peer { id: 2, addr: "" }, region_storage_path: "greptime/public", region_options: {} }"#
+            <span class="string">r#"UpdateRegionMetadata { candidate: Peer { id: 2, addr: "" }, region_storage_path: "greptime/public", region_options: {}, region_wal_options: {} }"#
         </span>);
     }
 
@@ -597,6 +626,7 @@
                         ..failed_region.clone()
                     },
                     <span class="kw-2">&amp;</span>env.path,
+                    HashMap::new(),
                     HashMap::new(),
                 )))
                 .unwrap(),

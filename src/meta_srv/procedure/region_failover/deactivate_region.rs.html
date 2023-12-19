@@ -603,7 +603,7 @@
             </span>.unwrap();
         <span class="macro">assert_eq!</span>(
             <span class="macro">format!</span>(<span class="string">"{next_state:?}"</span>),
-            <span class="string">r#"ActivateRegion { candidate: Peer { id: 2, addr: "" }, remark_inactive_region: false, region_storage_path: None, region_options: None }"#
+            <span class="string">r#"ActivateRegion { candidate: Peer { id: 2, addr: "" }, remark_inactive_region: false, region_storage_path: None, region_options: None, region_wal_options: None }"#
         </span>);
     }
 
@@ -645,7 +645,7 @@
         <span class="comment">// Timeout or not, proceed to `ActivateRegion`.
         </span><span class="macro">assert_eq!</span>(
             <span class="macro">format!</span>(<span class="string">"{next_state:?}"</span>),
-            <span class="string">r#"ActivateRegion { candidate: Peer { id: 2, addr: "" }, remark_inactive_region: false, region_storage_path: None, region_options: None }"#
+            <span class="string">r#"ActivateRegion { candidate: Peer { id: 2, addr: "" }, remark_inactive_region: false, region_storage_path: None, region_options: None, region_wal_options: None }"#
         </span>);
     }
 }
