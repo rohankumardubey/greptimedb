@@ -614,6 +614,10 @@
 <a href="#613" id="613">613</a>
 <a href="#614" id="614">614</a>
 <a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1024,6 +1028,9 @@
         </span>error: FromUtf8Error,
         location: Location,
     },
+
+    <span class="attr">#[snafu(display(<span class="string">"Failed to convert Mysql value, error: {}"</span>, err_msg))]
+    </span>MysqlValueConversion { err_msg: String, location: Location },
 }
 
 <span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T&gt; = std::result::Result&lt;T, Error&gt;;
@@ -1076,7 +1083,8 @@
             | PreparedStmtTypeMismatch { .. }
             | TimePrecision { .. }
             | UrlDecode { .. }
-            | IncompatibleSchema { .. } =&gt; StatusCode::InvalidArguments,
+            | IncompatibleSchema { .. }
+            | MysqlValueConversion { .. } =&gt; StatusCode::InvalidArguments,
 
             InfluxdbLinesWrite { source, .. }
             | PromSeriesWrite { source, .. }

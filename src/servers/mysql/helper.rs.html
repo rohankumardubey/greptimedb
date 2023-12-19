@@ -244,6 +244,26 @@
 <a href="#243" id="243">243</a>
 <a href="#244" id="244">244</a>
 <a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -261,12 +281,12 @@
 </span><span class="kw">use </span>std::ops::ControlFlow;
 <span class="kw">use </span>std::time::Duration;
 
-<span class="kw">use </span>chrono::{NaiveDate, NaiveDateTime};
+<span class="kw">use </span>chrono::NaiveDate;
 <span class="kw">use </span>common_query::prelude::ScalarValue;
 <span class="kw">use </span>datatypes::prelude::ConcreteDataType;
 <span class="kw">use </span>datatypes::value::{<span class="self">self</span>, Value};
 <span class="kw">use </span>itertools::Itertools;
-<span class="kw">use </span>opensrv_mysql::{ParamValue, ValueInner};
+<span class="kw">use </span>opensrv_mysql::{to_naive_datetime, ParamValue, ValueInner};
 <span class="kw">use </span>snafu::ResultExt;
 <span class="kw">use </span>sql::ast::{visit_expressions_mut, Expr, Value <span class="kw">as </span>ValueExpr, VisitMut};
 <span class="kw">use </span>sql::statements::statement::Statement;
@@ -417,9 +437,29 @@
             <span class="kw">let </span>date: common_time::Date = NaiveDate::from(param.value).into();
             <span class="prelude-val">Ok</span>(ScalarValue::Date32(<span class="prelude-val">Some</span>(date.val())))
         }
-        ValueInner::Datetime(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(ScalarValue::Date64(<span class="prelude-val">Some</span>(
-            NaiveDateTime::from(param.value).timestamp_millis(),
-        ))),
+        ValueInner::Datetime(<span class="kw">_</span>) =&gt; {
+            <span class="kw">let </span>timestamp_millis = to_naive_datetime(param.value)
+                .map_err(|e| {
+                    error::MysqlValueConversionSnafu {
+                        err_msg: e.to_string(),
+                    }
+                    .build()
+                })<span class="question-mark">?
+                </span>.timestamp_millis();
+
+            <span class="kw">match </span>t {
+                ConcreteDataType::DateTime(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(ScalarValue::Date64(<span class="prelude-val">Some</span>(timestamp_millis))),
+                ConcreteDataType::Timestamp(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(ScalarValue::TimestampMillisecond(
+                    <span class="prelude-val">Some</span>(timestamp_millis),
+                    <span class="prelude-val">None</span>,
+                )),
+                <span class="kw">_ </span>=&gt; error::PreparedStmtTypeMismatchSnafu {
+                    expected: t,
+                    actual: param.coltype,
+                }
+                .fail(),
+            }
+        }
         ValueInner::Time(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(ScalarValue::Time64Nanosecond(<span class="prelude-val">Some</span>(
             Duration::from(param.value).as_millis() <span class="kw">as </span>i64,
         ))),
