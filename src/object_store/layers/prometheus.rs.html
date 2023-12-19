@@ -881,7 +881,7 @@
             .inc();
 
         <span class="kw">let </span>timer = REQUESTS_DURATION_SECONDS
-            .with_label_values(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="self">self</span>.scheme])
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="self">self</span>.scheme, Operation::BlockingRead.into_static()])
             .start_timer();
         <span class="kw">let </span>result = <span class="self">self</span>.inner.blocking_read(path, args).map(|(rp, r)| {
             (
