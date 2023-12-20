@@ -103,6 +103,12 @@
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -172,8 +178,8 @@
 
     <span class="kw">fn </span>try_from(value: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">match </span>value {
-            <span class="string">"LoadBased" </span>=&gt; <span class="prelude-val">Ok</span>(SelectorType::LoadBased),
-            <span class="string">"LeaseBased" </span>=&gt; <span class="prelude-val">Ok</span>(SelectorType::LeaseBased),
+            <span class="string">"load_based" </span>| <span class="string">"LoadBased" </span>=&gt; <span class="prelude-val">Ok</span>(SelectorType::LoadBased),
+            <span class="string">"lease_based" </span>| <span class="string">"LeaseBased" </span>=&gt; <span class="prelude-val">Ok</span>(SelectorType::LeaseBased),
             other =&gt; error::UnsupportedSelectorTypeSnafu {
                 selector_type: other,
             }
@@ -194,12 +200,18 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_convert_str_to_selector_type() {
-        <span class="kw">let </span>leasebased = <span class="string">"LeaseBased"</span>;
-        <span class="kw">let </span>selector_type = leasebased.try_into().unwrap();
+        <span class="kw">let </span>lease_based = <span class="string">"lease_based"</span>;
+        <span class="kw">let </span>selector_type = lease_based.try_into().unwrap();
+        <span class="macro">assert_eq!</span>(SelectorType::LeaseBased, selector_type);
+        <span class="kw">let </span>lease_based = <span class="string">"LeaseBased"</span>;
+        <span class="kw">let </span>selector_type = lease_based.try_into().unwrap();
         <span class="macro">assert_eq!</span>(SelectorType::LeaseBased, selector_type);
 
-        <span class="kw">let </span>loadbased = <span class="string">"LoadBased"</span>;
-        <span class="kw">let </span>selector_type = loadbased.try_into().unwrap();
+        <span class="kw">let </span>load_based = <span class="string">"load_based"</span>;
+        <span class="kw">let </span>selector_type = load_based.try_into().unwrap();
+        <span class="macro">assert_eq!</span>(SelectorType::LoadBased, selector_type);
+        <span class="kw">let </span>load_based = <span class="string">"LoadBased"</span>;
+        <span class="kw">let </span>selector_type = load_based.try_into().unwrap();
         <span class="macro">assert_eq!</span>(SelectorType::LoadBased, selector_type);
 
         <span class="kw">let </span>unknown = <span class="string">"unknown"</span>;
