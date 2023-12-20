@@ -140,6 +140,20 @@
 <a href="#139" id="139">139</a>
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -154,9 +168,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>store_api::logstore::entry::{Entry, Id};
+</span><span class="kw">use </span>std::collections::HashMap;
+
+<span class="kw">use </span>common_config::wal::WalOptions;
+<span class="kw">use </span>store_api::logstore::entry::{Entry, Id <span class="kw">as </span>EntryId};
 <span class="kw">use </span>store_api::logstore::namespace::{Id <span class="kw">as </span>NamespaceId, Namespace};
-<span class="kw">use </span>store_api::logstore::{AppendResponse, LogStore};
+<span class="kw">use </span>store_api::logstore::{AppendBatchResponse, AppendResponse, LogStore};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, <span class="prelude-ty">Result</span>};
 
@@ -184,7 +201,7 @@
         <span class="kw-2">&amp;</span>[]
     }
 
-    <span class="kw">fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+    <span class="kw">fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; EntryId {
         <span class="number">0
     </span>}
 
@@ -204,17 +221,22 @@
     }
 
     <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>_e: <span class="self">Self</span>::Entry) -&gt; <span class="prelude-ty">Result</span>&lt;AppendResponse&gt; {
-        <span class="prelude-val">Ok</span>(AppendResponse { entry_id: <span class="number">0 </span>})
+        <span class="prelude-val">Ok</span>(AppendResponse {
+            entry_id: <span class="number">0</span>,
+            offset: <span class="prelude-val">None</span>,
+        })
     }
 
-    <span class="kw">async fn </span>append_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, _e: Vec&lt;<span class="self">Self</span>::Entry&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="prelude-val">Ok</span>(())
+    <span class="kw">async fn </span>append_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, _e: Vec&lt;<span class="self">Self</span>::Entry&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;AppendBatchResponse&gt; {
+        <span class="prelude-val">Ok</span>(AppendBatchResponse {
+            offsets: HashMap::new(),
+        })
     }
 
     <span class="kw">async fn </span>read(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         _ns: <span class="kw-2">&amp;</span><span class="self">Self</span>::Namespace,
-        _id: Id,
+        _entry_id: EntryId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;store_api::logstore::entry_stream::SendableEntryStream&lt;<span class="lifetime">'_</span>, <span class="self">Self</span>::Entry, <span class="self">Self</span>::Error&gt;&gt;
     {
         <span class="prelude-val">Ok</span>(Box::pin(futures::stream::once(futures::future::ready(<span class="prelude-val">Ok</span>(
@@ -234,25 +256,31 @@
         <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[])
     }
 
-    <span class="kw">fn </span>entry&lt;D: AsRef&lt;[u8]&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, data: D, id: Id, ns: <span class="self">Self</span>::Namespace) -&gt; <span class="self">Self</span>::Entry {
+    <span class="kw">fn </span>entry&lt;D: AsRef&lt;[u8]&gt;&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        data: D,
+        entry_id: EntryId,
+        ns: <span class="self">Self</span>::Namespace,
+    ) -&gt; <span class="self">Self</span>::Entry {
         <span class="kw">let _ </span>= data;
-        <span class="kw">let _ </span>= id;
+        <span class="kw">let _ </span>= entry_id;
         <span class="kw">let _ </span>= ns;
         EntryImpl
     }
 
-    <span class="kw">fn </span>namespace(<span class="kw-2">&amp;</span><span class="self">self</span>, id: NamespaceId) -&gt; <span class="self">Self</span>::Namespace {
-        <span class="kw">let _ </span>= id;
+    <span class="kw">fn </span>namespace(<span class="kw-2">&amp;</span><span class="self">self</span>, ns_id: NamespaceId, wal_options: <span class="kw-2">&amp;</span>WalOptions) -&gt; <span class="self">Self</span>::Namespace {
+        <span class="kw">let _ </span>= ns_id;
+        <span class="kw">let _ </span>= wal_options;
         NamespaceImpl
     }
 
     <span class="kw">async fn </span>obsolete(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        namespace: <span class="self">Self</span>::Namespace,
-        id: Id,
+        ns: <span class="self">Self</span>::Namespace,
+        entry_id: EntryId,
     ) -&gt; std::result::Result&lt;(), <span class="self">Self</span>::Error&gt; {
-        <span class="kw">let _ </span>= namespace;
-        <span class="kw">let _ </span>= id;
+        <span class="kw">let _ </span>= ns;
+        <span class="kw">let _ </span>= entry_id;
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -277,7 +305,7 @@
         store.create_namespace(<span class="kw-2">&amp;</span>NamespaceImpl).<span class="kw">await</span>.unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">0</span>, store.list_namespaces().<span class="kw">await</span>.unwrap().len());
         store.delete_namespace(<span class="kw-2">&amp;</span>NamespaceImpl).<span class="kw">await</span>.unwrap();
-        <span class="macro">assert_eq!</span>(NamespaceImpl, store.namespace(<span class="number">0</span>));
+        <span class="macro">assert_eq!</span>(NamespaceImpl, store.namespace(<span class="number">0</span>, <span class="kw-2">&amp;</span>WalOptions::default()));
         store.obsolete(NamespaceImpl, <span class="number">1</span>).<span class="kw">await</span>.unwrap();
     }
 }

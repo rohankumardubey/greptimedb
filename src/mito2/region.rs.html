@@ -230,6 +230,9 @@
 <a href="#229" id="229">229</a>
 <a href="#230" id="230">230</a>
 <a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -254,6 +257,7 @@
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, AtomicI64, Ordering};
 <span class="kw">use </span>std::sync::{Arc, RwLock};
 
+<span class="kw">use </span>common_config::wal::WalOptions;
 <span class="kw">use </span>common_telemetry::info;
 <span class="kw">use </span>common_time::util::current_time_millis;
 <span class="kw">use </span>snafu::{ensure, OptionExt};
@@ -306,6 +310,8 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) manifest_manager: RegionManifestManager,
     <span class="doccomment">/// SST file purger.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) file_purger: FilePurgerRef,
+    <span class="doccomment">/// Wal options of this region.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) wal_options: WalOptions,
     <span class="doccomment">/// Last flush time in millis.
     </span>last_flush_millis: AtomicI64,
     <span class="doccomment">/// Whether the region is writable.

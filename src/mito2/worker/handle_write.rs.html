@@ -199,6 +199,10 @@
 <a href="#198" id="198">198</a>
 <a href="#199" id="199">199</a>
 <a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -334,7 +338,11 @@
                     </span><span class="kw">continue</span>;
                 };
 
-                <span class="kw">let </span>region_ctx = RegionWriteCtx::new(region.region_id, <span class="kw-2">&amp;</span>region.version_control);
+                <span class="kw">let </span>region_ctx = RegionWriteCtx::new(
+                    region.region_id,
+                    <span class="kw-2">&amp;</span>region.version_control,
+                    region.wal_options.clone(),
+                );
 
                 e.insert(region_ctx);
             }

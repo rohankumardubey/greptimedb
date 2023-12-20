@@ -207,6 +207,19 @@
 <a href="#206" id="206">206</a>
 <a href="#207" id="207">207</a>
 <a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -225,6 +238,7 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>api::v1::{Mutation, OpType, Rows, WalEntry};
+<span class="kw">use </span>common_config::wal::WalOptions;
 <span class="kw">use </span>snafu::ResultExt;
 <span class="kw">use </span>store_api::logstore::LogStore;
 <span class="kw">use </span>store_api::storage::{RegionId, SequenceNumber};
@@ -295,6 +309,8 @@
     /// We keep [WalEntry] instead of mutations to avoid taking mutations
     /// out of the context to construct the wal entry when we write to the wal.
     </span>wal_entry: WalEntry,
+    <span class="doccomment">/// Wal options of the region being written to.
+    </span>wal_options: WalOptions,
     <span class="doccomment">/// Notifiers to send write results to waiters.
     ///
     /// The i-th notify is for i-th mutation.
@@ -311,7 +327,11 @@
 
 <span class="kw">impl </span>RegionWriteCtx {
     <span class="doccomment">/// Returns an empty context.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(region_id: RegionId, version_control: <span class="kw-2">&amp;</span>VersionControlRef) -&gt; RegionWriteCtx {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
+        region_id: RegionId,
+        version_control: <span class="kw-2">&amp;</span>VersionControlRef,
+        wal_options: WalOptions,
+    ) -&gt; RegionWriteCtx {
         <span class="kw">let </span>VersionControlData {
             version,
             committed_sequence,
@@ -326,6 +346,7 @@
             next_sequence: committed_sequence + <span class="number">1</span>,
             next_entry_id: last_entry_id + <span class="number">1</span>,
             wal_entry: WalEntry::default(),
+            wal_options,
             notifiers: Vec::new(),
             failed: <span class="bool-val">false</span>,
             put_num: <span class="number">0</span>,
@@ -362,7 +383,12 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         wal_writer: <span class="kw-2">&amp;mut </span>WalWriter&lt;S&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        wal_writer.add_entry(<span class="self">self</span>.region_id, <span class="self">self</span>.next_entry_id, <span class="kw-2">&amp;</span><span class="self">self</span>.wal_entry)<span class="question-mark">?</span>;
+        wal_writer.add_entry(
+            <span class="self">self</span>.region_id,
+            <span class="self">self</span>.next_entry_id,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.wal_entry,
+            <span class="kw-2">&amp;</span><span class="self">self</span>.wal_options,
+        )<span class="question-mark">?</span>;
         <span class="comment">// We only call this method one time, but we still bump next entry id for consistency.
         </span><span class="self">self</span>.next_entry_id += <span class="number">1</span>;
         <span class="prelude-val">Ok</span>(())

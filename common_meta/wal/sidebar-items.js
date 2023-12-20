@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["WAL_OPTIONS_KEY"],"enum":["WalConfig","WalOptions"],"mod":["kafka","options_allocator","prefix_wal_kafka"]};
+window.SIDEBAR_ITEMS = {"enum":["WalConfig"],"mod":["kafka","options_allocator"]};

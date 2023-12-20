@@ -101,8 +101,8 @@
 
 </span><span class="kw">use </span>std::hash::{Hash, Hasher};
 
-<span class="kw">use </span>store_api::logstore::entry::{Entry, Id};
-<span class="kw">use </span>store_api::logstore::namespace::Namespace;
+<span class="kw">use </span>store_api::logstore::entry::{Entry, Id <span class="kw">as </span>EntryId};
+<span class="kw">use </span>store_api::logstore::namespace::{Id <span class="kw">as </span>NamespaceId, Namespace};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::Error;
 <span class="kw">use </span><span class="kw">crate</span>::raft_engine::protos::logstore::{EntryImpl, NamespaceImpl};
@@ -129,7 +129,7 @@
 }
 
 <span class="kw">impl </span>NamespaceImpl {
-    <span class="kw">pub fn </span>with_id(id: Id) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>with_id(id: NamespaceId) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             id,
             ..Default::default()
@@ -147,7 +147,7 @@
 <span class="kw">impl </span>Eq <span class="kw">for </span>NamespaceImpl {}
 
 <span class="kw">impl </span>Namespace <span class="kw">for </span>NamespaceImpl {
-    <span class="kw">fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; store_api::logstore::namespace::Id {
+    <span class="kw">fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; NamespaceId {
         <span class="self">self</span>.id
     }
 }
@@ -160,7 +160,7 @@
         <span class="self">self</span>.data.as_slice()
     }
 
-    <span class="kw">fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id {
+    <span class="kw">fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; EntryId {
         <span class="self">self</span>.id
     }
 

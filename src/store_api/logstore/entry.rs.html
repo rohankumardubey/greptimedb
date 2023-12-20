@@ -34,6 +34,7 @@
 <a href="#33" id="33">33</a>
 <a href="#34" id="34">34</a>
 <a href="#35" id="35">35</a>
+<a href="#36" id="36">36</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,9 +53,10 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::logstore::namespace::Namespace;
 
-<span class="kw">pub type </span>Offset = usize;
-<span class="kw">pub type </span>Epoch = u64;
-<span class="kw">pub type </span>Id = u64;
+<span class="doccomment">/// An entry's logical id, allocated by log store users.
+</span><span class="kw">pub type </span>Id = u64;
+<span class="doccomment">/// An entry's physical offset in the underlying log store.
+</span><span class="kw">pub type </span>Offset = usize;
 
 <span class="doccomment">/// Entry is the minimal data storage unit in `LogStore`.
 </span><span class="kw">pub trait </span>Entry: Send + Sync {

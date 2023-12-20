@@ -33,7 +33,7 @@
 "promql":[["impl ErrorCompat for <a class=\"enum\" href=\"promql/error/enum.Error.html\" title=\"enum promql::error::Error\">Error</a>"]],
 "puffin":[["impl ErrorCompat for <a class=\"enum\" href=\"puffin/error/enum.Error.html\" title=\"enum puffin::error::Error\">Error</a>"]],
 "query":[["impl ErrorCompat for <a class=\"enum\" href=\"query/datafusion/error/enum.InnerError.html\" title=\"enum query::datafusion::error::InnerError\">InnerError</a>"],["impl ErrorCompat for <a class=\"enum\" href=\"query/error/enum.Error.html\" title=\"enum query::error::Error\">Error</a>"]],
-"script":[["impl ErrorCompat for <a class=\"enum\" href=\"script/python/error/enum.Error.html\" title=\"enum script::python::error::Error\">Error</a>"],["impl ErrorCompat for <a class=\"enum\" href=\"script/error/enum.Error.html\" title=\"enum script::error::Error\">Error</a>"]],
+"script":[["impl ErrorCompat for <a class=\"enum\" href=\"script/error/enum.Error.html\" title=\"enum script::error::Error\">Error</a>"],["impl ErrorCompat for <a class=\"enum\" href=\"script/python/error/enum.Error.html\" title=\"enum script::python::error::Error\">Error</a>"]],
 "servers":[["impl ErrorCompat for <a class=\"enum\" href=\"servers/error/enum.Error.html\" title=\"enum servers::error::Error\">Error</a>"]],
 "sql":[["impl ErrorCompat for <a class=\"enum\" href=\"sql/error/enum.Error.html\" title=\"enum sql::error::Error\">Error</a>"]],
 "store_api":[["impl ErrorCompat for <a class=\"enum\" href=\"store_api/metadata/enum.MetadataError.html\" title=\"enum store_api::metadata::MetadataError\">MetadataError</a>"]],

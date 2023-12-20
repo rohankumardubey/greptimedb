@@ -498,6 +498,31 @@
 <a href="#497" id="497">497</a>
 <a href="#498" id="498">498</a>
 <a href="#499" id="499">499</a>
+<a href="#500" id="500">500</a>
+<a href="#501" id="501">501</a>
+<a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a>
+<a href="#504" id="504">504</a>
+<a href="#505" id="505">505</a>
+<a href="#506" id="506">506</a>
+<a href="#507" id="507">507</a>
+<a href="#508" id="508">508</a>
+<a href="#509" id="509">509</a>
+<a href="#510" id="510">510</a>
+<a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -518,7 +543,8 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>catalog::kvbackend::MetaKvBackend;
 <span class="kw">use </span>clap::Parser;
-<span class="kw">use </span>common_telemetry::logging;
+<span class="kw">use </span>common_config::WalConfig;
+<span class="kw">use </span>common_telemetry::{info, logging};
 <span class="kw">use </span>datanode::config::DatanodeOptions;
 <span class="kw">use </span>datanode::datanode::{Datanode, DatanodeBuilder};
 <span class="kw">use </span>meta_client::MetaClientOptions;
@@ -666,8 +692,18 @@
             opts.storage.data_home = data_home.clone();
         }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(wal_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.wal_dir {
-            opts.wal.dir = <span class="prelude-val">Some</span>(wal_dir.clone());
+        <span class="comment">// `wal_dir` only affects raft-engine config.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(wal_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.wal_dir
+            &amp;&amp; <span class="kw">let </span>WalConfig::RaftEngine(raft_engine_config) = <span class="kw-2">&amp;mut </span>opts.wal
+        {
+            <span class="kw">if </span>raft_engine_config
+                .dir
+                .as_ref()
+                .is_some_and(|original_dir| original_dir != wal_dir)
+            {
+                <span class="macro">info!</span>(<span class="string">"The wal dir of raft-engine is altered to {wal_dir}"</span>);
+            }
+            raft_engine_config.dir.replace(wal_dir.clone());
         }
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(http_addr) = <span class="kw-2">&amp;</span><span class="self">self</span>.http_addr {
@@ -756,6 +792,7 @@
             tcp_nodelay = true
 
             [wal]
+            provider = "raft_engine"
             dir = "/other/wal"
             file_size = "1GB"
             purge_threshold = "50GB"
@@ -793,12 +830,18 @@
 
         <span class="macro">assert_eq!</span>(<span class="string">"127.0.0.1:3001"</span>.to_string(), options.rpc_addr);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">42</span>), options.node_id);
-        <span class="macro">assert_eq!</span>(<span class="string">"/other/wal"</span>, options.wal.dir.unwrap());
 
-        <span class="macro">assert_eq!</span>(Duration::from_secs(<span class="number">600</span>), options.wal.purge_interval);
-        <span class="macro">assert_eq!</span>(<span class="number">1024 </span>* <span class="number">1024 </span>* <span class="number">1024</span>, options.wal.file_size.<span class="number">0</span>);
-        <span class="macro">assert_eq!</span>(<span class="number">1024 </span>* <span class="number">1024 </span>* <span class="number">1024 </span>* <span class="number">50</span>, options.wal.purge_threshold.<span class="number">0</span>);
-        <span class="macro">assert!</span>(!options.wal.sync_write);
+        <span class="kw">let </span>WalConfig::RaftEngine(raft_engine_config) = options.wal <span class="kw">else </span>{
+            <span class="macro">unreachable!</span>()
+        };
+        <span class="macro">assert_eq!</span>(<span class="string">"/other/wal"</span>, raft_engine_config.dir.unwrap());
+        <span class="macro">assert_eq!</span>(Duration::from_secs(<span class="number">600</span>), raft_engine_config.purge_interval);
+        <span class="macro">assert_eq!</span>(<span class="number">1024 </span>* <span class="number">1024 </span>* <span class="number">1024</span>, raft_engine_config.file_size.<span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(
+            <span class="number">1024 </span>* <span class="number">1024 </span>* <span class="number">1024 </span>* <span class="number">50</span>,
+            raft_engine_config.purge_threshold.<span class="number">0
+        </span>);
+        <span class="macro">assert!</span>(!raft_engine_config.sync_write);
 
         <span class="kw">let </span>HeartbeatOptions {
             interval: heart_beat_interval,
@@ -912,9 +955,10 @@
             tcp_nodelay = true
 
             [wal]
+            provider = "raft_engine"
             file_size = "1GB"
             purge_threshold = "50GB"
-            purge_interval = "10m"
+            purge_interval = "5m"
             sync_write = false
 
             [storage]
@@ -975,7 +1019,10 @@
                 };
 
                 <span class="comment">// Should be read from env, env &gt; default values.
-                </span><span class="macro">assert_eq!</span>(opts.wal.read_batch_size, <span class="number">100</span>,);
+                </span><span class="kw">let </span>WalConfig::RaftEngine(raft_engine_config) = opts.wal <span class="kw">else </span>{
+                    <span class="macro">unreachable!</span>()
+                };
+                <span class="macro">assert_eq!</span>(raft_engine_config.read_batch_size, <span class="number">100</span>);
                 <span class="macro">assert_eq!</span>(
                     opts.meta_client.unwrap().metasrv_addrs,
                     <span class="macro">vec!</span>[
@@ -986,10 +1033,13 @@
                 );
 
                 <span class="comment">// Should be read from config file, config file &gt; env &gt; default values.
-                </span><span class="macro">assert_eq!</span>(opts.wal.purge_interval, Duration::from_secs(<span class="number">60 </span>* <span class="number">10</span>));
+                </span><span class="macro">assert_eq!</span>(
+                    raft_engine_config.purge_interval,
+                    Duration::from_secs(<span class="number">60 </span>* <span class="number">5</span>)
+                );
 
                 <span class="comment">// Should be read from cli, cli &gt; config file &gt; env &gt; default values.
-                </span><span class="macro">assert_eq!</span>(opts.wal.dir.unwrap(), <span class="string">"/other/wal/dir"</span>);
+                </span><span class="macro">assert_eq!</span>(raft_engine_config.dir.unwrap(), <span class="string">"/other/wal/dir"</span>);
 
                 <span class="comment">// Should be default value.
                 </span><span class="macro">assert_eq!</span>(opts.http.addr, DatanodeOptions::default().http.addr);

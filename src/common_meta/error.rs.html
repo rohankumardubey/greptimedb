@@ -406,6 +406,7 @@
 
 </span><span class="kw">use </span>std::str::Utf8Error;
 
+<span class="kw">use </span>common_config::wal::WalOptions;
 <span class="kw">use </span>common_error::ext::{BoxedError, ErrorExt};
 <span class="kw">use </span>common_error::status_code::StatusCode;
 <span class="kw">use </span>common_macro::stack_trace_debug;
@@ -415,7 +416,6 @@
 <span class="kw">use </span>table::metadata::TableId;
 
 <span class="kw">use </span><span class="kw">crate</span>::peer::Peer;
-<span class="kw">use </span><span class="kw">crate</span>::wal::WalOptions;
 <span class="kw">use </span><span class="kw">crate</span>::DatanodeId;
 
 <span class="attr">#[derive(Snafu)]

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["topic","topic_manager","topic_selector"],"struct":["KafkaConfig","KafkaOptions"]};
+window.SIDEBAR_ITEMS = {"mod":["topic","topic_manager","topic_selector"],"struct":["KafkaConfig"]};

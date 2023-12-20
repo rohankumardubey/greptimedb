@@ -508,6 +508,7 @@
 <span class="kw">use </span>api::v1::{ColumnDef, CreateTableExpr, SemanticType};
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>common_catalog::consts::METRIC_ENGINE;
+<span class="kw">use </span>common_config::WAL_OPTIONS_KEY;
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_procedure::error::{
     ExternalSnafu, FromJsonSnafu, <span class="prelude-ty">Result </span><span class="kw">as </span>ProcedureResult, ToJsonSnafu,
@@ -534,7 +535,6 @@
 <span class="kw">use </span><span class="kw">crate</span>::rpc::router::{
     find_leader_regions, find_leaders, operating_leader_regions, RegionRoute,
 };
-<span class="kw">use </span><span class="kw">crate</span>::wal::WAL_OPTIONS_KEY;
 
 <span class="kw">pub struct </span>CreateTableProcedure {
     <span class="kw">pub </span>context: DdlContext,

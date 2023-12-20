@@ -587,6 +587,40 @@
 <a href="#586" id="586">586</a>
 <a href="#587" id="587">587</a>
 <a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
+<a href="#622" id="622">622</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -610,6 +644,8 @@
 
 <span class="kw">use </span>catalog::memory::MemoryCatalogManager;
 <span class="kw">use </span>common_base::Plugins;
+<span class="kw">use </span>common_config::wal::{KafkaConfig, RaftEngineConfig};
+<span class="kw">use </span>common_config::{WalConfig, WAL_OPTIONS_KEY};
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_greptimedb_telemetry::GreptimeDBTelemetryTask;
 <span class="kw">use </span>common_meta::key::datanode_table::DatanodeTableManager;
@@ -621,9 +657,11 @@
 <span class="kw">use </span>futures::future;
 <span class="kw">use </span>futures_util::future::try_join_all;
 <span class="kw">use </span>futures_util::StreamExt;
+<span class="kw">use </span>log_store::kafka::log_store::KafkaLogStore;
 <span class="kw">use </span>log_store::raft_engine::log_store::RaftEngineLogStore;
 <span class="kw">use </span>meta_client::client::MetaClient;
 <span class="kw">use </span>metric_engine::engine::MetricEngine;
+<span class="kw">use </span>mito2::config::MitoConfig;
 <span class="kw">use </span>mito2::engine::MitoEngine;
 <span class="kw">use </span>object_store::manager::{ObjectStoreManager, ObjectStoreManagerRef};
 <span class="kw">use </span>object_store::util::normalize_dir;
@@ -634,7 +672,6 @@
 <span class="kw">use </span>servers::server::{start_server, ServerHandler, ServerHandlers};
 <span class="kw">use </span>servers::Mode;
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
-<span class="kw">use </span>store_api::logstore::LogStore;
 <span class="kw">use </span>store_api::path_utils::{region_dir, WAL_DIR};
 <span class="kw">use </span>store_api::region_engine::RegionEngineRef;
 <span class="kw">use </span>store_api::region_request::{RegionOpenRequest, RegionRequest};
@@ -810,18 +847,14 @@
         <span class="kw">let </span>kv_backend = <span class="self">self</span>.kv_backend.take().context(MissingKvBackendSnafu)<span class="question-mark">?</span>;
 
         <span class="comment">// build and initialize region server
-        </span><span class="kw">let </span>log_store = <span class="self">Self</span>::build_log_store(<span class="kw-2">&amp;</span><span class="self">self</span>.opts).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>(region_event_listener, region_event_receiver) = <span class="kw">if </span>controlled_by_metasrv {
+        </span><span class="kw">let </span>(region_event_listener, region_event_receiver) = <span class="kw">if </span>controlled_by_metasrv {
             <span class="kw">let </span>(tx, rx) = new_region_server_event_channel();
             (Box::new(tx) <span class="kw">as _</span>, <span class="prelude-val">Some</span>(rx))
         } <span class="kw">else </span>{
             (Box::new(NoopRegionServerEventListener) <span class="kw">as _</span>, <span class="prelude-val">None</span>)
         };
 
-        <span class="kw">let </span>region_server = <span class="self">self
-            </span>.new_region_server(log_store, region_event_listener)
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>region_server = <span class="self">self</span>.new_region_server(region_event_listener).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="self">self</span>.initialize_region_server(<span class="kw-2">&amp;</span>region_server, kv_backend, !controlled_by_metasrv)
             .<span class="kw">await</span><span class="question-mark">?</span>;
@@ -936,11 +969,21 @@
         <span class="kw">while let </span><span class="prelude-val">Some</span>(table_value) = table_values.next().<span class="kw">await </span>{
             <span class="kw">let </span>table_value = table_value.context(GetMetadataSnafu)<span class="question-mark">?</span>;
             <span class="kw">for </span>region_number <span class="kw">in </span>table_value.regions {
+                <span class="comment">// Augments region options with wal options if a wal options is provided.
+                </span><span class="kw">let </span><span class="kw-2">mut </span>region_options = table_value.region_info.region_options.clone();
+                table_value
+                    .region_info
+                    .region_wal_options
+                    .get(<span class="kw-2">&amp;</span>region_number.to_string())
+                    .and_then(|wal_options| {
+                        region_options.insert(WAL_OPTIONS_KEY.to_string(), wal_options.clone())
+                    });
+
                 regions.push((
                     RegionId::new(table_value.table_id, region_number),
                     table_value.region_info.engine.clone(),
                     table_value.region_info.region_storage_path.clone(),
-                    table_value.region_info.region_options.clone(),
+                    region_options,
                 ));
             }
         }
@@ -983,7 +1026,6 @@
 
     <span class="kw">async fn </span>new_region_server(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        log_store: Arc&lt;RaftEngineLogStore&gt;,
         event_listener: RegionServerEventListenerRef,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;RegionServer&gt; {
         <span class="kw">let </span>opts = <span class="kw-2">&amp;</span><span class="self">self</span>.opts;
@@ -1015,7 +1057,7 @@
         );
 
         <span class="kw">let </span>object_store_manager = <span class="self">Self</span>::build_object_store_manager(opts).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>engines = <span class="self">Self</span>::build_store_engines(opts, log_store, object_store_manager).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>engines = <span class="self">Self</span>::build_store_engines(opts, object_store_manager).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">for </span>engine <span class="kw">in </span>engines {
             region_server.register_engine(engine);
         }
@@ -1025,48 +1067,19 @@
 
     <span class="comment">// internal utils
 
-    </span><span class="doccomment">/// Build [RaftEngineLogStore]
-    </span><span class="kw">async fn </span>build_log_store(opts: <span class="kw-2">&amp;</span>DatanodeOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Arc&lt;RaftEngineLogStore&gt;&gt; {
-        <span class="kw">let </span>data_home = normalize_dir(<span class="kw-2">&amp;</span>opts.storage.data_home);
-        <span class="kw">let </span>wal_dir = <span class="kw">match </span><span class="kw-2">&amp;</span>opts.wal.dir {
-            <span class="prelude-val">Some</span>(dir) =&gt; dir.clone(),
-            <span class="prelude-val">None </span>=&gt; <span class="macro">format!</span>(<span class="string">"{}{WAL_DIR}"</span>, data_home),
-        };
-        <span class="kw">let </span>wal_config = opts.wal.clone();
-
-        <span class="comment">// create WAL directory
-        </span>fs::create_dir_all(Path::new(<span class="kw-2">&amp;</span>wal_dir))
-            .<span class="kw">await
-            </span>.context(CreateDirSnafu { dir: <span class="kw-2">&amp;</span>wal_dir })<span class="question-mark">?</span>;
-        <span class="macro">info!</span>(
-            <span class="string">"Creating logstore with config: {:?} and storage path: {}"</span>,
-            wal_config, <span class="kw-2">&amp;</span>wal_dir
-        );
-        <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(wal_dir, wal_config)
-            .<span class="kw">await
-            </span>.map_err(Box::new)
-            .context(OpenLogStoreSnafu)<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(Arc::new(logstore))
-    }
-
-    <span class="doccomment">/// Build [RegionEngineRef] from `store_engine` section in `opts`
-    </span><span class="kw">async fn </span>build_store_engines&lt;S&gt;(
+    </span><span class="doccomment">/// Builds [RegionEngineRef] from `store_engine` section in `opts`
+    </span><span class="kw">async fn </span>build_store_engines(
         opts: <span class="kw-2">&amp;</span>DatanodeOptions,
-        log_store: Arc&lt;S&gt;,
         object_store_manager: ObjectStoreManagerRef,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;RegionEngineRef&gt;&gt;
-    <span class="kw">where
-        </span>S: LogStore,
-    {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;RegionEngineRef&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>engines = <span class="macro">vec!</span>[];
         <span class="kw">for </span>engine <span class="kw">in </span><span class="kw-2">&amp;</span>opts.region_engine {
             <span class="kw">match </span>engine {
                 RegionEngineConfig::Mito(config) =&gt; {
-                    <span class="kw">let </span>mito_engine: MitoEngine = MitoEngine::new(
-                        config.clone(),
-                        log_store.clone(),
-                        object_store_manager.clone(),
-                    );
+                    <span class="kw">let </span>mito_engine =
+                        <span class="self">Self</span>::build_mito_engine(opts, object_store_manager.clone(), config.clone())
+                            .<span class="kw">await</span><span class="question-mark">?</span>;
+
                     <span class="kw">let </span>metric_engine = MetricEngine::new(mito_engine.clone());
                     engines.push(Arc::new(mito_engine) <span class="kw">as _</span>);
                     engines.push(Arc::new(metric_engine) <span class="kw">as _</span>);
@@ -1081,6 +1094,61 @@
             }
         }
         <span class="prelude-val">Ok</span>(engines)
+    }
+
+    <span class="doccomment">/// Builds [MitoEngine] according to options.
+    </span><span class="kw">async fn </span>build_mito_engine(
+        opts: <span class="kw-2">&amp;</span>DatanodeOptions,
+        object_store_manager: ObjectStoreManagerRef,
+        config: MitoConfig,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;MitoEngine&gt; {
+        <span class="kw">let </span>mito_engine = <span class="kw">match </span><span class="kw-2">&amp;</span>opts.wal {
+            WalConfig::RaftEngine(raft_engine_config) =&gt; MitoEngine::new(
+                config,
+                <span class="self">Self</span>::build_raft_engine_log_store(<span class="kw-2">&amp;</span>opts.storage.data_home, raft_engine_config)
+                    .<span class="kw">await</span><span class="question-mark">?</span>,
+                object_store_manager,
+            ),
+            WalConfig::Kafka(kafka_config) =&gt; MitoEngine::new(
+                config,
+                <span class="self">Self</span>::build_kafka_log_store(kafka_config).<span class="kw">await</span><span class="question-mark">?</span>,
+                object_store_manager,
+            ),
+        };
+        <span class="prelude-val">Ok</span>(mito_engine)
+    }
+
+    <span class="doccomment">/// Builds [RaftEngineLogStore].
+    </span><span class="kw">async fn </span>build_raft_engine_log_store(
+        data_home: <span class="kw-2">&amp;</span>str,
+        config: <span class="kw-2">&amp;</span>RaftEngineConfig,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Arc&lt;RaftEngineLogStore&gt;&gt; {
+        <span class="kw">let </span>data_home = normalize_dir(data_home);
+        <span class="kw">let </span>wal_dir = <span class="kw">match </span><span class="kw-2">&amp;</span>config.dir {
+            <span class="prelude-val">Some</span>(dir) =&gt; dir.clone(),
+            <span class="prelude-val">None </span>=&gt; <span class="macro">format!</span>(<span class="string">"{}{WAL_DIR}"</span>, data_home),
+        };
+
+        <span class="comment">// create WAL directory
+        </span>fs::create_dir_all(Path::new(<span class="kw-2">&amp;</span>wal_dir))
+            .<span class="kw">await
+            </span>.context(CreateDirSnafu { dir: <span class="kw-2">&amp;</span>wal_dir })<span class="question-mark">?</span>;
+        <span class="macro">info!</span>(
+            <span class="string">"Creating raft-engine logstore with config: {:?} and storage path: {}"</span>,
+            config, <span class="kw-2">&amp;</span>wal_dir
+        );
+        <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(wal_dir, config.clone())
+            .<span class="kw">await
+            </span>.map_err(Box::new)
+            .context(OpenLogStoreSnafu)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(Arc::new(logstore))
+    }
+
+    <span class="doccomment">/// Builds [KafkaLogStore].
+    </span><span class="kw">async fn </span>build_kafka_log_store(config: <span class="kw-2">&amp;</span>KafkaConfig) -&gt; <span class="prelude-ty">Result</span>&lt;Arc&lt;KafkaLogStore&gt;&gt; {
+        <span class="kw">let _ </span>= config;
+        <span class="macro">todo!</span>()
     }
 
     <span class="doccomment">/// Builds [ObjectStoreManager]

@@ -286,6 +286,11 @@
 <a href="#285" id="285">285</a>
 <a href="#286" id="286">286</a>
 <a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -459,6 +464,7 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::io::Write;
 
+    <span class="kw">use </span>common_config::WalConfig;
     <span class="kw">use </span>common_test_util::temp_dir::create_named_temp_file;
     <span class="kw">use </span>datanode::config::{DatanodeOptions, ObjectStoreConfig};
 
@@ -482,6 +488,7 @@
             tcp_nodelay = true
 
             [wal]
+            provider = "raft_engine"
             dir = "/tmp/greptimedb/wal"
             file_size = "1GB"
             purge_threshold = "50GB"
@@ -565,7 +572,10 @@
                 );
 
                 <span class="comment">// Should be the values from config file, not environment variables.
-                </span><span class="macro">assert_eq!</span>(opts.wal.dir.unwrap(), <span class="string">"/tmp/greptimedb/wal"</span>);
+                </span><span class="kw">let </span>WalConfig::RaftEngine(raft_engine_config) = opts.wal <span class="kw">else </span>{
+                    <span class="macro">unreachable!</span>()
+                };
+                <span class="macro">assert_eq!</span>(raft_engine_config.dir.unwrap(), <span class="string">"/tmp/greptimedb/wal"</span>);
 
                 <span class="comment">// Should be default values.
                 </span><span class="macro">assert_eq!</span>(opts.node_id, <span class="prelude-val">None</span>);
