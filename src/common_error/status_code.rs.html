@@ -243,6 +243,16 @@
 <a href="#242" id="242">242</a>
 <a href="#243" id="243">243</a>
 <a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -304,6 +314,10 @@
     RegionNotFound = <span class="number">4005</span>,
     RegionAlreadyExists = <span class="number">4006</span>,
     RegionReadonly = <span class="number">4007</span>,
+    RegionNotReady = <span class="number">4008</span>,
+    <span class="comment">// If mutually exclusive operations are reached at the same time,
+    // only one can be executed, another one will get region busy.
+    </span>RegionBusy = <span class="number">4009</span>,
     <span class="comment">// ====== End of catalog related status code =======
 
     // ====== Begin of storage related status code =====
@@ -348,7 +362,9 @@
         <span class="kw">match </span><span class="self">self </span>{
             StatusCode::StorageUnavailable
             | StatusCode::RuntimeResourcesExhausted
-            | StatusCode::Internal =&gt; <span class="bool-val">true</span>,
+            | StatusCode::Internal
+            | StatusCode::RegionNotReady
+            | StatusCode::RegionBusy =&gt; <span class="bool-val">true</span>,
 
             StatusCode::Success
             | StatusCode::Unknown
@@ -397,6 +413,8 @@
             | StatusCode::TableAlreadyExists
             | StatusCode::TableNotFound
             | StatusCode::RegionNotFound
+            | StatusCode::RegionNotReady
+            | StatusCode::RegionBusy
             | StatusCode::RegionAlreadyExists
             | StatusCode::RegionReadonly
             | StatusCode::TableColumnNotFound
@@ -428,6 +446,8 @@
             v <span class="kw">if </span>v == StatusCode::TableAlreadyExists <span class="kw">as </span>u32 =&gt; <span class="prelude-val">Some</span>(StatusCode::TableAlreadyExists),
             v <span class="kw">if </span>v == StatusCode::TableNotFound <span class="kw">as </span>u32 =&gt; <span class="prelude-val">Some</span>(StatusCode::TableNotFound),
             v <span class="kw">if </span>v == StatusCode::RegionNotFound <span class="kw">as </span>u32 =&gt; <span class="prelude-val">Some</span>(StatusCode::RegionNotFound),
+            v <span class="kw">if </span>v == StatusCode::RegionNotReady <span class="kw">as </span>u32 =&gt; <span class="prelude-val">Some</span>(StatusCode::RegionNotReady),
+            v <span class="kw">if </span>v == StatusCode::RegionBusy <span class="kw">as </span>u32 =&gt; <span class="prelude-val">Some</span>(StatusCode::RegionBusy),
             v <span class="kw">if </span>v == StatusCode::RegionAlreadyExists <span class="kw">as </span>u32 =&gt; {
                 <span class="prelude-val">Some</span>(StatusCode::RegionAlreadyExists)
             }

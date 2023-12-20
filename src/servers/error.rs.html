@@ -618,6 +618,8 @@
 <a href="#617" id="617">617</a>
 <a href="#618" id="618">618</a>
 <a href="#619" id="619">619</a>
+<a href="#620" id="620">620</a>
+<a href="#621" id="621">621</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1158,8 +1160,10 @@
         | StatusCode::TableColumnNotFound
         | StatusCode::DatabaseNotFound
         | StatusCode::UserNotFound =&gt; Code::NotFound,
-        StatusCode::StorageUnavailable =&gt; Code::Unavailable,
-        StatusCode::RuntimeResourcesExhausted | StatusCode::RateLimited =&gt; Code::ResourceExhausted,
+        StatusCode::StorageUnavailable | StatusCode::RegionNotReady =&gt; Code::Unavailable,
+        StatusCode::RuntimeResourcesExhausted
+        | StatusCode::RateLimited
+        | StatusCode::RegionBusy =&gt; Code::ResourceExhausted,
         StatusCode::UnsupportedPasswordType
         | StatusCode::UserPasswordMismatch
         | StatusCode::AuthHeaderNotFound

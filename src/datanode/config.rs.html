@@ -322,6 +322,8 @@
 <a href="#321" id="321">321</a>
 <a href="#322" id="322">322</a>
 <a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -549,6 +551,7 @@
     <span class="kw">pub </span>mode: Mode,
     <span class="kw">pub </span>node_id: <span class="prelude-ty">Option</span>&lt;u64&gt;,
     <span class="kw">pub </span>require_lease_before_startup: bool,
+    <span class="kw">pub </span>initialize_region_in_background: bool,
     <span class="kw">pub </span>rpc_addr: String,
     <span class="kw">pub </span>rpc_hostname: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>rpc_runtime_size: usize,
@@ -573,6 +576,7 @@
             mode: Mode::Standalone,
             node_id: <span class="prelude-val">None</span>,
             require_lease_before_startup: <span class="bool-val">false</span>,
+            initialize_region_in_background: <span class="bool-val">false</span>,
             rpc_addr: <span class="string">"127.0.0.1:3001"</span>.to_string(),
             rpc_hostname: <span class="prelude-val">None</span>,
             rpc_runtime_size: <span class="number">8</span>,

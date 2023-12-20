@@ -318,6 +318,20 @@
 <a href="#317" id="317">317</a>
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -530,6 +544,18 @@
         location: Location,
     },
 
+    <span class="attr">#[snafu(display(<span class="string">"Region {} not ready"</span>, region_id))]
+    </span>RegionNotReady {
+        region_id: RegionId,
+        location: Location,
+    },
+
+    <span class="attr">#[snafu(display(<span class="string">"Region {} is busy"</span>, region_id))]
+    </span>RegionBusy {
+        region_id: RegionId,
+        location: Location,
+    },
+
     <span class="attr">#[snafu(display(<span class="string">"Region engine {} is not registered"</span>, name))]
     </span>RegionEngineNotFound { name: String, location: Location },
 
@@ -615,6 +641,8 @@
             | GetRegionMetadata { .. } =&gt; StatusCode::Internal,
 
             RegionNotFound { .. } =&gt; StatusCode::RegionNotFound,
+            RegionNotReady { .. } =&gt; StatusCode::RegionNotReady,
+            RegionBusy { .. } =&gt; StatusCode::RegionBusy,
 
             StartServer { source, .. } | ShutdownServer { source, .. } =&gt; source.status_code(),
 
