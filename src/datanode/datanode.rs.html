@@ -586,6 +586,7 @@
 <a href="#585" id="585">585</a>
 <a href="#586" id="586">586</a>
 <a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -959,6 +960,7 @@
                             engine: engine.clone(),
                             region_dir,
                             options,
+                            skip_wal_replay: <span class="bool-val">false</span>,
                         }),
                     )
                     .<span class="kw">await</span><span class="question-mark">?</span>;

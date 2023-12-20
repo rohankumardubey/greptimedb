@@ -373,6 +373,18 @@
 <a href="#372" id="372">372</a>
 <a href="#373" id="373">373</a>
 <a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -429,6 +441,7 @@
     scheduler: SchedulerRef,
     options: HashMap&lt;String, String&gt;,
     cache_manager: <span class="prelude-ty">Option</span>&lt;CacheManagerRef&gt;,
+    skip_wal_replay: bool,
 }
 
 <span class="kw">impl </span>RegionOpener {
@@ -449,6 +462,7 @@
             scheduler,
             options: HashMap::new(),
             cache_manager: <span class="prelude-val">None</span>,
+            skip_wal_replay: <span class="bool-val">false</span>,
         }
     }
 
@@ -467,6 +481,12 @@
     <span class="doccomment">/// Sets the cache manager for the region.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>cache(<span class="kw-2">mut </span><span class="self">self</span>, cache_manager: <span class="prelude-ty">Option</span>&lt;CacheManagerRef&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.cache_manager = cache_manager;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Sets the `skip_wal_replay`.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>skip_wal_replay(<span class="kw-2">mut </span><span class="self">self</span>, skip: bool) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.skip_wal_replay = skip;
         <span class="self">self
     </span>}
 
@@ -610,7 +630,11 @@
             .build();
         <span class="kw">let </span>flushed_entry_id = version.flushed_entry_id;
         <span class="kw">let </span>version_control = Arc::new(VersionControl::new(version));
-        replay_memtable(wal, region_id, flushed_entry_id, <span class="kw-2">&amp;</span>version_control).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">if </span>!<span class="self">self</span>.skip_wal_replay {
+            replay_memtable(wal, region_id, flushed_entry_id, <span class="kw-2">&amp;</span>version_control).<span class="kw">await</span><span class="question-mark">?</span>;
+        } <span class="kw">else </span>{
+            <span class="macro">info!</span>(<span class="string">"Skip the WAL replay for region: {}"</span>, region_id);
+        }
 
         <span class="kw">let </span>region = MitoRegion {
             region_id: <span class="self">self</span>.region_id,

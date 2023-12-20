@@ -437,6 +437,7 @@
 <a href="#436" id="436">436</a>
 <a href="#437" id="437">437</a>
 <a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -503,6 +504,7 @@
                         engine: region_ident.engine,
                         region_dir: region_dir(<span class="kw-2">&amp;</span>region_storage_path, region_id),
                         options: region_options,
+                        skip_wal_replay: <span class="bool-val">false</span>,
                     });
                     <span class="kw">let </span>result = region_server.handle_request(region_id, request).<span class="kw">await</span>;
 

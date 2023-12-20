@@ -219,6 +219,8 @@
 <a href="#218" id="218">218</a>
 <a href="#219" id="219">219</a>
 <a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -384,6 +386,7 @@
             engine: <span class="string">"file"</span>.to_string(),
             region_dir,
             options: HashMap::default(),
+            skip_wal_replay: <span class="bool-val">false</span>,
         };
 
         <span class="kw">let </span>region = FileRegion::open(region_id, request, <span class="kw-2">&amp;</span>object_store)
@@ -432,6 +435,7 @@
             engine: <span class="string">"file"</span>.to_string(),
             region_dir,
             options: HashMap::default(),
+            skip_wal_replay: <span class="bool-val">false</span>,
         };
         <span class="kw">let </span>err = FileRegion::open(region_id, request, <span class="kw-2">&amp;</span>object_store)
             .<span class="kw">await

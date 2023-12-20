@@ -768,6 +768,9 @@
 <a href="#767" id="767">767</a>
 <a href="#768" id="768">768</a>
 <a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -886,6 +889,7 @@
                         engine: open.engine,
                         region_dir,
                         options: open.options,
+                        skip_wal_replay: <span class="bool-val">false</span>,
                     }),
                 )])
             }
@@ -967,6 +971,8 @@
     </span><span class="kw">pub </span>region_dir: String,
     <span class="doccomment">/// Options of the opened region.
     </span><span class="kw">pub </span>options: HashMap&lt;String, String&gt;,
+    <span class="doccomment">/// To skip replaying the WAL.
+    </span><span class="kw">pub </span>skip_wal_replay: bool,
 }
 
 <span class="doccomment">/// Close region request.
