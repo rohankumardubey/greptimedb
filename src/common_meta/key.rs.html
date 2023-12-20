@@ -1760,7 +1760,7 @@
             .build_delete_txn(table_id, table_info_value)<span class="question-mark">?</span>;
 
         <span class="comment">// Deletes datanode table key value pairs.
-        </span><span class="kw">let </span>distribution = region_distribution(<span class="kw-2">&amp;</span>table_route_value.region_routes)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>distribution = region_distribution(table_route_value.region_routes())<span class="question-mark">?</span>;
         <span class="kw">let </span>delete_datanode_txn = <span class="self">self
             </span>.datanode_table_manager()
             .build_delete_txn(table_id, distribution)<span class="question-mark">?</span>;
@@ -1885,7 +1885,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="comment">// Updates the datanode table key value pairs.
         </span><span class="kw">let </span>current_region_distribution =
-            region_distribution(<span class="kw-2">&amp;</span>current_table_route_value.region_routes)<span class="question-mark">?</span>;
+            region_distribution(current_table_route_value.region_routes())<span class="question-mark">?</span>;
         <span class="kw">let </span>new_region_distribution = region_distribution(<span class="kw-2">&amp;</span>new_region_routes)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>update_datanode_table_txn = <span class="self">self</span>.datanode_table_manager().build_update_txn(
@@ -1933,7 +1933,7 @@
     <span class="kw">where
         </span>F: Fn(<span class="kw-2">&amp;</span>RegionRoute) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Option</span>&lt;RegionStatus&gt;&gt;,
     {
-        <span class="kw">let </span><span class="kw-2">mut </span>new_region_routes = current_table_route_value.region_routes.clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>new_region_routes = current_table_route_value.region_routes().clone();
 
         <span class="kw">let </span><span class="kw-2">mut </span>updated = <span class="number">0</span>;
         <span class="kw">for </span>route <span class="kw">in </span><span class="kw-2">&amp;mut </span>new_region_routes {
@@ -2118,7 +2118,7 @@
         <span class="kw">let </span>mem_kv = Arc::new(MemoryKvBackend::default());
         <span class="kw">let </span>table_metadata_manager = TableMetadataManager::new(mem_kv);
         <span class="kw">let </span>region_route = new_test_region_route();
-        <span class="kw">let </span>region_routes = <span class="macro">vec!</span>[region_route.clone()];
+        <span class="kw">let </span>region_routes = <span class="kw-2">&amp;</span><span class="macro">vec!</span>[region_route.clone()];
         <span class="kw">let </span>table_info: RawTableInfo =
             new_test_table_info(region_routes.iter().map(|r| r.region.id.region_number())).into();
         <span class="comment">// creates metadata.
@@ -2161,7 +2161,7 @@
             table_info
         );
         <span class="macro">assert_eq!</span>(
-            remote_table_route.unwrap().into_inner().region_routes,
+            remote_table_route.unwrap().into_inner().region_routes(),
             region_routes
         );
     }
@@ -2171,7 +2171,7 @@
         <span class="kw">let </span>mem_kv = Arc::new(MemoryKvBackend::default());
         <span class="kw">let </span>table_metadata_manager = TableMetadataManager::new(mem_kv);
         <span class="kw">let </span>region_route = new_test_region_route();
-        <span class="kw">let </span>region_routes = <span class="macro">vec!</span>[region_route.clone()];
+        <span class="kw">let </span>region_routes = <span class="kw-2">&amp;</span><span class="macro">vec!</span>[region_route.clone()];
         <span class="kw">let </span>table_info: RawTableInfo =
             new_test_table_info(region_routes.iter().map(|r| r.region.id.region_number())).into();
         <span class="kw">let </span>table_id = table_info.ident.table_id;
@@ -2242,7 +2242,7 @@
             </span>.unwrap()
             .unwrap()
             .into_inner();
-        <span class="macro">assert_eq!</span>(removed_table_route.region_routes, region_routes);
+        <span class="macro">assert_eq!</span>(removed_table_route.region_routes(), region_routes);
     }
 
     <span class="attr">#[tokio::test]
@@ -2436,11 +2436,11 @@
             .unwrap();
 
         <span class="macro">assert_eq!</span>(
-            updated_route_value.region_routes[<span class="number">0</span>].leader_status,
+            updated_route_value.region_routes()[<span class="number">0</span>].leader_status,
             <span class="prelude-val">Some</span>(RegionStatus::Downgraded)
         );
         <span class="macro">assert_eq!</span>(
-            updated_route_value.region_routes[<span class="number">1</span>].leader_status,
+            updated_route_value.region_routes()[<span class="number">1</span>].leader_status,
             <span class="prelude-val">Some</span>(RegionStatus::Downgraded)
         );
     }

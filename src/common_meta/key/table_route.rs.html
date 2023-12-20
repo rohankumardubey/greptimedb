@@ -274,6 +274,34 @@
 <a href="#273" id="273">273</a>
 <a href="#274" id="274">274</a>
 <a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -314,41 +342,69 @@
 }
 
 <span class="attr">#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-</span><span class="kw">pub struct </span>TableRouteValue {
+</span><span class="kw">pub enum </span>TableRouteValue {
+    Physical(PhysicalTableRouteValue),
+    Logical(LogicalTableRouteValue),
+}
+
+<span class="attr">#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+</span><span class="kw">pub struct </span>PhysicalTableRouteValue {
     <span class="kw">pub </span>region_routes: Vec&lt;RegionRoute&gt;,
     version: u64,
 }
 
+<span class="attr">#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+</span><span class="kw">pub struct </span>LogicalTableRouteValue {
+    <span class="comment">// TODO(LFC): Add table route for MetricsEngine table.
+</span>}
+
 <span class="kw">impl </span>TableRouteValue {
     <span class="kw">pub fn </span>new(region_routes: Vec&lt;RegionRoute&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
+        <span class="self">Self</span>::Physical(PhysicalTableRouteValue {
             region_routes,
             version: <span class="number">0</span>,
-        }
+        })
     }
 
     <span class="doccomment">/// Returns a new version [TableRouteValue] with `region_routes`.
     </span><span class="kw">pub fn </span>update(<span class="kw-2">&amp;</span><span class="self">self</span>, region_routes: Vec&lt;RegionRoute&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
+        <span class="kw">let </span>version = <span class="self">self</span>.physical_table_route().version;
+        <span class="self">Self</span>::Physical(PhysicalTableRouteValue {
             region_routes,
-            version: <span class="self">self</span>.version + <span class="number">1</span>,
-        }
+            version: version + <span class="number">1</span>,
+        })
     }
 
     <span class="doccomment">/// Returns the version.
     ///
     /// For test purpose.
-    </span><span class="attr">#[cfg(any(tets, feature = <span class="string">"testing"</span>))]
+    </span><span class="attr">#[cfg(any(test, feature = <span class="string">"testing"</span>))]
     </span><span class="kw">pub fn </span>version(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="self">self</span>.version
+        <span class="self">self</span>.physical_table_route().version
     }
 
     <span class="doccomment">/// Returns the corresponding [RegionRoute].
     </span><span class="kw">pub fn </span>region_route(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) -&gt; <span class="prelude-ty">Option</span>&lt;RegionRoute&gt; {
-        <span class="self">self</span>.region_routes
+        <span class="self">self</span>.physical_table_route()
+            .region_routes
             .iter()
             .find(|route| route.region.id == region_id)
             .cloned()
+    }
+
+    <span class="doccomment">/// Gets the [RegionRoute]s of this [TableRouteValue::Physical].
+    ///
+    /// # Panics
+    /// The route type is not the [TableRouteValue::Physical].
+    </span><span class="kw">pub fn </span>region_routes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;RegionRoute&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.physical_table_route().region_routes
+    }
+
+    <span class="kw">fn </span>physical_table_route(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>PhysicalTableRouteValue {
+        <span class="kw">match </span><span class="self">self </span>{
+            TableRouteValue::Physical(x) =&gt; x,
+            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(<span class="string">"Mistakenly been treated as a Physical TableRoute: {self:?}"</span>),
+        }
     }
 }
 
@@ -545,7 +601,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;RegionDistribution&gt;&gt; {
         <span class="self">self</span>.get(table_id)
             .<span class="kw">await</span><span class="question-mark">?
-            </span>.map(|table_route| region_distribution(<span class="kw-2">&amp;</span>table_route.into_inner().region_routes))
+            </span>.map(|table_route| region_distribution(table_route.region_routes()))
             .transpose()
     }
 }

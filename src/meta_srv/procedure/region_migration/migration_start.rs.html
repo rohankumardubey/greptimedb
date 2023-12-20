@@ -378,7 +378,7 @@
         <span class="kw">let </span>table_route = ctx.get_table_route_value().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span>region_route = table_route
-            .region_routes
+            .region_routes()
             .iter()
             .find(|route| route.region.id == region_id)
             .cloned()

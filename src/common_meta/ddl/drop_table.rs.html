@@ -640,7 +640,7 @@
     }
 
     <span class="kw">fn </span>region_routes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;RegionRoute&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.table_route_value.region_routes
+        <span class="self">self</span>.table_route_value.region_routes()
     }
 
     <span class="kw">fn </span>table_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>RawTableInfo {

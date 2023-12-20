@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["TableRouteKey","TableRouteManager","TableRouteValue"]};
+window.SIDEBAR_ITEMS = {"enum":["TableRouteValue"],"struct":["LogicalTableRouteValue","PhysicalTableRouteValue","TableRouteKey","TableRouteManager"]};

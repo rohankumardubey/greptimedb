@@ -565,7 +565,6 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::key::table_info::TableInfoValue;
 <span class="kw">use </span><span class="kw">crate</span>::key::table_name::TableNameKey;
-<span class="kw">use </span><span class="kw">crate</span>::key::table_route::TableRouteValue;
 <span class="kw">use </span><span class="kw">crate</span>::key::DeserializedValueWithBytes;
 <span class="kw">use </span><span class="kw">crate</span>::metrics;
 <span class="kw">use </span><span class="kw">crate</span>::rpc::ddl::AlterTableTask;
@@ -705,7 +704,7 @@
         <span class="kw">let </span>table_id = <span class="self">self</span>.data.table_id();
         <span class="kw">let </span>table_ref = <span class="self">self</span>.data.table_ref();
 
-        <span class="kw">let </span>TableRouteValue { region_routes, .. } = <span class="self">self
+        <span class="kw">let </span>table_route = <span class="self">self
             </span>.context
             .table_metadata_manager
             .table_route_manager()
@@ -715,13 +714,14 @@
                 table_name: table_ref.to_string(),
             })<span class="question-mark">?
             </span>.into_inner();
+        <span class="kw">let </span>region_routes = table_route.region_routes();
 
-        <span class="kw">let </span>leaders = find_leaders(<span class="kw-2">&amp;</span>region_routes);
+        <span class="kw">let </span>leaders = find_leaders(region_routes);
         <span class="kw">let </span><span class="kw-2">mut </span>alter_region_tasks = Vec::with_capacity(leaders.len());
 
         <span class="kw">for </span>datanode <span class="kw">in </span>leaders {
             <span class="kw">let </span>requester = <span class="self">self</span>.context.datanode_manager.datanode(<span class="kw-2">&amp;</span>datanode).<span class="kw">await</span>;
-            <span class="kw">let </span>regions = find_leader_regions(<span class="kw-2">&amp;</span>region_routes, <span class="kw-2">&amp;</span>datanode);
+            <span class="kw">let </span>regions = find_leader_regions(region_routes, <span class="kw-2">&amp;</span>datanode);
 
             <span class="kw">for </span>region <span class="kw">in </span>regions {
                 <span class="kw">let </span>region_id = RegionId::new(table_id, region);

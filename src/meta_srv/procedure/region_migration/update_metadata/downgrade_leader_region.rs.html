@@ -472,7 +472,7 @@
 
         <span class="comment">// It should remain unchanged.
         </span><span class="macro">assert_eq!</span>(latest_table_route.version(), <span class="number">0</span>);
-        <span class="macro">assert!</span>(!latest_table_route.region_routes[<span class="number">0</span>].is_leader_downgraded());
+        <span class="macro">assert!</span>(!latest_table_route.region_routes()[<span class="number">0</span>].is_leader_downgraded());
         <span class="macro">assert!</span>(ctx.volatile_ctx.table_route.is_none());
     }
 
@@ -513,7 +513,7 @@
             </span>.unwrap()
             .unwrap();
 
-        <span class="macro">assert!</span>(latest_table_route.region_routes[<span class="number">0</span>].is_leader_downgraded());
+        <span class="macro">assert!</span>(latest_table_route.region_routes()[<span class="number">0</span>].is_leader_downgraded());
         <span class="macro">assert!</span>(ctx.volatile_ctx.table_route.is_none());
     }
 }
