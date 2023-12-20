@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["blob","single"],"struct":["InvertedIndexBlobWriter"],"trait":["InvertedIndexWriter"]};
+window.SIDEBAR_ITEMS = {"mod":["__mock_MockInvertedIndexWriter","__mock_MockInvertedIndexWriter_InvertedIndexWriter","blob","single"],"struct":["InvertedIndexBlobWriter","MockInvertedIndexWriter","MockInvertedIndexWriter_InvertedIndexWriter"],"trait":["InvertedIndexWriter"],"type":["ValueStream"]};

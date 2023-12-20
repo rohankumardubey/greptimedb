@@ -436,6 +436,22 @@
 <a href="#435" id="435">435</a>
 <a href="#436" id="436">436</a>
 <a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -467,6 +483,7 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::inverted_index::create::sort::merge_stream::MergeSortedStream;
 <span class="kw">use </span><span class="kw">crate</span>::inverted_index::create::sort::{SortOutput, SortedStream, Sorter};
+<span class="kw">use </span><span class="kw">crate</span>::inverted_index::create::sort_create::SorterFactory;
 <span class="kw">use </span><span class="kw">crate</span>::inverted_index::error::Result;
 <span class="kw">use </span><span class="kw">crate</span>::inverted_index::{Bytes, BytesRef};
 
@@ -573,6 +590,21 @@
             current_memory_usage: <span class="number">0</span>,
             memory_usage_threshold,
         }
+    }
+
+    <span class="doccomment">/// Generates a factory function that creates new `ExternalSorter` instances
+    </span><span class="kw">pub fn </span>factory(
+        temp_file_provider: Arc&lt;<span class="kw">dyn </span>ExternalTempFileProvider&gt;,
+        memory_usage_threshold: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    ) -&gt; SorterFactory {
+        Box::new(<span class="kw">move </span>|index_name, segment_row_count| {
+            Box::new(<span class="self">Self</span>::new(
+                index_name,
+                temp_file_provider.clone(),
+                segment_row_count,
+                memory_usage_threshold,
+            ))
+        })
     }
 
     <span class="doccomment">/// Pushes the non-null values to the values buffer and sets the bits within
