@@ -717,6 +717,14 @@
 <a href="#716" id="716">716</a>
 <a href="#717" id="717">717</a>
 <a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -968,12 +976,20 @@
 
 <span class="kw">impl </span>StartCommand {
     <span class="kw">fn </span>load_options(<span class="kw-2">&amp;</span><span class="self">self</span>, cli_options: <span class="kw-2">&amp;</span>CliOptions) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>opts: StandaloneOptions = Options::load_layered_options(
+        <span class="kw">let </span>opts: StandaloneOptions = Options::load_layered_options(
             <span class="self">self</span>.config_file.as_deref(),
             <span class="self">self</span>.env_prefix.as_ref(),
             <span class="prelude-val">None</span>,
         )<span class="question-mark">?</span>;
 
+        <span class="self">self</span>.convert_options(cli_options, opts)
+    }
+
+    <span class="kw">pub fn </span>convert_options(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        cli_options: <span class="kw-2">&amp;</span>CliOptions,
+        <span class="kw-2">mut </span>opts: StandaloneOptions,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Options&gt; {
         opts.mode = Mode::Standalone;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(dir) = <span class="kw-2">&amp;</span>cli_options.log_dir {

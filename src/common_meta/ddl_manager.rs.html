@@ -527,7 +527,6 @@
 <a href="#526" id="526">526</a>
 <a href="#527" id="527">527</a>
 <a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -916,8 +915,7 @@
         .table_metadata_allocator
         .create(
             <span class="kw-2">&amp;</span>TableMetadataAllocatorContext { cluster_id },
-            <span class="kw-2">&amp;mut </span>create_table_task.table_info,
-            <span class="kw-2">&amp;</span>create_table_task.partitions,
+            <span class="kw-2">&amp;</span>create_table_task,
         )
         .<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -926,6 +924,8 @@
         region_routes,
         region_wal_options,
     } = table_meta;
+
+    create_table_task.table_info.ident.table_id = table_id;
 
     <span class="kw">let </span>id = ddl_manager
         .submit_create_table_task(
@@ -984,9 +984,7 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::sync::Arc;
 
-    <span class="kw">use </span>api::v1::meta::Partition;
     <span class="kw">use </span>common_procedure::local::LocalManager;
-    <span class="kw">use </span>table::metadata::RawTableInfo;
 
     <span class="kw">use </span><span class="kw">super</span>::DdlManager;
     <span class="kw">use </span><span class="kw">crate</span>::cache_invalidator::DummyCacheInvalidator;
@@ -1001,6 +999,7 @@
     <span class="kw">use </span><span class="kw">crate</span>::kv_backend::memory::MemoryKvBackend;
     <span class="kw">use </span><span class="kw">crate</span>::peer::Peer;
     <span class="kw">use </span><span class="kw">crate</span>::region_keeper::MemoryRegionKeeper;
+    <span class="kw">use </span><span class="kw">crate</span>::rpc::ddl::CreateTableTask;
     <span class="kw">use </span><span class="kw">crate</span>::state_store::KvStateStore;
 
     <span class="doccomment">/// A dummy implemented [DatanodeManager].
@@ -1021,8 +1020,7 @@
         <span class="kw">async fn </span>create(
             <span class="kw-2">&amp;</span><span class="self">self</span>,
             _ctx: <span class="kw-2">&amp;</span>TableMetadataAllocatorContext,
-            _table_info: <span class="kw-2">&amp;mut </span>RawTableInfo,
-            _partitions: <span class="kw-2">&amp;</span>[Partition],
+            _task: <span class="kw-2">&amp;</span>CreateTableTask,
         ) -&gt; <span class="prelude-ty">Result</span>&lt;TableMetadata&gt; {
             <span class="macro">unimplemented!</span>()
         }

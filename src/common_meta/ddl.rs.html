@@ -83,9 +83,6 @@
 <a href="#82" id="82">82</a>
 <a href="#83" id="83">83</a>
 <a href="#84" id="84">84</a>
-<a href="#85" id="85">85</a>
-<a href="#86" id="86">86</a>
-<a href="#87" id="87">87</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -103,17 +100,15 @@
 </span><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>api::v1::meta::Partition;
 <span class="kw">use </span>common_telemetry::tracing_context::W3cTrace;
 <span class="kw">use </span>store_api::storage::{RegionNumber, TableId};
-<span class="kw">use </span>table::metadata::RawTableInfo;
 
 <span class="kw">use </span><span class="kw">crate</span>::cache_invalidator::CacheInvalidatorRef;
 <span class="kw">use </span><span class="kw">crate</span>::datanode_manager::DatanodeManagerRef;
 <span class="kw">use </span><span class="kw">crate</span>::error::Result;
 <span class="kw">use </span><span class="kw">crate</span>::key::TableMetadataManagerRef;
 <span class="kw">use </span><span class="kw">crate</span>::region_keeper::MemoryRegionKeeperRef;
-<span class="kw">use </span><span class="kw">crate</span>::rpc::ddl::{SubmitDdlTaskRequest, SubmitDdlTaskResponse};
+<span class="kw">use </span><span class="kw">crate</span>::rpc::ddl::{CreateTableTask, SubmitDdlTaskRequest, SubmitDdlTaskResponse};
 <span class="kw">use </span><span class="kw">crate</span>::rpc::router::RegionRoute;
 
 <span class="kw">pub mod </span>alter_table;
@@ -159,8 +154,7 @@
     <span class="kw">async fn </span>create(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         ctx: <span class="kw-2">&amp;</span>TableMetadataAllocatorContext,
-        table_info: <span class="kw-2">&amp;mut </span>RawTableInfo,
-        partitions: <span class="kw-2">&amp;</span>[Partition],
+        task: <span class="kw-2">&amp;</span>CreateTableTask,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;TableMetadata&gt;;
 }
 

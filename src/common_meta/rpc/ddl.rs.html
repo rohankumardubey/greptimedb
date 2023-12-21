@@ -477,6 +477,7 @@
 <a href="#476" id="476">476</a>
 <a href="#477" id="477">477</a>
 <a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -511,7 +512,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::table_name::TableName;
 
-<span class="attr">#[derive(Debug)]
+<span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub enum </span>DdlTask {
     CreateTable(CreateTableTask),
     DropTable(DropTableTask),
@@ -579,7 +580,8 @@
     }
 }
 
-<span class="kw">pub struct </span>SubmitDdlTaskRequest {
+<span class="attr">#[derive(Clone)]
+</span><span class="kw">pub struct </span>SubmitDdlTaskRequest {
     <span class="kw">pub </span>task: DdlTask,
 }
 
@@ -652,7 +654,7 @@
     }
 }
 
-<span class="attr">#[derive(Debug, PartialEq, Serialize, Deserialize)]
+<span class="attr">#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 </span><span class="kw">pub struct </span>DropTableTask {
     <span class="kw">pub </span>catalog: String,
     <span class="kw">pub </span>schema: String,
@@ -703,7 +705,7 @@
     }
 }
 
-<span class="attr">#[derive(Debug, PartialEq)]
+<span class="attr">#[derive(Debug, PartialEq, Clone)]
 </span><span class="kw">pub struct </span>CreateTableTask {
     <span class="kw">pub </span>create_table: CreateTableExpr,
     <span class="kw">pub </span>partitions: Vec&lt;Partition&gt;,
@@ -798,7 +800,7 @@
     }
 }
 
-<span class="attr">#[derive(Debug, PartialEq)]
+<span class="attr">#[derive(Debug, PartialEq, Clone)]
 </span><span class="kw">pub struct </span>AlterTableTask {
     <span class="kw">pub </span>alter_table: AlterExpr,
 }
@@ -868,7 +870,7 @@
     }
 }
 
-<span class="attr">#[derive(Debug, PartialEq, Serialize, Deserialize)]
+<span class="attr">#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 </span><span class="kw">pub struct </span>TruncateTableTask {
     <span class="kw">pub </span>catalog: String,
     <span class="kw">pub </span>schema: String,
