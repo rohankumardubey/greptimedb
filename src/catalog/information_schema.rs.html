@@ -246,6 +246,8 @@
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -297,7 +299,8 @@
     </span><span class="kw">static </span><span class="kw-2">ref </span>MEMORY_TABLES: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str] = <span class="kw-2">&amp;</span>[
         ENGINES,
         COLUMN_PRIVILEGES,
-        COLUMN_STATISTICS
+        COLUMN_STATISTICS,
+        BUILD_INFO,
     ];
 }
 
@@ -402,6 +405,7 @@
             ENGINES =&gt; <span class="macro">setup_memory_table!</span>(ENGINES),
             COLUMN_PRIVILEGES =&gt; <span class="macro">setup_memory_table!</span>(COLUMN_PRIVILEGES),
             COLUMN_STATISTICS =&gt; <span class="macro">setup_memory_table!</span>(COLUMN_STATISTICS),
+            BUILD_INFO =&gt; <span class="macro">setup_memory_table!</span>(BUILD_INFO),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
