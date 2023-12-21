@@ -959,11 +959,11 @@
     </span><span class="kw">pub </span>region_dir: String,
 }
 
-<span class="attr">#[derive(Debug)]
+<span class="attr">#[derive(Debug, Clone, Default)]
 </span><span class="kw">pub struct </span>RegionDropRequest {}
 
 <span class="doccomment">/// Open region request.
-</span><span class="attr">#[derive(Debug)]
+</span><span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub struct </span>RegionOpenRequest {
     <span class="doccomment">/// Region engine name
     </span><span class="kw">pub </span>engine: String,
