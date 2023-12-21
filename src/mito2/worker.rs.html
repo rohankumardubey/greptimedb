@@ -694,6 +694,8 @@
 <a href="#693" id="693">693</a>
 <a href="#694" id="694">694</a>
 <a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -711,6 +713,7 @@
 </span><span class="doccomment">//! Structs and utilities for writing regions.
 
 </span><span class="kw">mod </span>handle_alter;
+<span class="kw">mod </span>handle_catchup;
 <span class="kw">mod </span>handle_close;
 <span class="kw">mod </span>handle_compaction;
 <span class="kw">mod </span>handle_create;
@@ -1242,6 +1245,7 @@
                     <span class="kw">continue</span>;
                 }
                 DdlRequest::Truncate(<span class="kw">_</span>) =&gt; <span class="self">self</span>.handle_truncate_request(ddl.region_id).<span class="kw">await</span>,
+                DdlRequest::Catchup(req) =&gt; <span class="self">self</span>.handle_catchup_request(ddl.region_id, req).<span class="kw">await</span>,
             };
 
             ddl.sender.send(res);

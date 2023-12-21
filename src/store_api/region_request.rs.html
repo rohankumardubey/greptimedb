@@ -771,6 +771,23 @@
 <a href="#770" id="770">770</a>
 <a href="#771" id="771">771</a>
 <a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
+<a href="#789" id="789">789</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -794,6 +811,7 @@
 <span class="kw">use </span>snafu::{ensure, OptionExt};
 <span class="kw">use </span>strum::IntoStaticStr;
 
+<span class="kw">use </span><span class="kw">crate</span>::logstore::entry;
 <span class="kw">use </span><span class="kw">crate</span>::metadata::{
     ColumnMetadata, InvalidRawRegionRequestSnafu, InvalidRegionRequestSnafu, MetadataError,
     RegionMetadata, <span class="prelude-ty">Result</span>,
@@ -815,6 +833,7 @@
     Flush(RegionFlushRequest),
     Compact(RegionCompactRequest),
     Truncate(RegionTruncateRequest),
+    Catchup(RegionCatchupRequest),
 }
 
 <span class="kw">impl </span>RegionRequest {
@@ -832,6 +851,7 @@
             RegionRequest::Flush(<span class="kw">_</span>) =&gt; <span class="string">"flush"</span>,
             RegionRequest::Compact(<span class="kw">_</span>) =&gt; <span class="string">"compact"</span>,
             RegionRequest::Truncate(<span class="kw">_</span>) =&gt; <span class="string">"truncate"</span>,
+            RegionRequest::Catchup(<span class="kw">_</span>) =&gt; <span class="string">"catchup"</span>,
         }
     }
 
@@ -1226,6 +1246,19 @@
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>RegionTruncateRequest {}
 
+<span class="doccomment">/// Catchup region request.
+///
+/// Makes a readonly region to catch up to leader region changes.
+/// There is no effect if it operating on a leader region.
+</span><span class="attr">#[derive(Debug)]
+</span><span class="kw">pub struct </span>RegionCatchupRequest {
+    <span class="doccomment">/// Sets it to writable if it's available after it has caught up with all changes.
+    </span><span class="kw">pub </span>set_writable: bool,
+    <span class="doccomment">/// The `entry_id` that was expected to reply to.
+    /// `None` stands replaying to latest.
+    </span><span class="kw">pub </span>entry_id: <span class="prelude-ty">Option</span>&lt;entry::Id&gt;,
+}
+
 <span class="kw">impl </span>fmt::Display <span class="kw">for </span>RegionRequest {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
@@ -1239,6 +1272,7 @@
             RegionRequest::Flush(<span class="kw">_</span>) =&gt; <span class="macro">write!</span>(f, <span class="string">"Flush"</span>),
             RegionRequest::Compact(<span class="kw">_</span>) =&gt; <span class="macro">write!</span>(f, <span class="string">"Compact"</span>),
             RegionRequest::Truncate(<span class="kw">_</span>) =&gt; <span class="macro">write!</span>(f, <span class="string">"Truncate"</span>),
+            RegionRequest::Catchup(<span class="kw">_</span>) =&gt; <span class="macro">write!</span>(f, <span class="string">"Catchup"</span>),
         }
     }
 }

@@ -157,9 +157,9 @@
             <span class="self">self</span>.object_store_manager.clone(),
             <span class="self">self</span>.scheduler.clone(),
         )
-        .options(request.options)
         .skip_wal_replay(request.skip_wal_replay)
-        .cache(<span class="prelude-val">Some</span>(<span class="self">self</span>.cache_manager.clone()))
+        .parse_options(request.options)<span class="question-mark">?
+        </span>.cache(<span class="prelude-val">Some</span>(<span class="self">self</span>.cache_manager.clone()))
         .open(<span class="kw-2">&amp;</span><span class="self">self</span>.config, <span class="kw-2">&amp;</span><span class="self">self</span>.wal)
         .<span class="kw">await</span><span class="question-mark">?</span>;
 

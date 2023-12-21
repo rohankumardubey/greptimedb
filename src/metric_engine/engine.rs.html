@@ -276,6 +276,8 @@
 <a href="#275" id="275">275</a>
 <a href="#276" id="276">276</a>
 <a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -409,6 +411,8 @@
             RegionRequest::Flush(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
             RegionRequest::Compact(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
             RegionRequest::Truncate(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
+            <span class="doccomment">/// It always Ok(0), all data is latest.
+            </span>RegionRequest::Catchup(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="number">0</span>),
         };
 
         result.map_err(BoxedError::new)

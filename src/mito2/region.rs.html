@@ -233,6 +233,11 @@
 <a href="#232" id="232">232</a>
 <a href="#233" id="233">233</a>
 <a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -359,6 +364,11 @@
     <span class="doccomment">/// Returns whether the region is writable.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>is_writable(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.writable.load(Ordering::Relaxed)
+    }
+
+    <span class="doccomment">/// Returns the region dir.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>region_dir(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
+        <span class="self">self</span>.access_layer.region_dir()
     }
 
     <span class="doccomment">/// Sets the writable flag.

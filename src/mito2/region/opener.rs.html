@@ -400,6 +400,12 @@
 <a href="#399" id="399">399</a>
 <a href="#400" id="400">400</a>
 <a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -455,7 +461,7 @@
     object_store_manager: ObjectStoreManagerRef,
     region_dir: String,
     scheduler: SchedulerRef,
-    options: HashMap&lt;String, String&gt;,
+    options: <span class="prelude-ty">Option</span>&lt;RegionOptions&gt;,
     cache_manager: <span class="prelude-ty">Option</span>&lt;CacheManagerRef&gt;,
     skip_wal_replay: bool,
 }
@@ -476,7 +482,7 @@
             object_store_manager,
             region_dir: normalize_dir(region_dir),
             scheduler,
-            options: HashMap::new(),
+            options: <span class="prelude-val">None</span>,
             cache_manager: <span class="prelude-val">None</span>,
             skip_wal_replay: <span class="bool-val">false</span>,
         }
@@ -488,9 +494,15 @@
         <span class="self">self
     </span>}
 
+    <span class="doccomment">/// Parses and sets options for the region.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>parse_options(<span class="kw-2">mut </span><span class="self">self</span>, options: HashMap&lt;String, String&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="self">self</span>.options = <span class="prelude-val">Some</span>(RegionOptions::try_from(<span class="kw-2">&amp;</span>options)<span class="question-mark">?</span>);
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>)
+    }
+
     <span class="doccomment">/// Sets options for the region.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>options(<span class="kw-2">mut </span><span class="self">self</span>, value: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.options = value;
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>options(<span class="kw-2">mut </span><span class="self">self</span>, options: RegionOptions) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.options = <span class="prelude-val">Some</span>(options);
         <span class="self">self
     </span>}
 
@@ -510,9 +522,10 @@
     /// Opens the region if it already exists.
     ///
     /// # Panics
-    /// Panics if metadata is not set.
+    /// - Panics if metadata is not set.
+    /// - Panics if options is not set.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>create_or_open&lt;S: LogStore&gt;(
-        <span class="self">self</span>,
+        <span class="kw-2">mut </span><span class="self">self</span>,
         config: <span class="kw-2">&amp;</span>MitoConfig,
         wal: <span class="kw-2">&amp;</span>Wal&lt;S&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MitoRegion&gt; {
@@ -547,9 +560,8 @@
                 );
             }
         }
-        <span class="kw">let </span>options = RegionOptions::try_from(<span class="kw-2">&amp;</span><span class="self">self</span>.options)<span class="question-mark">?</span>;
+        <span class="kw">let </span>options = <span class="self">self</span>.options.take().unwrap();
         <span class="kw">let </span>wal_options = options.wal_options.clone();
-
         <span class="kw">let </span>object_store = <span class="self">self</span>.object_store(<span class="kw-2">&amp;</span>options.storage)<span class="question-mark">?</span>.clone();
 
         <span class="comment">// Create a manifest manager for this region and writes regions to the manifest file.
@@ -620,7 +632,7 @@
         config: <span class="kw-2">&amp;</span>MitoConfig,
         wal: <span class="kw-2">&amp;</span>Wal&lt;S&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;MitoRegion&gt;&gt; {
-        <span class="kw">let </span>region_options = RegionOptions::try_from(<span class="kw-2">&amp;</span><span class="self">self</span>.options)<span class="question-mark">?</span>;
+        <span class="kw">let </span>region_options = <span class="self">self</span>.options.as_ref().unwrap().clone();
         <span class="kw">let </span>wal_options = region_options.wal_options.clone();
 
         <span class="kw">let </span>region_manifest_options = <span class="self">self</span>.manifest_options(config, <span class="kw-2">&amp;</span>region_options)<span class="question-mark">?</span>;
@@ -760,13 +772,13 @@
 }
 
 <span class="doccomment">/// Replays the mutations from WAL and inserts mutations to memtable of given region.
-</span><span class="kw">async fn </span>replay_memtable&lt;S: LogStore&gt;(
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>replay_memtable&lt;S: LogStore&gt;(
     wal: <span class="kw-2">&amp;</span>Wal&lt;S&gt;,
     wal_options: <span class="kw-2">&amp;</span>WalOptions,
     region_id: RegionId,
     flushed_entry_id: EntryId,
     version_control: <span class="kw-2">&amp;</span>VersionControlRef,
-) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+) -&gt; <span class="prelude-ty">Result</span>&lt;EntryId&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>rows_replayed = <span class="number">0</span>;
     <span class="comment">// Last entry id should start from flushed entry id since there might be no
     // data in the WAL.
@@ -794,7 +806,7 @@
         <span class="string">"Replay WAL for region: {}, rows recovered: {}, last entry id: {}"</span>,
         region_id, rows_replayed, last_entry_id
     );
-    <span class="prelude-val">Ok</span>(())
+    <span class="prelude-val">Ok</span>(last_entry_id)
 }
 
 <span class="doccomment">/// Returns the directory to the manifest files.

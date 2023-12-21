@@ -766,6 +766,23 @@
 <a href="#765" id="765">765</a>
 <a href="#766" id="766">766</a>
 <a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
+<a href="#773" id="773">773</a>
+<a href="#774" id="774">774</a>
+<a href="#775" id="775">775</a>
+<a href="#776" id="776">776</a>
+<a href="#777" id="777">777</a>
+<a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -789,7 +806,7 @@
 <span class="kw">use </span>futures::future::try_join_all;
 <span class="kw">use </span>futures::TryStreamExt;
 <span class="kw">use </span>lazy_static::lazy_static;
-<span class="kw">use </span>object_store::{util, Entry, ErrorKind, ObjectStore};
+<span class="kw">use </span>object_store::{util, Entry, ErrorKind, Lister, ObjectStore};
 <span class="kw">use </span>regex::Regex;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>snafu::{ensure, ResultExt};
@@ -916,6 +933,23 @@
         <span class="macro">format!</span>(<span class="string">"{}{}"</span>, <span class="self">self</span>.path, LAST_CHECKPOINT_FILE)
     }
 
+    <span class="doccomment">/// Returns the manifest dir
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>manifest_dir(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>str {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.path
+    }
+
+    <span class="doccomment">/// Returns a iterator of manifests.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>manifest_lister(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Lister&gt;&gt; {
+        <span class="kw">match </span><span class="self">self</span>.object_store.lister_with(<span class="kw-2">&amp;</span><span class="self">self</span>.path).<span class="kw">await </span>{
+            <span class="prelude-val">Ok</span>(streamer) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(streamer)),
+            <span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.kind() == ErrorKind::NotFound =&gt; {
+                <span class="macro">debug!</span>(<span class="string">"Manifest directory does not exists: {}"</span>, <span class="self">self</span>.path);
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+            }
+            <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(e).context(OpenDalSnafu)<span class="question-mark">?</span>,
+        }
+    }
+
     <span class="doccomment">/// Return all `R`s in the root directory that meet the `filter` conditions (that is, the `filter` closure returns `Some(R)`),
     /// and discard `R` that does not meet the conditions (that is, the `filter` closure returns `None`)
     /// Return an empty vector when directory is not found.
@@ -923,13 +957,8 @@
     <span class="kw">where
         </span>F: Fn(Entry) -&gt; <span class="prelude-ty">Option</span>&lt;R&gt;,
     {
-        <span class="kw">let </span>streamer = <span class="kw">match </span><span class="self">self</span>.object_store.lister_with(<span class="kw-2">&amp;</span><span class="self">self</span>.path).<span class="kw">await </span>{
-            <span class="prelude-val">Ok</span>(streamer) =&gt; streamer,
-            <span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.kind() == ErrorKind::NotFound =&gt; {
-                <span class="macro">debug!</span>(<span class="string">"Manifest directory does not exists: {}"</span>, <span class="self">self</span>.path);
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[]);
-            }
-            <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(e).context(OpenDalSnafu)<span class="question-mark">?</span>,
+        <span class="kw">let </span><span class="prelude-val">Some</span>(streamer) = <span class="self">self</span>.manifest_lister().<span class="kw">await</span><span class="question-mark">? </span><span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[]);
         };
 
         streamer
@@ -939,7 +968,12 @@
             </span>.context(OpenDalSnafu)
     }
 
-    <span class="doccomment">/// Scan the manifest files in the range of [start, end) and return all manifest entries.
+    <span class="doccomment">/// Sorts the manifest files.
+    </span><span class="kw">fn </span>sort_manifests(entries: <span class="kw-2">&amp;mut </span>[(ManifestVersion, Entry)]) {
+        entries.sort_unstable_by(|(v1, <span class="kw">_</span>), (v2, <span class="kw">_</span>)| v1.cmp(v2));
+    }
+
+    <span class="doccomment">/// Scans the manifest files in the range of [start, end) and return all manifest entries.
     </span><span class="kw">pub async fn </span>scan(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         start: ManifestVersion,
@@ -960,7 +994,7 @@
             </span>})
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
-        entries.sort_unstable_by(|(v1, <span class="kw">_</span>), (v2, <span class="kw">_</span>)| v1.cmp(v2));
+        <span class="self">Self</span>::sort_manifests(<span class="kw-2">&amp;mut </span>entries);
 
         <span class="prelude-val">Ok</span>(entries)
     }

@@ -1231,6 +1231,12 @@
 <a href="#1230" id="1230">1230</a>
 <a href="#1231" id="1231">1231</a>
 <a href="#1232" id="1232">1232</a>
+<a href="#1233" id="1233">1233</a>
+<a href="#1234" id="1234">1234</a>
+<a href="#1235" id="1235">1235</a>
+<a href="#1236" id="1236">1236</a>
+<a href="#1237" id="1237">1237</a>
+<a href="#1238" id="1238">1238</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1265,9 +1271,9 @@
 <span class="kw">use </span>store_api::metadata::{ColumnMetadata, RegionMetadata};
 <span class="kw">use </span>store_api::region_engine::SetReadonlyResponse;
 <span class="kw">use </span>store_api::region_request::{
-    AffectedRows, RegionAlterRequest, RegionCloseRequest, RegionCompactRequest,
-    RegionCreateRequest, RegionDropRequest, RegionFlushRequest, RegionOpenRequest, RegionRequest,
-    RegionTruncateRequest,
+    AffectedRows, RegionAlterRequest, RegionCatchupRequest, RegionCloseRequest,
+    RegionCompactRequest, RegionCreateRequest, RegionDropRequest, RegionFlushRequest,
+    RegionOpenRequest, RegionRequest, RegionTruncateRequest,
 };
 <span class="kw">use </span>store_api::storage::{RegionId, SequenceNumber};
 <span class="kw">use </span>tokio::sync::oneshot::{<span class="self">self</span>, Receiver, Sender};
@@ -1783,6 +1789,11 @@
                 sender: sender.into(),
                 request: DdlRequest::Truncate(v),
             }),
+            RegionRequest::Catchup(v) =&gt; WorkerRequest::Ddl(SenderDdlRequest {
+                region_id,
+                sender: sender.into(),
+                request: DdlRequest::Catchup(v),
+            }),
         };
 
         <span class="prelude-val">Ok</span>((worker_request, receiver))
@@ -1811,6 +1822,7 @@
     Flush(RegionFlushRequest),
     Compact(RegionCompactRequest),
     Truncate(RegionTruncateRequest),
+    Catchup(RegionCatchupRequest),
 }
 
 <span class="doccomment">/// Sender and Ddl request.

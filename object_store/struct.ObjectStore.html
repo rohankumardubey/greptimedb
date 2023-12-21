@@ -46,7 +46,7 @@ Limit is usually the maximum size of data that operator will handle in one opera
 op.check().<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.stat" class="method"><h4 class="code-header">pub async fn <a href="#method.stat" class="fn">stat</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Metadata, <a class="struct" href="struct.Error.html" title="struct object_store::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>Get current path’s metadata.</p>
 <h5 id="notes"><a href="#notes">Notes</a></h5>
-<p>For fetch metadata of entries returned by [<code>Lister</code>], it’s better to use [<code>list_with</code>] and
+<p>For fetch metadata of entries returned by <a href="struct.Lister.html" title="struct object_store::Lister"><code>Lister</code></a>, it’s better to use [<code>list_with</code>] and
 [<code>lister_with</code>] with <code>metakey</code> query like <code>Metakey::ContentLength | Metakey::LastModified</code>
 so that we can avoid extra requests.</p>
 <h5 id="examples-2"><a href="#examples-2">Examples</a></h5>
@@ -64,7 +64,7 @@ so that we can avoid extra requests.</p>
 <li>Don’t want to read from cached metadata.</li>
 </ul>
 <p>You may want to use <code>metadata</code> if you are working with entries
-returned by [<code>Lister</code>]. It’s highly possible that metadata
+returned by <a href="struct.Lister.html" title="struct object_store::Lister"><code>Lister</code></a>. It’s highly possible that metadata
 you want has already been cached.</p>
 <h5 id="examples-3"><a href="#examples-3">Examples</a></h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>opendal::ErrorKind;
@@ -300,7 +300,7 @@ For fetching more metadata, please specify the <code>metakey</code>.</p>
         EntryMode::Unknown =&gt; <span class="kw">continue</span>,
     }
 }</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.lister" class="method"><h4 class="code-header">pub async fn <a href="#method.lister" class="fn">lister</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Lister, <a class="struct" href="struct.Error.html" title="struct object_store::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>List entries within a given directory as a stream.</p>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.lister" class="method"><h4 class="code-header">pub async fn <a href="#method.lister" class="fn">lister</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="struct.Lister.html" title="struct object_store::Lister">Lister</a>, <a class="struct" href="struct.Error.html" title="struct object_store::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>List entries within a given directory as a stream.</p>
 <p>This function will create a new handle to list entries.</p>
 <p>An error will be returned if given path doesn’t end with <code>/</code>.</p>
 <h5 id="notes-14"><a href="#notes-14">Notes</a></h5><h6 id="listing-recursively-1"><a href="#listing-recursively-1">Listing recursively</a></h6>
