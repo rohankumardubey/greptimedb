@@ -1,4 +1,3 @@
 (function() {var implementors = {
-"mito2":[["impl&lt;'a&gt; PruningStatistics for <a class=\"struct\" href=\"mito2/sst/parquet/stats/struct.RowGroupPruningStats.html\" title=\"struct mito2::sst::parquet::stats::RowGroupPruningStats\">RowGroupPruningStats</a>&lt;'a&gt;"]],
-"table":[["impl&lt;'a&gt; PruningStatistics for <a class=\"struct\" href=\"table/predicate/stats/struct.RowGroupPruningStatistics.html\" title=\"struct table::predicate::stats::RowGroupPruningStatistics\">RowGroupPruningStatistics</a>&lt;'a&gt;"]]
+"mito2":[["impl&lt;'a&gt; PruningStatistics for <a class=\"struct\" href=\"mito2/sst/parquet/stats/struct.RowGroupPruningStats.html\" title=\"struct mito2::sst::parquet::stats::RowGroupPruningStats\">RowGroupPruningStats</a>&lt;'a&gt;"]]
 };if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

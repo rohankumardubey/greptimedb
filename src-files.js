@@ -52,7 +52,7 @@ var srcIndex = new Map(JSON.parse('[\
 ["sqlness_runner",["",[],["env.rs","main.rs","util.rs"]]],\
 ["store_api",["",[["logstore",[],["entry.rs","entry_stream.rs","namespace.rs"]],["manifest",[],["action.rs","storage.rs"]],["storage",[],["consts.rs","descriptors.rs","requests.rs","types.rs"]]],["data_source.rs","lib.rs","logstore.rs","manifest.rs","metadata.rs","metric_engine_consts.rs","path_utils.rs","region_engine.rs","region_request.rs","storage.rs"]]],\
 ["substrait",["",[],["df_substrait.rs","error.rs","extension_serializer.rs","lib.rs"]]],\
-["table",["",[["predicate",[],["stats.rs"]],["table",[],["adapter.rs","metrics.rs","numbers.rs","scan.rs"]],["test_util",[],["empty_table.rs","memtable.rs","mock_engine.rs","table_info.rs"]]],["dist_table.rs","engine.rs","error.rs","lib.rs","metadata.rs","predicate.rs","requests.rs","stats.rs","table.rs","test_util.rs","thin_table.rs"]]],\
+["table",["",[["table",[],["adapter.rs","metrics.rs","numbers.rs","scan.rs"]],["test_util",[],["empty_table.rs","memtable.rs","mock_engine.rs","table_info.rs"]]],["dist_table.rs","engine.rs","error.rs","lib.rs","metadata.rs","predicate.rs","requests.rs","stats.rs","table.rs","test_util.rs","thin_table.rs"]]],\
 ["tests_integration",["",[],["cluster.rs","grpc.rs","influxdb.rs","instance.rs","lib.rs","opentsdb.rs","otlp.rs","prom_store.rs","standalone.rs","test_util.rs"]]]\
 ]'));
 createSrcSidebar();
