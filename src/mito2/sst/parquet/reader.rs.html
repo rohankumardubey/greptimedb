@@ -452,6 +452,8 @@
 <a href="#451" id="451">451</a>
 <a href="#452" id="452">452</a>
 <a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -476,7 +478,7 @@
 <span class="kw">use </span>common_telemetry::debug;
 <span class="kw">use </span>common_time::range::TimestampRange;
 <span class="kw">use </span>datatypes::arrow::record_batch::RecordBatch;
-<span class="kw">use </span>object_store::{ObjectStore, Reader};
+<span class="kw">use </span>object_store::ObjectStore;
 <span class="kw">use </span>parquet::arrow::arrow_reader::ParquetRecordBatchReader;
 <span class="kw">use </span>parquet::arrow::async_reader::AsyncFileReader;
 <span class="kw">use </span>parquet::arrow::{parquet_to_arrow_field_levels, FieldLevels, ProjectionMask};
@@ -632,7 +634,7 @@
             file_handle: <span class="self">self</span>.file_handle.clone(),
             file_path,
             parquet_meta,
-            file_reader: reader,
+            object_store: <span class="self">self</span>.object_store.clone(),
             projection: projection_mask,
             field_levels,
             cache_manager: <span class="self">self</span>.cache_manager.clone(),
@@ -739,8 +741,8 @@
     </span>file_path: String,
     <span class="doccomment">/// Metadata of the parquet file.
     </span>parquet_meta: Arc&lt;ParquetMetaData&gt;,
-    <span class="doccomment">/// Reader to get data.
-    </span>file_reader: BufReader&lt;Reader&gt;,
+    <span class="doccomment">/// Object store as an Operator.
+    </span>object_store: ObjectStore,
     <span class="doccomment">/// Projection mask.
     </span>projection: ProjectionMask,
     <span class="doccomment">/// Field levels to read.
@@ -763,10 +765,12 @@
             <span class="kw-2">&amp;</span><span class="self">self</span>.parquet_meta,
             row_group_idx,
             <span class="self">self</span>.cache_manager.clone(),
+            <span class="kw-2">&amp;</span><span class="self">self</span>.file_path,
+            <span class="self">self</span>.object_store.clone(),
         );
         <span class="comment">// Fetches data into memory.
         </span>row_group
-            .fetch(<span class="kw-2">&amp;mut </span><span class="self">self</span>.file_reader, <span class="kw-2">&amp;</span><span class="self">self</span>.projection, <span class="prelude-val">None</span>)
+            .fetch(<span class="kw-2">&amp;</span><span class="self">self</span>.projection, <span class="prelude-val">None</span>)
             .<span class="kw">await
             </span>.context(ReadParquetSnafu {
                 path: <span class="kw-2">&amp;</span><span class="self">self</span>.file_path,
