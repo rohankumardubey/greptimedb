@@ -215,6 +215,17 @@
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -243,6 +254,7 @@
 <span class="kw">use </span>common_telemetry::info;
 <span class="kw">use </span>etcd_client::Client;
 <span class="kw">use </span>servers::configurator::ConfiguratorRef;
+<span class="kw">use </span>servers::export_metrics::ExportMetricsTask;
 <span class="kw">use </span>servers::http::{HttpServer, HttpServerBuilder};
 <span class="kw">use </span>servers::metrics_handler::MetricsHandler;
 <span class="kw">use </span>servers::server::Server;
@@ -253,6 +265,7 @@
 <span class="kw">use </span>tonic::transport::server::{Router, TcpIncoming};
 
 <span class="kw">use </span><span class="kw">crate</span>::election::etcd::EtcdElection;
+<span class="kw">use </span><span class="kw">crate</span>::error::InitExportMetricsTaskSnafu;
 <span class="kw">use </span><span class="kw">crate</span>::lock::etcd::EtcdLock;
 <span class="kw">use </span><span class="kw">crate</span>::lock::memory::MemLock;
 <span class="kw">use </span><span class="kw">crate</span>::metasrv::builder::MetaSrvBuilder;
@@ -274,6 +287,8 @@
     signal_sender: <span class="prelude-ty">Option</span>&lt;Sender&lt;()&gt;&gt;,
 
     plugins: Plugins,
+
+    export_metrics_task: <span class="prelude-ty">Option</span>&lt;ExportMetricsTask&gt;,
 }
 
 <span class="kw">impl </span>MetaSrvInstance {
@@ -290,17 +305,24 @@
         );
         <span class="comment">// put meta_srv into plugins for later use
         </span>plugins.insert::&lt;Arc&lt;MetaSrv&gt;&gt;(Arc::new(meta_srv.clone()));
+        <span class="kw">let </span>export_metrics_task = ExportMetricsTask::try_new(<span class="kw-2">&amp;</span>opts.export_metrics, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>plugins))
+            .context(InitExportMetricsTaskSnafu)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(MetaSrvInstance {
             meta_srv,
             http_srv,
             opts,
             signal_sender: <span class="prelude-val">None</span>,
             plugins,
+            export_metrics_task,
         })
     }
 
     <span class="kw">pub async fn </span>start(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="self">self</span>.meta_srv.try_start().<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(t) = <span class="self">self</span>.export_metrics_task.as_ref() {
+            t.start()
+        }
 
         <span class="kw">let </span>(tx, rx) = mpsc::channel::&lt;()&gt;(<span class="number">1</span>);
 

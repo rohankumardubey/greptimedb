@@ -324,6 +324,9 @@
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
 <a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -354,6 +357,7 @@
 <span class="kw">use </span>mito2::config::MitoConfig;
 <span class="kw">use </span>secrecy::SecretString;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>servers::export_metrics::ExportMetricsOption;
 <span class="kw">use </span>servers::heartbeat_options::HeartbeatOptions;
 <span class="kw">use </span>servers::http::HttpOptions;
 <span class="kw">use </span>servers::Mode;
@@ -568,6 +572,7 @@
     </span><span class="kw">pub </span>region_engine: Vec&lt;RegionEngineConfig&gt;,
     <span class="kw">pub </span>logging: LoggingOptions,
     <span class="kw">pub </span>enable_telemetry: bool,
+    <span class="kw">pub </span>export_metrics: ExportMetricsOption,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>DatanodeOptions {
@@ -593,6 +598,7 @@
             logging: LoggingOptions::default(),
             heartbeat: HeartbeatOptions::datanode_default(),
             enable_telemetry: <span class="bool-val">true</span>,
+            export_metrics: ExportMetricsOption::default(),
         }
     }
 }

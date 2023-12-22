@@ -656,6 +656,17 @@
 <a href="#655" id="655">655</a>
 <a href="#656" id="656">656</a>
 <a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -701,6 +712,7 @@
 <span class="kw">use </span>object_store::manager::{ObjectStoreManager, ObjectStoreManagerRef};
 <span class="kw">use </span>object_store::util::normalize_dir;
 <span class="kw">use </span>query::QueryEngineFactory;
+<span class="kw">use </span>servers::export_metrics::ExportMetricsTask;
 <span class="kw">use </span>servers::grpc::{GrpcServer, GrpcServerConfig};
 <span class="kw">use </span>servers::http::HttpServerBuilder;
 <span class="kw">use </span>servers::metrics_handler::MetricsHandler;
@@ -742,6 +754,7 @@
     greptimedb_telemetry_task: Arc&lt;GreptimeDBTelemetryTask&gt;,
     leases_notifier: <span class="prelude-ty">Option</span>&lt;Arc&lt;Notify&gt;&gt;,
     plugins: Plugins,
+    export_metrics_task: <span class="prelude-ty">Option</span>&lt;ExportMetricsTask&gt;,
 }
 
 <span class="kw">impl </span>Datanode {
@@ -752,6 +765,10 @@
         <span class="self">self</span>.wait_coordinated().<span class="kw">await</span>;
 
         <span class="self">self</span>.start_telemetry();
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(t) = <span class="self">self</span>.export_metrics_task.as_ref() {
+            t.start()
+        }
 
         <span class="self">self</span>.start_services().<span class="kw">await
     </span>}
@@ -935,6 +952,10 @@
                 <span class="prelude-val">None
             </span>};
 
+        <span class="kw">let </span>export_metrics_task =
+            ExportMetricsTask::try_new(<span class="kw-2">&amp;</span><span class="self">self</span>.opts.export_metrics, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.plugins))
+                .context(StartServerSnafu)<span class="question-mark">?</span>;
+
         <span class="prelude-val">Ok</span>(Datanode {
             services,
             heartbeat_task,
@@ -943,6 +964,7 @@
             region_event_receiver,
             leases_notifier,
             plugins: <span class="self">self</span>.plugins.clone(),
+            export_metrics_task,
         })
     }
 

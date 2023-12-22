@@ -434,6 +434,9 @@
 <a href="#433" id="433">433</a>
 <a href="#434" id="434">434</a>
 <a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -468,6 +471,7 @@
 <span class="kw">use </span>common_telemetry::logging::LoggingOptions;
 <span class="kw">use </span>common_telemetry::{error, info, warn};
 <span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>servers::export_metrics::ExportMetricsOption;
 <span class="kw">use </span>servers::http::HttpOptions;
 <span class="kw">use </span>snafu::ResultExt;
 <span class="kw">use </span>table::metadata::TableId;
@@ -508,6 +512,7 @@
     <span class="kw">pub </span>enable_telemetry: bool,
     <span class="kw">pub </span>data_home: String,
     <span class="kw">pub </span>wal: WalConfig,
+    <span class="kw">pub </span>export_metrics: ExportMetricsOption,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>MetaSrvOptions {
@@ -533,6 +538,7 @@
             enable_telemetry: <span class="bool-val">true</span>,
             data_home: METASRV_HOME.to_string(),
             wal: WalConfig::default(),
+            export_metrics: ExportMetricsOption::default(),
         }
     }
 }

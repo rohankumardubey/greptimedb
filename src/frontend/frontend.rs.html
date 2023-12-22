@@ -100,6 +100,9 @@
 <a href="#99" id="99">99</a>
 <a href="#100" id="100">100</a>
 <a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -117,6 +120,7 @@
 </span><span class="kw">use </span>common_telemetry::logging::LoggingOptions;
 <span class="kw">use </span>meta_client::MetaClientOptions;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>servers::export_metrics::ExportMetricsOption;
 <span class="kw">use </span>servers::heartbeat_options::HeartbeatOptions;
 <span class="kw">use </span>servers::http::HttpOptions;
 <span class="kw">use </span>servers::Mode;
@@ -146,6 +150,7 @@
     <span class="kw">pub </span>logging: LoggingOptions,
     <span class="kw">pub </span>datanode: DatanodeOptions,
     <span class="kw">pub </span>user_provider: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="kw">pub </span>export_metrics: ExportMetricsOption,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>FrontendOptions {
@@ -166,6 +171,7 @@
             logging: LoggingOptions::default(),
             datanode: DatanodeOptions::default(),
             user_provider: <span class="prelude-val">None</span>,
+            export_metrics: ExportMetricsOption::default(),
         }
     }
 }

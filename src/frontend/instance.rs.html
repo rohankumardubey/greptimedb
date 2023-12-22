@@ -598,6 +598,19 @@
 <a href="#597" id="597">597</a>
 <a href="#598" id="598">598</a>
 <a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -655,6 +668,7 @@
 <span class="kw">use </span>raft_engine::{Config, ReadableSize, RecoveryMode};
 <span class="kw">use </span>servers::error <span class="kw">as </span>server_error;
 <span class="kw">use </span>servers::error::{AuthSnafu, ExecuteQuerySnafu, ParsePromQLSnafu};
+<span class="kw">use </span>servers::export_metrics::{ExportMetricsOption, ExportMetricsTask};
 <span class="kw">use </span>servers::interceptor::{
     PromQueryInterceptor, PromQueryInterceptorRef, SqlQueryInterceptor, SqlQueryInterceptorRef,
 };
@@ -677,7 +691,8 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     <span class="self">self</span>, Error, ExecLogicalPlanSnafu, ExecutePromqlSnafu, ExternalSnafu, ParseSqlSnafu,
-    PermissionSnafu, PlanStatementSnafu, <span class="prelude-ty">Result</span>, SqlExecInterceptedSnafu, TableOperationSnafu,
+    PermissionSnafu, PlanStatementSnafu, <span class="prelude-ty">Result</span>, SqlExecInterceptedSnafu, StartServerSnafu,
+    TableOperationSnafu,
 };
 <span class="kw">use </span><span class="kw">crate</span>::frontend::{FrontendOptions, TomlSerializable};
 <span class="kw">use </span><span class="kw">crate</span>::heartbeat::HeartbeatTask;
@@ -716,6 +731,7 @@
     heartbeat_task: <span class="prelude-ty">Option</span>&lt;HeartbeatTask&gt;,
     inserter: InserterRef,
     deleter: DeleterRef,
+    export_metrics_task: <span class="prelude-ty">Option</span>&lt;ExportMetricsTask&gt;,
 }
 
 <span class="kw">impl </span>Instance {
@@ -793,6 +809,12 @@
         <span class="prelude-val">Ok</span>(())
     }
 
+    <span class="kw">pub fn </span>build_export_metrics_task(<span class="kw-2">&amp;mut </span><span class="self">self</span>, opts: <span class="kw-2">&amp;</span>ExportMetricsOption) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.export_metrics_task =
+            ExportMetricsTask::try_new(opts, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.plugins)).context(StartServerSnafu)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(())
+    }
+
     <span class="kw">pub fn </span>catalog_manager(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>CatalogManagerRef {
         <span class="kw-2">&amp;</span><span class="self">self</span>.catalog_manager
     }
@@ -821,6 +843,10 @@
         }
 
         <span class="self">self</span>.script_executor.start(<span class="self">self</span>)<span class="question-mark">?</span>;
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(t) = <span class="self">self</span>.export_metrics_task.as_ref() {
+            t.start()
+        }
 
         futures::future::try_join_all(<span class="self">self</span>.servers.iter().map(|(name, handler)| <span class="kw">async move </span>{
             <span class="macro">info!</span>(<span class="string">"Starting service: {name}"</span>);

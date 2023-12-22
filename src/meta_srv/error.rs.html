@@ -739,6 +739,12 @@
 <a href="#738" id="738">738</a>
 <a href="#739" id="739">739</a>
 <a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -934,6 +940,11 @@
     },
     <span class="attr">#[snafu(display(<span class="string">"Failed to start http server"</span>))]
     </span>StartHttp {
+        location: Location,
+        source: servers::error::Error,
+    },
+    <span class="attr">#[snafu(display(<span class="string">"Failed to init export metrics task"</span>))]
+    </span>InitExportMetricsTask {
         location: Location,
         source: servers::error::Error,
     },
@@ -1392,6 +1403,7 @@
             | Error::ParseNum { .. }
             | Error::UnsupportedSelectorType { .. }
             | Error::InvalidArguments { .. }
+            | Error::InitExportMetricsTask { .. }
             | Error::InvalidHeartbeatRequest { .. }
             | Error::TooManyPartitions { .. } =&gt; StatusCode::InvalidArguments,
             Error::LeaseKeyFromUtf8 { .. }
