@@ -373,6 +373,13 @@
 <a href="#372" id="372">372</a>
 <a href="#373" id="373">373</a>
 <a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -518,6 +525,12 @@
                 schema: DEFAULT_PRIVATE_SCHEMA_NAME.to_string(),
             })
             .unwrap();
+        manager
+            .register_schema_sync(RegisterSchemaRequest {
+                catalog: DEFAULT_CATALOG_NAME.to_string(),
+                schema: INFORMATION_SCHEMA_NAME.to_string(),
+            })
+            .unwrap();
 
         manager
     }
@@ -631,6 +644,7 @@
             Arc::downgrade(<span class="self">self</span>) <span class="kw">as </span>Weak&lt;<span class="kw">dyn </span>CatalogManager&gt;,
         );
         <span class="kw">let </span>information_schema = information_schema_provider.tables().clone();
+
         <span class="kw">let </span><span class="kw-2">mut </span>catalog = HashMap::new();
         catalog.insert(INFORMATION_SCHEMA_NAME.to_string(), information_schema);
         catalog
