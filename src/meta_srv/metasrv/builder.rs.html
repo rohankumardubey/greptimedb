@@ -439,7 +439,6 @@
 <span class="kw">use </span>client::client_manager::DatanodeClients;
 <span class="kw">use </span>common_base::Plugins;
 <span class="kw">use </span>common_catalog::consts::MIN_USER_TABLE_ID;
-<span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_grpc::channel_manager::ChannelConfig;
 <span class="kw">use </span>common_meta::datanode_manager::DatanodeManagerRef;
 <span class="kw">use </span>common_meta::ddl::TableMetadataAllocatorRef;
@@ -451,14 +450,14 @@
 <span class="kw">use </span>common_meta::region_keeper::{MemoryRegionKeeper, MemoryRegionKeeperRef};
 <span class="kw">use </span>common_meta::sequence::SequenceBuilder;
 <span class="kw">use </span>common_meta::state_store::KvStateStore;
-<span class="kw">use </span>common_meta::wal::build_wal_options_allocator;
+<span class="kw">use </span>common_meta::wal::WalOptionsAllocator;
 <span class="kw">use </span>common_procedure::local::{LocalManager, ManagerConfig};
 <span class="kw">use </span>common_procedure::ProcedureManagerRef;
 <span class="kw">use </span>snafu::ResultExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::cache_invalidator::MetasrvCacheInvalidator;
 <span class="kw">use </span><span class="kw">crate</span>::cluster::{MetaPeerClientBuilder, MetaPeerClientRef};
-<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, OtherSnafu, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::greptimedb_telemetry::get_greptimedb_telemetry_task;
 <span class="kw">use </span><span class="kw">crate</span>::handler::check_leader_handler::CheckLeaderHandler;
 <span class="kw">use </span><span class="kw">crate</span>::handler::collect_stats_handler::CollectStatsHandler;
@@ -626,10 +625,10 @@
             table_id: <span class="prelude-val">None</span>,
         };
 
-        <span class="kw">let </span>wal_options_allocator = build_wal_options_allocator(<span class="kw-2">&amp;</span>options.wal, <span class="kw-2">&amp;</span>kv_backend)
-            .<span class="kw">await
-            </span>.map_err(BoxedError::new)
-            .context(OtherSnafu)<span class="question-mark">?</span>;
+        <span class="kw">let </span>wal_options_allocator = Arc::new(WalOptionsAllocator::new(
+            options.wal.clone(),
+            kv_backend.clone(),
+        ));
         <span class="kw">let </span>table_metadata_allocator = table_metadata_allocator.unwrap_or_else(|| {
             <span class="kw">let </span>sequence = Arc::new(
                 SequenceBuilder::new(TABLE_ID_SEQ, kv_backend.clone())
@@ -641,7 +640,7 @@
                 selector_ctx.clone(),
                 selector.clone(),
                 sequence.clone(),
-                wal_options_allocator,
+                wal_options_allocator.clone(),
             ))
         });
 
@@ -734,6 +733,7 @@
             procedure_manager,
             mailbox,
             ddl_executor: ddl_manager,
+            wal_options_allocator,
             table_metadata_manager,
             greptimedb_telemetry_task: get_greptimedb_telemetry_task(
                 <span class="prelude-val">Some</span>(metasrv_home),

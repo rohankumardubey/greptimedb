@@ -734,6 +734,11 @@
 <a href="#733" id="733">733</a>
 <a href="#734" id="734">734</a>
 <a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -755,7 +760,6 @@
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>common_catalog::consts::MIN_USER_TABLE_ID;
 <span class="kw">use </span>common_config::{metadata_store_dir, KvBackendConfig, WalConfig};
-<span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_meta::cache_invalidator::DummyCacheInvalidator;
 <span class="kw">use </span>common_meta::datanode_manager::DatanodeManagerRef;
 <span class="kw">use </span>common_meta::ddl::{DdlTaskExecutorRef, TableMetadataAllocatorRef};
@@ -764,7 +768,7 @@
 <span class="kw">use </span>common_meta::kv_backend::KvBackendRef;
 <span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeper;
 <span class="kw">use </span>common_meta::sequence::SequenceBuilder;
-<span class="kw">use </span>common_meta::wal::build_wal_options_allocator;
+<span class="kw">use </span>common_meta::wal::{WalOptionsAllocator, WalOptionsAllocatorRef};
 <span class="kw">use </span>common_procedure::ProcedureManagerRef;
 <span class="kw">use </span>common_telemetry::info;
 <span class="kw">use </span>common_telemetry::logging::LoggingOptions;
@@ -787,9 +791,9 @@
 <span class="kw">use </span>snafu::ResultExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
-    CreateDirSnafu, IllegalConfigSnafu, InitDdlManagerSnafu, InitMetadataSnafu, OtherSnafu, <span class="prelude-ty">Result</span>,
+    CreateDirSnafu, IllegalConfigSnafu, InitDdlManagerSnafu, InitMetadataSnafu, <span class="prelude-ty">Result</span>,
     ShutdownDatanodeSnafu, ShutdownFrontendSnafu, StartDatanodeSnafu, StartFrontendSnafu,
-    StartProcedureManagerSnafu, StopProcedureManagerSnafu,
+    StartProcedureManagerSnafu, StartWalOptionsAllocatorSnafu, StopProcedureManagerSnafu,
 };
 <span class="kw">use </span><span class="kw">crate</span>::options::{CliOptions, MixOptions, Options};
 <span class="kw">use </span><span class="kw">crate</span>::App;
@@ -916,6 +920,7 @@
     datanode: Datanode,
     frontend: FeInstance,
     procedure_manager: ProcedureManagerRef,
+    wal_options_allocator: WalOptionsAllocatorRef,
 }
 
 <span class="attr">#[async_trait]
@@ -931,6 +936,11 @@
             .start()
             .<span class="kw">await
             </span>.context(StartProcedureManagerSnafu)<span class="question-mark">?</span>;
+
+        <span class="self">self</span>.wal_options_allocator
+            .start()
+            .<span class="kw">await
+            </span>.context(StartWalOptionsAllocatorSnafu)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.frontend.start().<span class="kw">await</span>.context(StartFrontendSnafu)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
@@ -1124,14 +1134,13 @@
                 .build(),
         );
         <span class="comment">// TODO(niebayes): add a wal config into the MixOptions and pass it to the allocator builder.
-        </span><span class="kw">let </span>wal_options_allocator =
-            build_wal_options_allocator(<span class="kw-2">&amp;</span>common_meta::wal::WalConfig::default(), <span class="kw-2">&amp;</span>kv_backend)
-                .<span class="kw">await
-                </span>.map_err(BoxedError::new)
-                .context(OtherSnafu)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>wal_options_allocator = Arc::new(WalOptionsAllocator::new(
+            common_meta::wal::WalConfig::default(),
+            kv_backend.clone(),
+        ));
         <span class="kw">let </span>table_meta_allocator = Arc::new(StandaloneTableMetadataAllocator::new(
             table_id_sequence,
-            wal_options_allocator,
+            wal_options_allocator.clone(),
         ));
 
         <span class="kw">let </span>ddl_task_executor = <span class="self">Self</span>::create_ddl_task_executor(
@@ -1161,6 +1170,7 @@
             datanode,
             frontend,
             procedure_manager,
+            wal_options_allocator,
         })
     }
 

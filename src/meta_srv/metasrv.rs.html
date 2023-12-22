@@ -437,6 +437,15 @@
 <a href="#436" id="436">436</a>
 <a href="#437" id="437">437</a>
 <a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -465,6 +474,7 @@
 <span class="kw">use </span>common_meta::key::TableMetadataManagerRef;
 <span class="kw">use </span>common_meta::kv_backend::{KvBackendRef, ResettableKvBackend, ResettableKvBackendRef};
 <span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeperRef;
+<span class="kw">use </span>common_meta::wal::options_allocator::WalOptionsAllocatorRef;
 <span class="kw">use </span>common_meta::wal::WalConfig;
 <span class="kw">use </span>common_procedure::options::ProcedureConfig;
 <span class="kw">use </span>common_procedure::ProcedureManagerRef;
@@ -616,6 +626,7 @@
 
 <span class="kw">pub struct </span>MetaStateHandler {
     procedure_manager: ProcedureManagerRef,
+    wal_options_allocator: WalOptionsAllocatorRef,
     subscribe_manager: <span class="prelude-ty">Option</span>&lt;SubscribeManagerRef&gt;,
     greptimedb_telemetry_task: Arc&lt;GreptimeDBTelemetryTask&gt;,
     leader_cached_kv_backend: Arc&lt;LeaderCachedKvBackend&gt;,
@@ -635,6 +646,11 @@
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self</span>.procedure_manager.start().<span class="kw">await </span>{
             <span class="macro">error!</span>(e; <span class="string">"Failed to start procedure manager"</span>);
         }
+
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self</span>.wal_options_allocator.start().<span class="kw">await </span>{
+            <span class="macro">error!</span>(e; <span class="string">"Failed to start wal options allocator"</span>);
+        }
+
         <span class="self">self</span>.greptimedb_telemetry_task.should_report(<span class="bool-val">true</span>);
     }
 
@@ -675,6 +691,7 @@
     procedure_manager: ProcedureManagerRef,
     mailbox: MailboxRef,
     ddl_executor: DdlTaskExecutorRef,
+    wal_options_allocator: WalOptionsAllocatorRef,
     table_metadata_manager: TableMetadataManagerRef,
     memory_region_keeper: MemoryRegionKeeperRef,
     greptimedb_telemetry_task: Arc&lt;GreptimeDBTelemetryTask&gt;,
@@ -709,6 +726,7 @@
                 greptimedb_telemetry_task,
                 subscribe_manager,
                 procedure_manager,
+                wal_options_allocator: <span class="self">self</span>.wal_options_allocator.clone(),
                 state: <span class="self">self</span>.state.clone(),
                 leader_cached_kv_backend: leader_cached_kv_backend.clone(),
             };

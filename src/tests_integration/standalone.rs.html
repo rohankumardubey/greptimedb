@@ -168,6 +168,7 @@
 <a href="#167" id="167">167</a>
 <a href="#168" id="168">168</a>
 <a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -193,7 +194,7 @@
 <span class="kw">use </span>common_meta::key::TableMetadataManager;
 <span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeper;
 <span class="kw">use </span>common_meta::sequence::SequenceBuilder;
-<span class="kw">use </span>common_meta::wal::build_wal_options_allocator;
+<span class="kw">use </span>common_meta::wal::WalOptionsAllocator;
 <span class="kw">use </span>common_procedure::options::ProcedureConfig;
 <span class="kw">use </span>common_telemetry::logging::LoggingOptions;
 <span class="kw">use </span>datanode::config::DatanodeOptions;
@@ -289,13 +290,13 @@
                 .build(),
         );
         <span class="comment">// TODO(niebayes): add a wal config into the MixOptions and pass it to the allocator builder.
-        </span><span class="kw">let </span>wal_options_allocator =
-            build_wal_options_allocator(<span class="kw-2">&amp;</span>common_meta::wal::WalConfig::default(), <span class="kw-2">&amp;</span>kv_backend)
-                .<span class="kw">await
-                </span>.unwrap();
+        </span><span class="kw">let </span>wal_options_allocator = Arc::new(WalOptionsAllocator::new(
+            common_meta::wal::WalConfig::default(),
+            kv_backend.clone(),
+        ));
         <span class="kw">let </span>table_meta_allocator = Arc::new(StandaloneTableMetadataAllocator::new(
             table_id_sequence,
-            wal_options_allocator,
+            wal_options_allocator.clone(),
         ));
 
         <span class="kw">let </span>ddl_task_executor = Arc::new(
@@ -317,6 +318,7 @@
             </span>.unwrap();
 
         procedure_manager.start().<span class="kw">await</span>.unwrap();
+        wal_options_allocator.start().<span class="kw">await</span>.unwrap();
 
         test_util::prepare_another_catalog_and_schema(<span class="kw-2">&amp;</span>instance).<span class="kw">await</span>;
 

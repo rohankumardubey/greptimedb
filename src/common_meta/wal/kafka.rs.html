@@ -52,6 +52,28 @@
 <a href="#51" id="51">51</a>
 <a href="#52" id="52">52</a>
 <a href="#53" id="53">53</a>
+<a href="#54" id="54">54</a>
+<a href="#55" id="55">55</a>
+<a href="#56" id="56">56</a>
+<a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -69,6 +91,8 @@
 </span><span class="kw">pub mod </span>topic;
 <span class="kw">pub mod </span>topic_manager;
 <span class="kw">pub mod </span>topic_selector;
+
+<span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
@@ -91,6 +115,21 @@
     </span><span class="kw">pub </span>num_partitions: i32,
     <span class="doccomment">/// The replication factor of each topic.
     </span><span class="kw">pub </span>replication_factor: i16,
+    <span class="doccomment">/// Above which a topic creation operation will be cancelled.
+    </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
+    </span><span class="kw">pub </span>create_topic_timeout: Duration,
+    <span class="doccomment">/// The initial backoff for kafka clients.
+    </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
+    </span><span class="kw">pub </span>backoff_init: Duration,
+    <span class="doccomment">/// The maximum backoff for kafka clients.
+    </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
+    </span><span class="kw">pub </span>backoff_max: Duration,
+    <span class="doccomment">/// Exponential backoff rate, i.e. next backoff = base * current backoff.
+    </span><span class="kw">pub </span>backoff_base: f64,
+    <span class="doccomment">/// Stop reconnecting if the total wait time reaches the deadline.
+    /// If it's None, the reconnecting won't terminate.
+    </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
+    </span><span class="kw">pub </span>backoff_deadline: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>KafkaConfig {
@@ -99,10 +138,15 @@
             broker_endpoints: <span class="macro">vec!</span>[<span class="string">"127.0.0.1:9090"</span>.to_string()],
             num_topics: <span class="number">64</span>,
             selector_type: TopicSelectorType::RoundRobin,
-            topic_name_prefix: <span class="string">"greptimedb_kafka_wal"</span>.to_string(),
+            topic_name_prefix: <span class="string">"greptimedb_wal_kafka"</span>.to_string(),
             num_partitions: <span class="number">1</span>,
             replication_factor: <span class="number">3</span>,
-        }
+            create_topic_timeout: Duration::from_secs(<span class="number">30</span>),
+            backoff_init: Duration::from_millis(<span class="number">500</span>),
+            backoff_max: Duration::from_secs(<span class="number">10</span>),
+            backoff_base: <span class="number">2.0</span>,
+            backoff_deadline: <span class="prelude-val">Some</span>(Duration::from_secs(<span class="number">60 </span>* <span class="number">5</span>)), <span class="comment">// 5 mins
+        </span>}
     }
 }
 </code></pre></div></section></main></body></html>

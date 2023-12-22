@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["WalOptionsAllocator"],"fn":["build_region_wal_options","build_wal_options_allocator"]};
+window.SIDEBAR_ITEMS = {"enum":["WalOptionsAllocator"],"fn":["allocate_region_wal_options"],"type":["WalOptionsAllocatorRef"]};

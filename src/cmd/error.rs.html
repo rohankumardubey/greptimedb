@@ -292,6 +292,13 @@
 <a href="#291" id="291">291</a>
 <a href="#292" id="292">292</a>
 <a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -347,6 +354,12 @@
     </span>StopProcedureManager {
         location: Location,
         source: common_procedure::error::Error,
+    },
+
+    <span class="attr">#[snafu(display(<span class="string">"Failed to start wal options allocator"</span>))]
+    </span>StartWalOptionsAllocator {
+        location: Location,
+        source: common_meta::error::Error,
     },
 
     <span class="attr">#[snafu(display(<span class="string">"Failed to start datanode"</span>))]
@@ -564,6 +577,7 @@
 
             Error::StartProcedureManager { source, .. }
             | Error::StopProcedureManager { source, .. } =&gt; source.status_code(),
+            Error::StartWalOptionsAllocator { source, .. } =&gt; source.status_code(),
             Error::ReplCreation { .. } | Error::Readline { .. } =&gt; StatusCode::Internal,
             Error::RequestDatabase { source, .. } =&gt; source.status_code(),
             Error::CollectRecordBatches { source, .. }

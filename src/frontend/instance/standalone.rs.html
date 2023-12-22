@@ -200,6 +200,9 @@
 <a href="#199" id="199">199</a>
 <a href="#200" id="200">200</a>
 <a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -228,8 +231,8 @@
 <span class="kw">use </span>common_meta::rpc::ddl::CreateTableTask;
 <span class="kw">use </span>common_meta::rpc::router::{Region, RegionRoute};
 <span class="kw">use </span>common_meta::sequence::SequenceRef;
-<span class="kw">use </span>common_meta::wal::options_allocator::build_region_wal_options;
-<span class="kw">use </span>common_meta::wal::WalOptionsAllocator;
+<span class="kw">use </span>common_meta::wal::options_allocator::allocate_region_wal_options;
+<span class="kw">use </span>common_meta::wal::WalOptionsAllocatorRef;
 <span class="kw">use </span>common_recordbatch::SendableRecordBatchStream;
 <span class="kw">use </span>common_telemetry::tracing_context::{FutureExt, TracingContext};
 <span class="kw">use </span>common_telemetry::{debug, info, tracing};
@@ -310,11 +313,14 @@
 
 <span class="kw">pub struct </span>StandaloneTableMetadataAllocator {
     table_id_sequence: SequenceRef,
-    wal_options_allocator: WalOptionsAllocator,
+    wal_options_allocator: WalOptionsAllocatorRef,
 }
 
 <span class="kw">impl </span>StandaloneTableMetadataAllocator {
-    <span class="kw">pub fn </span>new(table_id_sequence: SequenceRef, wal_options_allocator: WalOptionsAllocator) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(
+        table_id_sequence: SequenceRef,
+        wal_options_allocator: WalOptionsAllocatorRef,
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             table_id_sequence,
             wal_options_allocator,
@@ -387,7 +393,7 @@
             .map(|route| route.region.id.region_number())
             .collect();
         <span class="kw">let </span>region_wal_options =
-            build_region_wal_options(region_numbers, <span class="kw-2">&amp;</span><span class="self">self</span>.wal_options_allocator)<span class="question-mark">?</span>;
+            allocate_region_wal_options(region_numbers, <span class="kw-2">&amp;</span><span class="self">self</span>.wal_options_allocator)<span class="question-mark">?</span>;
 
         <span class="macro">debug!</span>(
             <span class="string">"Allocated region wal options {:?} for table {}"</span>,
