@@ -59,6 +59,7 @@
 <a href="#58" id="58">58</a>
 <a href="#59" id="59">59</a>
 <a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,6 +79,7 @@
 <span class="kw">pub const </span>SYSTEM_CATALOG_TABLE_NAME: <span class="kw-2">&amp;</span>str = <span class="string">"system_catalog"</span>;
 <span class="kw">pub const </span>DEFAULT_CATALOG_NAME: <span class="kw-2">&amp;</span>str = <span class="string">"greptime"</span>;
 <span class="kw">pub const </span>DEFAULT_SCHEMA_NAME: <span class="kw-2">&amp;</span>str = <span class="string">"public"</span>;
+<span class="kw">pub const </span>DEFAULT_PRIVATE_SCHEMA_NAME: <span class="kw-2">&amp;</span>str = <span class="string">"greptime_private"</span>;
 
 <span class="doccomment">/// Reserves [0,MIN_USER_TABLE_ID) for internal usage.
 /// User defined table id starts from this value.
