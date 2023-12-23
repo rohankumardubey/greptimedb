@@ -294,6 +294,12 @@
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
 <a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -394,6 +400,8 @@
     <span class="kw">pub </span>region_options: HashMap&lt;String, String&gt;,
     <span class="attr">#[serde(default)]
     </span><span class="kw">pub </span>region_wal_options: HashMap&lt;String, String&gt;,
+    <span class="attr">#[serde(default)]
+    </span><span class="kw">pub </span>skip_wal_replay: bool,
 }
 
 <span class="kw">impl </span>OpenRegion {
@@ -402,12 +410,14 @@
         path: <span class="kw-2">&amp;</span>str,
         region_options: HashMap&lt;String, String&gt;,
         region_wal_options: HashMap&lt;String, String&gt;,
+        skip_wal_replay: bool,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             region_ident,
             region_storage_path: path.to_string(),
             region_options,
             region_wal_options,
+            skip_wal_replay,
         }
     }
 }
@@ -523,12 +533,13 @@
             <span class="string">"test/foo"</span>,
             HashMap::new(),
             HashMap::new(),
+            <span class="bool-val">false</span>,
         ));
 
         <span class="kw">let </span>serialized = serde_json::to_string(<span class="kw-2">&amp;</span>open_region).unwrap();
 
         <span class="macro">assert_eq!</span>(
-            <span class="string">r#"{"OpenRegion":{"region_ident":{"cluster_id":1,"datanode_id":2,"table_id":1024,"region_number":1,"engine":"mito2"},"region_storage_path":"test/foo","region_options":{},"region_wal_options":{}}}"#</span>,
+            <span class="string">r#"{"OpenRegion":{"region_ident":{"cluster_id":1,"datanode_id":2,"table_id":1024,"region_number":1,"engine":"mito2"},"region_storage_path":"test/foo","region_options":{},"region_wal_options":{},"skip_wal_replay":false}}"#</span>,
             serialized
         );
 
@@ -585,6 +596,7 @@
             region_storage_path,
             region_options,
             region_wal_options: HashMap::new(),
+            skip_wal_replay: <span class="bool-val">false</span>,
         };
         <span class="macro">assert_eq!</span>(expected, deserialized);
     }

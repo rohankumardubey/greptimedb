@@ -436,6 +436,8 @@
 <a href="#435" id="435">435</a>
 <a href="#436" id="436">436</a>
 <a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -528,6 +530,7 @@
             <span class="kw-2">&amp;</span>region_storage_path,
             region_options,
             region_wal_options,
+            <span class="bool-val">true</span>,
         ));
 
         <span class="prelude-val">Ok</span>(open_instruction)
@@ -653,6 +656,7 @@
             region_storage_path: <span class="string">"/bar/foo/region/"</span>.to_string(),
             region_options: Default::default(),
             region_wal_options: Default::default(),
+            skip_wal_replay: <span class="bool-val">true</span>,
         })
     }
 
