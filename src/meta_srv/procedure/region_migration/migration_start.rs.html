@@ -283,15 +283,6 @@
 <a href="#282" id="282">282</a>
 <a href="#283" id="283">283</a>
 <a href="#284" id="284">284</a>
-<a href="#285" id="285">285</a>
-<a href="#286" id="286">286</a>
-<a href="#287" id="287">287</a>
-<a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -431,7 +422,6 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::assert_matches::assert_matches;
-    <span class="kw">use </span>std::collections::HashMap;
 
     <span class="kw">use </span>common_meta::key::test_utils::new_test_table_info;
     <span class="kw">use </span>common_meta::peer::Peer;
@@ -481,10 +471,8 @@
             ..Default::default()
         };
 
-        env.table_metadata_manager()
-            .create_table_metadata(table_info, <span class="macro">vec!</span>[region_route], HashMap::default())
-            .<span class="kw">await
-            </span>.unwrap();
+        env.create_physical_table_metadata(table_info, <span class="macro">vec!</span>[region_route])
+            .<span class="kw">await</span>;
 
         <span class="kw">let </span>err = state
             .retrieve_region_route(<span class="kw-2">&amp;mut </span>ctx, RegionId::new(<span class="number">1024</span>, <span class="number">3</span>))
@@ -515,10 +503,8 @@
             ..Default::default()
         }];
 
-        env.table_metadata_manager()
-            .create_table_metadata(table_info, region_routes, HashMap::default())
-            .<span class="kw">await
-            </span>.unwrap();
+        env.create_physical_table_metadata(table_info, region_routes)
+            .<span class="kw">await</span>;
 
         <span class="kw">let </span>(next, <span class="kw">_</span>) = state.next(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap();
 
@@ -548,10 +534,8 @@
             ..Default::default()
         }];
 
-        env.table_metadata_manager()
-            .create_table_metadata(table_info, region_routes, HashMap::default())
-            .<span class="kw">await
-            </span>.unwrap();
+        env.create_physical_table_metadata(table_info, region_routes)
+            .<span class="kw">await</span>;
 
         <span class="kw">let </span>(next, <span class="kw">_</span>) = state.next(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap();
 
@@ -575,10 +559,8 @@
             ..Default::default()
         }];
 
-        env.table_metadata_manager()
-            .create_table_metadata(table_info, region_routes, HashMap::default())
-            .<span class="kw">await
-            </span>.unwrap();
+        env.create_physical_table_metadata(table_info, region_routes)
+            .<span class="kw">await</span>;
 
         <span class="kw">let </span>(next, <span class="kw">_</span>) = state.next(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap();
 

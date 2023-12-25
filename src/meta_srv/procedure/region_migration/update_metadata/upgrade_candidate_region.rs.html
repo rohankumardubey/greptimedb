@@ -476,28 +476,6 @@
 <a href="#475" id="475">475</a>
 <a href="#476" id="476">476</a>
 <a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
-<a href="#479" id="479">479</a>
-<a href="#480" id="480">480</a>
-<a href="#481" id="481">481</a>
-<a href="#482" id="482">482</a>
-<a href="#483" id="483">483</a>
-<a href="#484" id="484">484</a>
-<a href="#485" id="485">485</a>
-<a href="#486" id="486">486</a>
-<a href="#487" id="487">487</a>
-<a href="#488" id="488">488</a>
-<a href="#489" id="489">489</a>
-<a href="#490" id="490">490</a>
-<a href="#491" id="491">491</a>
-<a href="#492" id="492">492</a>
-<a href="#493" id="493">493</a>
-<a href="#494" id="494">494</a>
-<a href="#495" id="495">495</a>
-<a href="#496" id="496">496</a>
-<a href="#497" id="497">497</a>
-<a href="#498" id="498">498</a>
-<a href="#499" id="499">499</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -676,7 +654,6 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::assert_matches::assert_matches;
-    <span class="kw">use </span>std::collections::HashMap;
 
     <span class="kw">use </span>common_meta::key::test_utils::new_test_table_info;
     <span class="kw">use </span>common_meta::peer::Peer;
@@ -725,11 +702,8 @@
             ..Default::default()
         }];
 
-        <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
-        table_metadata_manager
-            .create_table_metadata(table_info, region_routes, HashMap::default())
-            .<span class="kw">await
-            </span>.unwrap();
+        env.create_physical_table_metadata(table_info, region_routes)
+            .<span class="kw">await</span>;
 
         <span class="kw">let </span>err = state
             .build_upgrade_candidate_region_metadata(<span class="kw-2">&amp;mut </span>ctx)
@@ -754,11 +728,8 @@
             ..Default::default()
         }];
 
-        <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
-        table_metadata_manager
-            .create_table_metadata(table_info, region_routes, HashMap::default())
-            .<span class="kw">await
-            </span>.unwrap();
+        env.create_physical_table_metadata(table_info, region_routes)
+            .<span class="kw">await</span>;
 
         <span class="kw">let </span>err = state
             .build_upgrade_candidate_region_metadata(<span class="kw-2">&amp;mut </span>ctx)
@@ -785,11 +756,8 @@
             leader_status: <span class="prelude-val">Some</span>(RegionStatus::Downgraded),
         }];
 
-        <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
-        table_metadata_manager
-            .create_table_metadata(table_info, region_routes, HashMap::default())
-            .<span class="kw">await
-            </span>.unwrap();
+        env.create_physical_table_metadata(table_info, region_routes)
+            .<span class="kw">await</span>;
 
         <span class="kw">let </span>new_region_routes = state
             .build_upgrade_candidate_region_metadata(<span class="kw-2">&amp;mut </span>ctx)
@@ -826,12 +794,10 @@
             },
         ];
 
-        <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
-        table_metadata_manager
-            .create_table_metadata(table_info, region_routes, HashMap::default())
-            .<span class="kw">await
-            </span>.unwrap();
+        env.create_physical_table_metadata(table_info, region_routes)
+            .<span class="kw">await</span>;
 
+        <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
         <span class="kw">let </span>original_table_route = table_metadata_manager
             .table_route_manager()
             .get(table_id)
@@ -885,11 +851,8 @@
             leader_status: <span class="prelude-val">None</span>,
         }];
 
-        <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
-        table_metadata_manager
-            .create_table_metadata(table_info, region_routes, HashMap::default())
-            .<span class="kw">await
-            </span>.unwrap();
+        env.create_physical_table_metadata(table_info, region_routes)
+            .<span class="kw">await</span>;
 
         <span class="kw">let </span>updated = state.check_metadata_updated(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap();
         <span class="macro">assert!</span>(!updated);
@@ -911,11 +874,8 @@
             leader_status: <span class="prelude-val">None</span>,
         }];
 
-        <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
-        table_metadata_manager
-            .create_table_metadata(table_info, region_routes, HashMap::default())
-            .<span class="kw">await
-            </span>.unwrap();
+        env.create_physical_table_metadata(table_info, region_routes)
+            .<span class="kw">await</span>;
 
         <span class="kw">let </span>updated = state.check_metadata_updated(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap();
         <span class="macro">assert!</span>(updated);
@@ -937,11 +897,8 @@
             leader_status: <span class="prelude-val">Some</span>(RegionStatus::Downgraded),
         }];
 
-        <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
-        table_metadata_manager
-            .create_table_metadata(table_info, region_routes, HashMap::default())
-            .<span class="kw">await
-            </span>.unwrap();
+        env.create_physical_table_metadata(table_info, region_routes)
+            .<span class="kw">await</span>;
 
         <span class="kw">let </span>err = state.check_metadata_updated(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap_err();
         <span class="macro">assert_matches!</span>(err, Error::Unexpected { .. });
@@ -970,11 +927,10 @@
             .unwrap();
         ctx.volatile_ctx.opening_region_guard = <span class="prelude-val">Some</span>(guard);
 
+        env.create_physical_table_metadata(table_info, region_routes)
+            .<span class="kw">await</span>;
+
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
-        table_metadata_manager
-            .create_table_metadata(table_info, region_routes, HashMap::default())
-            .<span class="kw">await
-            </span>.unwrap();
 
         <span class="kw">let </span>(next, <span class="kw">_</span>) = state.next(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap();
 

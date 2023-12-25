@@ -140,6 +140,11 @@
 <a href="#139" id="139">139</a>
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -156,6 +161,7 @@
 
 </span><span class="kw">use </span>std::time::Instant;
 
+<span class="kw">use </span>common_meta::key::table_route::TableRouteValue;
 <span class="kw">use </span>common_meta::key::TableMetadataManagerRef;
 <span class="kw">use </span>common_meta::table_name::TableName;
 
@@ -195,7 +201,11 @@
                 <span class="kw">let </span>start = Instant::now();
 
                 <span class="self">self</span>.table_metadata_manager
-                    .create_table_metadata(table_info, region_routes, region_wal_options)
+                    .create_table_metadata(
+                        table_info,
+                        TableRouteValue::physical(region_routes),
+                        region_wal_options,
+                    )
                     .<span class="kw">await
                     </span>.unwrap();
 

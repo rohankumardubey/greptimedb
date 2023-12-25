@@ -309,7 +309,7 @@
 <span class="kw">use </span>snafu::OptionExt;
 <span class="kw">use </span>table::metadata::TableId;
 
-<span class="kw">use super</span>::{TABLE_NAME_KEY_PATTERN, TABLE_NAME_KEY_PREFIX};
+<span class="kw">use super</span>::{TableMetaValue, TABLE_NAME_KEY_PATTERN, TABLE_NAME_KEY_PREFIX};
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, InvalidTableMetadataSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::key::{to_removed_key, TableMetaKey};
 <span class="kw">use </span><span class="kw">crate</span>::kv_backend::memory::MemoryKvBackend;

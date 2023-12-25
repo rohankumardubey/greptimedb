@@ -357,7 +357,7 @@
 <span class="kw">use </span>table::engine::TableReference;
 <span class="kw">use </span>table::metadata::{RawTableInfo, TableId};
 
-<span class="kw">use super</span>::{DeserializedValueWithBytes, TABLE_INFO_KEY_PREFIX};
+<span class="kw">use super</span>::{DeserializedValueWithBytes, TableMetaValue, TABLE_INFO_KEY_PREFIX};
 <span class="kw">use </span><span class="kw">crate</span>::error::Result;
 <span class="kw">use </span><span class="kw">crate</span>::key::{to_removed_key, TableMetaKey};
 <span class="kw">use </span><span class="kw">crate</span>::kv_backend::txn::{Compare, CompareOp, Txn, TxnOp, TxnOpResponse};

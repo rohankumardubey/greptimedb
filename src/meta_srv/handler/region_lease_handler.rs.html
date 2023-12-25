@@ -369,6 +369,15 @@
 <a href="#368" id="368">368</a>
 <a href="#369" id="369">369</a>
 <a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -475,6 +484,7 @@
     <span class="kw">use </span>std::sync::Arc;
 
     <span class="kw">use </span>common_meta::distributed_time_constants;
+    <span class="kw">use </span>common_meta::key::table_route::TableRouteValue;
     <span class="kw">use </span>common_meta::key::test_utils::new_test_table_info;
     <span class="kw">use </span>common_meta::key::TableMetadataManager;
     <span class="kw">use </span>common_meta::kv_backend::memory::MemoryKvBackend;
@@ -532,7 +542,11 @@
         <span class="kw">let </span>table_metadata_manager = keeper.table_metadata_manager();
 
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes, HashMap::default())
+            .create_table_metadata(
+                table_info,
+                TableRouteValue::physical(region_routes),
+                HashMap::default(),
+            )
             .<span class="kw">await
             </span>.unwrap();
 
@@ -674,7 +688,11 @@
         <span class="kw">let </span>table_metadata_manager = keeper.table_metadata_manager();
 
         table_metadata_manager
-            .create_table_metadata(table_info, region_routes, HashMap::default())
+            .create_table_metadata(
+                table_info,
+                TableRouteValue::physical(region_routes),
+                HashMap::default(),
+            )
             .<span class="kw">await
             </span>.unwrap();
 

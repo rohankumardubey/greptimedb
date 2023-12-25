@@ -525,8 +525,6 @@
 <a href="#524" id="524">524</a>
 <a href="#525" id="525">525</a>
 <a href="#526" id="526">526</a>
-<a href="#527" id="527">527</a>
-<a href="#528" id="528">528</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -706,7 +704,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         cluster_id: u64,
         create_table_task: CreateTableTask,
-        region_routes: Vec&lt;RegionRoute&gt;,
+        table_route: TableRouteValue,
         region_wal_options: HashMap&lt;RegionNumber, String&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;ProcedureId&gt; {
         <span class="kw">let </span>context = <span class="self">self</span>.create_context();
@@ -714,7 +712,7 @@
         <span class="kw">let </span>procedure = CreateTableProcedure::new(
             cluster_id,
             create_table_task,
-            region_routes,
+            table_route,
             region_wal_options,
             context,
         );
@@ -804,9 +802,8 @@
         table_name: table_ref.to_string(),
     })<span class="question-mark">?</span>;
 
-    <span class="kw">let </span>table_route_value = table_route_value.with_context(|| error::TableRouteNotFoundSnafu {
-        table_name: table_ref.to_string(),
-    })<span class="question-mark">?</span>;
+    <span class="kw">let </span>table_route_value =
+        table_route_value.context(error::TableRouteNotFoundSnafu { table_id })<span class="question-mark">?</span>;
 
     <span class="kw">let </span>table_route = table_route_value.into_inner().region_routes().clone();
 
@@ -885,9 +882,8 @@
         table_name: table_ref.to_string(),
     })<span class="question-mark">?</span>;
 
-    <span class="kw">let </span>table_route_value = table_route_value.with_context(|| error::TableRouteNotFoundSnafu {
-        table_name: table_ref.to_string(),
-    })<span class="question-mark">?</span>;
+    <span class="kw">let </span>table_route_value =
+        table_route_value.context(error::TableRouteNotFoundSnafu { table_id })<span class="question-mark">?</span>;
 
     <span class="kw">let </span>id = ddl_manager
         .submit_drop_table_task(
@@ -921,7 +917,7 @@
 
     <span class="kw">let </span>TableMetadata {
         table_id,
-        region_routes,
+        table_route,
         region_wal_options,
     } = table_meta;
 
@@ -931,7 +927,7 @@
         .submit_create_table_task(
             cluster_id,
             create_table_task,
-            region_routes,
+            table_route,
             region_wal_options,
         )
         .<span class="kw">await</span><span class="question-mark">?</span>;

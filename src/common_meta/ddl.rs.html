@@ -106,10 +106,10 @@
 <span class="kw">use </span><span class="kw">crate</span>::cache_invalidator::CacheInvalidatorRef;
 <span class="kw">use </span><span class="kw">crate</span>::datanode_manager::DatanodeManagerRef;
 <span class="kw">use </span><span class="kw">crate</span>::error::Result;
+<span class="kw">use </span><span class="kw">crate</span>::key::table_route::TableRouteValue;
 <span class="kw">use </span><span class="kw">crate</span>::key::TableMetadataManagerRef;
 <span class="kw">use </span><span class="kw">crate</span>::region_keeper::MemoryRegionKeeperRef;
 <span class="kw">use </span><span class="kw">crate</span>::rpc::ddl::{CreateTableTask, SubmitDdlTaskRequest, SubmitDdlTaskResponse};
-<span class="kw">use </span><span class="kw">crate</span>::rpc::router::RegionRoute;
 
 <span class="kw">pub mod </span>alter_table;
 <span class="kw">pub mod </span>create_table;
@@ -143,7 +143,7 @@
     <span class="doccomment">/// Table id.
     </span><span class="kw">pub </span>table_id: TableId,
     <span class="doccomment">/// Route information for each region of the table.
-    </span><span class="kw">pub </span>region_routes: Vec&lt;RegionRoute&gt;,
+    </span><span class="kw">pub </span>table_route: TableRouteValue,
     <span class="doccomment">/// The encoded wal options for regions of the table.
     </span><span class="comment">// If a region does not have an associated wal options, no key for the region would be found in the map.
     </span><span class="kw">pub </span>region_wal_options: HashMap&lt;RegionNumber, String&gt;,
