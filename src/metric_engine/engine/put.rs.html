@@ -638,7 +638,7 @@
         <span class="comment">// add columns
         </span><span class="kw">let </span>logical_region_id = env.default_logical_region_id();
         <span class="kw">let </span>columns = <span class="kw-2">&amp;</span>[<span class="string">"odd"</span>, <span class="string">"even"</span>, <span class="string">"Ev_En"</span>];
-        <span class="kw">let </span>alter_request = test_util::alter_logical_region_add_tag_columns(columns);
+        <span class="kw">let </span>alter_request = test_util::alter_logical_region_add_tag_columns(<span class="number">123456</span>, columns);
         engine
             .handle_request(logical_region_id, RegionRequest::Alter(alter_request))
             .<span class="kw">await

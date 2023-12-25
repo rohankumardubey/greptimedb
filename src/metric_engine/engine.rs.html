@@ -278,6 +278,9 @@
 <a href="#277" id="277">277</a>
 <a href="#278" id="278">278</a>
 <a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -432,7 +435,10 @@
 
     <span class="doccomment">/// Retrieves region's metadata.
     </span><span class="kw">async fn </span>get_metadata(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) -&gt; <span class="prelude-ty">Result</span>&lt;RegionMetadataRef, BoxedError&gt; {
-        <span class="macro">todo!</span>()
+        <span class="self">self</span>.inner
+            .load_region_metadata(region_id)
+            .<span class="kw">await
+            </span>.map_err(BoxedError::new)
     }
 
     <span class="doccomment">/// Retrieves region's disk usage.
@@ -541,7 +547,7 @@
             .<span class="kw">await
             </span>.unwrap_err();
 
-        <span class="comment">// open nonexistent region
+        <span class="comment">// open nonexistent region won't report error
         </span><span class="kw">let </span>invalid_open_request = RegionOpenRequest {
             engine: METRIC_ENGINE_NAME.to_string(),
             region_dir: env.default_region_dir(),
@@ -554,7 +560,7 @@
                 RegionRequest::Open(invalid_open_request),
             )
             .<span class="kw">await
-            </span>.unwrap_err();
+            </span>.unwrap();
     }
 }
 </code></pre></div></section></main></body></html>

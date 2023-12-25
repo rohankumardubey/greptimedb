@@ -652,8 +652,6 @@
 <a href="#651" id="651">651</a>
 <a href="#652" id="652">652</a>
 <a href="#653" id="653">653</a>
-<a href="#654" id="654">654</a>
-<a href="#655" id="655">655</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -678,6 +676,7 @@
 <span class="kw">use </span>datafusion::prelude::{col, lit};
 <span class="kw">use </span>mito2::engine::MitoEngine;
 <span class="kw">use </span>snafu::ResultExt;
+<span class="kw">use </span>store_api::metadata::ColumnMetadata;
 <span class="kw">use </span>store_api::metric_engine_consts::{
     METADATA_SCHEMA_KEY_COLUMN_INDEX, METADATA_SCHEMA_KEY_COLUMN_NAME,
     METADATA_SCHEMA_TIMESTAMP_COLUMN_NAME, METADATA_SCHEMA_VALUE_COLUMN_INDEX,
@@ -688,7 +687,7 @@
 <span class="kw">use </span>store_api::storage::{RegionId, ScanRequest};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
-    CollectRecordBatchStreamSnafu, DecodeColumnValueSnafu, DeserializeSemanticTypeSnafu,
+    CollectRecordBatchStreamSnafu, DecodeColumnValueSnafu, DeserializeColumnMetadataSnafu,
     MitoReadOperationSnafu, MitoWriteOperationSnafu, ParseRegionIdSnafu, RegionAlreadyExistsSnafu,
     <span class="prelude-ty">Result</span>,
 };
@@ -752,16 +751,16 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         physical_region_id: RegionId,
         logical_region_id: RegionId,
-        column_name: <span class="kw-2">&amp;</span>str,
-        semantic_type: SemanticType,
+        column_metadata: <span class="kw-2">&amp;</span>ColumnMetadata,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
         <span class="kw">let </span>region_id = utils::to_metadata_region_id(physical_region_id);
-        <span class="kw">let </span>column_key = <span class="self">Self</span>::concat_column_key(logical_region_id, column_name);
+        <span class="kw">let </span>column_key =
+            <span class="self">Self</span>::concat_column_key(logical_region_id, <span class="kw-2">&amp;</span>column_metadata.column_schema.name);
 
         <span class="self">self</span>.put_if_absent(
             region_id,
             column_key,
-            <span class="self">Self</span>::serialize_semantic_type(semantic_type),
+            <span class="self">Self</span>::serialize_column_metadata(column_metadata),
         )
         .<span class="kw">await
     </span>}
@@ -788,7 +787,7 @@
         <span class="kw">let </span>column_key = <span class="self">Self</span>::concat_column_key(logical_region_id, column_name);
         <span class="kw">let </span>semantic_type = <span class="self">self</span>.get(region_id, <span class="kw-2">&amp;</span>column_key).<span class="kw">await</span><span class="question-mark">?</span>;
         semantic_type
-            .map(|s| <span class="self">Self</span>::deserialize_semantic_type(<span class="kw-2">&amp;</span>s))
+            .map(|s| <span class="self">Self</span>::deserialize_column_metadata(<span class="kw-2">&amp;</span>s).map(|c| c.semantic_type))
             .transpose()
     }
 
@@ -799,7 +798,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         physical_region_id: RegionId,
         logical_region_id: RegionId,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(String, SemanticType)&gt;&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;(String, ColumnMetadata)&gt;&gt; {
         <span class="kw">let </span>metadata_region_id = utils::to_metadata_region_id(physical_region_id);
         <span class="kw">let </span>region_column_prefix = <span class="self">Self</span>::concat_column_key_prefix(logical_region_id);
 
@@ -810,8 +809,8 @@
             }
             <span class="comment">// Safety: we have checked the prefix
             </span><span class="kw">let </span>(<span class="kw">_</span>, column_name) = <span class="self">Self</span>::parse_column_key(<span class="kw-2">&amp;</span>k)<span class="question-mark">?</span>.unwrap();
-            <span class="kw">let </span>semantic_type = <span class="self">Self</span>::deserialize_semantic_type(<span class="kw-2">&amp;</span>v)<span class="question-mark">?</span>;
-            columns.push((column_name, semantic_type));
+            <span class="kw">let </span>column_metadata = <span class="self">Self</span>::deserialize_column_metadata(<span class="kw-2">&amp;</span>v)<span class="question-mark">?</span>;
+            columns.push((column_name, column_metadata));
         }
 
         <span class="prelude-val">Ok</span>(columns)
@@ -884,13 +883,14 @@
         }
     }
 
-    <span class="kw">pub fn </span>serialize_semantic_type(semantic_type: SemanticType) -&gt; String {
-        serde_json::to_string(<span class="kw-2">&amp;</span>semantic_type).unwrap()
+    <span class="kw">pub fn </span>serialize_column_metadata(column_metadata: <span class="kw-2">&amp;</span>ColumnMetadata) -&gt; String {
+        serde_json::to_string(column_metadata).unwrap()
     }
 
-    <span class="kw">pub fn </span>deserialize_semantic_type(semantic_type: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;SemanticType&gt; {
-        serde_json::from_str(semantic_type)
-            .with_context(|<span class="kw">_</span>| DeserializeSemanticTypeSnafu { raw: semantic_type })
+    <span class="kw">pub fn </span>deserialize_column_metadata(column_metadata: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;ColumnMetadata&gt; {
+        serde_json::from_str(column_metadata).with_context(|<span class="kw">_</span>| DeserializeColumnMetadataSnafu {
+            raw: column_metadata,
+        })
     }
 }
 
@@ -1067,6 +1067,8 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
+    <span class="kw">use </span>datatypes::data_type::ConcreteDataType;
+    <span class="kw">use </span>datatypes::schema::ColumnSchema;
     <span class="kw">use </span>store_api::region_request::RegionRequest;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
@@ -1119,26 +1121,21 @@
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_serialize_semantic_type() {
+    </span><span class="kw">fn </span>test_serialize_column_metadata() {
         <span class="kw">let </span>semantic_type = SemanticType::Tag;
-        <span class="kw">let </span>expected = <span class="string">"\"Tag\""</span>.to_string();
+        <span class="kw">let </span>column_metadata = ColumnMetadata {
+            column_schema: ColumnSchema::new(<span class="string">"blabla"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
+            semantic_type,
+            column_id: <span class="number">5</span>,
+        };
+        <span class="kw">let </span>expected = <span class="string">"{\"column_schema\":{\"name\":\"blabla\",\"data_type\":{\"String\":null},\"is_nullable\":false,\"is_time_index\":false,\"default_constraint\":null,\"metadata\":{}},\"semantic_type\":\"Tag\",\"column_id\":5}"</span>.to_string();
         <span class="macro">assert_eq!</span>(
-            MetadataRegion::serialize_semantic_type(semantic_type),
-            expected
-        );
-    }
-
-    <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_deserialize_semantic_type() {
-        <span class="kw">let </span>semantic_type = <span class="string">"\"Tag\""</span>;
-        <span class="kw">let </span>expected = SemanticType::Tag;
-        <span class="macro">assert_eq!</span>(
-            MetadataRegion::deserialize_semantic_type(semantic_type).unwrap(),
+            MetadataRegion::serialize_column_metadata(<span class="kw-2">&amp;</span>column_metadata),
             expected
         );
 
-        <span class="kw">let </span>semantic_type = <span class="string">"\"InvalidType\""</span>;
-        <span class="macro">assert!</span>(MetadataRegion::deserialize_semantic_type(semantic_type).is_err());
+        <span class="kw">let </span>semantic_type = <span class="string">"\"Invalid Column Metadata\""</span>;
+        <span class="macro">assert!</span>(MetadataRegion::deserialize_column_metadata(semantic_type).is_err());
     }
 
     <span class="attr">#[test]
@@ -1276,13 +1273,17 @@
         <span class="kw">let </span>logical_region_id = RegionId::new(<span class="number">868</span>, <span class="number">8390</span>);
         <span class="kw">let </span>column_name = <span class="string">"column1"</span>;
         <span class="kw">let </span>semantic_type = SemanticType::Tag;
-        metadata_region
-            .add_column(
-                physical_region_id,
-                logical_region_id,
+        <span class="kw">let </span>column_metadata = ColumnMetadata {
+            column_schema: ColumnSchema::new(
                 column_name,
-                semantic_type,
-            )
+                ConcreteDataType::string_datatype(),
+                <span class="bool-val">false</span>,
+            ),
+            semantic_type,
+            column_id: <span class="number">5</span>,
+        };
+        metadata_region
+            .add_column(physical_region_id, logical_region_id, <span class="kw-2">&amp;</span>column_metadata)
             .<span class="kw">await
             </span>.unwrap();
         <span class="kw">let </span>actual_semantic_type = metadata_region
@@ -1293,12 +1294,7 @@
 
         <span class="comment">// duplicate column won't be updated
         </span><span class="kw">let </span>is_updated = metadata_region
-            .add_column(
-                physical_region_id,
-                logical_region_id,
-                column_name,
-                SemanticType::Field,
-            )
+            .add_column(physical_region_id, logical_region_id, <span class="kw-2">&amp;</span>column_metadata)
             .<span class="kw">await
             </span>.unwrap();
         <span class="macro">assert!</span>(!is_updated);

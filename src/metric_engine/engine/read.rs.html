@@ -246,6 +246,72 @@
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -260,18 +326,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>common_query::logical_plan::Expr;
+</span><span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span>api::v1::SemanticType;
+<span class="kw">use </span>common_query::logical_plan::Expr;
 <span class="kw">use </span>common_recordbatch::SendableRecordBatchStream;
 <span class="kw">use </span>common_telemetry::{error, info, tracing};
 <span class="kw">use </span>datafusion::logical_expr;
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
+<span class="kw">use </span>store_api::metadata::{RegionMetadata, RegionMetadataBuilder, RegionMetadataRef};
 <span class="kw">use </span>store_api::metric_engine_consts::DATA_SCHEMA_TABLE_ID_COLUMN_NAME;
 <span class="kw">use </span>store_api::region_engine::RegionEngine;
 <span class="kw">use </span>store_api::storage::consts::ReservedColumnId;
 <span class="kw">use </span>store_api::storage::{RegionId, ScanRequest};
 
 <span class="kw">use </span><span class="kw">crate</span>::engine::MetricEngineInner;
-<span class="kw">use </span><span class="kw">crate</span>::error::{LogicalRegionNotFoundSnafu, MitoReadOperationSnafu, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::error::{
+    InvalidMetadataSnafu, LogicalRegionNotFoundSnafu, MitoReadOperationSnafu, <span class="prelude-ty">Result</span>,
+};
 <span class="kw">use </span><span class="kw">crate</span>::utils;
 
 <span class="kw">impl </span>MetricEngineInner {
@@ -315,17 +387,7 @@
         logical_region_id: RegionId,
         request: ScanRequest,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt; {
-        <span class="kw">let </span>physical_region_id = {
-            <span class="kw">let </span>state = <span class="kw-2">&amp;</span><span class="self">self</span>.state.read().<span class="kw">await</span>;
-            state
-                .get_physical_region_id(logical_region_id)
-                .with_context(|| {
-                    <span class="macro">error!</span>(<span class="string">"Trying to read an nonexistent region {logical_region_id}"</span>);
-                    LogicalRegionNotFoundSnafu {
-                        region_id: logical_region_id,
-                    }
-                })<span class="question-mark">?
-        </span>};
+        <span class="kw">let </span>physical_region_id = <span class="self">self</span>.get_physical_region_id(logical_region_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>data_region_id = utils::to_data_region_id(physical_region_id);
         <span class="kw">let </span>request = <span class="self">self
             </span>.transform_request(physical_region_id, logical_region_id, request)
@@ -334,6 +396,38 @@
             .handle_query(data_region_id, request)
             .<span class="kw">await
             </span>.context(MitoReadOperationSnafu)
+    }
+
+    <span class="kw">pub async fn </span>load_region_metadata(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) -&gt; <span class="prelude-ty">Result</span>&lt;RegionMetadataRef&gt; {
+        <span class="kw">let </span>is_reading_physical_region = <span class="self">self
+            </span>.state
+            .read()
+            .<span class="kw">await
+            </span>.physical_regions()
+            .contains_key(<span class="kw-2">&amp;</span>region_id);
+
+        <span class="kw">if </span>is_reading_physical_region {
+            <span class="self">self</span>.mito
+                .get_metadata(region_id)
+                .<span class="kw">await
+                </span>.context(MitoReadOperationSnafu)
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>physical_region_id = <span class="self">self</span>.get_physical_region_id(region_id).<span class="kw">await</span><span class="question-mark">?</span>;
+            <span class="self">self</span>.logical_region_metadata(physical_region_id, region_id)
+                .<span class="kw">await
+        </span>}
+    }
+
+    <span class="kw">async fn </span>get_physical_region_id(<span class="kw-2">&amp;</span><span class="self">self</span>, logical_region_id: RegionId) -&gt; <span class="prelude-ty">Result</span>&lt;RegionId&gt; {
+        <span class="kw">let </span>state = <span class="kw-2">&amp;</span><span class="self">self</span>.state.read().<span class="kw">await</span>;
+        state
+            .get_physical_region_id(logical_region_id)
+            .with_context(|| {
+                <span class="macro">error!</span>(<span class="string">"Trying to read an nonexistent region {logical_region_id}"</span>);
+                LogicalRegionNotFoundSnafu {
+                    region_id: logical_region_id,
+                }
+            })
     }
 
     <span class="doccomment">/// Transform the [ScanRequest] from logical region to physical data region.
@@ -378,9 +472,13 @@
         origin_projection: <span class="kw-2">&amp;</span>[usize],
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;usize&gt;&gt; {
         <span class="comment">// project on logical columns
-        </span><span class="kw">let </span>logical_columns = <span class="self">self
+        </span><span class="kw">let </span>all_logical_columns = <span class="self">self
             </span>.load_logical_columns(physical_region_id, logical_region_id)
             .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>projected_logical_names = origin_projection
+            .iter()
+            .map(|i| all_logical_columns[<span class="kw-2">*</span>i].column_schema.name.clone())
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
 
         <span class="comment">// generate physical projection
         </span><span class="kw">let </span><span class="kw-2">mut </span>physical_projection = Vec::with_capacity(origin_projection.len());
@@ -390,10 +488,9 @@
             .get_metadata(data_region_id)
             .<span class="kw">await
             </span>.context(MitoReadOperationSnafu)<span class="question-mark">?</span>;
-        <span class="kw">for </span>logical_proj <span class="kw">in </span>origin_projection {
-            <span class="kw">let </span>column_id = logical_columns[<span class="kw-2">*</span>logical_proj].column_id;
+        <span class="kw">for </span>name <span class="kw">in </span>projected_logical_names {
             <span class="comment">// Safety: logical columns is a strict subset of physical columns
-            </span>physical_projection.push(physical_metadata.column_index_by_id(column_id).unwrap());
+            </span>physical_projection.push(physical_metadata.column_index_by_name(<span class="kw-2">&amp;</span>name).unwrap());
         }
 
         <span class="prelude-val">Ok</span>(physical_projection)
@@ -407,7 +504,9 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;usize&gt;&gt; {
         <span class="kw">let </span>logical_columns = <span class="self">self
             </span>.load_logical_columns(physical_region_id, logical_region_id)
-            .<span class="kw">await</span><span class="question-mark">?</span>;
+            .<span class="kw">await</span><span class="question-mark">?
+            </span>.into_iter()
+            .map(|col| col.column_schema.name);
         <span class="kw">let </span><span class="kw-2">mut </span>projection = Vec::with_capacity(logical_columns.len());
         <span class="kw">let </span>data_region_id = utils::to_data_region_id(physical_region_id);
         <span class="kw">let </span>physical_metadata = <span class="self">self
@@ -415,12 +514,44 @@
             .get_metadata(data_region_id)
             .<span class="kw">await
             </span>.context(MitoReadOperationSnafu)<span class="question-mark">?</span>;
-        <span class="kw">for </span>logical_col <span class="kw">in </span>logical_columns {
-            <span class="kw">let </span>column_id = logical_col.column_id;
+        <span class="kw">for </span>name <span class="kw">in </span>logical_columns {
             <span class="comment">// Safety: logical columns is a strict subset of physical columns
-            </span>projection.push(physical_metadata.column_index_by_id(column_id).unwrap());
+            </span>projection.push(physical_metadata.column_index_by_name(<span class="kw-2">&amp;</span>name).unwrap());
         }
+
         <span class="prelude-val">Ok</span>(projection)
+    }
+
+    <span class="kw">pub async fn </span>logical_region_metadata(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        physical_region_id: RegionId,
+        logical_region_id: RegionId,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;RegionMetadataRef&gt; {
+        <span class="kw">let </span>logical_columns = <span class="self">self
+            </span>.load_logical_columns(physical_region_id, logical_region_id)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>primary_keys = logical_columns
+            .iter()
+            .filter_map(|col| {
+                <span class="kw">if </span>col.semantic_type == SemanticType::Tag {
+                    <span class="prelude-val">Some</span>(col.column_id)
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">None
+                </span>}
+            })
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+
+        <span class="kw">let </span><span class="kw-2">mut </span>logical_metadata_builder = RegionMetadataBuilder::new(logical_region_id);
+        <span class="kw">for </span>col <span class="kw">in </span>logical_columns {
+            logical_metadata_builder.push_column_metadata(col);
+        }
+        logical_metadata_builder.primary_key(primary_keys);
+        <span class="kw">let </span>logical_metadata = logical_metadata_builder
+            .build()
+            .context(InvalidMetadataSnafu)<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(Arc::new(logical_metadata))
     }
 }
 
@@ -453,7 +584,8 @@
             </span>.unwrap();
 
         <span class="comment">// add columns to the first logical region
-        </span><span class="kw">let </span>alter_request = alter_logical_region_add_tag_columns(<span class="kw-2">&amp;</span>[<span class="string">"987"</span>, <span class="string">"789"</span>, <span class="string">"654"</span>, <span class="string">"321"</span>]);
+        </span><span class="kw">let </span>alter_request =
+            alter_logical_region_add_tag_columns(<span class="number">123456</span>, <span class="kw-2">&amp;</span>[<span class="string">"987"</span>, <span class="string">"798"</span>, <span class="string">"654"</span>, <span class="string">"321"</span>]);
         env.metric()
             .handle_request(logical_region_id, RegionRequest::Alter(alter_request))
             .<span class="kw">await
@@ -473,7 +605,7 @@
             .<span class="kw">await
             </span>.unwrap();
 
-        <span class="macro">assert_eq!</span>(scan_req.projection.unwrap(), <span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]);
+        <span class="macro">assert_eq!</span>(scan_req.projection.unwrap(), <span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>]);
         <span class="macro">assert_eq!</span>(scan_req.filters.len(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(
             scan_req.filters[<span class="number">0</span>],
@@ -490,7 +622,7 @@
             .transform_request(physical_region_id, logical_region_id, scan_req)
             .<span class="kw">await
             </span>.unwrap();
-        <span class="macro">assert_eq!</span>(scan_req.projection.unwrap(), <span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>]);
+        <span class="macro">assert_eq!</span>(scan_req.projection.unwrap(), <span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">4</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>]);
     }
 }
 </code></pre></div></section></main></body></html>

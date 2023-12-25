@@ -176,6 +176,22 @@
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
 <a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -235,6 +251,14 @@
 
     <span class="attr">#[snafu(display(<span class="string">"Failed to deserialize semantic type from {}"</span>, raw))]
     </span>DeserializeSemanticType {
+        raw: String,
+        <span class="attr">#[snafu(source)]
+        </span>error: serde_json::Error,
+        location: Location,
+    },
+
+    <span class="attr">#[snafu(display(<span class="string">"Failed to deserialize column metadata from {}"</span>, raw))]
+    </span>DeserializeColumnMetadata {
         raw: String,
         <span class="attr">#[snafu(source)]
         </span>error: serde_json::Error,
@@ -310,6 +334,12 @@
 
     <span class="attr">#[snafu(display(<span class="string">"Alter request to physical region is forbidden"</span>))]
     </span>ForbiddenPhysicalAlter { location: Location },
+
+    <span class="attr">#[snafu(display(<span class="string">"Invalid region metadata"</span>))]
+    </span>InvalidMetadata {
+        source: store_api::metadata::MetadataError,
+        location: Location,
+    },
 }
 
 <span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T, E = Error&gt; = std::result::Result&lt;T, E&gt;;
@@ -328,8 +358,10 @@
 
             MissingInternalColumn { .. }
             | DeserializeSemanticType { .. }
+            | DeserializeColumnMetadata { .. }
             | DecodeColumnValue { .. }
-            | ParseRegionId { .. } =&gt; StatusCode::Unexpected,
+            | ParseRegionId { .. }
+            | InvalidMetadata { .. } =&gt; StatusCode::Unexpected,
 
             PhysicalRegionNotFound { .. } | LogicalRegionNotFound { .. } =&gt; {
                 StatusCode::RegionNotFound
