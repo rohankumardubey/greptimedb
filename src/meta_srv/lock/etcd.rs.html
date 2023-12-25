@@ -75,6 +75,30 @@
 <a href="#74" id="74">74</a>
 <a href="#75" id="75">75</a>
 <a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
+<a href="#82" id="82">82</a>
+<a href="#83" id="83">83</a>
+<a href="#84" id="84">84</a>
+<a href="#85" id="85">85</a>
+<a href="#86" id="86">86</a>
+<a href="#87" id="87">87</a>
+<a href="#88" id="88">88</a>
+<a href="#89" id="89">89</a>
+<a href="#90" id="90">90</a>
+<a href="#91" id="91">91</a>
+<a href="#92" id="92">92</a>
+<a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -102,10 +126,14 @@
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>EtcdLock {
     client: Client,
+    store_key_prefix: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl </span>EtcdLock {
-    <span class="kw">pub async fn </span>with_endpoints&lt;E, S&gt;(endpoints: S) -&gt; <span class="prelude-ty">Result</span>&lt;DistLockRef&gt;
+    <span class="kw">pub async fn </span>with_endpoints&lt;E, S&gt;(
+        endpoints: S,
+        store_key_prefix: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;DistLockRef&gt;
     <span class="kw">where
         </span>E: AsRef&lt;str&gt;,
         S: AsRef&lt;[E]&gt;,
@@ -114,17 +142,34 @@
             .<span class="kw">await
             </span>.context(error::ConnectEtcdSnafu)<span class="question-mark">?</span>;
 
-        <span class="self">Self</span>::with_etcd_client(client)
+        <span class="self">Self</span>::with_etcd_client(client, store_key_prefix)
     }
 
-    <span class="kw">pub fn </span>with_etcd_client(client: Client) -&gt; <span class="prelude-ty">Result</span>&lt;DistLockRef&gt; {
-        <span class="prelude-val">Ok</span>(Arc::new(EtcdLock { client }))
+    <span class="kw">pub fn </span>with_etcd_client(
+        client: Client,
+        store_key_prefix: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;DistLockRef&gt; {
+        <span class="prelude-val">Ok</span>(Arc::new(EtcdLock {
+            client,
+            store_key_prefix,
+        }))
+    }
+
+    <span class="kw">fn </span>lock_key(<span class="kw-2">&amp;</span><span class="self">self</span>, key: Vec&lt;u8&gt;) -&gt; Vec&lt;u8&gt; {
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.store_key_prefix {
+            <span class="prelude-val">Some</span>(prefix) =&gt; {
+                <span class="kw">let </span><span class="kw-2">mut </span>prefix = prefix.as_bytes().to_vec();
+                prefix.extend_from_slice(<span class="kw-2">&amp;</span>key);
+                prefix
+            }
+            <span class="prelude-val">None </span>=&gt; key,
+        }
     }
 }
 
 <span class="attr">#[async_trait::async_trait]
 </span><span class="kw">impl </span>DistLock <span class="kw">for </span>EtcdLock {
-    <span class="kw">async fn </span>lock(<span class="kw-2">&amp;</span><span class="self">self</span>, name: Vec&lt;u8&gt;, opts: Opts) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;&gt; {
+    <span class="kw">async fn </span>lock(<span class="kw-2">&amp;</span><span class="self">self</span>, key: Vec&lt;u8&gt;, opts: Opts) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;u8&gt;&gt; {
         <span class="kw">let </span>expire = opts.expire_secs.unwrap_or(DEFAULT_EXPIRE_TIME_SECS) <span class="kw">as </span>i64;
 
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.clone();
@@ -138,7 +183,7 @@
         <span class="kw">let </span>lock_opts = LockOptions::new().with_lease(lease_id);
 
         <span class="kw">let </span>resp = client
-            .lock(name, <span class="prelude-val">Some</span>(lock_opts))
+            .lock(<span class="self">self</span>.lock_key(key), <span class="prelude-val">Some</span>(lock_opts))
             .<span class="kw">await
             </span>.context(error::LockSnafu)<span class="question-mark">?</span>;
 
@@ -147,7 +192,10 @@
 
     <span class="kw">async fn </span>unlock(<span class="kw-2">&amp;</span><span class="self">self</span>, key: Vec&lt;u8&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>client = <span class="self">self</span>.client.clone();
-        <span class="kw">let _ </span>= client.unlock(key).<span class="kw">await</span>.context(error::UnlockSnafu)<span class="question-mark">?</span>;
+        <span class="kw">let _ </span>= client
+            .unlock(<span class="self">self</span>.lock_key(key))
+            .<span class="kw">await
+            </span>.context(error::UnlockSnafu)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 }

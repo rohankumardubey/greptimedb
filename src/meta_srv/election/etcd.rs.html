@@ -206,6 +206,23 @@
 <a href="#205" id="205">205</a>
 <a href="#206" id="206">206</a>
 <a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -243,10 +260,15 @@
     is_leader: AtomicBool,
     infancy: AtomicBool,
     leader_watcher: broadcast::Sender&lt;LeaderChangeMessage&gt;,
+    store_key_prefix: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="kw">impl </span>EtcdElection {
-    <span class="kw">pub async fn </span>with_endpoints&lt;E, S&gt;(leader_value: E, endpoints: S) -&gt; <span class="prelude-ty">Result</span>&lt;ElectionRef&gt;
+    <span class="kw">pub async fn </span>with_endpoints&lt;E, S&gt;(
+        leader_value: E,
+        endpoints: S,
+        store_key_prefix: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ElectionRef&gt;
     <span class="kw">where
         </span>E: AsRef&lt;str&gt;,
         S: AsRef&lt;[E]&gt;,
@@ -255,10 +277,14 @@
             .<span class="kw">await
             </span>.context(error::ConnectEtcdSnafu)<span class="question-mark">?</span>;
 
-        <span class="self">Self</span>::with_etcd_client(leader_value, client).<span class="kw">await
+        <span class="self">Self</span>::with_etcd_client(leader_value, client, store_key_prefix).<span class="kw">await
     </span>}
 
-    <span class="kw">pub async fn </span>with_etcd_client&lt;E&gt;(leader_value: E, client: Client) -&gt; <span class="prelude-ty">Result</span>&lt;ElectionRef&gt;
+    <span class="kw">pub async fn </span>with_etcd_client&lt;E&gt;(
+        leader_value: E,
+        client: Client,
+        store_key_prefix: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;ElectionRef&gt;
     <span class="kw">where
         </span>E: AsRef&lt;str&gt;,
     {
@@ -299,7 +325,15 @@
             is_leader: AtomicBool::new(<span class="bool-val">false</span>),
             infancy: AtomicBool::new(<span class="bool-val">false</span>),
             leader_watcher: tx,
+            store_key_prefix,
         }))
+    }
+
+    <span class="kw">fn </span>election_key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.store_key_prefix {
+            <span class="prelude-val">Some</span>(prefix) =&gt; <span class="macro">format!</span>(<span class="string">"{}{}"</span>, prefix, ELECTION_KEY),
+            <span class="prelude-val">None </span>=&gt; ELECTION_KEY.to_string(),
+        }
     }
 }
 
@@ -336,7 +370,7 @@
         // to confirm that it is a valid leader, because it is possible that the
         // election's lease expires.
         </span><span class="kw">let </span>res = election_client
-            .campaign(ELECTION_KEY, <span class="self">self</span>.leader_value.clone(), lease_id)
+            .campaign(<span class="self">self</span>.election_key(), <span class="self">self</span>.leader_value.clone(), lease_id)
             .<span class="kw">await
             </span>.context(error::EtcdFailedSnafu)<span class="question-mark">?</span>;
 
@@ -396,7 +430,7 @@
             <span class="kw">let </span>res = <span class="self">self
                 </span>.client
                 .election_client()
-                .leader(ELECTION_KEY)
+                .leader(<span class="self">self</span>.election_key())
                 .<span class="kw">await
                 </span>.context(error::EtcdFailedSnafu)<span class="question-mark">?</span>;
             <span class="kw">let </span>leader_value = res.kv().context(error::NoLeaderSnafu)<span class="question-mark">?</span>.value();
