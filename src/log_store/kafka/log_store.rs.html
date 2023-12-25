@@ -105,6 +105,88 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -120,22 +202,37 @@
 // limitations under the License.
 
 </span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>common_config::wal::{KafkaConfig, WalOptions};
+<span class="kw">use </span>futures_util::StreamExt;
+<span class="kw">use </span>rskafka::client::consumer::{StartOffset, StreamConsumerBuilder};
 <span class="kw">use </span>store_api::logstore::entry::Id <span class="kw">as </span>EntryId;
 <span class="kw">use </span>store_api::logstore::entry_stream::SendableEntryStream;
 <span class="kw">use </span>store_api::logstore::namespace::Id <span class="kw">as </span>NamespaceId;
 <span class="kw">use </span>store_api::logstore::{AppendBatchResponse, AppendResponse, LogStore};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::kafka::client_manager::{ClientManager, ClientManagerRef};
+<span class="kw">use </span><span class="kw">crate</span>::kafka::offset::Offset;
+<span class="kw">use </span><span class="kw">crate</span>::kafka::record_utils::{handle_consume_result, RecordProducer};
 <span class="kw">use </span><span class="kw">crate</span>::kafka::{EntryImpl, NamespaceImpl};
 
-<span class="attr">#[derive(Debug)]
-</span><span class="kw">pub struct </span>KafkaLogStore;
+<span class="doccomment">/// A log store backed by Kafka.
+</span><span class="attr">#[derive(Debug)]
+</span><span class="kw">pub struct </span>KafkaLogStore {
+    config: KafkaConfig,
+    <span class="doccomment">/// Manages kafka clients through which the log store contact the Kafka cluster.
+    </span>client_manager: ClientManagerRef,
+}
 
 <span class="kw">impl </span>KafkaLogStore {
-    <span class="kw">pub async fn </span>try_new(config: KafkaConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
-        <span class="macro">todo!</span>()
+    <span class="doccomment">/// Tries to create a Kafka log store.
+    </span><span class="kw">pub async fn </span>try_new(config: <span class="kw-2">&amp;</span>KafkaConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            client_manager: Arc::new(ClientManager::try_new(config).<span class="kw">await</span><span class="question-mark">?</span>),
+            config: config.clone(),
+        })
     }
 }
 
@@ -145,68 +242,135 @@
     <span class="kw">type </span>Entry = EntryImpl;
     <span class="kw">type </span>Namespace = NamespaceImpl;
 
-    <span class="doccomment">/// Create an entry of the associate Entry type.
+    <span class="doccomment">/// Creates an entry of the associated Entry type.
     </span><span class="kw">fn </span>entry&lt;D: AsRef&lt;[u8]&gt;&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         data: D,
         entry_id: EntryId,
         ns: <span class="self">Self</span>::Namespace,
     ) -&gt; <span class="self">Self</span>::Entry {
-        EntryImpl::new(data.as_ref().to_vec(), entry_id, ns)
+        EntryImpl {
+            data: data.as_ref().to_vec(),
+            id: entry_id,
+            ns,
+        }
     }
 
-    <span class="doccomment">/// Append an `Entry` to WAL with given namespace and return append response containing
-    /// the entry id.
+    <span class="doccomment">/// Appends an entry to the log store and returns a response containing the entry id of the appended entry.
     </span><span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, entry: <span class="self">Self</span>::Entry) -&gt; <span class="prelude-ty">Result</span>&lt;AppendResponse&gt; {
-        <span class="macro">todo!</span>()
+        <span class="kw">let </span>entry_id = RecordProducer::new(entry.ns.clone())
+            .with_entries(<span class="macro">vec!</span>[entry])
+            .produce(<span class="kw-2">&amp;</span><span class="self">self</span>.client_manager)
+            .<span class="kw">await
+            </span>.map(TryInto::try_into)<span class="question-mark">??</span>;
+        <span class="prelude-val">Ok</span>(AppendResponse {
+            last_entry_id: entry_id,
+        })
     }
 
-    <span class="doccomment">/// For a batch of log entries belonging to multiple regions, each assigned to a specific topic,
-    /// we need to determine the minimum log offset returned for each region in this batch.
-    /// During replay, we use this offset to fetch log entries for a region from its assigned topic.
-    /// After fetching, we filter the entries to obtain log entries relevant to that specific region.
+    <span class="doccomment">/// Appends a batch of entries and returns a response containing a map where the key is a region id
+    /// while the value is the id of the last successfully written entry of the region.
     </span><span class="kw">async fn </span>append_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, entries: Vec&lt;<span class="self">Self</span>::Entry&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;AppendBatchResponse&gt; {
-        <span class="macro">todo!</span>()
+        <span class="kw">if </span>entries.is_empty() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(AppendBatchResponse::default());
+        }
+
+        <span class="comment">// Groups entries by region id and pushes them to an associated record producer.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>producers = HashMap::with_capacity(entries.len());
+        <span class="kw">for </span>entry <span class="kw">in </span>entries {
+            producers
+                .entry(entry.ns.region_id)
+                .or_insert(RecordProducer::new(entry.ns.clone()))
+                .push(entry);
+        }
+
+        <span class="comment">// Builds a record from entries belong to a region and produces them to kafka server.
+        </span><span class="kw">let </span>region_ids = producers.keys().cloned().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">let </span>tasks = producers
+            .into_values()
+            .map(|producer| producer.produce(<span class="kw-2">&amp;</span><span class="self">self</span>.client_manager))
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="comment">// Each produce operation returns a kafka offset of the produced record.
+        // The offsets are then converted to entry ids.
+        </span><span class="kw">let </span>entry_ids = futures::future::try_join_all(tasks)
+            .<span class="kw">await</span><span class="question-mark">?
+            </span>.into_iter()
+            .map(TryInto::try_into)
+            .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;&gt;()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(AppendBatchResponse {
+            last_entry_ids: region_ids.into_iter().zip(entry_ids).collect(),
+        })
     }
 
-    <span class="doccomment">/// Create a new `EntryStream` to asynchronously generates `Entry` with ids
-    /// starting from `id`. The generated entries will be filtered by the namespace.
+    <span class="doccomment">/// Creates a new `EntryStream` to asynchronously generates `Entry` with entry ids
+    /// starting from `entry_id`. The generated entries will be filtered by the namespace.
     </span><span class="kw">async fn </span>read(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         ns: <span class="kw-2">&amp;</span><span class="self">Self</span>::Namespace,
         entry_id: EntryId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;SendableEntryStream&lt;<span class="self">Self</span>::Entry, <span class="self">Self</span>::Error&gt;&gt; {
-        <span class="macro">todo!</span>()
+        <span class="kw">let </span>topic = ns.topic.clone();
+        <span class="kw">let </span>region_id = ns.region_id;
+
+        <span class="comment">// Gets the client associated with the topic.
+        </span><span class="kw">let </span>client = <span class="self">self
+            </span>.client_manager
+            .get_or_insert(<span class="kw-2">&amp;</span>topic)
+            .<span class="kw">await</span><span class="question-mark">?
+            </span>.raw_client
+            .clone();
+
+        <span class="comment">// Reads the entries starting from exactly the specified offset.
+        </span><span class="kw">let </span>offset = Offset::try_from(entry_id)<span class="question-mark">?</span>.<span class="number">0</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>stream_consumer = StreamConsumerBuilder::new(client, StartOffset::At(offset))
+            .with_max_batch_size(<span class="self">self</span>.config.max_batch_size.as_bytes() <span class="kw">as </span>i32)
+            .with_max_wait_ms(<span class="self">self</span>.config.max_wait_time.as_millis() <span class="kw">as </span>i32)
+            .build();
+        <span class="kw">let </span>stream = <span class="macro">async_stream::stream!</span>({
+            <span class="kw">while let </span><span class="prelude-val">Some</span>(consume_result) = stream_consumer.next().<span class="kw">await </span>{
+                <span class="kw">yield </span>handle_consume_result(consume_result, <span class="kw-2">&amp;</span>topic, region_id, offset);
+            }
+        });
+        <span class="prelude-val">Ok</span>(Box::pin(stream))
     }
 
-    <span class="doccomment">/// Create a namespace of the associate Namespace type
+    <span class="doccomment">/// Creates a namespace of the associated Namespace type.
     </span><span class="kw">fn </span>namespace(<span class="kw-2">&amp;</span><span class="self">self</span>, ns_id: NamespaceId, wal_options: <span class="kw-2">&amp;</span>WalOptions) -&gt; <span class="self">Self</span>::Namespace {
-        <span class="macro">todo!</span>()
+        <span class="comment">// Safety: upon start, the datanode checks the consistency of the wal providers in the wal config of the
+        // datanode and that of the metasrv. Therefore, the wal options passed into the kafka log store
+        // must be of type WalOptions::Kafka.
+        </span><span class="kw">let </span>WalOptions::Kafka(kafka_options) = wal_options <span class="kw">else </span>{
+            <span class="macro">unreachable!</span>()
+        };
+        NamespaceImpl {
+            region_id: ns_id,
+            topic: kafka_options.topic.clone(),
+        }
     }
 
-    <span class="doccomment">/// Create a new `Namespace`.
+    <span class="doccomment">/// Creates a new `Namespace` from the given ref.
     </span><span class="kw">async fn </span>create_namespace(<span class="kw-2">&amp;</span><span class="self">self</span>, _ns: <span class="kw-2">&amp;</span><span class="self">Self</span>::Namespace) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Delete an existing `Namespace` with given ref.
+    <span class="doccomment">/// Deletes an existing `Namespace` specified by the given ref.
     </span><span class="kw">async fn </span>delete_namespace(<span class="kw-2">&amp;</span><span class="self">self</span>, _ns: <span class="kw-2">&amp;</span><span class="self">Self</span>::Namespace) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// List all existing namespaces.
+    <span class="doccomment">/// Lists all existing namespaces.
     </span><span class="kw">async fn </span>list_namespaces(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="self">Self</span>::Namespace&gt;&gt; {
         <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[])
     }
 
-    <span class="doccomment">/// Mark all entry ids `&lt;=id` of given `namespace` as obsolete so that logstore can safely delete
-    /// the log files if all entries inside are obsolete. This method may not delete log
-    /// files immediately.
+    <span class="doccomment">/// Marks all entries with ids `&lt;=entry_id` of the given `namespace` as obsolete,
+    /// so that the log store can safely delete those entries. This method does not guarantee
+    /// that the obsolete entries are deleted immediately.
     </span><span class="kw">async fn </span>obsolete(<span class="kw-2">&amp;</span><span class="self">self</span>, _ns: <span class="self">Self</span>::Namespace, _entry_id: EntryId) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="doccomment">/// Stop components of logstore.
+    <span class="doccomment">/// Stops components of the logstore.
     </span><span class="kw">async fn </span>stop(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
     }

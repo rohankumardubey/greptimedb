@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["log_store"],"struct":["EntryImpl","NamespaceImpl"]};
+window.SIDEBAR_ITEMS = {"mod":["client_manager","log_store","offset","record_utils"],"struct":["EntryImpl","NamespaceImpl"]};

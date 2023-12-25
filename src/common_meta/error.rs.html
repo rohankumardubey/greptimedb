@@ -736,7 +736,7 @@
     },
 
     <span class="attr">#[snafu(display(
-        <span class="string">"Failed to build a kafka client, broker endpoints: {:?}"</span>,
+        <span class="string">"Failed to build a Kafka client, broker endpoints: {:?}"</span>,
         broker_endpoints
     ))]
     </span>BuildKafkaClient {
@@ -746,14 +746,14 @@
         </span>error: rskafka::client::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">"Failed to build a kafka controller client"</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to build a Kafka controller client"</span>))]
     </span>BuildKafkaCtrlClient {
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: rskafka::client::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">"Failed to create a kafka wal topic"</span>))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to create a Kafka wal topic"</span>))]
     </span>CreateKafkaWalTopic {
         location: Location,
         <span class="attr">#[snafu(source)]

@@ -115,6 +115,8 @@
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -187,23 +189,25 @@
     </span><span class="kw">fn </span>test_serde_kafka_config() {
         <span class="kw">let </span>toml_str = <span class="string">r#"
             broker_endpoints = ["127.0.0.1:9090"]
-            num_topics = 32
-            topic_name_prefix = "greptimedb_wal_kafka_topic"
-            num_partitions = 1
             max_batch_size = "4MB"
             linger = "200ms"
             max_wait_time = "100ms"
+            backoff_init = "500ms"
+            backoff_max = "10s"
+            backoff_base = 2
+            backoff_deadline = "5mins"
         "#</span>;
         <span class="kw">let </span>decoded: KafkaConfig = toml::from_str(toml_str).unwrap();
         <span class="kw">let </span>expected = KafkaConfig {
             broker_endpoints: <span class="macro">vec!</span>[<span class="string">"127.0.0.1:9090"</span>.to_string()],
-            num_topics: <span class="number">32</span>,
-            topic_name_prefix: <span class="string">"greptimedb_wal_kafka_topic"</span>.to_string(),
-            num_partitions: <span class="number">1</span>,
             compression: RsKafkaCompression::default(),
             max_batch_size: ReadableSize::mb(<span class="number">4</span>),
             linger: Duration::from_millis(<span class="number">200</span>),
             max_wait_time: Duration::from_millis(<span class="number">100</span>),
+            backoff_init: Duration::from_millis(<span class="number">500</span>),
+            backoff_max: Duration::from_secs(<span class="number">10</span>),
+            backoff_base: <span class="number">2</span>,
+            backoff_deadline: <span class="prelude-val">Some</span>(Duration::from_secs(<span class="number">60 </span>* <span class="number">5</span>)),
         };
         <span class="macro">assert_eq!</span>(decoded, expected);
     }

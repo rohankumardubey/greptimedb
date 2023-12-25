@@ -310,7 +310,7 @@
         </span><span class="kw">let </span>backoff_config = BackoffConfig {
             init_backoff: <span class="self">self</span>.config.backoff_init,
             max_backoff: <span class="self">self</span>.config.backoff_max,
-            base: <span class="self">self</span>.config.backoff_base,
+            base: <span class="self">self</span>.config.backoff_base <span class="kw">as </span>f64,
             deadline: <span class="self">self</span>.config.backoff_deadline,
         };
         <span class="kw">let </span>client = ClientBuilder::new(<span class="self">self</span>.config.broker_endpoints.clone())
@@ -386,7 +386,7 @@
     </span><span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_restore_persisted_topics() {
         <span class="kw">let </span>kv_backend = Arc::new(MemoryKvBackend::new()) <span class="kw">as </span>KvBackendRef;
-        <span class="kw">let </span>topic_name_prefix = <span class="string">"greptimedb_wal_kafka"</span>;
+        <span class="kw">let </span>topic_name_prefix = <span class="string">"greptimedb_wal_topic"</span>;
         <span class="kw">let </span>num_topics = <span class="number">16</span>;
 
         <span class="comment">// Constructs mock topics.

@@ -169,13 +169,13 @@
             broker_endpoints = ["127.0.0.1:9090"]
             num_topics = 32
             selector_type = "round_robin"
-            topic_name_prefix = "greptimedb_wal_kafka"
+            topic_name_prefix = "greptimedb_wal_topic"
             num_partitions = 1
             replication_factor = 3
             create_topic_timeout = "30s"
             backoff_init = "500ms"
             backoff_max = "10s"
-            backoff_base = 2.0
+            backoff_base = 2
             backoff_deadline = "5mins"
         "#</span>;
         <span class="kw">let </span>wal_config: WalConfig = toml::from_str(toml_str).unwrap();
@@ -183,13 +183,13 @@
             broker_endpoints: <span class="macro">vec!</span>[<span class="string">"127.0.0.1:9090"</span>.to_string()],
             num_topics: <span class="number">32</span>,
             selector_type: KafkaTopicSelectorType::RoundRobin,
-            topic_name_prefix: <span class="string">"greptimedb_wal_kafka"</span>.to_string(),
+            topic_name_prefix: <span class="string">"greptimedb_wal_topic"</span>.to_string(),
             num_partitions: <span class="number">1</span>,
             replication_factor: <span class="number">3</span>,
             create_topic_timeout: Duration::from_secs(<span class="number">30</span>),
             backoff_init: Duration::from_millis(<span class="number">500</span>),
             backoff_max: Duration::from_secs(<span class="number">10</span>),
-            backoff_base: <span class="number">2.0</span>,
+            backoff_base: <span class="number">2</span>,
             backoff_deadline: <span class="prelude-val">Some</span>(Duration::from_secs(<span class="number">60 </span>* <span class="number">5</span>)),
         };
         <span class="macro">assert_eq!</span>(wal_config, WalConfig::Kafka(expected_kafka_config));

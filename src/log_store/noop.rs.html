@@ -147,12 +147,6 @@
 <a href="#146" id="146">146</a>
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -167,9 +161,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-
-<span class="kw">use </span>common_config::wal::WalOptions;
+</span><span class="kw">use </span>common_config::wal::WalOptions;
 <span class="kw">use </span>store_api::logstore::entry::{Entry, Id <span class="kw">as </span>EntryId};
 <span class="kw">use </span>store_api::logstore::namespace::{Id <span class="kw">as </span>NamespaceId, Namespace};
 <span class="kw">use </span>store_api::logstore::{AppendBatchResponse, AppendResponse, LogStore};
@@ -220,15 +212,11 @@
     }
 
     <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>_e: <span class="self">Self</span>::Entry) -&gt; <span class="prelude-ty">Result</span>&lt;AppendResponse&gt; {
-        <span class="prelude-val">Ok</span>(AppendResponse {
-            last_entry_id: Default::default(),
-        })
+        <span class="prelude-val">Ok</span>(AppendResponse::default())
     }
 
     <span class="kw">async fn </span>append_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, _e: Vec&lt;<span class="self">Self</span>::Entry&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;AppendBatchResponse&gt; {
-        <span class="prelude-val">Ok</span>(AppendBatchResponse {
-            last_entry_ids: HashMap::new(),
-        })
+        <span class="prelude-val">Ok</span>(AppendBatchResponse::default())
     }
 
     <span class="kw">async fn </span>read(

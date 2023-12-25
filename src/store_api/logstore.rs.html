@@ -92,6 +92,7 @@
 <a href="#91" id="91">91</a>
 <a href="#92" id="92">92</a>
 <a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -143,6 +144,7 @@
 
     <span class="doccomment">/// Creates a new `EntryStream` to asynchronously generates `Entry` with ids
     /// starting from `id`.
+    </span><span class="comment">// TODO(niebayes): update docs for entry id.
     </span><span class="kw">async fn </span>read(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         ns: <span class="kw-2">&amp;</span><span class="self">Self</span>::Namespace,
@@ -173,7 +175,7 @@
 }
 
 <span class="doccomment">/// The response of an `append` operation.
-</span><span class="attr">#[derive(Debug)]
+</span><span class="attr">#[derive(Debug, Default)]
 </span><span class="kw">pub struct </span>AppendResponse {
     <span class="doccomment">/// The id of the entry appended to the log store.
     </span><span class="kw">pub </span>last_entry_id: EntryId,

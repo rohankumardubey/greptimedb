@@ -71,6 +71,14 @@
 <a href="#70" id="70">70</a>
 <a href="#71" id="71">71</a>
 <a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -92,7 +100,7 @@
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="doccomment">/// Topic name prefix.
-</span><span class="kw">pub const </span>TOPIC_NAME_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">"greptimedb_wal_kafka_topic"</span>;
+</span><span class="kw">pub const </span>TOPIC_NAME_PREFIX: <span class="kw-2">&amp;</span>str = <span class="string">"greptimedb_wal_topic"</span>;
 <span class="doccomment">/// Kafka wal topic.
 </span><span class="kw">pub type </span>Topic = String;
 
@@ -102,38 +110,46 @@
 </span><span class="kw">pub struct </span>KafkaConfig {
     <span class="doccomment">/// The broker endpoints of the Kafka cluster.
     </span><span class="kw">pub </span>broker_endpoints: Vec&lt;String&gt;,
-    <span class="doccomment">/// Number of topics shall be created beforehand.
-    </span><span class="kw">pub </span>num_topics: usize,
-    <span class="doccomment">/// Topic name prefix.
-    </span><span class="kw">pub </span>topic_name_prefix: String,
-    <span class="doccomment">/// Number of partitions per topic.
-    </span><span class="kw">pub </span>num_partitions: i32,
     <span class="doccomment">/// The compression algorithm used to compress log entries.
     </span><span class="attr">#[serde(skip)]
     #[serde(default)]
     </span><span class="kw">pub </span>compression: RsKafkaCompression,
-    <span class="doccomment">/// The maximum log size an rskakfa batch producer could buffer.
+    <span class="doccomment">/// The maximum log size a kakfa batch producer could buffer.
     </span><span class="kw">pub </span>max_batch_size: ReadableSize,
-    <span class="doccomment">/// The linger duration of an rskafka batch producer.
+    <span class="doccomment">/// The linger duration of a kafka batch producer.
     </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
     </span><span class="kw">pub </span>linger: Duration,
     <span class="doccomment">/// The maximum amount of time (in milliseconds) to wait for Kafka records to be returned.
     </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
     </span><span class="kw">pub </span>max_wait_time: Duration,
+    <span class="doccomment">/// The initial backoff for kafka clients.
+    </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
+    </span><span class="kw">pub </span>backoff_init: Duration,
+    <span class="doccomment">/// The maximum backoff for kafka clients.
+    </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
+    </span><span class="kw">pub </span>backoff_max: Duration,
+    <span class="doccomment">/// Exponential backoff rate, i.e. next backoff = base * current backoff.
+    </span><span class="comment">// Sets to u32 type since some structs containing the KafkaConfig need to derive the Eq trait.
+    </span><span class="kw">pub </span>backoff_base: u32,
+    <span class="doccomment">/// Stop reconnecting if the total wait time reaches the deadline.
+    /// If it's None, the reconnecting won't terminate.
+    </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
+    </span><span class="kw">pub </span>backoff_deadline: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>KafkaConfig {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             broker_endpoints: <span class="macro">vec!</span>[<span class="string">"127.0.0.1:9090"</span>.to_string()],
-            num_topics: <span class="number">64</span>,
-            topic_name_prefix: TOPIC_NAME_PREFIX.to_string(),
-            num_partitions: <span class="number">1</span>,
             compression: RsKafkaCompression::NoCompression,
             max_batch_size: ReadableSize::mb(<span class="number">4</span>),
             linger: Duration::from_millis(<span class="number">200</span>),
             max_wait_time: Duration::from_millis(<span class="number">100</span>),
-        }
+            backoff_init: Duration::from_millis(<span class="number">500</span>),
+            backoff_max: Duration::from_secs(<span class="number">10</span>),
+            backoff_base: <span class="number">2</span>,
+            backoff_deadline: <span class="prelude-val">Some</span>(Duration::from_secs(<span class="number">60 </span>* <span class="number">5</span>)), <span class="comment">// 5 mins
+        </span>}
     }
 }
 
