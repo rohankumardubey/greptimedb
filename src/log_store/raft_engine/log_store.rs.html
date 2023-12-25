@@ -648,6 +648,18 @@
 <a href="#647" id="647">647</a>
 <a href="#648" id="648">648</a>
 <a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -662,7 +674,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::fmt::{Debug, Formatter};
+</span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::fmt::{Debug, Formatter};
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_stream::stream;
@@ -829,8 +842,7 @@
             .write(<span class="kw-2">&amp;mut </span>batch, <span class="self">self</span>.config.sync_write)
             .context(RaftEngineSnafu)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(AppendResponse {
-            entry_id,
-            offset: <span class="prelude-val">None</span>,
+            last_entry_id: entry_id,
         })
     }
 
@@ -842,11 +854,19 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(AppendBatchResponse::default());
         }
 
+        <span class="comment">// Records the last entry id for each region's entries.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>last_entry_ids: HashMap&lt;NamespaceId, EntryId&gt; =
+            HashMap::with_capacity(entries.len());
         <span class="kw">let </span><span class="kw-2">mut </span>batch = LogBatch::with_capacity(entries.len());
 
         <span class="kw">for </span>e <span class="kw">in </span>entries {
             <span class="self">self</span>.check_entry(<span class="kw-2">&amp;</span>e)<span class="question-mark">?</span>;
-            <span class="kw">let </span>ns_id = e.namespace_id;
+            <span class="comment">// For raft-engine log store, the namespace id is the region id.
+            </span><span class="kw">let </span>ns_id = e.namespace_id;
+            last_entry_ids
+                .entry(ns_id)
+                .and_modify(|x| <span class="kw-2">*</span>x = (<span class="kw-2">*</span>x).max(e.id))
+                .or_insert(e.id);
             batch
                 .add_entries::&lt;MessageType&gt;(ns_id, <span class="kw-2">&amp;</span>[e])
                 .context(AddEntryLogBatchSnafu)<span class="question-mark">?</span>;
@@ -857,8 +877,7 @@
             .write(<span class="kw-2">&amp;mut </span>batch, <span class="self">self</span>.config.sync_write)
             .context(RaftEngineSnafu)<span class="question-mark">?</span>;
 
-        <span class="comment">// The user of raft-engine log store does not care about the response.
-        </span><span class="prelude-val">Ok</span>(AppendBatchResponse::default())
+        <span class="prelude-val">Ok</span>(AppendBatchResponse { last_entry_ids })
     }
 
     <span class="doccomment">/// Create a stream of entries from logstore in the given namespace. The end of stream is
@@ -1031,7 +1050,7 @@
 
     <span class="kw">use </span>common_base::readable_size::ReadableSize;
     <span class="kw">use </span>common_telemetry::debug;
-    <span class="kw">use </span>common_test_util::temp_dir::create_temp_dir;
+    <span class="kw">use </span>common_test_util::temp_dir::{create_temp_dir, TempDir};
     <span class="kw">use </span>futures_util::StreamExt;
     <span class="kw">use </span>store_api::logstore::entry_stream::SendableEntryStream;
     <span class="kw">use </span>store_api::logstore::namespace::Namespace <span class="kw">as </span>NamespaceTrait;
@@ -1102,7 +1121,7 @@
                 ))
                 .<span class="kw">await
                 </span>.unwrap();
-            <span class="macro">assert_eq!</span>(i, response.entry_id);
+            <span class="macro">assert_eq!</span>(i, response.last_entry_id);
         }
         <span class="kw">let </span><span class="kw-2">mut </span>entries = HashSet::with_capacity(<span class="number">1024</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>s = logstore.read(<span class="kw-2">&amp;</span>Namespace::with_id(<span class="number">1</span>), <span class="number">0</span>).<span class="kw">await</span>.unwrap();
@@ -1176,10 +1195,7 @@
         size
     }
 
-    <span class="attr">#[tokio::test]
-    </span><span class="kw">async fn </span>test_compaction() {
-        common_telemetry::init_default_ut_logging();
-        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"raft-engine-logstore-test"</span>);
+    <span class="kw">async fn </span>new_test_log_store(dir: <span class="kw-2">&amp;</span>TempDir) -&gt; RaftEngineLogStore {
         <span class="kw">let </span>path = dir.path().to_str().unwrap().to_string();
 
         <span class="kw">let </span>config = RaftEngineConfig {
@@ -1189,7 +1205,15 @@
             ..Default::default()
         };
 
-        <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(path, config).<span class="kw">await</span>.unwrap();
+        RaftEngineLogStore::try_new(path, config).<span class="kw">await</span>.unwrap()
+    }
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_compaction() {
+        common_telemetry::init_default_ut_logging();
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"raft-engine-logstore-test"</span>);
+        <span class="kw">let </span>logstore = new_test_log_store(<span class="kw-2">&amp;</span>dir).<span class="kw">await</span>;
+
         <span class="kw">let </span>namespace = Namespace::with_id(<span class="number">42</span>);
         <span class="kw">for </span>id <span class="kw">in </span><span class="number">0</span>..<span class="number">4096 </span>{
             <span class="kw">let </span>entry = Entry::create(id, namespace.id(), [<span class="string">b'x'</span>; <span class="number">4096</span>].to_vec());
@@ -1212,16 +1236,8 @@
     </span><span class="kw">async fn </span>test_obsolete() {
         common_telemetry::init_default_ut_logging();
         <span class="kw">let </span>dir = create_temp_dir(<span class="string">"raft-engine-logstore-test"</span>);
-        <span class="kw">let </span>path = dir.path().to_str().unwrap().to_string();
+        <span class="kw">let </span>logstore = new_test_log_store(<span class="kw-2">&amp;</span>dir).<span class="kw">await</span>;
 
-        <span class="kw">let </span>config = RaftEngineConfig {
-            file_size: ReadableSize::mb(<span class="number">2</span>),
-            purge_threshold: ReadableSize::mb(<span class="number">4</span>),
-            purge_interval: Duration::from_secs(<span class="number">5</span>),
-            ..Default::default()
-        };
-
-        <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(path, config).<span class="kw">await</span>.unwrap();
         <span class="kw">let </span>namespace = Namespace::with_id(<span class="number">42</span>);
         <span class="kw">for </span>id <span class="kw">in </span><span class="number">0</span>..<span class="number">1024 </span>{
             <span class="kw">let </span>entry = Entry::create(id, namespace.id(), [<span class="string">b'x'</span>; <span class="number">4096</span>].to_vec());
@@ -1241,16 +1257,7 @@
     </span><span class="kw">async fn </span>test_append_batch() {
         common_telemetry::init_default_ut_logging();
         <span class="kw">let </span>dir = create_temp_dir(<span class="string">"logstore-append-batch-test"</span>);
-        <span class="kw">let </span>path = dir.path().to_str().unwrap().to_string();
-
-        <span class="kw">let </span>config = RaftEngineConfig {
-            file_size: ReadableSize::mb(<span class="number">2</span>),
-            purge_threshold: ReadableSize::mb(<span class="number">4</span>),
-            purge_interval: Duration::from_secs(<span class="number">5</span>),
-            ..Default::default()
-        };
-
-        <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(path, config).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>logstore = new_test_log_store(<span class="kw-2">&amp;</span>dir).<span class="kw">await</span>;
 
         <span class="kw">let </span>entries = (<span class="number">0</span>..<span class="number">8</span>)
             .flat_map(|ns_id| {
@@ -1272,16 +1279,7 @@
     </span><span class="kw">async fn </span>test_append_batch_interleaved() {
         common_telemetry::init_default_ut_logging();
         <span class="kw">let </span>dir = create_temp_dir(<span class="string">"logstore-append-batch-test"</span>);
-
-        <span class="kw">let </span>path = dir.path().to_str().unwrap().to_string();
-        <span class="kw">let </span>config = RaftEngineConfig {
-            file_size: ReadableSize::mb(<span class="number">2</span>),
-            purge_threshold: ReadableSize::mb(<span class="number">4</span>),
-            purge_interval: Duration::from_secs(<span class="number">5</span>),
-            ..Default::default()
-        };
-
-        <span class="kw">let </span>logstore = RaftEngineLogStore::try_new(path, config).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>logstore = new_test_log_store(<span class="kw-2">&amp;</span>dir).<span class="kw">await</span>;
 
         <span class="kw">let </span>entries = <span class="macro">vec!</span>[
             Entry::create(<span class="number">0</span>, <span class="number">0</span>, [<span class="string">b'0'</span>; <span class="number">4096</span>].to_vec()),
@@ -1295,6 +1293,32 @@
 
         <span class="macro">assert_eq!</span>((<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">2</span>)), logstore.span(<span class="kw-2">&amp;</span>Namespace::with_id(<span class="number">0</span>)));
         <span class="macro">assert_eq!</span>((<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">1</span>)), logstore.span(<span class="kw-2">&amp;</span>Namespace::with_id(<span class="number">1</span>)));
+    }
+
+    <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_append_batch_response() {
+        common_telemetry::init_default_ut_logging();
+        <span class="kw">let </span>dir = create_temp_dir(<span class="string">"logstore-append-batch-test"</span>);
+        <span class="kw">let </span>logstore = new_test_log_store(<span class="kw-2">&amp;</span>dir).<span class="kw">await</span>;
+
+        <span class="kw">let </span>entries = <span class="macro">vec!</span>[
+            <span class="comment">// Entry[0] from region 0.
+            </span>Entry::create(<span class="number">0</span>, <span class="number">0</span>, [<span class="string">b'0'</span>; <span class="number">4096</span>].to_vec()),
+            <span class="comment">// Entry[0] from region 1.
+            </span>Entry::create(<span class="number">0</span>, <span class="number">1</span>, [<span class="string">b'1'</span>; <span class="number">4096</span>].to_vec()),
+            <span class="comment">// Entry[1] from region 1.
+            </span>Entry::create(<span class="number">1</span>, <span class="number">0</span>, [<span class="string">b'1'</span>; <span class="number">4096</span>].to_vec()),
+            <span class="comment">// Entry[1] from region 0.
+            </span>Entry::create(<span class="number">1</span>, <span class="number">1</span>, [<span class="string">b'0'</span>; <span class="number">4096</span>].to_vec()),
+            <span class="comment">// Entry[2] from region 2.
+            </span>Entry::create(<span class="number">2</span>, <span class="number">2</span>, [<span class="string">b'2'</span>; <span class="number">4096</span>].to_vec()),
+        ];
+
+        <span class="comment">// Ensure the last entry id returned for each region is the expected one.
+        </span><span class="kw">let </span>last_entry_ids = logstore.append_batch(entries).<span class="kw">await</span>.unwrap().last_entry_ids;
+        <span class="macro">assert_eq!</span>(last_entry_ids[<span class="kw-2">&amp;</span><span class="number">0</span>], <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(last_entry_ids[<span class="kw-2">&amp;</span><span class="number">1</span>], <span class="number">1</span>);
+        <span class="macro">assert_eq!</span>(last_entry_ids[<span class="kw-2">&amp;</span><span class="number">2</span>], <span class="number">2</span>);
     }
 }
 </code></pre></div></section></main></body></html>

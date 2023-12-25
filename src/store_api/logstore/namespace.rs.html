@@ -20,6 +20,9 @@
 <a href="#19" id="19">19</a>
 <a href="#20" id="20">20</a>
 <a href="#21" id="21">21</a>
+<a href="#22" id="22">22</a>
+<a href="#23" id="23">23</a>
+<a href="#24" id="24">24</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,9 +39,12 @@
 
 </span><span class="kw">use </span>std::hash::Hash;
 
-<span class="kw">pub type </span>Id = u64;
+<span class="doccomment">/// The namespace id.
+/// Usually the namespace id is identical with the region id.
+</span><span class="kw">pub type </span>Id = u64;
 
 <span class="kw">pub trait </span>Namespace: Send + Sync + Clone + std::fmt::Debug + Hash + PartialEq + Eq {
-    <span class="kw">fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id;
+    <span class="doccomment">/// Returns the namespace id.
+    </span><span class="kw">fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id;
 }
 </code></pre></div></section></main></body></html>

@@ -153,7 +153,6 @@
 <a href="#152" id="152">152</a>
 <a href="#153" id="153">153</a>
 <a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -222,14 +221,13 @@
 
     <span class="kw">async fn </span>append(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut </span>_e: <span class="self">Self</span>::Entry) -&gt; <span class="prelude-ty">Result</span>&lt;AppendResponse&gt; {
         <span class="prelude-val">Ok</span>(AppendResponse {
-            entry_id: <span class="number">0</span>,
-            offset: <span class="prelude-val">None</span>,
+            last_entry_id: Default::default(),
         })
     }
 
     <span class="kw">async fn </span>append_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, _e: Vec&lt;<span class="self">Self</span>::Entry&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;AppendBatchResponse&gt; {
         <span class="prelude-val">Ok</span>(AppendBatchResponse {
-            offsets: HashMap::new(),
+            last_entry_ids: HashMap::new(),
         })
     }
 

@@ -203,6 +203,17 @@
 <a href="#202" id="202">202</a>
 <a href="#203" id="203">203</a>
 <a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -278,12 +289,23 @@
                     region_ctx.set_error(e);
                 }
             }
-            <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = wal_writer.write_to_wal().<span class="kw">await</span>.map_err(Arc::new) {
-                <span class="comment">// Failed to write wal.
-                </span><span class="kw">for </span><span class="kw-2">mut </span>region_ctx <span class="kw">in </span>region_ctxs.into_values() {
-                    region_ctx.set_error(e.clone());
+            <span class="kw">match </span>wal_writer.write_to_wal().<span class="kw">await</span>.map_err(Arc::new) {
+                <span class="prelude-val">Ok</span>(response) =&gt; {
+                    <span class="kw">for </span>(region_id, region_ctx) <span class="kw">in </span>region_ctxs.iter_mut() {
+                        <span class="comment">// Safety: the log store implementation ensures that either the `write_to_wal` fails and no
+                        // response is returned or the last entry ids for each region do exist.
+                        </span><span class="kw">let </span>last_entry_id =
+                            response.last_entry_ids.get(<span class="kw-2">&amp;</span>region_id.as_u64()).unwrap();
+                        region_ctx.set_next_entry_id(last_entry_id + <span class="number">1</span>);
+                    }
                 }
-                <span class="kw">return</span>;
+                <span class="prelude-val">Err</span>(e) =&gt; {
+                    <span class="comment">// Failed to write wal.
+                    </span><span class="kw">for </span><span class="kw-2">mut </span>region_ctx <span class="kw">in </span>region_ctxs.into_values() {
+                        region_ctx.set_error(e.clone());
+                    }
+                    <span class="kw">return</span>;
+                }
             }
         }
 

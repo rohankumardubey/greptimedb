@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":["Entry"],"type":["Id","Offset"]};
+window.SIDEBAR_ITEMS = {"trait":["Entry"],"type":["Id"]};

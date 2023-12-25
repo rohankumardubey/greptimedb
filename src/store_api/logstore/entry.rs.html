@@ -35,6 +35,8 @@
 <a href="#34" id="34">34</a>
 <a href="#35" id="35">35</a>
 <a href="#36" id="36">36</a>
+<a href="#37" id="37">37</a>
+<a href="#38" id="38">38</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,22 +55,24 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::logstore::namespace::Namespace;
 
-<span class="doccomment">/// An entry's logical id, allocated by log store users.
+<span class="doccomment">/// An entry's id.
+/// Different log store implementations may interpret the id to different meanings.
 </span><span class="kw">pub type </span>Id = u64;
-<span class="doccomment">/// An entry's physical offset in the underlying log store.
-</span><span class="kw">pub type </span>Offset = usize;
 
-<span class="doccomment">/// Entry is the minimal data storage unit in `LogStore`.
+<span class="doccomment">/// Entry is the minimal data storage unit through which users interact with the log store.
+/// The log store implementation may have larger or smaller data storage unit than an entry.
 </span><span class="kw">pub trait </span>Entry: Send + Sync {
     <span class="kw">type </span>Error: ErrorExt + Send + Sync;
     <span class="kw">type </span>Namespace: Namespace;
 
-    <span class="doccomment">/// Return contained data of entry.
+    <span class="doccomment">/// Returns the contained data of the entry.
     </span><span class="kw">fn </span>data(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[u8];
 
-    <span class="doccomment">/// Return entry id that monotonically increments.
+    <span class="doccomment">/// Returns the id of the entry.
+    /// Usually the namespace id is identical with the region id.
     </span><span class="kw">fn </span>id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Id;
 
-    <span class="kw">fn </span>namespace(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Namespace;
+    <span class="doccomment">/// Returns the namespace of the entry.
+    </span><span class="kw">fn </span>namespace(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span>::Namespace;
 }
 </code></pre></div></section></main></body></html>
