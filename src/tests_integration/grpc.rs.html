@@ -1329,7 +1329,7 @@ CREATE TABLE {table_name} (
             .unwrap()
             .into_inner();
 
-        <span class="kw">let </span>region_to_dn_map = region_distribution(table_route_value.region_routes())
+        <span class="kw">let </span>region_to_dn_map = region_distribution(<span class="kw-2">&amp;</span>table_route_value.region_routes)
             .unwrap()
             .iter()
             .map(|(k, v)| (v[<span class="number">0</span>], <span class="kw-2">*</span>k))

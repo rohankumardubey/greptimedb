@@ -235,6 +235,12 @@
 <a href="#234" id="234">234</a>
 <a href="#235" id="235">235</a>
 <a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -296,6 +302,7 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::assert_matches::assert_matches;
+    <span class="kw">use </span>std::collections::HashMap;
 
     <span class="kw">use </span>common_meta::key::test_utils::new_test_table_info;
     <span class="kw">use </span>common_meta::peer::Peer;
@@ -364,10 +371,12 @@
             region_routes
         };
 
-        env.create_physical_table_metadata(table_info, region_routes)
-            .<span class="kw">await</span>;
-
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
+        table_metadata_manager
+            .create_table_metadata(table_info, region_routes, HashMap::default())
+            .<span class="kw">await
+            </span>.unwrap();
+
         <span class="kw">let </span>old_table_route = table_metadata_manager
             .table_route_manager()
             .get(table_id)
@@ -400,14 +409,15 @@
 
         state.rollback_downgraded_region(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap();
 
-        <span class="kw">let </span>table_route = table_metadata_manager
+        <span class="kw">let </span>region_routes = table_metadata_manager
             .table_route_manager()
             .get(table_id)
             .<span class="kw">await
             </span>.unwrap()
             .unwrap()
-            .into_inner();
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>expected_region_routes, table_route.region_routes());
+            .into_inner()
+            .region_routes;
+        <span class="macro">assert_eq!</span>(expected_region_routes, region_routes);
     }
 
     <span class="attr">#[tokio::test]
@@ -447,10 +457,11 @@
             region_routes
         };
 
-        env.create_physical_table_metadata(table_info, region_routes)
-            .<span class="kw">await</span>;
-
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
+        table_metadata_manager
+            .create_table_metadata(table_info, region_routes, HashMap::default())
+            .<span class="kw">await
+            </span>.unwrap();
 
         <span class="kw">let </span>(next, <span class="kw">_</span>) = state.next(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap();
 
@@ -461,14 +472,15 @@
 
         <span class="macro">assert!</span>(ctx.volatile_ctx.table_route.is_none());
 
-        <span class="kw">let </span>table_route = table_metadata_manager
+        <span class="kw">let </span>region_routes = table_metadata_manager
             .table_route_manager()
             .get(table_id)
             .<span class="kw">await
             </span>.unwrap()
             .unwrap()
-            .into_inner();
-        <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span>expected_region_routes, table_route.region_routes());
+            .into_inner()
+            .region_routes;
+        <span class="macro">assert_eq!</span>(expected_region_routes, region_routes);
     }
 }
 </code></pre></div></section></main></body></html>

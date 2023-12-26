@@ -253,6 +253,11 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -329,6 +334,7 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::assert_matches::assert_matches;
+    <span class="kw">use </span>std::collections::HashMap;
 
     <span class="kw">use </span>common_meta::key::test_utils::new_test_table_info;
     <span class="kw">use </span>common_meta::peer::Peer;
@@ -390,10 +396,12 @@
             },
         ];
 
-        env.create_physical_table_metadata(table_info, region_routes)
-            .<span class="kw">await</span>;
-
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
+        table_metadata_manager
+            .create_table_metadata(table_info, region_routes, HashMap::default())
+            .<span class="kw">await
+            </span>.unwrap();
+
         <span class="kw">let </span>original_table_route = table_metadata_manager
             .table_route_manager()
             .get(table_id)
@@ -442,10 +450,11 @@
             ..Default::default()
         }];
 
-        env.create_physical_table_metadata(table_info, region_routes)
-            .<span class="kw">await</span>;
-
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
+        table_metadata_manager
+            .create_table_metadata(table_info, region_routes, HashMap::default())
+            .<span class="kw">await
+            </span>.unwrap();
 
         <span class="kw">let </span>(next, <span class="kw">_</span>) = state.next(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap();
 
@@ -463,7 +472,7 @@
 
         <span class="comment">// It should remain unchanged.
         </span><span class="macro">assert_eq!</span>(latest_table_route.version(), <span class="number">0</span>);
-        <span class="macro">assert!</span>(!latest_table_route.region_routes()[<span class="number">0</span>].is_leader_downgraded());
+        <span class="macro">assert!</span>(!latest_table_route.region_routes[<span class="number">0</span>].is_leader_downgraded());
         <span class="macro">assert!</span>(ctx.volatile_ctx.table_route.is_none());
     }
 
@@ -484,10 +493,11 @@
             ..Default::default()
         }];
 
-        env.create_physical_table_metadata(table_info, region_routes)
-            .<span class="kw">await</span>;
-
         <span class="kw">let </span>table_metadata_manager = env.table_metadata_manager();
+        table_metadata_manager
+            .create_table_metadata(table_info, region_routes, HashMap::default())
+            .<span class="kw">await
+            </span>.unwrap();
 
         <span class="kw">let </span>(next, <span class="kw">_</span>) = state.next(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap();
 
@@ -503,7 +513,7 @@
             </span>.unwrap()
             .unwrap();
 
-        <span class="macro">assert!</span>(latest_table_route.region_routes()[<span class="number">0</span>].is_leader_downgraded());
+        <span class="macro">assert!</span>(latest_table_route.region_routes[<span class="number">0</span>].is_leader_downgraded());
         <span class="macro">assert!</span>(ctx.volatile_ctx.table_route.is_none());
     }
 }

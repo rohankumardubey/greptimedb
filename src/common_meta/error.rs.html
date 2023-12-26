@@ -567,9 +567,9 @@
         source: table::error::Error,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">"Failed to find table route for table id {}"</span>, table_id))]
+    <span class="attr">#[snafu(display(<span class="string">"Table route not found: {}"</span>, table_name))]
     </span>TableRouteNotFound {
-        table_id: TableId,
+        table_name: String,
         location: Location,
     },
 

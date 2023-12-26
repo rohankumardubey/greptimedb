@@ -109,7 +109,6 @@ original_task.<span class="kw">await</span>.expect(<span class="string">"The tas
 <p>Awaiting a cancelled task might complete as usual if the task was
 already completed at the time it was cancelled, but most likely it
 will fail with a <a href="../struct.JoinError.html#method.is_cancelled" title="method common_runtime::JoinError::is_cancelled">cancelled</a> <code>JoinError</code>.</p>
-<p>See also <a href="crate::task#cancellation">the module level docs</a> for more information on cancellation.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>tokio::time;
 
