@@ -764,8 +764,8 @@
 <span class="kw">use </span><span class="kw">super</span>::StatementExecutor;
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     <span class="self">self</span>, AlterExprToRequestSnafu, CatalogSnafu, ColumnDataTypeSnafu, ColumnNotFoundSnafu,
-    DeserializePartitionSnafu, InvalidPartitionColumnsSnafu, ParseSqlSnafu, <span class="prelude-ty">Result</span>,
-    SchemaNotFoundSnafu, TableMetadataManagerSnafu, TableNotFoundSnafu,
+    DeserializePartitionSnafu, InvalidPartitionColumnsSnafu, InvalidTableNameSnafu, ParseSqlSnafu,
+    <span class="prelude-ty">Result</span>, SchemaNotFoundSnafu, TableMetadataManagerSnafu, TableNotFoundSnafu,
     UnrecognizedTableOptionSnafu,
 };
 <span class="kw">use </span><span class="kw">crate</span>::expr_factory;
@@ -845,8 +845,8 @@
 
         <span class="macro">ensure!</span>(
             NAME_PATTERN_REG.is_match(<span class="kw-2">&amp;</span>create_table.table_name),
-            error::UnexpectedSnafu {
-                violated: <span class="macro">format!</span>(<span class="string">"Invalid table name: {}"</span>, create_table.table_name)
+            InvalidTableNameSnafu {
+                table_name: create_table.table_name.clone(),
             }
         );
 

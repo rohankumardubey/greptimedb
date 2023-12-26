@@ -245,6 +245,13 @@
 <a href="#244" id="244">244</a>
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -290,6 +297,7 @@
     <span class="kw">pub </span>enable_otlp_tracing: bool,
     <span class="kw">pub </span>otlp_endpoint: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>tracing_sample_ratio: <span class="prelude-ty">Option</span>&lt;f64&gt;,
+    <span class="kw">pub </span>append_stdout: bool,
 }
 
 <span class="kw">impl </span>PartialEq <span class="kw">for </span>LoggingOptions {
@@ -299,6 +307,7 @@
             &amp;&amp; <span class="self">self</span>.enable_otlp_tracing == other.enable_otlp_tracing
             &amp;&amp; <span class="self">self</span>.otlp_endpoint == other.otlp_endpoint
             &amp;&amp; <span class="self">self</span>.tracing_sample_ratio == other.tracing_sample_ratio
+            &amp;&amp; <span class="self">self</span>.append_stdout == other.append_stdout
     }
 }
 
@@ -312,6 +321,7 @@
             enable_otlp_tracing: <span class="bool-val">false</span>,
             otlp_endpoint: <span class="prelude-val">None</span>,
             tracing_sample_ratio: <span class="prelude-val">None</span>,
+            append_stdout: <span class="bool-val">true</span>,
         }
     }
 }
@@ -376,10 +386,14 @@
     <span class="comment">// Enable log compatible layer to convert log record to tracing span.
     </span>LogTracer::init().expect(<span class="string">"log tracer must be valid"</span>);
 
-    <span class="comment">// Stdout layer.
-    </span><span class="kw">let </span>(stdout_writer, stdout_guard) = tracing_appender::non_blocking(std::io::stdout());
-    <span class="kw">let </span>stdout_logging_layer = Layer::new().with_writer(stdout_writer);
-    guards.push(stdout_guard);
+    <span class="kw">let </span>stdout_logging_layer = <span class="kw">if </span>opts.append_stdout {
+        <span class="kw">let </span>(stdout_writer, stdout_guard) = tracing_appender::non_blocking(std::io::stdout());
+        guards.push(stdout_guard);
+
+        <span class="prelude-val">Some</span>(Layer::new().with_writer(stdout_writer))
+    } <span class="kw">else </span>{
+        <span class="prelude-val">None
+    </span>};
 
     <span class="comment">// JSON log layer.
     </span><span class="kw">let </span>rolling_appender = RollingFileAppender::new(Rotation::HOURLY, dir, app_name);
@@ -431,7 +445,7 @@
             <span class="prelude-val">None
         </span>};
 
-        <span class="kw">let </span>stdout_logging_layer = stdout_logging_layer.with_filter(filter.clone());
+        <span class="kw">let </span>stdout_logging_layer = stdout_logging_layer.map(|x| x.with_filter(filter.clone()));
 
         <span class="kw">let </span>file_logging_layer = file_logging_layer.with_filter(filter);
 

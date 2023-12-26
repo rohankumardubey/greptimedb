@@ -632,6 +632,10 @@
 <a href="#631" id="631">631</a>
 <a href="#632" id="632">632</a>
 <a href="#633" id="633">633</a>
+<a href="#634" id="634">634</a>
+<a href="#635" id="635">635</a>
+<a href="#636" id="636">636</a>
+<a href="#637" id="637">637</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -658,7 +662,7 @@
 <span class="kw">use </span>common_error::ext::{BoxedError, ErrorExt};
 <span class="kw">use </span>common_error::status_code::StatusCode;
 <span class="kw">use </span>common_macro::stack_trace_debug;
-<span class="kw">use </span>common_telemetry::logging;
+<span class="kw">use </span>common_telemetry::{debug, error};
 <span class="kw">use </span>datatypes::prelude::ConcreteDataType;
 <span class="kw">use </span>query::parser::PromQuery;
 <span class="kw">use </span>serde_json::json;
@@ -1254,7 +1258,11 @@
             | Error::InvalidQuery { .. }
             | Error::TimePrecision { .. } =&gt; HttpStatusCode::BAD_REQUEST,
             <span class="kw">_ </span>=&gt; {
-                <span class="macro">logging::error!</span>(<span class="self">self</span>; <span class="string">"Failed to handle HTTP request"</span>);
+                <span class="kw">if </span><span class="self">self</span>.status_code().should_log_error() {
+                    <span class="macro">error!</span>(<span class="self">self</span>; <span class="string">"Failed to handle HTTP request: "</span>);
+                } <span class="kw">else </span>{
+                    <span class="macro">debug!</span>(<span class="string">"Failed to handle HTTP request: {self}"</span>);
+                }
 
                 HttpStatusCode::INTERNAL_SERVER_ERROR
             }
