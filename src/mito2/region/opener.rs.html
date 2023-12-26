@@ -406,6 +406,10 @@
 <a href="#405" id="405">405</a>
 <a href="#406" id="406">406</a>
 <a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -664,6 +668,10 @@
         <span class="kw">let </span>flushed_entry_id = version.flushed_entry_id;
         <span class="kw">let </span>version_control = Arc::new(VersionControl::new(version));
         <span class="kw">if </span>!<span class="self">self</span>.skip_wal_replay {
+            <span class="macro">info!</span>(
+                <span class="string">"Start replaying memtable at flushed_entry_id {} for region {}"</span>,
+                flushed_entry_id, region_id
+            );
             replay_memtable(
                 wal,
                 <span class="kw-2">&amp;</span>wal_options,

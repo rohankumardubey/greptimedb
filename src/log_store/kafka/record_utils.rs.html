@@ -187,37 +187,6 @@
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
-<a href="#194" id="194">194</a>
-<a href="#195" id="195">195</a>
-<a href="#196" id="196">196</a>
-<a href="#197" id="197">197</a>
-<a href="#198" id="198">198</a>
-<a href="#199" id="199">199</a>
-<a href="#200" id="200">200</a>
-<a href="#201" id="201">201</a>
-<a href="#202" id="202">202</a>
-<a href="#203" id="203">203</a>
-<a href="#204" id="204">204</a>
-<a href="#205" id="205">205</a>
-<a href="#206" id="206">206</a>
-<a href="#207" id="207">207</a>
-<a href="#208" id="208">208</a>
-<a href="#209" id="209">209</a>
-<a href="#210" id="210">210</a>
-<a href="#211" id="211">211</a>
-<a href="#212" id="212">212</a>
-<a href="#213" id="213">213</a>
-<a href="#214" id="214">214</a>
-<a href="#215" id="215">215</a>
-<a href="#216" id="216">216</a>
-<a href="#217" id="217">217</a>
-<a href="#218" id="218">218</a>
-<a href="#219" id="219">219</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -232,20 +201,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>common_config::wal::KafkaWalTopic <span class="kw">as </span>Topic;
-<span class="kw">use </span>rskafka::record::{Record, RecordAndOffset};
+</span><span class="kw">use </span>rskafka::record::Record;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>snafu::{ensure, OptionExt, ResultExt};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
-    ConsumeRecordSnafu, DecodeMetaSnafu, EmptyEntriesSnafu, EncodeMetaSnafu, GetClientSnafu,
-    MissingKeySnafu, MissingValueSnafu, ProduceRecordSnafu, <span class="prelude-ty">Result</span>,
+    DecodeMetaSnafu, EmptyEntriesSnafu, EncodeMetaSnafu, GetClientSnafu, MissingKeySnafu,
+    MissingValueSnafu, ProduceRecordSnafu, <span class="prelude-ty">Result</span>,
 };
 <span class="kw">use </span><span class="kw">crate</span>::kafka::client_manager::ClientManagerRef;
 <span class="kw">use </span><span class="kw">crate</span>::kafka::offset::Offset;
 <span class="kw">use </span><span class="kw">crate</span>::kafka::{EntryId, EntryImpl, NamespaceImpl};
-
-<span class="kw">type </span>ConsumeResult = std::result::Result&lt;(RecordAndOffset, i64), rskafka::client::error::Error&gt;;
 
 <span class="doccomment">/// Record metadata which will be serialized/deserialized to/from the `key` of a Record.
 </span><span class="attr">#[derive(Debug, Serialize, Deserialize, PartialEq)]
@@ -345,7 +311,7 @@
     })
 }
 
-<span class="kw">fn </span>decode_from_record(record: Record) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;EntryImpl&gt;&gt; {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>decode_from_record(record: Record) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;EntryImpl&gt;&gt; {
     <span class="kw">let </span>key = record.key.context(MissingKeySnafu)<span class="question-mark">?</span>;
     <span class="kw">let </span>value = record.value.context(MissingValueSnafu)<span class="question-mark">?</span>;
     <span class="kw">let </span>meta: RecordMeta = serde_json::from_slice(<span class="kw-2">&amp;</span>key).context(DecodeMetaSnafu)<span class="question-mark">?</span>;
@@ -362,34 +328,6 @@
         start_offset = <span class="kw-2">*</span>end_offset;
     }
     <span class="prelude-val">Ok</span>(entries)
-}
-
-<span class="doccomment">/// Handles the result of a consume operation on a kafka topic.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>handle_consume_result(
-    result: ConsumeResult,
-    topic: <span class="kw-2">&amp;</span>Topic,
-    region_id: u64,
-    offset: i64,
-) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;EntryImpl&gt;&gt; {
-    <span class="kw">match </span>result {
-        <span class="prelude-val">Ok</span>((record_and_offset, <span class="kw">_</span>)) =&gt; {
-            <span class="comment">// Only produces entries belong to the region with the given region id.
-            // Since a record only contains entries from a single region, it suffices to check the first entry only.
-            </span><span class="kw">let </span>entries = decode_from_record(record_and_offset.record)<span class="question-mark">?</span>;
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(entry) = entries.first()
-                &amp;&amp; entry.id == region_id
-            {
-                <span class="prelude-val">Ok</span>(entries)
-            } <span class="kw">else </span>{
-                <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[])
-            }
-        }
-        <span class="prelude-val">Err</span>(e) =&gt; <span class="prelude-val">Err</span>(e).context(ConsumeRecordSnafu {
-            topic,
-            region_id,
-            offset,
-        }),
-    }
 }
 
 <span class="attr">#[cfg(test)]

@@ -232,6 +232,33 @@
 <a href="#231" id="231">231</a>
 <a href="#232" id="232">232</a>
 <a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
+<a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -251,10 +278,13 @@
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>common_config::wal::kafka::TopicSelectorType;
-<span class="kw">use </span>common_telemetry::debug;
+<span class="kw">use </span>common_telemetry::{debug, error, info};
+<span class="kw">use </span>rskafka::client::controller::ControllerClient;
+<span class="kw">use </span>rskafka::client::error::Error <span class="kw">as </span>RsKafkaError;
+<span class="kw">use </span>rskafka::client::error::ProtocolError::TopicAlreadyExists;
 <span class="kw">use </span>rskafka::client::ClientBuilder;
 <span class="kw">use </span>rskafka::BackoffConfig;
-<span class="kw">use </span>snafu::{ensure, ResultExt};
+<span class="kw">use </span>snafu::{ensure, AsErrorSource, ResultExt};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     BuildKafkaClientSnafu, BuildKafkaCtrlClientSnafu, CreateKafkaWalTopicSnafu, DecodeJsonSnafu,
@@ -313,7 +343,6 @@
             .<span class="kw">await</span><span class="question-mark">?
             </span>.into_iter()
             .collect::&lt;HashSet&lt;Topic&gt;&gt;();
-        <span class="macro">debug!</span>(<span class="string">"Restored {} topics"</span>, created_topics.len());
 
         <span class="comment">// Creates missing topics.
         </span><span class="kw">let </span>to_be_created = topics
@@ -326,10 +355,10 @@
                 <span class="prelude-val">Some</span>(i)
             })
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+
         <span class="kw">if </span>!to_be_created.is_empty() {
             <span class="self">self</span>.try_create_topics(topics, <span class="kw-2">&amp;</span>to_be_created).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="self">Self</span>::persist_created_topics(topics, <span class="kw-2">&amp;</span><span class="self">self</span>.kv_backend).<span class="kw">await</span><span class="question-mark">?</span>;
-            <span class="macro">debug!</span>(<span class="string">"Persisted {} topics"</span>, topics.len());
         }
         <span class="prelude-val">Ok</span>(())
     }
@@ -353,23 +382,12 @@
             </span>.controller_client()
             .context(BuildKafkaCtrlClientSnafu)<span class="question-mark">?</span>;
 
-        <span class="comment">// Spawns tokio tasks for creating missing topics.
+        <span class="comment">// Try to create missing topics.
         </span><span class="kw">let </span>tasks = to_be_created
             .iter()
-            .map(|i| {
-                client.create_topic(
-                    topics[<span class="kw-2">*</span>i].clone(),
-                    <span class="self">self</span>.config.num_partitions,
-                    <span class="self">self</span>.config.replication_factor,
-                    <span class="self">self</span>.config.create_topic_timeout.as_millis() <span class="kw">as </span>i32,
-                )
-            })
+            .map(|i| <span class="self">self</span>.try_create_topic(<span class="kw-2">&amp;</span>topics[<span class="kw-2">*</span>i], <span class="kw-2">&amp;</span>client))
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="comment">// FIXME(niebayes): try to create an already-exist topic would raise an error.
-        </span>futures::future::try_join_all(tasks)
-            .<span class="kw">await
-            </span>.context(CreateKafkaWalTopicSnafu)
-            .map(|<span class="kw">_</span>| ())
+        futures::future::try_join_all(tasks).<span class="kw">await</span>.map(|<span class="kw">_</span>| ())
     }
 
     <span class="doccomment">/// Selects one topic from the topic pool through the topic selector.
@@ -382,6 +400,32 @@
         (<span class="number">0</span>..num_topics)
             .map(|<span class="kw">_</span>| <span class="self">self</span>.topic_selector.select(<span class="kw-2">&amp;</span><span class="self">self</span>.topic_pool))
             .collect()
+    }
+
+    <span class="kw">async fn </span>try_create_topic(<span class="kw-2">&amp;</span><span class="self">self</span>, topic: <span class="kw-2">&amp;</span>Topic, client: <span class="kw-2">&amp;</span>ControllerClient) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">match </span>client
+            .create_topic(
+                topic.clone(),
+                <span class="self">self</span>.config.num_partitions,
+                <span class="self">self</span>.config.replication_factor,
+                <span class="self">self</span>.config.create_topic_timeout.as_millis() <span class="kw">as </span>i32,
+            )
+            .<span class="kw">await
+        </span>{
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
+                <span class="macro">info!</span>(<span class="string">"Successfully created topic {}"</span>, topic);
+                <span class="prelude-val">Ok</span>(())
+            }
+            <span class="prelude-val">Err</span>(e) =&gt; {
+                <span class="kw">if </span><span class="self">Self</span>::is_topic_already_exist_err(<span class="kw-2">&amp;</span>e) {
+                    <span class="macro">info!</span>(<span class="string">"The topic {} already exists"</span>, topic);
+                    <span class="prelude-val">Ok</span>(())
+                } <span class="kw">else </span>{
+                    <span class="macro">error!</span>(<span class="string">"Failed to create a topic {}, error {:?}"</span>, topic, e);
+                    <span class="prelude-val">Err</span>(e).context(CreateKafkaWalTopicSnafu)
+                }
+            }
+        }
     }
 
     <span class="kw">async fn </span>restore_created_topics(kv_backend: <span class="kw-2">&amp;</span>KvBackendRef) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Topic&gt;&gt; {
@@ -404,6 +448,16 @@
             })
             .<span class="kw">await
             </span>.map(|<span class="kw">_</span>| ())
+    }
+
+    <span class="kw">fn </span>is_topic_already_exist_err(e: <span class="kw-2">&amp;</span>RsKafkaError) -&gt; bool {
+        <span class="macro">matches!</span>(
+            e,
+            <span class="kw-2">&amp;</span>RsKafkaError::ServerError {
+                protocol_error: TopicAlreadyExists,
+                ..
+            }
+        )
     }
 }
 

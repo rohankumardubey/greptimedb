@@ -140,6 +140,9 @@
 <a href="#139" id="139">139</a>
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -263,13 +266,16 @@
 
 <span class="kw">impl </span>Default <span class="kw">for </span>StandaloneKafkaConfig {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>base = KafkaConfig::default();
+        <span class="kw">let </span>replication_factor = base.broker_endpoints.len() <span class="kw">as </span>i16;
+
         <span class="self">Self </span>{
-            base: KafkaConfig::default(),
+            base,
             num_topics: <span class="number">64</span>,
             selector_type: TopicSelectorType::RoundRobin,
             topic_name_prefix: <span class="string">"greptimedb_wal_topic"</span>.to_string(),
             num_partitions: <span class="number">1</span>,
-            replication_factor: <span class="number">3</span>,
+            replication_factor,
             create_topic_timeout: Duration::from_secs(<span class="number">30</span>),
         }
     }

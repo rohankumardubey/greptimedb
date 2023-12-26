@@ -63,6 +63,9 @@
 <a href="#62" id="62">62</a>
 <a href="#63" id="63">63</a>
 <a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -115,13 +118,16 @@
 
 <span class="kw">impl </span>Default <span class="kw">for </span>KafkaConfig {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>broker_endpoints = <span class="macro">vec!</span>[<span class="string">"127.0.0.1:9092"</span>.to_string()];
+        <span class="kw">let </span>replication_factor = broker_endpoints.len() <span class="kw">as </span>i16;
+
         <span class="self">Self </span>{
-            broker_endpoints: <span class="macro">vec!</span>[<span class="string">"127.0.0.1:9092"</span>.to_string()],
+            broker_endpoints,
             num_topics: <span class="number">64</span>,
             selector_type: TopicSelectorType::RoundRobin,
             topic_name_prefix: <span class="string">"greptimedb_wal_topic"</span>.to_string(),
             num_partitions: <span class="number">1</span>,
-            replication_factor: <span class="number">3</span>,
+            replication_factor,
             create_topic_timeout: Duration::from_secs(<span class="number">30</span>),
             backoff: KafkaBackoffConfig::default(),
         }

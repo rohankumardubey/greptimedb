@@ -109,6 +109,15 @@
 <a href="#108" id="108">108</a>
 <a href="#109" id="109">109</a>
 <a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -167,6 +176,7 @@
 }
 
 <span class="attr">#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(try_from = <span class="string">"String"</span>)]
 </span><span class="kw">pub enum </span>SelectorType {
     <span class="attr">#[default]
     </span>LoadBased,
@@ -185,6 +195,14 @@
             }
             .fail(),
         }
+    }
+}
+
+<span class="kw">impl </span>TryFrom&lt;String&gt; <span class="kw">for </span>SelectorType {
+    <span class="kw">type </span>Error = error::Error;
+
+    <span class="kw">fn </span>try_from(value: String) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        SelectorType::try_from(value.as_str())
     }
 }
 

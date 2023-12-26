@@ -179,6 +179,9 @@
 <a href="#178" id="178">178</a>
 <a href="#179" id="179">179</a>
 <a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -200,6 +203,8 @@
 <span class="kw">use </span>common_macro::stack_trace_debug;
 <span class="kw">use </span>common_runtime::error::Error <span class="kw">as </span>RuntimeError;
 <span class="kw">use </span>snafu::{Location, Snafu};
+
+<span class="kw">use </span><span class="kw">crate</span>::kafka::NamespaceImpl <span class="kw">as </span>KafkaNamespace;
 
 <span class="attr">#[derive(Snafu)]
 #[snafu(visibility(<span class="kw">pub</span>))]
@@ -333,16 +338,17 @@
         </span>error: rskafka::client::producer::Error,
     },
 
-    <span class="attr">#[snafu(display(
-        <span class="string">"Failed to read a record from Kafka, topic: {}, region_id: {}, offset: {}"</span>,
-        topic,
-        region_id,
-        offset,
-    ))]
+    <span class="attr">#[snafu(display(<span class="string">"Failed to read a record from Kafka, ns: {}"</span>, ns))]
     </span>ConsumeRecord {
-        topic: String,
-        region_id: u64,
-        offset: i64,
+        ns: KafkaNamespace,
+        location: Location,
+        <span class="attr">#[snafu(source)]
+        </span>error: rskafka::client::error::Error,
+    },
+
+    <span class="attr">#[snafu(display(<span class="string">"Failed to get the latest offset, ns: {}"</span>, ns))]
+    </span>GetOffset {
+        ns: KafkaNamespace,
         location: Location,
         <span class="attr">#[snafu(source)]
         </span>error: rskafka::client::error::Error,
