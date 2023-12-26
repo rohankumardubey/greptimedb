@@ -324,7 +324,7 @@
         </span><span class="kw">let </span>offset = Offset::try_from(entry_id)<span class="question-mark">?</span>.<span class="number">0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>stream_consumer = StreamConsumerBuilder::new(client, StartOffset::At(offset))
             .with_max_batch_size(<span class="self">self</span>.config.max_batch_size.as_bytes() <span class="kw">as </span>i32)
-            .with_max_wait_ms(<span class="self">self</span>.config.max_wait_time.as_millis() <span class="kw">as </span>i32)
+            .with_max_wait_ms(<span class="self">self</span>.config.produce_record_timeout.as_millis() <span class="kw">as </span>i32)
             .build();
         <span class="kw">let </span>stream = <span class="macro">async_stream::stream!</span>({
             <span class="kw">while let </span><span class="prelude-val">Some</span>(consume_result) = stream_consumer.next().<span class="kw">await </span>{

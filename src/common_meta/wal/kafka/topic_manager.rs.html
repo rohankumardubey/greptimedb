@@ -231,6 +231,7 @@
 <a href="#230" id="230">230</a>
 <a href="#231" id="231">231</a>
 <a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -249,6 +250,7 @@
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::Duration;
 
+<span class="kw">use </span>common_config::wal::kafka::TopicSelectorType;
 <span class="kw">use </span>common_telemetry::debug;
 <span class="kw">use </span>rskafka::client::ClientBuilder;
 <span class="kw">use </span>rskafka::BackoffConfig;
@@ -261,7 +263,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::kv_backend::KvBackendRef;
 <span class="kw">use </span><span class="kw">crate</span>::rpc::store::PutRequest;
 <span class="kw">use </span><span class="kw">crate</span>::wal::kafka::topic::Topic;
-<span class="kw">use </span><span class="kw">crate</span>::wal::kafka::topic_selector::{RoundRobinTopicSelector, SelectorType, TopicSelectorRef};
+<span class="kw">use </span><span class="kw">crate</span>::wal::kafka::topic_selector::{RoundRobinTopicSelector, TopicSelectorRef};
 <span class="kw">use </span><span class="kw">crate</span>::wal::kafka::KafkaConfig;
 
 <span class="kw">const </span>CREATED_TOPICS_KEY: <span class="kw-2">&amp;</span>str = <span class="string">"__created_wal_topics/kafka/"</span>;
@@ -284,7 +286,7 @@
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
 
         <span class="kw">let </span>selector = <span class="kw">match </span>config.selector_type {
-            SelectorType::RoundRobin =&gt; RoundRobinTopicSelector::with_shuffle(),
+            TopicSelectorType::RoundRobin =&gt; RoundRobinTopicSelector::with_shuffle(),
         };
 
         <span class="self">Self </span>{
@@ -336,10 +338,10 @@
     </span><span class="kw">async fn </span>try_create_topics(<span class="kw-2">&amp;</span><span class="self">self</span>, topics: <span class="kw-2">&amp;</span>[Topic], to_be_created: <span class="kw-2">&amp;</span>[usize]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="comment">// Builds an kafka controller client for creating topics.
         </span><span class="kw">let </span>backoff_config = BackoffConfig {
-            init_backoff: <span class="self">self</span>.config.backoff_init,
-            max_backoff: <span class="self">self</span>.config.backoff_max,
-            base: <span class="self">self</span>.config.backoff_base <span class="kw">as </span>f64,
-            deadline: <span class="self">self</span>.config.backoff_deadline,
+            init_backoff: <span class="self">self</span>.config.backoff.init,
+            max_backoff: <span class="self">self</span>.config.backoff.max,
+            base: <span class="self">self</span>.config.backoff.base <span class="kw">as </span>f64,
+            deadline: <span class="self">self</span>.config.backoff.deadline,
         };
         <span class="kw">let </span>client = ClientBuilder::new(<span class="self">self</span>.config.broker_endpoints.clone())
             .backoff_config(backoff_config)
@@ -363,7 +365,7 @@
                 )
             })
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="comment">// TODO(niebayes): Determine how rskafka handles an already-exist topic. Check if an error would be raised.
+        <span class="comment">// FIXME(niebayes): try to create an already-exist topic would raise an error.
         </span>futures::future::try_join_all(tasks)
             .<span class="kw">await
             </span>.context(CreateKafkaWalTopicSnafu)

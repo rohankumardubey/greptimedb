@@ -739,6 +739,10 @@
 <a href="#738" id="738">738</a>
 <a href="#739" id="739">739</a>
 <a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -759,7 +763,8 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>common_catalog::consts::MIN_USER_TABLE_ID;
-<span class="kw">use </span>common_config::{metadata_store_dir, KvBackendConfig, WalConfig};
+<span class="kw">use </span>common_config::wal::StandaloneWalConfig;
+<span class="kw">use </span>common_config::{metadata_store_dir, KvBackendConfig};
 <span class="kw">use </span>common_meta::cache_invalidator::DummyCacheInvalidator;
 <span class="kw">use </span>common_meta::datanode_manager::DatanodeManagerRef;
 <span class="kw">use </span>common_meta::ddl::{DdlTaskExecutorRef, TableMetadataAllocatorRef};
@@ -845,7 +850,7 @@
     <span class="kw">pub </span>opentsdb: OpentsdbOptions,
     <span class="kw">pub </span>influxdb: InfluxdbOptions,
     <span class="kw">pub </span>prom_store: PromStoreOptions,
-    <span class="kw">pub </span>wal: WalConfig,
+    <span class="kw">pub </span>wal: StandaloneWalConfig,
     <span class="kw">pub </span>storage: StorageConfig,
     <span class="kw">pub </span>metadata_store: KvBackendConfig,
     <span class="kw">pub </span>procedure: ProcedureConfig,
@@ -868,7 +873,7 @@
             opentsdb: OpentsdbOptions::default(),
             influxdb: InfluxdbOptions::default(),
             prom_store: PromStoreOptions::default(),
-            wal: WalConfig::default(),
+            wal: StandaloneWalConfig::default(),
             storage: StorageConfig::default(),
             metadata_store: KvBackendConfig::default(),
             procedure: ProcedureConfig::default(),
@@ -907,7 +912,7 @@
         DatanodeOptions {
             node_id: <span class="prelude-val">Some</span>(<span class="number">0</span>),
             enable_telemetry: <span class="self">self</span>.enable_telemetry,
-            wal: <span class="self">self</span>.wal,
+            wal: <span class="self">self</span>.wal.into(),
             storage: <span class="self">self</span>.storage,
             region_engine: <span class="self">self</span>.region_engine,
             rpc_addr: <span class="self">self</span>.grpc.addr,
@@ -1079,7 +1084,8 @@
         <span class="kw">let </span>procedure = opts.procedure.clone();
         <span class="kw">let </span>frontend = opts.clone().frontend_options();
         <span class="kw">let </span>logging = opts.logging.clone();
-        <span class="kw">let </span>datanode = opts.datanode_options();
+        <span class="kw">let </span>wal_meta = opts.wal.clone().into();
+        <span class="kw">let </span>datanode = opts.datanode_options().clone();
 
         <span class="prelude-val">Ok</span>(Options::Standalone(Box::new(MixOptions {
             procedure,
@@ -1088,6 +1094,7 @@
             frontend,
             datanode,
             logging,
+            wal_meta,
         })))
     }
 
@@ -1133,9 +1140,8 @@
                 .step(<span class="number">10</span>)
                 .build(),
         );
-        <span class="comment">// TODO(niebayes): add a wal config into the MixOptions and pass it to the allocator builder.
-        </span><span class="kw">let </span>wal_options_allocator = Arc::new(WalOptionsAllocator::new(
-            common_meta::wal::WalConfig::default(),
+        <span class="kw">let </span>wal_options_allocator = Arc::new(WalOptionsAllocator::new(
+            opts.wal_meta.clone(),
             kv_backend.clone(),
         ));
         <span class="kw">let </span>table_meta_allocator = Arc::new(StandaloneTableMetadataAllocator::new(
@@ -1220,6 +1226,7 @@
 
     <span class="kw">use </span>auth::{Identity, Password, UserProviderRef};
     <span class="kw">use </span>common_base::readable_size::ReadableSize;
+    <span class="kw">use </span>common_config::WalConfig;
     <span class="kw">use </span>common_test_util::temp_dir::create_named_temp_file;
     <span class="kw">use </span>datanode::config::{FileConfig, GcsConfig};
     <span class="kw">use </span>servers::Mode;
@@ -1270,6 +1277,7 @@
             purge_interval = "10m"
             read_batch_size = 128
             sync_write = false
+
             [storage]
             data_home = "/tmp/greptimedb/"
             type = "File"

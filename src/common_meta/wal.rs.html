@@ -98,6 +98,24 @@
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -117,6 +135,7 @@
 
 <span class="kw">use </span>std::collections::HashMap;
 
+<span class="kw">use </span>common_config::wal::StandaloneWalConfig;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>serde_with::with_prefix;
 
@@ -129,21 +148,38 @@
 
 <span class="doccomment">/// Wal config for metasrv.
 </span><span class="attr">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
-#[serde(tag = <span class="string">"provider"</span>)]
+#[serde(tag = <span class="string">"provider"</span>, rename_all = <span class="string">"snake_case"</span>)]
 </span><span class="kw">pub enum </span>WalConfig {
     <span class="attr">#[default]
-    #[serde(rename = <span class="string">"raft_engine"</span>)]
     </span>RaftEngine,
-    <span class="attr">#[serde(rename = <span class="string">"kafka"</span>)]
-    </span>Kafka(KafkaConfig),
+    Kafka(KafkaConfig),
+}
+
+<span class="kw">impl </span>From&lt;StandaloneWalConfig&gt; <span class="kw">for </span>WalConfig {
+    <span class="kw">fn </span>from(value: StandaloneWalConfig) -&gt; <span class="self">Self </span>{
+        <span class="kw">match </span>value {
+            StandaloneWalConfig::RaftEngine(config) =&gt; WalConfig::RaftEngine,
+            StandaloneWalConfig::Kafka(config) =&gt; WalConfig::Kafka(KafkaConfig {
+                broker_endpoints: config.base.broker_endpoints,
+                num_topics: config.num_topics,
+                selector_type: config.selector_type,
+                topic_name_prefix: config.topic_name_prefix,
+                num_partitions: config.num_partitions,
+                replication_factor: config.replication_factor,
+                create_topic_timeout: config.create_topic_timeout,
+                backoff: config.base.backoff,
+            }),
+        }
+    }
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::time::Duration;
 
+    <span class="kw">use </span>common_config::wal::kafka::{KafkaBackoffConfig, TopicSelectorType};
+
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::wal::kafka::topic_selector::SelectorType <span class="kw">as </span>KafkaTopicSelectorType;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_serde_wal_config() {
@@ -157,7 +193,7 @@
         <span class="comment">// Test serde raft-engine wal config with extra other wal config.
         </span><span class="kw">let </span>toml_str = <span class="string">r#"
             provider = "raft_engine"
-            broker_endpoints = ["127.0.0.1:9090"]
+            broker_endpoints = ["127.0.0.1:9092"]
             num_topics = 32
         "#</span>;
         <span class="kw">let </span>wal_config: WalConfig = toml::from_str(toml_str).unwrap();
@@ -166,7 +202,7 @@
         <span class="comment">// Test serde kafka wal config.
         </span><span class="kw">let </span>toml_str = <span class="string">r#"
             provider = "kafka"
-            broker_endpoints = ["127.0.0.1:9090"]
+            broker_endpoints = ["127.0.0.1:9092"]
             num_topics = 32
             selector_type = "round_robin"
             topic_name_prefix = "greptimedb_wal_topic"
@@ -180,21 +216,21 @@
         "#</span>;
         <span class="kw">let </span>wal_config: WalConfig = toml::from_str(toml_str).unwrap();
         <span class="kw">let </span>expected_kafka_config = KafkaConfig {
-            broker_endpoints: <span class="macro">vec!</span>[<span class="string">"127.0.0.1:9090"</span>.to_string()],
+            broker_endpoints: <span class="macro">vec!</span>[<span class="string">"127.0.0.1:9092"</span>.to_string()],
             num_topics: <span class="number">32</span>,
-            selector_type: KafkaTopicSelectorType::RoundRobin,
+            selector_type: TopicSelectorType::RoundRobin,
             topic_name_prefix: <span class="string">"greptimedb_wal_topic"</span>.to_string(),
             num_partitions: <span class="number">1</span>,
             replication_factor: <span class="number">3</span>,
             create_topic_timeout: Duration::from_secs(<span class="number">30</span>),
-            backoff_init: Duration::from_millis(<span class="number">500</span>),
-            backoff_max: Duration::from_secs(<span class="number">10</span>),
-            backoff_base: <span class="number">2</span>,
-            backoff_deadline: <span class="prelude-val">Some</span>(Duration::from_secs(<span class="number">60 </span>* <span class="number">5</span>)),
+            backoff: KafkaBackoffConfig {
+                init: Duration::from_millis(<span class="number">500</span>),
+                max: Duration::from_secs(<span class="number">10</span>),
+                base: <span class="number">2</span>,
+                deadline: <span class="prelude-val">Some</span>(Duration::from_secs(<span class="number">60 </span>* <span class="number">5</span>)),
+            },
         };
         <span class="macro">assert_eq!</span>(wal_config, WalConfig::Kafka(expected_kafka_config));
     }
-
-    <span class="comment">// TODO(niebayes): the integrate test needs to test that the example config file can be successfully parsed.
-</span>}
+}
 </code></pre></div></section></main></body></html>

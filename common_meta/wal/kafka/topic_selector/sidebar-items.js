@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":["SelectorType"],"struct":["RoundRobinTopicSelector"],"trait":["TopicSelector"],"type":["TopicSelectorRef"]};
+window.SIDEBAR_ITEMS = {"struct":["RoundRobinTopicSelector"],"trait":["TopicSelector"],"type":["TopicSelectorRef"]};

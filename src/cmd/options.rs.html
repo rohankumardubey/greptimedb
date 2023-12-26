@@ -291,6 +291,8 @@
 <a href="#290" id="290">290</a>
 <a href="#291" id="291">291</a>
 <a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -307,6 +309,7 @@
 
 </span><span class="kw">use </span>clap::ArgMatches;
 <span class="kw">use </span>common_config::KvBackendConfig;
+<span class="kw">use </span>common_meta::wal::WalConfig <span class="kw">as </span>MetaSrvWalConfig;
 <span class="kw">use </span>common_telemetry::logging::{LoggingOptions, TracingOptions};
 <span class="kw">use </span>config::{Config, Environment, File, FileFormat};
 <span class="kw">use </span>datanode::config::{DatanodeOptions, ProcedureConfig};
@@ -330,6 +333,7 @@
     <span class="kw">pub </span>frontend: FrontendOptions,
     <span class="kw">pub </span>datanode: DatanodeOptions,
     <span class="kw">pub </span>logging: LoggingOptions,
+    <span class="kw">pub </span>wal_meta: MetaSrvWalConfig,
 }
 
 <span class="kw">impl </span>From&lt;MixOptions&gt; <span class="kw">for </span>FrontendOptions {
