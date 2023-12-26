@@ -348,6 +348,7 @@
 <a href="#347" id="347">347</a>
 <a href="#348" id="348">348</a>
 <a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -364,7 +365,6 @@
 
 </span><span class="kw">use </span>std::hash::{BuildHasher, Hash, Hasher};
 
-<span class="kw">use </span>ahash::RandomState;
 <span class="kw">use </span>api::v1::value::ValueData;
 <span class="kw">use </span>api::v1::{ColumnDataType, ColumnSchema, Row, Rows, SemanticType};
 <span class="kw">use </span>common_telemetry::{error, info};
@@ -375,12 +375,15 @@
 <span class="kw">use </span>store_api::region_request::{AffectedRows, RegionPutRequest};
 <span class="kw">use </span>store_api::storage::{RegionId, TableId};
 
-<span class="kw">use </span><span class="kw">crate</span>::engine::{MetricEngineInner, RANDOM_STATE};
+<span class="kw">use </span><span class="kw">crate</span>::engine::MetricEngineInner;
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     ColumnNotFoundSnafu, ForbiddenPhysicalAlterSnafu, LogicalRegionNotFoundSnafu, <span class="prelude-ty">Result</span>,
 };
 <span class="kw">use </span><span class="kw">crate</span>::metrics::FORBIDDEN_OPERATION_COUNT;
 <span class="kw">use </span><span class="kw">crate</span>::utils::{to_data_region_id, to_metadata_region_id};
+
+<span class="comment">// A random number
+</span><span class="kw">const </span>TSID_HASH_SEED: u32 = <span class="number">846793005</span>;
 
 <span class="kw">impl </span>MetricEngineInner {
     <span class="doccomment">/// Dispatch region put request
@@ -524,9 +527,8 @@
         });
 
         <span class="comment">// fill internal columns
-        </span><span class="kw">let </span><span class="kw-2">mut </span>random_state = RANDOM_STATE.clone();
-        <span class="kw">for </span>row <span class="kw">in </span><span class="kw-2">&amp;mut </span>rows.rows {
-            <span class="self">Self</span>::fill_internal_columns(<span class="kw-2">&amp;mut </span>random_state, table_id, <span class="kw-2">&amp;</span>tag_col_indices, row);
+        </span><span class="kw">for </span>row <span class="kw">in </span><span class="kw-2">&amp;mut </span>rows.rows {
+            <span class="self">Self</span>::fill_internal_columns(table_id, <span class="kw-2">&amp;</span>tag_col_indices, row);
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -534,12 +536,11 @@
 
     <span class="doccomment">/// Fills internal columns of a row with table name and a hash of tag values.
     </span><span class="kw">fn </span>fill_internal_columns(
-        random_state: <span class="kw-2">&amp;mut </span>RandomState,
         table_id: TableId,
         tag_col_indices: <span class="kw-2">&amp;</span>[(usize, String)],
         row: <span class="kw-2">&amp;mut </span>Row,
     ) {
-        <span class="kw">let </span><span class="kw-2">mut </span>hasher = random_state.build_hasher();
+        <span class="kw">let </span><span class="kw-2">mut </span>hasher = mur3::Hasher128::with_seed(TSID_HASH_SEED);
         <span class="kw">for </span>(idx, name) <span class="kw">in </span>tag_col_indices {
             <span class="kw">let </span>tag = row.values[<span class="kw-2">*</span>idx].clone();
             name.hash(<span class="kw-2">&amp;mut </span>hasher);
@@ -548,7 +549,8 @@
                 string.hash(<span class="kw-2">&amp;mut </span>hasher);
             }
         }
-        <span class="kw">let </span>hash = hasher.finish();
+        <span class="comment">// TSID is 64 bits, simply truncate the 128 bits hash
+        </span><span class="kw">let </span>(hash, <span class="kw">_</span>) = hasher.finish128();
 
         <span class="comment">// fill table id and tsid
         </span>row.values.push(ValueData::U32Value(table_id).into());
@@ -597,15 +599,15 @@
             </span>.unwrap();
         <span class="kw">let </span>batches = RecordBatches::try_collect(stream).<span class="kw">await</span>.unwrap();
         <span class="kw">let </span>expected = <span class="string">"\
-+-------------------------+----------------+------------+---------------------+-------+
-| greptime_timestamp      | greptime_value | __table_id | __tsid              | job   |
-+-------------------------+----------------+------------+---------------------+-------+
-| 1970-01-01T00:00:00     | 0.0            | 3          | 4844750677434873907 | tag_0 |
-| 1970-01-01T00:00:00.001 | 1.0            | 3          | 4844750677434873907 | tag_0 |
-| 1970-01-01T00:00:00.002 | 2.0            | 3          | 4844750677434873907 | tag_0 |
-| 1970-01-01T00:00:00.003 | 3.0            | 3          | 4844750677434873907 | tag_0 |
-| 1970-01-01T00:00:00.004 | 4.0            | 3          | 4844750677434873907 | tag_0 |
-+-------------------------+----------------+------------+---------------------+-------+"</span>;
++-------------------------+----------------+------------+----------------------+-------+
+| greptime_timestamp      | greptime_value | __table_id | __tsid               | job   |
++-------------------------+----------------+------------+----------------------+-------+
+| 1970-01-01T00:00:00     | 0.0            | 3          | 12881218023286672757 | tag_0 |
+| 1970-01-01T00:00:00.001 | 1.0            | 3          | 12881218023286672757 | tag_0 |
+| 1970-01-01T00:00:00.002 | 2.0            | 3          | 12881218023286672757 | tag_0 |
+| 1970-01-01T00:00:00.003 | 3.0            | 3          | 12881218023286672757 | tag_0 |
+| 1970-01-01T00:00:00.004 | 4.0            | 3          | 12881218023286672757 | tag_0 |
++-------------------------+----------------+------------+----------------------+-------+"</span>;
         <span class="macro">assert_eq!</span>(expected, batches.pretty_print().unwrap(), <span class="string">"physical region"</span>);
 
         <span class="comment">// read data from logical region
