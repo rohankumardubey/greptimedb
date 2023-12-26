@@ -168,6 +168,12 @@
 <a href="#167" id="167">167</a>
 <a href="#168" id="168">168</a>
 <a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -196,6 +202,7 @@
 <span class="kw">use </span>store_api::metadata::RegionMetadataRef;
 <span class="kw">use </span>store_api::storage::consts::SEQUENCE_COLUMN_NAME;
 
+<span class="kw">use </span><span class="kw">super</span>::helper::parse_parquet_metadata;
 <span class="kw">use </span><span class="kw">crate</span>::error::{InvalidMetadataSnafu, <span class="prelude-ty">Result</span>, WriteBufferSnafu};
 <span class="kw">use </span><span class="kw">crate</span>::read::{Batch, Source};
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::format::WriteFormat;
@@ -277,15 +284,20 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         }
 
-        <span class="kw">let </span>(_file_meta, file_size) = buffered_writer.close().<span class="kw">await</span>.context(WriteBufferSnafu)<span class="question-mark">?</span>;
+        <span class="kw">let </span>(file_meta, file_size) = buffered_writer.close().<span class="kw">await</span>.context(WriteBufferSnafu)<span class="question-mark">?</span>;
+
         <span class="comment">// Safety: num rows &gt; 0 so we must have min/max.
         </span><span class="kw">let </span>time_range = stats.time_range.unwrap();
+
+        <span class="comment">// convert FileMetaData to ParquetMetaData
+        </span><span class="kw">let </span>parquet_metadata = parse_parquet_metadata(file_meta)<span class="question-mark">?</span>;
 
         <span class="comment">// object_store.write will make sure all bytes are written or an error is raised.
         </span><span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(SstInfo {
             time_range,
             file_size,
             num_rows: stats.num_rows,
+            file_metadata: <span class="prelude-val">Some</span>(parquet_metadata),
         }))
     }
 
