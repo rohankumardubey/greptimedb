@@ -92,13 +92,6 @@
 <a href="#91" id="91">91</a>
 <a href="#92" id="92">92</a>
 <a href="#93" id="93">93</a>
-<a href="#94" id="94">94</a>
-<a href="#95" id="95">95</a>
-<a href="#96" id="96">96</a>
-<a href="#97" id="97">97</a>
-<a href="#98" id="98">98</a>
-<a href="#99" id="99">99</a>
-<a href="#100" id="100">100</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -126,14 +119,11 @@
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>EtcdLock {
     client: Client,
-    store_key_prefix: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    store_key_prefix: String,
 }
 
 <span class="kw">impl </span>EtcdLock {
-    <span class="kw">pub async fn </span>with_endpoints&lt;E, S&gt;(
-        endpoints: S,
-        store_key_prefix: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;DistLockRef&gt;
+    <span class="kw">pub async fn </span>with_endpoints&lt;E, S&gt;(endpoints: S, store_key_prefix: String) -&gt; <span class="prelude-ty">Result</span>&lt;DistLockRef&gt;
     <span class="kw">where
         </span>E: AsRef&lt;str&gt;,
         S: AsRef&lt;[E]&gt;,
@@ -145,10 +135,7 @@
         <span class="self">Self</span>::with_etcd_client(client, store_key_prefix)
     }
 
-    <span class="kw">pub fn </span>with_etcd_client(
-        client: Client,
-        store_key_prefix: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;DistLockRef&gt; {
+    <span class="kw">pub fn </span>with_etcd_client(client: Client, store_key_prefix: String) -&gt; <span class="prelude-ty">Result</span>&lt;DistLockRef&gt; {
         <span class="prelude-val">Ok</span>(Arc::new(EtcdLock {
             client,
             store_key_prefix,
@@ -156,13 +143,12 @@
     }
 
     <span class="kw">fn </span>lock_key(<span class="kw-2">&amp;</span><span class="self">self</span>, key: Vec&lt;u8&gt;) -&gt; Vec&lt;u8&gt; {
-        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.store_key_prefix {
-            <span class="prelude-val">Some</span>(prefix) =&gt; {
-                <span class="kw">let </span><span class="kw-2">mut </span>prefix = prefix.as_bytes().to_vec();
-                prefix.extend_from_slice(<span class="kw-2">&amp;</span>key);
-                prefix
-            }
-            <span class="prelude-val">None </span>=&gt; key,
+        <span class="kw">if </span><span class="self">self</span>.store_key_prefix.is_empty() {
+            key
+        } <span class="kw">else </span>{
+            <span class="kw">let </span><span class="kw-2">mut </span>prefix = <span class="self">self</span>.store_key_prefix.as_bytes().to_vec();
+            prefix.extend_from_slice(<span class="kw-2">&amp;</span>key);
+            prefix
         }
     }
 }

@@ -387,6 +387,8 @@
 <a href="#386" id="386">386</a>
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -508,8 +510,8 @@
     </span>data_home: <span class="prelude-ty">Option</span>&lt;String&gt;,
 
     <span class="doccomment">/// If it's not empty, the metasrv will store all data with this key prefix.
-    </span><span class="attr">#[clap(long)]
-    </span>store_key_prefix: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    </span><span class="attr">#[clap(long, default_value = <span class="string">""</span>)]
+    </span>store_key_prefix: String,
 }
 
 <span class="kw">impl </span>StartCommand {
@@ -566,7 +568,9 @@
             opts.data_home = data_home.clone();
         }
 
-        opts.store_key_prefix = <span class="self">self</span>.store_key_prefix.clone();
+        <span class="kw">if </span>!<span class="self">self</span>.store_key_prefix.is_empty() {
+            opts.store_key_prefix = <span class="self">self</span>.store_key_prefix.clone()
+        }
 
         <span class="comment">// Disable dashboard in metasrv.
         </span>opts.http.disable_dashboard = <span class="bool-val">true</span>;

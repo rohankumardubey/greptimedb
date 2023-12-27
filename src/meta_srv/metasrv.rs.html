@@ -525,7 +525,7 @@
     <span class="kw">pub </span>data_home: String,
     <span class="kw">pub </span>wal: WalConfig,
     <span class="kw">pub </span>export_metrics: ExportMetricsOption,
-    <span class="kw">pub </span>store_key_prefix: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="kw">pub </span>store_key_prefix: String,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>MetaSrvOptions {
@@ -552,7 +552,7 @@
             data_home: METASRV_HOME.to_string(),
             wal: WalConfig::default(),
             export_metrics: ExportMetricsOption::default(),
-            store_key_prefix: <span class="prelude-val">None</span>,
+            store_key_prefix: String::new(),
         }
     }
 }
