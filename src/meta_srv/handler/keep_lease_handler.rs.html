@@ -73,6 +73,7 @@
 <a href="#72" id="72">72</a>
 <a href="#73" id="73">73</a>
 <a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -97,7 +98,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::keys::{LeaseKey, LeaseValue};
 <span class="kw">use </span><span class="kw">crate</span>::metasrv::Context;
 
-<span class="kw">pub struct </span>KeepLeaseHandler;
+<span class="doccomment">/// Keeps [Datanode] leases
+</span><span class="kw">pub struct </span>KeepLeaseHandler;
 
 <span class="attr">#[async_trait::async_trait]
 </span><span class="kw">impl </span>HeartbeatHandler <span class="kw">for </span>KeepLeaseHandler {

@@ -319,6 +319,9 @@
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
 <a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -337,7 +340,10 @@
 <span class="kw">mod </span>heartbeat;
 <span class="kw">mod </span>leader;
 <span class="kw">mod </span>meta;
-<span class="kw">mod </span>node_lease;
+<span class="comment">// TODO(weny): removes it.
+</span><span class="kw">mod </span>node_lease;
+<span class="attr">#[allow(dead_code)]
+</span><span class="kw">mod </span>region_migration;
 <span class="kw">mod </span>route;
 <span class="kw">mod </span>util;
 

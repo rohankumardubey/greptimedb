@@ -24,8 +24,8 @@ by using the given <code>opts</code></p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.build_mito_engine" class="method"><a class="src rightside" href="../../src/datanode/datanode.rs.html#457-476">source</a><h4 class="code-header">async fn <a href="#method.build_mito_engine" class="fn">build_mito_engine</a>(
     opts: &amp;<a class="struct" href="../config/struct.DatanodeOptions.html" title="struct datanode::config::DatanodeOptions">DatanodeOptions</a>,
     object_store_manager: <a class="type" href="../../object_store/manager/type.ObjectStoreManagerRef.html" title="type object_store::manager::ObjectStoreManagerRef">ObjectStoreManagerRef</a>,
-    config: MitoConfig
-) -&gt; <a class="type" href="../error/type.Result.html" title="type datanode::error::Result">Result</a>&lt;MitoEngine&gt;</h4></section></summary><div class="docblock"><p>Builds [MitoEngine] according to options.</p>
+    config: <a class="struct" href="../../mito2/config/struct.MitoConfig.html" title="struct mito2::config::MitoConfig">MitoConfig</a>
+) -&gt; <a class="type" href="../error/type.Result.html" title="type datanode::error::Result">Result</a>&lt;<a class="struct" href="../../mito2/engine/struct.MitoEngine.html" title="struct mito2::engine::MitoEngine">MitoEngine</a>&gt;</h4></section></summary><div class="docblock"><p>Builds <a href="../../mito2/engine/struct.MitoEngine.html" title="struct mito2::engine::MitoEngine">MitoEngine</a> according to options.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.build_raft_engine_log_store" class="method"><a class="src rightside" href="../../src/datanode/datanode.rs.html#479-503">source</a><h4 class="code-header">async fn <a href="#method.build_raft_engine_log_store" class="fn">build_raft_engine_log_store</a>(
     data_home: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>,
     config: &amp;<a class="struct" href="../../common_config/wal/raft_engine/struct.RaftEngineConfig.html" title="struct common_config::wal::raft_engine::RaftEngineConfig">RaftEngineConfig</a>
