@@ -164,7 +164,6 @@
 <a href="#163" id="163">163</a>
 <a href="#164" id="164">164</a>
 <a href="#165" id="165">165</a>
-<a href="#166" id="166">166</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -179,17 +178,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>common_catalog::format_full_table_name;
+</span><span class="kw">use </span>std::collections::HashMap;
+
+<span class="kw">use </span>common_catalog::consts::METRIC_ENGINE;
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_meta::ddl::{TableMetadata, TableMetadataAllocator, TableMetadataAllocatorContext};
-<span class="kw">use </span>common_meta::error::{<span class="self">self </span><span class="kw">as </span>meta_error, <span class="prelude-ty">Result </span><span class="kw">as </span>MetaResult};
+<span class="kw">use </span>common_meta::error::{ExternalSnafu, <span class="prelude-ty">Result </span><span class="kw">as </span>MetaResult};
+<span class="kw">use </span>common_meta::key::table_route::{
+    LogicalTableRouteValue, PhysicalTableRouteValue, TableRouteValue,
+};
 <span class="kw">use </span>common_meta::rpc::ddl::CreateTableTask;
 <span class="kw">use </span>common_meta::rpc::router::{Region, RegionRoute};
 <span class="kw">use </span>common_meta::sequence::SequenceRef;
 <span class="kw">use </span>common_meta::wal::{allocate_region_wal_options, WalOptionsAllocatorRef};
-<span class="kw">use </span>common_telemetry::{debug, warn};
+<span class="kw">use </span>common_meta::ClusterId;
+<span class="kw">use </span>common_telemetry::debug;
 <span class="kw">use </span>snafu::{ensure, ResultExt};
-<span class="kw">use </span>store_api::storage::{RegionId, TableId, MAX_REGION_SEQ};
+<span class="kw">use </span>store_api::storage::{RegionId, RegionNumber, TableId, MAX_REGION_SEQ};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>, TooManyPartitionsSnafu};
 <span class="kw">use </span><span class="kw">crate</span>::metasrv::{SelectorContext, SelectorRef};
@@ -216,6 +221,83 @@
             wal_options_allocator,
         }
     }
+
+    <span class="kw">async fn </span>create_table_route(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        cluster_id: ClusterId,
+        table_id: TableId,
+        task: <span class="kw-2">&amp;</span>CreateTableTask,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;TableRouteValue&gt; {
+        <span class="kw">let </span>table_route = <span class="kw">if </span>task.create_table.engine == METRIC_ENGINE {
+            TableRouteValue::Logical(LogicalTableRouteValue {})
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>regions = task.partitions.len();
+
+            <span class="macro">ensure!</span>(regions &lt;= MAX_REGION_SEQ <span class="kw">as </span>usize, TooManyPartitionsSnafu);
+
+            <span class="kw">let </span><span class="kw-2">mut </span>peers = <span class="self">self
+                </span>.selector
+                .select(
+                    cluster_id,
+                    <span class="kw-2">&amp;</span><span class="self">self</span>.ctx,
+                    SelectorOptions {
+                        min_required_items: regions,
+                        allow_duplication: <span class="bool-val">true</span>,
+                    },
+                )
+                .<span class="kw">await</span><span class="question-mark">?</span>;
+
+            <span class="macro">ensure!</span>(
+                peers.len() &gt;= regions,
+                error::NoEnoughAvailableDatanodeSnafu {
+                    required: regions,
+                    available: peers.len(),
+                }
+            );
+
+            peers.truncate(regions);
+
+            <span class="kw">let </span>region_routes = task
+                .partitions
+                .iter()
+                .enumerate()
+                .map(|(i, partition)| {
+                    <span class="kw">let </span>region = Region {
+                        id: RegionId::new(table_id, i <span class="kw">as </span>RegionNumber),
+                        partition: <span class="prelude-val">Some</span>(partition.clone().into()),
+                        ..Default::default()
+                    };
+
+                    <span class="kw">let </span>peer = peers[i % peers.len()].clone();
+
+                    RegionRoute {
+                        region,
+                        leader_peer: <span class="prelude-val">Some</span>(peer.into()),
+                        ..Default::default()
+                    }
+                })
+                .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+            TableRouteValue::Physical(PhysicalTableRouteValue::new(region_routes))
+        };
+        <span class="prelude-val">Ok</span>(table_route)
+    }
+
+    <span class="kw">fn </span>create_wal_options(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        table_route: <span class="kw-2">&amp;</span>TableRouteValue,
+    ) -&gt; MetaResult&lt;HashMap&lt;RegionNumber, String&gt;&gt; {
+        <span class="kw">match </span>table_route {
+            TableRouteValue::Physical(x) =&gt; {
+                <span class="kw">let </span>region_numbers = x
+                    .region_routes
+                    .iter()
+                    .map(|route| route.region.id.region_number())
+                    .collect();
+                allocate_region_wal_options(region_numbers, <span class="kw-2">&amp;</span><span class="self">self</span>.wal_options_allocator)
+            }
+            TableRouteValue::Logical(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(HashMap::new()),
+        }
+    }
 }
 
 <span class="attr">#[async_trait::async_trait]
@@ -225,23 +307,15 @@
         ctx: <span class="kw-2">&amp;</span>TableMetadataAllocatorContext,
         task: <span class="kw-2">&amp;</span>CreateTableTask,
     ) -&gt; MetaResult&lt;TableMetadata&gt; {
-        <span class="kw">let </span>(table_id, region_routes) = handle_create_region_routes(
-            ctx.cluster_id,
-            task,
-            <span class="kw-2">&amp;</span><span class="self">self</span>.ctx,
-            <span class="kw-2">&amp;</span><span class="self">self</span>.selector,
-            <span class="kw-2">&amp;</span><span class="self">self</span>.table_id_sequence,
-        )
-        .<span class="kw">await
-        </span>.map_err(BoxedError::new)
-        .context(meta_error::ExternalSnafu)<span class="question-mark">?</span>;
+        <span class="kw">let </span>table_id = <span class="self">self</span>.table_id_sequence.next().<span class="kw">await</span><span class="question-mark">? </span><span class="kw">as </span>TableId;
 
-        <span class="kw">let </span>region_numbers = region_routes
-            .iter()
-            .map(|route| route.region.id.region_number())
-            .collect();
-        <span class="kw">let </span>region_wal_options =
-            allocate_region_wal_options(region_numbers, <span class="kw-2">&amp;</span><span class="self">self</span>.wal_options_allocator)<span class="question-mark">?</span>;
+        <span class="kw">let </span>table_route = <span class="self">self
+            </span>.create_table_route(ctx.cluster_id, table_id, task)
+            .<span class="kw">await
+            </span>.map_err(BoxedError::new)
+            .context(ExternalSnafu)<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>region_wal_options = <span class="self">self</span>.create_wal_options(<span class="kw-2">&amp;</span>table_route)<span class="question-mark">?</span>;
 
         <span class="macro">debug!</span>(
             <span class="string">"Allocated region wal options {:?} for table {}"</span>,
@@ -250,85 +324,9 @@
 
         <span class="prelude-val">Ok</span>(TableMetadata {
             table_id,
-            region_routes,
+            table_route,
             region_wal_options,
         })
     }
-}
-
-<span class="doccomment">/// pre-allocates create table's table id and region routes.
-</span><span class="kw">async fn </span>handle_create_region_routes(
-    cluster_id: u64,
-    task: <span class="kw-2">&amp;</span>CreateTableTask,
-    ctx: <span class="kw-2">&amp;</span>SelectorContext,
-    selector: <span class="kw-2">&amp;</span>SelectorRef,
-    table_id_sequence: <span class="kw-2">&amp;</span>SequenceRef,
-) -&gt; <span class="prelude-ty">Result</span>&lt;(TableId, Vec&lt;RegionRoute&gt;)&gt; {
-    <span class="kw">let </span>table_info = <span class="kw-2">&amp;</span>task.table_info;
-    <span class="kw">let </span>partitions = <span class="kw-2">&amp;</span>task.partitions;
-
-    <span class="kw">let </span><span class="kw-2">mut </span>peers = selector
-        .select(
-            cluster_id,
-            ctx,
-            SelectorOptions {
-                min_required_items: partitions.len(),
-                allow_duplication: <span class="bool-val">true</span>,
-            },
-        )
-        .<span class="kw">await</span><span class="question-mark">?</span>;
-
-    <span class="kw">if </span>peers.len() &lt; partitions.len() {
-        <span class="macro">warn!</span>(
-            <span class="string">"Create table failed due to no enough available datanodes, table: {}, partition number: {}, datanode number: {}"</span>,
-            format_full_table_name(
-                <span class="kw-2">&amp;</span>table_info.catalog_name,
-                <span class="kw-2">&amp;</span>table_info.schema_name,
-                <span class="kw-2">&amp;</span>table_info.name
-            ),
-            partitions.len(),
-            peers.len()
-        );
-        <span class="kw">return </span>error::NoEnoughAvailableDatanodeSnafu {
-            required: partitions.len(),
-            available: peers.len(),
-        }
-        .fail();
-    }
-
-    <span class="comment">// We don't need to keep all peers, just truncate it to the number of partitions.
-    // If the peers are not enough, some peers will be used for multiple partitions.
-    </span>peers.truncate(partitions.len());
-
-    <span class="kw">let </span>table_id = table_id_sequence
-        .next()
-        .<span class="kw">await
-        </span>.context(error::NextSequenceSnafu)<span class="question-mark">? </span><span class="kw">as </span>u32;
-
-    <span class="macro">ensure!</span>(
-        partitions.len() &lt;= MAX_REGION_SEQ <span class="kw">as </span>usize,
-        TooManyPartitionsSnafu
-    );
-
-    <span class="kw">let </span>region_routes = partitions
-        .iter()
-        .enumerate()
-        .map(|(i, partition)| {
-            <span class="kw">let </span>region = Region {
-                id: RegionId::new(table_id, i <span class="kw">as </span>u32),
-                partition: <span class="prelude-val">Some</span>(partition.clone().into()),
-                ..Default::default()
-            };
-            <span class="kw">let </span>peer = peers[i % peers.len()].clone();
-            RegionRoute {
-                region,
-                leader_peer: <span class="prelude-val">Some</span>(peer.into()),
-                follower_peers: <span class="macro">vec!</span>[], <span class="comment">// follower_peers is not supported at the moment
-                </span>leader_status: <span class="prelude-val">None</span>,
-            }
-        })
-        .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-
-    <span class="prelude-val">Ok</span>((table_id, region_routes))
 }
 </code></pre></div></section></main></body></html>

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["handle_create_region_routes"],"struct":["MetaSrvTableMetadataAllocator"]};
+window.SIDEBAR_ITEMS = {"struct":["MetaSrvTableMetadataAllocator"]};

@@ -438,6 +438,11 @@
 <a href="#437" id="437">437</a>
 <a href="#438" id="438">438</a>
 <a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -627,6 +632,7 @@
     <span class="kw">use </span>std::assert_matches::assert_matches;
 
     <span class="kw">use </span>common_catalog::consts::MITO2_ENGINE;
+    <span class="kw">use </span>common_meta::key::table_route::TableRouteValue;
     <span class="kw">use </span>common_meta::key::test_utils::new_test_table_info;
     <span class="kw">use </span>common_meta::peer::Peer;
     <span class="kw">use </span>common_meta::rpc::router::{Region, RegionRoute};
@@ -849,7 +855,11 @@
         }];
 
         env.table_metadata_manager()
-            .create_table_metadata(table_info, region_routes, HashMap::default())
+            .create_table_metadata(
+                table_info,
+                TableRouteValue::physical(region_routes),
+                HashMap::default(),
+            )
             .<span class="kw">await
             </span>.unwrap();
 

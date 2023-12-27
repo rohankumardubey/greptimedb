@@ -203,6 +203,31 @@
 <a href="#202" id="202">202</a>
 <a href="#203" id="203">203</a>
 <a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -223,10 +248,14 @@
 <span class="kw">use </span>api::v1::region::{QueryRequest, RegionRequest, RegionResponse};
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>client::region::check_response_header;
+<span class="kw">use </span>common_catalog::consts::METRIC_ENGINE;
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_meta::datanode_manager::{AffectedRows, Datanode, DatanodeManager, DatanodeRef};
 <span class="kw">use </span>common_meta::ddl::{TableMetadata, TableMetadataAllocator, TableMetadataAllocatorContext};
 <span class="kw">use </span>common_meta::error::{<span class="self">self </span><span class="kw">as </span>meta_error, <span class="prelude-ty">Result </span><span class="kw">as </span>MetaResult, UnsupportedSnafu};
+<span class="kw">use </span>common_meta::key::table_route::{
+    LogicalTableRouteValue, PhysicalTableRouteValue, TableRouteValue,
+};
 <span class="kw">use </span>common_meta::peer::Peer;
 <span class="kw">use </span>common_meta::rpc::ddl::CreateTableTask;
 <span class="kw">use </span>common_meta::rpc::router::{Region, RegionRoute};
@@ -239,7 +268,7 @@
 <span class="kw">use </span>datanode::region_server::RegionServer;
 <span class="kw">use </span>servers::grpc::region_server::RegionServerHandler;
 <span class="kw">use </span>snafu::{ensure, OptionExt, ResultExt};
-<span class="kw">use </span>store_api::storage::{RegionId, TableId};
+<span class="kw">use </span>store_api::storage::{RegionId, RegionNumber, TableId};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{InvalidRegionRequestSnafu, InvokeRegionServerSnafu, <span class="prelude-ty">Result</span>};
 
@@ -356,17 +385,29 @@
         };
         <span class="prelude-val">Ok</span>(table_id)
     }
+
+    <span class="kw">fn </span>create_wal_options(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        table_route: <span class="kw-2">&amp;</span>TableRouteValue,
+    ) -&gt; MetaResult&lt;HashMap&lt;RegionNumber, String&gt;&gt; {
+        <span class="kw">match </span>table_route {
+            TableRouteValue::Physical(x) =&gt; {
+                <span class="kw">let </span>region_numbers = x
+                    .region_routes
+                    .iter()
+                    .map(|route| route.region.id.region_number())
+                    .collect();
+                allocate_region_wal_options(region_numbers, <span class="kw-2">&amp;</span><span class="self">self</span>.wal_options_allocator)
+            }
+            TableRouteValue::Logical(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(HashMap::new()),
+        }
+    }
 }
 
-<span class="attr">#[async_trait]
-</span><span class="kw">impl </span>TableMetadataAllocator <span class="kw">for </span>StandaloneTableMetadataAllocator {
-    <span class="kw">async fn </span>create(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        _ctx: <span class="kw-2">&amp;</span>TableMetadataAllocatorContext,
-        task: <span class="kw-2">&amp;</span>CreateTableTask,
-    ) -&gt; MetaResult&lt;TableMetadata&gt; {
-        <span class="kw">let </span>table_id = <span class="self">self</span>.allocate_table_id(task).<span class="kw">await</span><span class="question-mark">?</span>;
-
+<span class="kw">fn </span>create_table_route(table_id: TableId, task: <span class="kw-2">&amp;</span>CreateTableTask) -&gt; TableRouteValue {
+    <span class="kw">if </span>task.create_table.engine == METRIC_ENGINE {
+        TableRouteValue::Logical(LogicalTableRouteValue {})
+    } <span class="kw">else </span>{
         <span class="kw">let </span>region_routes = task
             .partitions
             .iter()
@@ -387,13 +428,22 @@
                 }
             })
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        TableRouteValue::Physical(PhysicalTableRouteValue::new(region_routes))
+    }
+}
 
-        <span class="kw">let </span>region_numbers = region_routes
-            .iter()
-            .map(|route| route.region.id.region_number())
-            .collect();
-        <span class="kw">let </span>region_wal_options =
-            allocate_region_wal_options(region_numbers, <span class="kw-2">&amp;</span><span class="self">self</span>.wal_options_allocator)<span class="question-mark">?</span>;
+<span class="attr">#[async_trait]
+</span><span class="kw">impl </span>TableMetadataAllocator <span class="kw">for </span>StandaloneTableMetadataAllocator {
+    <span class="kw">async fn </span>create(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        _ctx: <span class="kw-2">&amp;</span>TableMetadataAllocatorContext,
+        task: <span class="kw-2">&amp;</span>CreateTableTask,
+    ) -&gt; MetaResult&lt;TableMetadata&gt; {
+        <span class="kw">let </span>table_id = <span class="self">self</span>.allocate_table_id(task).<span class="kw">await</span><span class="question-mark">?</span>;
+
+        <span class="kw">let </span>table_route = create_table_route(table_id, task);
+
+        <span class="kw">let </span>region_wal_options = <span class="self">self</span>.create_wal_options(<span class="kw-2">&amp;</span>table_route)<span class="question-mark">?</span>;
 
         <span class="macro">debug!</span>(
             <span class="string">"Allocated region wal options {:?} for table {}"</span>,
@@ -402,8 +452,8 @@
 
         <span class="prelude-val">Ok</span>(TableMetadata {
             table_id,
-            region_routes,
-            region_wal_options: HashMap::default(),
+            table_route,
+            region_wal_options,
         })
     }
 }

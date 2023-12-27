@@ -606,7 +606,7 @@
 <span class="kw">use </span>common_meta::key::table_name::{TableNameKey, TableNameValue};
 <span class="kw">use </span>common_meta::key::table_region::{TableRegionKey, TableRegionValue};
 <span class="kw">use </span>common_meta::key::table_route::{TableRouteKey, TableRouteValue <span class="kw">as </span>NextTableRouteValue};
-<span class="kw">use </span>common_meta::key::{RegionDistribution, TableMetaKey};
+<span class="kw">use </span>common_meta::key::{RegionDistribution, TableMetaKey, TableMetaValue};
 <span class="kw">use </span>common_meta::kv_backend::etcd::EtcdStore;
 <span class="kw">use </span>common_meta::kv_backend::KvBackendRef;
 <span class="kw">use </span>common_meta::range_stream::PaginationStream;
@@ -732,7 +732,7 @@
         )
         .unwrap();
 
-        <span class="kw">let </span>new_table_value = NextTableRouteValue::new(table_route.region_routes);
+        <span class="kw">let </span>new_table_value = NextTableRouteValue::physical(table_route.region_routes);
 
         <span class="kw">let </span>table_id = table_route.table.id <span class="kw">as </span>u32;
         <span class="kw">let </span>new_key = TableRouteKey::new(table_id);
