@@ -2344,6 +2344,11 @@
 <a href="#2343" id="2343">2343</a>
 <a href="#2344" id="2344">2344</a>
 <a href="#2345" id="2345">2345</a>
+<a href="#2346" id="2346">2346</a>
+<a href="#2347" id="2347">2347</a>
+<a href="#2348" id="2348">2348</a>
+<a href="#2349" id="2349">2349</a>
+<a href="#2350" id="2350">2350</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -3173,8 +3178,10 @@
             ScalarValue::DurationNanosecond(d) =&gt; d
                 .map(|x| Value::Duration(Duration::new(x, TimeUnit::Nanosecond)))
                 .unwrap_or(Value::Null),
-            ScalarValue::Decimal128(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>)
-            | ScalarValue::Decimal256(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>)
+            ScalarValue::Decimal128(v, p, s) =&gt; v
+                .map(|v| Value::Decimal128(Decimal128::new(v, p, s)))
+                .unwrap_or(Value::Null),
+            ScalarValue::Decimal256(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>)
             | ScalarValue::Struct(<span class="kw">_</span>, <span class="kw">_</span>)
             | ScalarValue::Dictionary(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; {
                 <span class="kw">return </span>error::UnsupportedArrowTypeSnafu {
@@ -3821,11 +3828,14 @@
             ScalarValue::DurationNanosecond(<span class="prelude-val">None</span>).try_into().unwrap()
         );
 
-        <span class="kw">let </span>result: <span class="prelude-ty">Result</span>&lt;Value&gt; = ScalarValue::Decimal128(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="number">0</span>, <span class="number">0</span>).try_into();
-        <span class="macro">assert!</span>(result
-            .unwrap_err()
-            .to_string()
-            .contains(<span class="string">"Unsupported arrow data type, type: Decimal128(0, 0)"</span>));
+        <span class="macro">assert_eq!</span>(
+            Value::Decimal128(Decimal128::new(<span class="number">1</span>, <span class="number">38</span>, <span class="number">10</span>)),
+            ScalarValue::Decimal128(<span class="prelude-val">Some</span>(<span class="number">1</span>), <span class="number">38</span>, <span class="number">10</span>).try_into().unwrap()
+        );
+        <span class="macro">assert_eq!</span>(
+            Value::Null,
+            ScalarValue::Decimal128(<span class="prelude-val">None</span>, <span class="number">0</span>, <span class="number">0</span>).try_into().unwrap()
+        );
     }
 
     <span class="attr">#[test]
