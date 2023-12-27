@@ -253,6 +253,7 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -298,7 +299,8 @@
         <span class="kw">let </span>table_id = region_id.table_id();
         <span class="kw">let </span>current_table_route_value = ctx.get_table_route_value().<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = table_metadata_manager
+        <span class="comment">// TODO(weny): ensures the leader region peer is the `from_peer`.
+        </span><span class="kw">if let </span><span class="prelude-val">Err</span>(err) = table_metadata_manager
             .update_leader_region_status(table_id, current_table_route_value, |route| {
                 <span class="kw">if </span>route.region.id == region_id
                     &amp;&amp; route

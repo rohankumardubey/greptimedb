@@ -953,6 +953,10 @@
 <a href="#952" id="952">952</a>
 <a href="#953" id="953">953</a>
 <a href="#954" id="954">954</a>
+<a href="#955" id="955">955</a>
+<a href="#956" id="956">956</a>
+<a href="#957" id="957">957</a>
+<a href="#958" id="958">958</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -968,6 +972,9 @@
 // limitations under the License.
 
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>downgrade_leader_region;
+<span class="comment">// TODO(weny): remove it.
+</span><span class="attr">#[allow(dead_code)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>manager;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>migration_abort;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>migration_end;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>migration_start;
@@ -1078,6 +1085,7 @@
 }
 
 <span class="doccomment">/// Default implementation.
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>ContextFactoryImpl {
     volatile_ctx: VolatileContext,
     table_metadata_manager: TableMetadataManagerRef,
