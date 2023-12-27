@@ -957,6 +957,7 @@
 <a href="#956" id="956">956</a>
 <a href="#957" id="957">957</a>
 <a href="#958" id="958">958</a>
+<a href="#959" id="959">959</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1480,6 +1481,7 @@
 
     <span class="kw">use </span>api::v1::ColumnDataType;
     <span class="kw">use </span>common_time::timestamp::TimeUnit;
+    <span class="kw">use </span>common_time::timezone::set_default_timezone;
     <span class="kw">use </span>datatypes::types::BooleanType;
     <span class="kw">use </span>datatypes::value::OrderedFloat;
 
@@ -1655,7 +1657,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">pub fn </span>test_parse_datetime_literal() {
-        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"Asia/Shanghai"</span>)).unwrap();
         <span class="kw">let </span>value = sql_value_to_value(
             <span class="string">"datetime_col"</span>,
             <span class="kw-2">&amp;</span>ConcreteDataType::datetime_datatype(),

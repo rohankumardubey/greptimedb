@@ -317,6 +317,7 @@
 <a href="#316" id="316">316</a>
 <a href="#317" id="317">317</a>
 <a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -495,6 +496,7 @@
 
     <span class="kw">use </span>common_base::bytes::StringBytes;
     <span class="kw">use </span>common_time::time::Time;
+    <span class="kw">use </span>common_time::timezone::set_default_timezone;
     <span class="kw">use </span>common_time::{Date, DateTime, Timestamp};
     <span class="kw">use </span>ordered_float::OrderedFloat;
 
@@ -532,7 +534,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_cast_with_opt() {
-        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"Asia/Shanghai"</span>)).unwrap();
         <span class="comment">// non-strict mode
         </span><span class="kw">let </span>cast_option = CastOption { strict: <span class="bool-val">false </span>};
         <span class="kw">let </span>src_value = Value::Int8(-<span class="number">1</span>);

@@ -229,6 +229,7 @@
 <a href="#228" id="228">228</a>
 <a href="#229" id="229">229</a>
 <a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -251,7 +252,7 @@
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, InvalidDateStrSnafu, <span class="prelude-ty">Result</span>};
-<span class="kw">use </span><span class="kw">crate</span>::timezone::TimeZone;
+<span class="kw">use </span><span class="kw">crate</span>::timezone::Timezone;
 <span class="kw">use </span><span class="kw">crate</span>::util::{format_utc_datetime, local_datetime_to_utc};
 <span class="kw">use crate</span>::{Date, Interval};
 
@@ -341,11 +342,11 @@
         NaiveDateTime::from_timestamp_millis(<span class="self">self</span>.<span class="number">0</span>)
     }
 
-    <span class="kw">pub fn </span>to_chrono_datetime_with_timezone(<span class="kw-2">&amp;</span><span class="self">self</span>, tz: <span class="prelude-ty">Option</span>&lt;TimeZone&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;NaiveDateTime&gt; {
+    <span class="kw">pub fn </span>to_chrono_datetime_with_timezone(<span class="kw-2">&amp;</span><span class="self">self</span>, tz: <span class="prelude-ty">Option</span>&lt;Timezone&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;NaiveDateTime&gt; {
         <span class="kw">let </span>datetime = <span class="self">self</span>.to_chrono_datetime();
         datetime.map(|v| <span class="kw">match </span>tz {
-            <span class="prelude-val">Some</span>(TimeZone::Offset(offset)) =&gt; offset.from_utc_datetime(<span class="kw-2">&amp;</span>v).naive_local(),
-            <span class="prelude-val">Some</span>(TimeZone::Named(tz)) =&gt; tz.from_utc_datetime(<span class="kw-2">&amp;</span>v).naive_local(),
+            <span class="prelude-val">Some</span>(Timezone::Offset(offset)) =&gt; offset.from_utc_datetime(<span class="kw-2">&amp;</span>v).naive_local(),
+            <span class="prelude-val">Some</span>(Timezone::Named(tz)) =&gt; tz.from_utc_datetime(<span class="kw-2">&amp;</span>v).naive_local(),
             <span class="prelude-val">None </span>=&gt; Utc.from_utc_datetime(<span class="kw-2">&amp;</span>v).naive_local(),
         })
     }
@@ -386,10 +387,11 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::timezone::set_default_timezone;
 
     <span class="attr">#[test]
     </span><span class="kw">pub fn </span>test_new_date_time() {
-        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"Asia/Shanghai"</span>)).unwrap();
         <span class="macro">assert_eq!</span>(<span class="string">"1970-01-01 08:00:00+0800"</span>, DateTime::new(<span class="number">0</span>).to_string());
         <span class="macro">assert_eq!</span>(<span class="string">"1970-01-01 08:00:01+0800"</span>, DateTime::new(<span class="number">1000</span>).to_string());
         <span class="macro">assert_eq!</span>(<span class="string">"1970-01-01 07:59:59+0800"</span>, DateTime::new(-<span class="number">1000</span>).to_string());
@@ -397,7 +399,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">pub fn </span>test_parse_from_string() {
-        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"Asia/Shanghai"</span>)).unwrap();
         <span class="kw">let </span>time = <span class="string">"1970-01-01 00:00:00+0800"</span>;
         <span class="kw">let </span>dt = DateTime::from_str(time).unwrap();
         <span class="macro">assert_eq!</span>(time, <span class="kw-2">&amp;</span>dt.to_string());
@@ -425,7 +427,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_parse_local_date_time() {
-        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"Asia/Shanghai"</span>)).unwrap();
         <span class="macro">assert_eq!</span>(
             -<span class="number">28800000</span>,
             DateTime::from_str(<span class="string">"1970-01-01 00:00:00"</span>).unwrap().val()

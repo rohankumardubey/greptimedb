@@ -114,6 +114,7 @@
 <a href="#113" id="113">113</a>
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -142,6 +143,7 @@
 
     <span class="kw">use </span>arrow::array::{Array, PrimitiveArray};
     <span class="kw">use </span>arrow_array::ArrayRef;
+    <span class="kw">use </span>common_time::timezone::set_default_timezone;
     <span class="kw">use </span>common_time::DateTime;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
@@ -153,7 +155,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_datetime_vector() {
-        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"Asia/Shanghai"</span>)).unwrap();
         <span class="kw">let </span>v = DateTimeVector::new(PrimitiveArray::from(<span class="macro">vec!</span>[<span class="number">1000</span>, <span class="number">2000</span>, <span class="number">3000</span>]));
         <span class="macro">assert_eq!</span>(ConcreteDataType::datetime_datatype(), v.data_type());
         <span class="macro">assert_eq!</span>(<span class="number">3</span>, v.len());

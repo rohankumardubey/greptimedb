@@ -160,8 +160,8 @@
     <span class="attr">#[snafu(display(<span class="string">"Timestamp arithmetic overflow, msg: {}"</span>, msg))]
     </span>ArithmeticOverflow { msg: String, location: Location },
 
-    <span class="attr">#[snafu(display(<span class="string">"Invalid time zone offset: {hours}:{minutes}"</span>))]
-    </span>InvalidTimeZoneOffset {
+    <span class="attr">#[snafu(display(<span class="string">"Invalid timezone offset: {hours}:{minutes}"</span>))]
+    </span>InvalidTimezoneOffset {
         hours: i32,
         minutes: u32,
         location: Location,
@@ -175,8 +175,8 @@
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">"Invalid time zone string {raw}"</span>))]
-    </span>ParseTimeZoneName { raw: String, location: Location },
+    <span class="attr">#[snafu(display(<span class="string">"Invalid timezone string {raw}"</span>))]
+    </span>ParseTimezoneName { raw: String, location: Location },
 }
 
 <span class="kw">impl </span>ErrorExt <span class="kw">for </span>Error {
@@ -184,9 +184,9 @@
         <span class="kw">match </span><span class="self">self </span>{
             Error::ParseDateStr { .. }
             | Error::ParseTimestamp { .. }
-            | Error::InvalidTimeZoneOffset { .. }
+            | Error::InvalidTimezoneOffset { .. }
             | Error::ParseOffsetStr { .. }
-            | Error::ParseTimeZoneName { .. } =&gt; StatusCode::InvalidArguments,
+            | Error::ParseTimezoneName { .. } =&gt; StatusCode::InvalidArguments,
             Error::TimestampOverflow { .. } =&gt; StatusCode::Internal,
             Error::InvalidDateStr { .. } | Error::ArithmeticOverflow { .. } =&gt; {
                 StatusCode::InvalidArguments
@@ -205,9 +205,9 @@
             | Error::TimestampOverflow { location, .. }
             | Error::ArithmeticOverflow { location, .. } =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span>location),
             Error::ParseDateStr { .. }
-            | Error::InvalidTimeZoneOffset { .. }
+            | Error::InvalidTimezoneOffset { .. }
             | Error::ParseOffsetStr { .. }
-            | Error::ParseTimeZoneName { .. } =&gt; <span class="prelude-val">None</span>,
+            | Error::ParseTimezoneName { .. } =&gt; <span class="prelude-val">None</span>,
             Error::InvalidDateStr { location, .. } =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span>location),
             Error::ParseInterval { location, .. } =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span>location),
         }

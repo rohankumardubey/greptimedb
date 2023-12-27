@@ -236,6 +236,7 @@
 <a href="#235" id="235">235</a>
 <a href="#236" id="236">236</a>
 <a href="#237" id="237">237</a>
+<a href="#238" id="238">238</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -259,7 +260,8 @@
 <span class="kw">use </span>auth::UserInfoRef;
 <span class="kw">use </span>common_catalog::consts::{DEFAULT_CATALOG_NAME, DEFAULT_SCHEMA_NAME};
 <span class="kw">use </span>common_catalog::{build_db_string, parse_catalog_and_schema_from_db_string};
-<span class="kw">use </span>common_time::TimeZone;
+<span class="kw">use </span>common_time::timezone::get_timezone;
+<span class="kw">use </span>common_time::Timezone;
 <span class="kw">use </span>derive_builder::Builder;
 <span class="kw">use </span>sql::dialect::{Dialect, GreptimeDbDialect, MySqlDialect, PostgreSqlDialect};
 
@@ -273,7 +275,7 @@
     current_catalog: String,
     current_schema: String,
     current_user: ArcSwap&lt;<span class="prelude-ty">Option</span>&lt;UserInfoRef&gt;&gt;,
-    time_zone: <span class="prelude-ty">Option</span>&lt;TimeZone&gt;,
+    timezone: Timezone,
     sql_dialect: Box&lt;<span class="kw">dyn </span>Dialect + Send + Sync&gt;,
 }
 
@@ -295,7 +297,7 @@
             current_catalog: catalog.to_string(),
             current_schema: schema.to_string(),
             current_user: Default::default(),
-            time_zone: Default::default(),
+            timezone: get_timezone(<span class="prelude-val">None</span>),
             sql_dialect: Box::new(GreptimeDbDialect {}),
         }
     }
@@ -353,8 +355,8 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>time_zone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;TimeZone&gt; {
-        <span class="self">self</span>.time_zone.clone()
+    </span><span class="kw">pub fn </span>timezone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Timezone {
+        <span class="self">self</span>.timezone.clone()
     }
 
     <span class="attr">#[inline]
@@ -380,7 +382,7 @@
             current_user: <span class="self">self
                 </span>.current_user
                 .unwrap_or_else(|| ArcSwap::new(Arc::new(<span class="prelude-val">None</span>))),
-            time_zone: <span class="self">self</span>.time_zone.unwrap_or(<span class="prelude-val">None</span>),
+            timezone: <span class="self">self</span>.timezone.unwrap_or(get_timezone(<span class="prelude-val">None</span>)),
             sql_dialect: <span class="self">self
                 </span>.sql_dialect
                 .unwrap_or_else(|| Box::new(GreptimeDbDialect {})),

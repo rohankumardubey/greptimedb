@@ -415,7 +415,6 @@
 <a href="#414" id="414">414</a>
 <a href="#415" id="415">415</a>
 <a href="#416" id="416">416</a>
-<a href="#417" id="417">417</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -437,8 +436,7 @@
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
 <span class="kw">use </span><span class="kw">crate</span>::timestamp::TimeUnit;
-<span class="kw">use </span><span class="kw">crate</span>::timezone::TimeZone;
-<span class="kw">use </span><span class="kw">crate</span>::util::format_utc_datetime;
+<span class="kw">use </span><span class="kw">crate</span>::timezone::{get_timezone, Timezone};
 
 <span class="doccomment">/// Time value, represents the elapsed time since midnight in the unit of `TimeUnit`.
 </span><span class="attr">#[derive(Debug, Clone, Default, Copy, Serialize, Deserialize)]
@@ -527,30 +525,28 @@
         <span class="self">self</span>.as_formatted_string(<span class="string">"%H:%M:%S%.f%z"</span>, <span class="prelude-val">None</span>)
     }
 
-    <span class="doccomment">/// Format Time for local timezone.
-    </span><span class="kw">pub fn </span>to_local_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+    <span class="doccomment">/// Format Time for system timeszone.
+    </span><span class="kw">pub fn </span>to_system_tz_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="self">self</span>.as_formatted_string(<span class="string">"%H:%M:%S%.f"</span>, <span class="prelude-val">None</span>)
     }
 
     <span class="doccomment">/// Format Time for given timezone.
-    /// When timezone is None, using local time by default.
-    </span><span class="kw">pub fn </span>to_timezone_aware_string(<span class="kw-2">&amp;</span><span class="self">self</span>, tz: <span class="prelude-ty">Option</span>&lt;TimeZone&gt;) -&gt; String {
+    /// When timezone is None, using system timezone by default.
+    </span><span class="kw">pub fn </span>to_timezone_aware_string(<span class="kw-2">&amp;</span><span class="self">self</span>, tz: <span class="prelude-ty">Option</span>&lt;Timezone&gt;) -&gt; String {
         <span class="self">self</span>.as_formatted_string(<span class="string">"%H:%M:%S%.f"</span>, tz)
     }
 
-    <span class="kw">fn </span>as_formatted_string(<span class="self">self</span>, pattern: <span class="kw-2">&amp;</span>str, timezone: <span class="prelude-ty">Option</span>&lt;TimeZone&gt;) -&gt; String {
+    <span class="kw">fn </span>as_formatted_string(<span class="self">self</span>, pattern: <span class="kw-2">&amp;</span>str, timezone: <span class="prelude-ty">Option</span>&lt;Timezone&gt;) -&gt; String {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(time) = <span class="self">self</span>.to_chrono_time() {
             <span class="kw">let </span>date = Utc::now().date_naive();
             <span class="kw">let </span>datetime = NaiveDateTime::new(date, time);
-
-            <span class="kw">match </span>timezone {
-                <span class="prelude-val">Some</span>(TimeZone::Offset(offset)) =&gt; {
+            <span class="kw">match </span>get_timezone(timezone) {
+                Timezone::Offset(offset) =&gt; {
                     <span class="macro">format!</span>(<span class="string">"{}"</span>, offset.from_utc_datetime(<span class="kw-2">&amp;</span>datetime).format(pattern))
                 }
-                <span class="prelude-val">Some</span>(TimeZone::Named(tz)) =&gt; {
+                Timezone::Named(tz) =&gt; {
                     <span class="macro">format!</span>(<span class="string">"{}"</span>, tz.from_utc_datetime(<span class="kw-2">&amp;</span>datetime).format(pattern))
                 }
-                <span class="prelude-val">None </span>=&gt; format_utc_datetime(<span class="kw-2">&amp;</span>datetime, pattern),
             }
         } <span class="kw">else </span>{
             <span class="macro">format!</span>(<span class="string">"[Time{}: {}]"</span>, <span class="self">self</span>.unit, <span class="self">self</span>.value)
@@ -641,6 +637,7 @@
     <span class="kw">use </span>serde_json::Value;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use </span><span class="kw">crate</span>::timezone::set_default_timezone;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_time() {
@@ -730,33 +727,33 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_to_iso8601_string() {
-        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"+10:00"</span>)).unwrap();
         <span class="kw">let </span>time_millis = <span class="number">1000001</span>;
         <span class="kw">let </span>ts = Time::new_millisecond(time_millis);
-        <span class="macro">assert_eq!</span>(<span class="string">"08:16:40.001+0800"</span>, ts.to_iso8601_string());
+        <span class="macro">assert_eq!</span>(<span class="string">"10:16:40.001+1000"</span>, ts.to_iso8601_string());
 
         <span class="kw">let </span>time_millis = <span class="number">1000</span>;
         <span class="kw">let </span>ts = Time::new_millisecond(time_millis);
-        <span class="macro">assert_eq!</span>(<span class="string">"08:00:01+0800"</span>, ts.to_iso8601_string());
+        <span class="macro">assert_eq!</span>(<span class="string">"10:00:01+1000"</span>, ts.to_iso8601_string());
 
         <span class="kw">let </span>time_millis = <span class="number">1</span>;
         <span class="kw">let </span>ts = Time::new_millisecond(time_millis);
-        <span class="macro">assert_eq!</span>(<span class="string">"08:00:00.001+0800"</span>, ts.to_iso8601_string());
+        <span class="macro">assert_eq!</span>(<span class="string">"10:00:00.001+1000"</span>, ts.to_iso8601_string());
 
         <span class="kw">let </span>time_seconds = <span class="number">9 </span>* <span class="number">3600</span>;
         <span class="kw">let </span>ts = Time::new_second(time_seconds);
-        <span class="macro">assert_eq!</span>(<span class="string">"17:00:00+0800"</span>, ts.to_iso8601_string());
+        <span class="macro">assert_eq!</span>(<span class="string">"19:00:00+1000"</span>, ts.to_iso8601_string());
 
         <span class="kw">let </span>time_seconds = <span class="number">23 </span>* <span class="number">3600</span>;
         <span class="kw">let </span>ts = Time::new_second(time_seconds);
-        <span class="macro">assert_eq!</span>(<span class="string">"07:00:00+0800"</span>, ts.to_iso8601_string());
+        <span class="macro">assert_eq!</span>(<span class="string">"09:00:00+1000"</span>, ts.to_iso8601_string());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_serialize_to_json_value() {
-        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"+10:00"</span>)).unwrap();
         <span class="macro">assert_eq!</span>(
-            <span class="string">"08:00:01+0800"</span>,
+            <span class="string">"10:00:01+1000"</span>,
             <span class="kw">match </span>serde_json::Value::from(Time::new(<span class="number">1</span>, TimeUnit::Second)) {
                 Value::String(s) =&gt; s,
                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
@@ -764,7 +761,7 @@
         );
 
         <span class="macro">assert_eq!</span>(
-            <span class="string">"08:00:00.001+0800"</span>,
+            <span class="string">"10:00:00.001+1000"</span>,
             <span class="kw">match </span>serde_json::Value::from(Time::new(<span class="number">1</span>, TimeUnit::Millisecond)) {
                 Value::String(s) =&gt; s,
                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
@@ -772,7 +769,7 @@
         );
 
         <span class="macro">assert_eq!</span>(
-            <span class="string">"08:00:00.000001+0800"</span>,
+            <span class="string">"10:00:00.000001+1000"</span>,
             <span class="kw">match </span>serde_json::Value::from(Time::new(<span class="number">1</span>, TimeUnit::Microsecond)) {
                 Value::String(s) =&gt; s,
                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
@@ -780,7 +777,7 @@
         );
 
         <span class="macro">assert_eq!</span>(
-            <span class="string">"08:00:00.000000001+0800"</span>,
+            <span class="string">"10:00:00.000000001+1000"</span>,
             <span class="kw">match </span>serde_json::Value::from(Time::new(<span class="number">1</span>, TimeUnit::Nanosecond)) {
                 Value::String(s) =&gt; s,
                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
@@ -790,46 +787,47 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_to_timezone_aware_string() {
-        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"+10:00"</span>)).unwrap();
 
         <span class="macro">assert_eq!</span>(
-            <span class="string">"08:00:00.001"</span>,
+            <span class="string">"10:00:00.001"</span>,
             Time::new(<span class="number">1</span>, TimeUnit::Millisecond).to_timezone_aware_string(<span class="prelude-val">None</span>)
         );
+        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
         <span class="macro">assert_eq!</span>(
             <span class="string">"08:00:00.001"</span>,
             Time::new(<span class="number">1</span>, TimeUnit::Millisecond)
-                .to_timezone_aware_string(TimeZone::from_tz_string(<span class="string">"SYSTEM"</span>).unwrap())
+                .to_timezone_aware_string(<span class="prelude-val">Some</span>(Timezone::from_tz_string(<span class="string">"SYSTEM"</span>).unwrap()))
         );
         <span class="macro">assert_eq!</span>(
             <span class="string">"08:00:00.001"</span>,
             Time::new(<span class="number">1</span>, TimeUnit::Millisecond)
-                .to_timezone_aware_string(TimeZone::from_tz_string(<span class="string">"+08:00"</span>).unwrap())
+                .to_timezone_aware_string(<span class="prelude-val">Some</span>(Timezone::from_tz_string(<span class="string">"+08:00"</span>).unwrap()))
         );
         <span class="macro">assert_eq!</span>(
             <span class="string">"07:00:00.001"</span>,
             Time::new(<span class="number">1</span>, TimeUnit::Millisecond)
-                .to_timezone_aware_string(TimeZone::from_tz_string(<span class="string">"+07:00"</span>).unwrap())
+                .to_timezone_aware_string(<span class="prelude-val">Some</span>(Timezone::from_tz_string(<span class="string">"+07:00"</span>).unwrap()))
         );
         <span class="macro">assert_eq!</span>(
             <span class="string">"23:00:00.001"</span>,
             Time::new(<span class="number">1</span>, TimeUnit::Millisecond)
-                .to_timezone_aware_string(TimeZone::from_tz_string(<span class="string">"-01:00"</span>).unwrap())
+                .to_timezone_aware_string(<span class="prelude-val">Some</span>(Timezone::from_tz_string(<span class="string">"-01:00"</span>).unwrap()))
         );
         <span class="macro">assert_eq!</span>(
             <span class="string">"08:00:00.001"</span>,
             Time::new(<span class="number">1</span>, TimeUnit::Millisecond)
-                .to_timezone_aware_string(TimeZone::from_tz_string(<span class="string">"Asia/Shanghai"</span>).unwrap())
+                .to_timezone_aware_string(<span class="prelude-val">Some</span>(Timezone::from_tz_string(<span class="string">"Asia/Shanghai"</span>).unwrap()))
         );
         <span class="macro">assert_eq!</span>(
             <span class="string">"00:00:00.001"</span>,
             Time::new(<span class="number">1</span>, TimeUnit::Millisecond)
-                .to_timezone_aware_string(TimeZone::from_tz_string(<span class="string">"UTC"</span>).unwrap())
+                .to_timezone_aware_string(<span class="prelude-val">Some</span>(Timezone::from_tz_string(<span class="string">"UTC"</span>).unwrap()))
         );
         <span class="macro">assert_eq!</span>(
             <span class="string">"03:00:00.001"</span>,
             Time::new(<span class="number">1</span>, TimeUnit::Millisecond)
-                .to_timezone_aware_string(TimeZone::from_tz_string(<span class="string">"Europe/Moscow"</span>).unwrap())
+                .to_timezone_aware_string(<span class="prelude-val">Some</span>(Timezone::from_tz_string(<span class="string">"Europe/Moscow"</span>).unwrap()))
         );
     }
 }

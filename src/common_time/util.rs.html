@@ -105,6 +105,7 @@
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
 <a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -121,23 +122,24 @@
 
 </span><span class="kw">use </span>std::str::FromStr;
 
-<span class="kw">use </span>chrono::offset::Local;
 <span class="kw">use </span>chrono::{LocalResult, NaiveDateTime, TimeZone};
 <span class="kw">use </span>chrono_tz::Tz;
 
+<span class="kw">use </span><span class="kw">crate</span>::timezone::get_timezone;
+
 <span class="kw">pub fn </span>format_utc_datetime(utc: <span class="kw-2">&amp;</span>NaiveDateTime, pattern: <span class="kw-2">&amp;</span>str) -&gt; String {
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(tz) = find_tz_from_env() {
-        <span class="macro">format!</span>(<span class="string">"{}"</span>, tz.from_utc_datetime(utc).format(pattern))
-    } <span class="kw">else </span>{
-        <span class="macro">format!</span>(<span class="string">"{}"</span>, Local.from_utc_datetime(utc).format(pattern))
+    <span class="kw">match </span>get_timezone(<span class="prelude-val">None</span>) {
+        <span class="kw">crate</span>::Timezone::Offset(offset) =&gt; {
+            offset.from_utc_datetime(utc).format(pattern).to_string()
+        }
+        <span class="kw">crate</span>::Timezone::Named(tz) =&gt; tz.from_utc_datetime(utc).format(pattern).to_string(),
     }
 }
 
 <span class="kw">pub fn </span>local_datetime_to_utc(local: <span class="kw-2">&amp;</span>NaiveDateTime) -&gt; LocalResult&lt;NaiveDateTime&gt; {
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(tz) = find_tz_from_env() {
-        tz.from_local_datetime(local).map(|x| x.naive_utc())
-    } <span class="kw">else </span>{
-        Local.from_local_datetime(local).map(|x| x.naive_utc())
+    <span class="kw">match </span>get_timezone(<span class="prelude-val">None</span>) {
+        <span class="kw">crate</span>::Timezone::Offset(offset) =&gt; offset.from_local_datetime(local).map(|x| x.naive_utc()),
+        <span class="kw">crate</span>::Timezone::Named(tz) =&gt; tz.from_local_datetime(local).map(|x| x.naive_utc()),
     }
 }
 

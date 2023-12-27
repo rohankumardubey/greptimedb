@@ -131,6 +131,7 @@
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -234,6 +235,7 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
 
+    <span class="kw">use </span>common_time::timezone::set_default_timezone;
     <span class="kw">use </span>common_time::Timestamp;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
@@ -246,7 +248,7 @@
         <span class="macro">assert_eq!</span>(dt, Value::DateTime(DateTime::from(<span class="number">1000</span>)));
 
         <span class="comment">// cast from String
-        </span>std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        </span>set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"Asia/Shanghai"</span>)).unwrap();
         <span class="kw">let </span>val = Value::String(<span class="string">"1970-01-01 00:00:00+0800"</span>.into());
         <span class="kw">let </span>dt = ConcreteDataType::datetime_datatype().try_cast(val).unwrap();
         <span class="macro">assert_eq!</span>(

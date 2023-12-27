@@ -162,6 +162,26 @@
 <a href="#161" id="161">161</a>
 <a href="#162" id="162">162</a>
 <a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -179,24 +199,52 @@
 </span><span class="kw">use </span>std::fmt::Display;
 <span class="kw">use </span>std::str::FromStr;
 
-<span class="kw">use </span>chrono::{FixedOffset, Local, Offset};
+<span class="kw">use </span>chrono::FixedOffset;
 <span class="kw">use </span>chrono_tz::Tz;
+<span class="kw">use </span>once_cell::sync::OnceCell;
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
-    InvalidTimeZoneOffsetSnafu, ParseOffsetStrSnafu, ParseTimeZoneNameSnafu, <span class="prelude-ty">Result</span>,
+    InvalidTimezoneOffsetSnafu, ParseOffsetStrSnafu, ParseTimezoneNameSnafu, <span class="prelude-ty">Result</span>,
 };
 <span class="kw">use </span><span class="kw">crate</span>::util::find_tz_from_env;
 
+<span class="doccomment">/// System timezone in `frontend`/`standalone`,
+/// config by option `default_timezone` in toml,
+/// default value is `UTC` when `default_timezone` is not set.
+</span><span class="kw">static </span>DEFAULT_TIMEZONE: OnceCell&lt;Timezone&gt; = OnceCell::new();
+
+<span class="comment">// Set the System timezone by `tz_str`
+</span><span class="kw">pub fn </span>set_default_timezone(tz_str: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">let </span>tz = <span class="kw">match </span>tz_str {
+        <span class="prelude-val">None </span>| <span class="prelude-val">Some</span>(<span class="string">""</span>) =&gt; Timezone::Named(Tz::UTC),
+        <span class="prelude-val">Some</span>(tz) =&gt; Timezone::from_tz_string(tz)<span class="question-mark">?</span>,
+    };
+    DEFAULT_TIMEZONE.get_or_init(|| tz);
+    <span class="prelude-val">Ok</span>(())
+}
+
+<span class="attr">#[inline(always)]
+</span><span class="doccomment">/// If the `tz=Some(timezone)`, return `timezone` directly,
+/// or return current system timezone.
+</span><span class="kw">pub fn </span>get_timezone(tz: <span class="prelude-ty">Option</span>&lt;Timezone&gt;) -&gt; Timezone {
+    tz.unwrap_or_else(|| {
+        DEFAULT_TIMEZONE
+            .get()
+            .cloned()
+            .unwrap_or(Timezone::Named(Tz::UTC))
+    })
+}
+
 <span class="attr">#[derive(Debug, Clone, PartialEq, Eq)]
-</span><span class="kw">pub enum </span>TimeZone {
+</span><span class="kw">pub enum </span>Timezone {
     Offset(FixedOffset),
     Named(Tz),
 }
 
-<span class="kw">impl </span>TimeZone {
+<span class="kw">impl </span>Timezone {
     <span class="doccomment">/// Compute timezone from given offset hours and minutes
-    /// Return `None` if given offset exceeds scope
+    /// Return `Err` if given offset exceeds scope
     </span><span class="kw">pub fn </span>hours_mins_opt(offset_hours: i32, offset_mins: u32) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>offset_secs = <span class="kw">if </span>offset_hours &gt; <span class="number">0 </span>{
             offset_hours * <span class="number">3600 </span>+ offset_mins <span class="kw">as </span>i32 * <span class="number">60
@@ -206,7 +254,7 @@
 
         FixedOffset::east_opt(offset_secs)
             .map(<span class="self">Self</span>::Offset)
-            .context(InvalidTimeZoneOffsetSnafu {
+            .context(InvalidTimezoneOffsetSnafu {
                 hours: offset_hours,
                 minutes: offset_mins,
             })
@@ -221,10 +269,10 @@
     /// - `SYSTEM`
     /// - Offset to UTC: `+08:00` , `-11:30`
     /// - Named zones: `Asia/Shanghai`, `Europe/Berlin`
-    </span><span class="kw">pub fn </span>from_tz_string(tz_string: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt;&gt; {
+    </span><span class="kw">pub fn </span>from_tz_string(tz_string: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="comment">// Use system timezone
         </span><span class="kw">if </span>tz_string.eq_ignore_ascii_case(<span class="string">"SYSTEM"</span>) {
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+            <span class="prelude-val">Ok</span>(Timezone::Named(find_tz_from_env().unwrap_or(Tz::UTC)))
         } <span class="kw">else if let </span><span class="prelude-val">Some</span>((hrs, mins)) = tz_string.split_once(<span class="string">':'</span>) {
             <span class="kw">let </span>hrs = hrs
                 .parse::&lt;i32&gt;()
@@ -232,16 +280,16 @@
             <span class="kw">let </span>mins = mins
                 .parse::&lt;u32&gt;()
                 .context(ParseOffsetStrSnafu { raw: tz_string })<span class="question-mark">?</span>;
-            <span class="self">Self</span>::hours_mins_opt(hrs, mins).map(<span class="prelude-val">Some</span>)
+            <span class="self">Self</span>::hours_mins_opt(hrs, mins)
         } <span class="kw">else if let </span><span class="prelude-val">Ok</span>(tz) = Tz::from_str(tz_string) {
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="self">Self</span>::Named(tz)))
+            <span class="prelude-val">Ok</span>(<span class="self">Self</span>::Named(tz))
         } <span class="kw">else </span>{
-            ParseTimeZoneNameSnafu { raw: tz_string }.fail()
+            ParseTimezoneNameSnafu { raw: tz_string }.fail()
         }
     }
 }
 
-<span class="kw">impl </span>Display <span class="kw">for </span>TimeZone {
+<span class="kw">impl </span>Display <span class="kw">for </span>Timezone {
     <span class="kw">fn </span>fmt(<span class="kw-2">&amp;</span><span class="self">self</span>, f: <span class="kw-2">&amp;mut </span>std::fmt::Formatter&lt;<span class="lifetime">'_</span>&gt;) -&gt; std::fmt::Result {
         <span class="kw">match </span><span class="self">self </span>{
             <span class="self">Self</span>::Named(tz) =&gt; <span class="macro">write!</span>(f, <span class="string">"{}"</span>, tz.name()),
@@ -251,12 +299,9 @@
 }
 
 <span class="attr">#[inline]
-</span><span class="kw">pub fn </span>system_time_zone_name() -&gt; String {
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(tz) = find_tz_from_env() {
-        Local::now().with_timezone(<span class="kw-2">&amp;</span>tz).offset().fix().to_string()
-    } <span class="kw">else </span>{
-        Local::now().offset().to_string()
-    }
+</span><span class="doccomment">/// Return current system config timezone, default config is UTC
+</span><span class="kw">pub fn </span>system_timezone_name() -&gt; String {
+    <span class="macro">format!</span>(<span class="string">"{}"</span>, get_timezone(<span class="prelude-val">None</span>))
 }
 
 <span class="attr">#[cfg(test)]
@@ -265,61 +310,56 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_from_tz_string() {
-        <span class="macro">assert_eq!</span>(<span class="prelude-val">None</span>, TimeZone::from_tz_string(<span class="string">"SYSTEM"</span>).unwrap());
-
-        <span class="kw">let </span>utc_plus_8 = <span class="prelude-val">Some</span>(TimeZone::Offset(FixedOffset::east_opt(<span class="number">3600 </span>* <span class="number">8</span>).unwrap()));
-        <span class="macro">assert_eq!</span>(utc_plus_8, TimeZone::from_tz_string(<span class="string">"+8:00"</span>).unwrap());
-        <span class="macro">assert_eq!</span>(utc_plus_8, TimeZone::from_tz_string(<span class="string">"+08:00"</span>).unwrap());
-        <span class="macro">assert_eq!</span>(utc_plus_8, TimeZone::from_tz_string(<span class="string">"08:00"</span>).unwrap());
-
-        <span class="kw">let </span>utc_minus_8 = <span class="prelude-val">Some</span>(TimeZone::Offset(FixedOffset::west_opt(<span class="number">3600 </span>* <span class="number">8</span>).unwrap()));
-        <span class="macro">assert_eq!</span>(utc_minus_8, TimeZone::from_tz_string(<span class="string">"-08:00"</span>).unwrap());
-        <span class="macro">assert_eq!</span>(utc_minus_8, TimeZone::from_tz_string(<span class="string">"-8:00"</span>).unwrap());
-
-        <span class="kw">let </span>utc_minus_8_5 = <span class="prelude-val">Some</span>(TimeZone::Offset(
-            FixedOffset::west_opt(<span class="number">3600 </span>* <span class="number">8 </span>+ <span class="number">60 </span>* <span class="number">30</span>).unwrap(),
-        ));
-        <span class="macro">assert_eq!</span>(utc_minus_8_5, TimeZone::from_tz_string(<span class="string">"-8:30"</span>).unwrap());
-
-        <span class="kw">let </span>utc_plus_max = <span class="prelude-val">Some</span>(TimeZone::Offset(FixedOffset::east_opt(<span class="number">3600 </span>* <span class="number">14</span>).unwrap()));
-        <span class="macro">assert_eq!</span>(utc_plus_max, TimeZone::from_tz_string(<span class="string">"14:00"</span>).unwrap());
-
-        <span class="kw">let </span>utc_minus_max = <span class="prelude-val">Some</span>(TimeZone::Offset(
-            FixedOffset::west_opt(<span class="number">3600 </span>* <span class="number">13 </span>+ <span class="number">60 </span>* <span class="number">59</span>).unwrap(),
-        ));
-        <span class="macro">assert_eq!</span>(utc_minus_max, TimeZone::from_tz_string(<span class="string">"-13:59"</span>).unwrap());
-
         <span class="macro">assert_eq!</span>(
-            <span class="prelude-val">Some</span>(TimeZone::Named(Tz::Asia__Shanghai)),
-            TimeZone::from_tz_string(<span class="string">"Asia/Shanghai"</span>).unwrap()
-        );
-        <span class="macro">assert_eq!</span>(
-            <span class="prelude-val">Some</span>(TimeZone::Named(Tz::UTC)),
-            TimeZone::from_tz_string(<span class="string">"UTC"</span>).unwrap()
+            Timezone::Named(Tz::UTC),
+            Timezone::from_tz_string(<span class="string">"SYSTEM"</span>).unwrap()
         );
 
-        <span class="macro">assert!</span>(TimeZone::from_tz_string(<span class="string">"WORLD_PEACE"</span>).is_err());
-        <span class="macro">assert!</span>(TimeZone::from_tz_string(<span class="string">"A0:01"</span>).is_err());
-        <span class="macro">assert!</span>(TimeZone::from_tz_string(<span class="string">"20:0A"</span>).is_err());
-        <span class="macro">assert!</span>(TimeZone::from_tz_string(<span class="string">":::::"</span>).is_err());
-        <span class="macro">assert!</span>(TimeZone::from_tz_string(<span class="string">"Asia/London"</span>).is_err());
-        <span class="macro">assert!</span>(TimeZone::from_tz_string(<span class="string">"Unknown"</span>).is_err());
+        <span class="kw">let </span>utc_plus_8 = Timezone::Offset(FixedOffset::east_opt(<span class="number">3600 </span>* <span class="number">8</span>).unwrap());
+        <span class="macro">assert_eq!</span>(utc_plus_8, Timezone::from_tz_string(<span class="string">"+8:00"</span>).unwrap());
+        <span class="macro">assert_eq!</span>(utc_plus_8, Timezone::from_tz_string(<span class="string">"+08:00"</span>).unwrap());
+        <span class="macro">assert_eq!</span>(utc_plus_8, Timezone::from_tz_string(<span class="string">"08:00"</span>).unwrap());
+
+        <span class="kw">let </span>utc_minus_8 = Timezone::Offset(FixedOffset::west_opt(<span class="number">3600 </span>* <span class="number">8</span>).unwrap());
+        <span class="macro">assert_eq!</span>(utc_minus_8, Timezone::from_tz_string(<span class="string">"-08:00"</span>).unwrap());
+        <span class="macro">assert_eq!</span>(utc_minus_8, Timezone::from_tz_string(<span class="string">"-8:00"</span>).unwrap());
+
+        <span class="kw">let </span>utc_minus_8_5 = Timezone::Offset(FixedOffset::west_opt(<span class="number">3600 </span>* <span class="number">8 </span>+ <span class="number">60 </span>* <span class="number">30</span>).unwrap());
+        <span class="macro">assert_eq!</span>(utc_minus_8_5, Timezone::from_tz_string(<span class="string">"-8:30"</span>).unwrap());
+
+        <span class="kw">let </span>utc_plus_max = Timezone::Offset(FixedOffset::east_opt(<span class="number">3600 </span>* <span class="number">14</span>).unwrap());
+        <span class="macro">assert_eq!</span>(utc_plus_max, Timezone::from_tz_string(<span class="string">"14:00"</span>).unwrap());
+
+        <span class="kw">let </span>utc_minus_max = Timezone::Offset(FixedOffset::west_opt(<span class="number">3600 </span>* <span class="number">13 </span>+ <span class="number">60 </span>* <span class="number">59</span>).unwrap());
+        <span class="macro">assert_eq!</span>(utc_minus_max, Timezone::from_tz_string(<span class="string">"-13:59"</span>).unwrap());
+
+        <span class="macro">assert_eq!</span>(
+            Timezone::Named(Tz::Asia__Shanghai),
+            Timezone::from_tz_string(<span class="string">"Asia/Shanghai"</span>).unwrap()
+        );
+        <span class="macro">assert_eq!</span>(
+            Timezone::Named(Tz::UTC),
+            Timezone::from_tz_string(<span class="string">"UTC"</span>).unwrap()
+        );
+
+        <span class="macro">assert!</span>(Timezone::from_tz_string(<span class="string">"WORLD_PEACE"</span>).is_err());
+        <span class="macro">assert!</span>(Timezone::from_tz_string(<span class="string">"A0:01"</span>).is_err());
+        <span class="macro">assert!</span>(Timezone::from_tz_string(<span class="string">"20:0A"</span>).is_err());
+        <span class="macro">assert!</span>(Timezone::from_tz_string(<span class="string">":::::"</span>).is_err());
+        <span class="macro">assert!</span>(Timezone::from_tz_string(<span class="string">"Asia/London"</span>).is_err());
+        <span class="macro">assert!</span>(Timezone::from_tz_string(<span class="string">"Unknown"</span>).is_err());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_timezone_to_string() {
-        <span class="macro">assert_eq!</span>(<span class="string">"UTC"</span>, TimeZone::Named(Tz::UTC).to_string());
+        <span class="macro">assert_eq!</span>(<span class="string">"UTC"</span>, Timezone::Named(Tz::UTC).to_string());
         <span class="macro">assert_eq!</span>(
             <span class="string">"+01:00"</span>,
-            TimeZone::from_tz_string(<span class="string">"01:00"</span>)
-                .unwrap()
-                .unwrap()
-                .to_string()
+            Timezone::from_tz_string(<span class="string">"01:00"</span>).unwrap().to_string()
         );
         <span class="macro">assert_eq!</span>(
             <span class="string">"Asia/Shanghai"</span>,
-            TimeZone::from_tz_string(<span class="string">"Asia/Shanghai"</span>)
-                .unwrap()
+            Timezone::from_tz_string(<span class="string">"Asia/Shanghai"</span>)
                 .unwrap()
                 .to_string()
         );

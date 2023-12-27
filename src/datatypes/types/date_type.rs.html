@@ -140,6 +140,7 @@
 <a href="#139" id="139">139</a>
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -243,6 +244,7 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>common_base::bytes::StringBytes;
+    <span class="kw">use </span>common_time::timezone::set_default_timezone;
     <span class="kw">use </span>common_time::Timestamp;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
@@ -250,7 +252,7 @@
     <span class="comment">// $TZ doesn't take effort
     </span><span class="attr">#[test]
     </span><span class="kw">fn </span>test_date_cast() {
-        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"Asia/Shanghai"</span>)).unwrap();
         <span class="comment">// timestamp -&gt; date
         </span><span class="kw">let </span>ts = Value::Timestamp(Timestamp::from_str(<span class="string">"2000-01-01 08:00:01"</span>).unwrap());
         <span class="kw">let </span>date = ConcreteDataType::date_datatype().try_cast(ts).unwrap();

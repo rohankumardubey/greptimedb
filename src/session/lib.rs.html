@@ -107,6 +107,7 @@
 <a href="#106" id="106">106</a>
 <a href="#107" id="107">107</a>
 <a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -130,7 +131,8 @@
 <span class="kw">use </span>auth::UserInfoRef;
 <span class="kw">use </span>common_catalog::build_db_string;
 <span class="kw">use </span>common_catalog::consts::{DEFAULT_CATALOG_NAME, DEFAULT_SCHEMA_NAME};
-<span class="kw">use </span>common_time::TimeZone;
+<span class="kw">use </span>common_time::timezone::get_timezone;
+<span class="kw">use </span>common_time::Timezone;
 <span class="kw">use </span>context::QueryContextBuilder;
 
 <span class="kw">use </span><span class="kw">crate</span>::context::{Channel, ConnInfo, QueryContextRef};
@@ -142,7 +144,7 @@
     schema: ArcSwap&lt;String&gt;,
     user_info: ArcSwap&lt;UserInfoRef&gt;,
     conn_info: ConnInfo,
-    time_zone: ArcSwap&lt;<span class="prelude-ty">Option</span>&lt;TimeZone&gt;&gt;,
+    timezone: ArcSwap&lt;Timezone&gt;,
 }
 
 <span class="kw">pub type </span>SessionRef = Arc&lt;Session&gt;;
@@ -154,7 +156,7 @@
             schema: ArcSwap::new(Arc::new(DEFAULT_SCHEMA_NAME.into())),
             user_info: ArcSwap::new(Arc::new(auth::userinfo_by_name(<span class="prelude-val">None</span>))),
             conn_info: ConnInfo::new(addr, channel),
-            time_zone: ArcSwap::new(Arc::new(<span class="prelude-val">None</span>)),
+            timezone: ArcSwap::new(Arc::new(get_timezone(<span class="prelude-val">None</span>))),
         }
     }
 
@@ -167,7 +169,7 @@
             .current_catalog(<span class="self">self</span>.catalog.load().to_string())
             .current_schema(<span class="self">self</span>.schema.load().to_string())
             .sql_dialect(<span class="self">self</span>.conn_info.channel.dialect())
-            .time_zone((<span class="kw-2">**</span><span class="self">self</span>.time_zone.load()).clone())
+            .timezone((<span class="kw-2">**</span><span class="self">self</span>.timezone.load()).clone())
             .build()
     }
 
@@ -182,13 +184,13 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>time_zone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;TimeZone&gt; {
-        <span class="self">self</span>.time_zone.load().as_ref().clone()
+    </span><span class="kw">pub fn </span>timezone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Timezone {
+        <span class="self">self</span>.timezone.load().as_ref().clone()
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>set_time_zone(<span class="kw-2">&amp;</span><span class="self">self</span>, tz: <span class="prelude-ty">Option</span>&lt;TimeZone&gt;) {
-        <span class="kw">let _ </span>= <span class="self">self</span>.time_zone.swap(Arc::new(tz));
+    </span><span class="kw">pub fn </span>set_timezone(<span class="kw-2">&amp;</span><span class="self">self</span>, tz: Timezone) {
+        <span class="kw">let _ </span>= <span class="self">self</span>.timezone.swap(Arc::new(tz));
     }
 
     <span class="attr">#[inline]

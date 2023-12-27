@@ -469,6 +469,13 @@
 <a href="#468" id="468">468</a>
 <a href="#469" id="469">469</a>
 <a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -492,8 +499,8 @@
 
 <span class="kw">use </span>common_query::Output;
 <span class="kw">use </span>common_recordbatch::RecordBatches;
-<span class="kw">use </span>common_time::timezone::system_time_zone_name;
-<span class="kw">use </span>common_time::TimeZone;
+<span class="kw">use </span>common_time::timezone::system_timezone_name;
+<span class="kw">use </span>common_time::Timezone;
 <span class="kw">use </span>datatypes::prelude::ConcreteDataType;
 <span class="kw">use </span>datatypes::schema::{ColumnSchema, Schema};
 <span class="kw">use </span>datatypes::vectors::StringVector;
@@ -526,7 +533,7 @@
 </span><span class="kw">static </span>SHOW_SQL_MODE_PATTERN: Lazy&lt;Regex&gt; =
     Lazy::new(|| Regex::new(<span class="string">"(?i)^(SHOW VARIABLES LIKE 'sql_mode'(.*))"</span>).unwrap());
 
-<span class="comment">// Time zone settings
+<span class="comment">// Timezone settings
 </span><span class="kw">static </span>SET_TIME_ZONE_PATTERN: Lazy&lt;Regex&gt; =
     Lazy::new(|| Regex::new(<span class="string">r"(?i)^SET TIME_ZONE\s*=\s*'(\S+)'"</span>).unwrap());
 
@@ -671,11 +678,8 @@
 
         <span class="comment">// get value of variables from known sources or fallback to defaults
         </span><span class="kw">let </span>value = <span class="kw">match </span>var_as[<span class="number">0</span>] {
-            <span class="string">"time_zone" </span>=&gt; query_context
-                .time_zone()
-                .map(|tz| tz.to_string())
-                .unwrap_or_else(|| <span class="string">""</span>.to_owned()),
-            <span class="string">"system_time_zone" </span>=&gt; system_time_zone_name(),
+            <span class="string">"time_zone" </span>=&gt; query_context.timezone().to_string(),
+            <span class="string">"system_time_zone" </span>=&gt; system_timezone_name(),
             <span class="kw">_ </span>=&gt; VAR_VALUES
                 .get(var_as[<span class="number">0</span>])
                 .map(|v| v.to_string())
@@ -742,8 +746,8 @@
     <span class="kw">if let </span><span class="prelude-val">Some</span>(captures) = SET_TIME_ZONE_PATTERN.captures(query) {
         <span class="comment">// get the capture
         </span><span class="kw">let </span>tz = captures.get(<span class="number">1</span>).unwrap();
-        <span class="kw">if let </span><span class="prelude-val">Ok</span>(timezone) = TimeZone::from_tz_string(tz.as_str()) {
-            session.set_time_zone(timezone);
+        <span class="kw">if let </span><span class="prelude-val">Ok</span>(timezone) = Timezone::from_tz_string(tz.as_str()) {
+            session.set_timezone(timezone);
             <span class="kw">return </span><span class="prelude-val">Some</span>(Output::AffectedRows(<span class="number">0</span>));
         }
     }
@@ -802,6 +806,7 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
 
+    <span class="kw">use </span>common_time::timezone::set_default_timezone;
     <span class="kw">use </span>session::context::{Channel, QueryContext};
     <span class="kw">use </span>session::Session;
 
@@ -861,16 +866,16 @@
 +-----------------+------------------------+"</span>;
         test(query, expected);
 
-        <span class="comment">// set sysstem timezone
-        </span>std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        <span class="comment">// set system timezone
+        </span>set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"Asia/Shanghai"</span>)).unwrap();
         <span class="comment">// complex variables
         </span><span class="kw">let </span>query = <span class="string">"/* mysql-connector-java-8.0.17 (Revision: 16a712ddb3f826a1933ab42b0039f7fb9eebc6ec) */SELECT  @@session.auto_increment_increment AS auto_increment_increment, @@character_set_client AS character_set_client, @@character_set_connection AS character_set_connection, @@character_set_results AS character_set_results, @@character_set_server AS character_set_server, @@collation_server AS collation_server, @@collation_connection AS collation_connection, @@init_connect AS init_connect, @@interactive_timeout AS interactive_timeout, @@license AS license, @@lower_case_table_names AS lower_case_table_names, @@max_allowed_packet AS max_allowed_packet, @@net_write_timeout AS net_write_timeout, @@performance_schema AS performance_schema, @@sql_mode AS sql_mode, @@system_time_zone AS system_time_zone, @@time_zone AS time_zone, @@transaction_isolation AS transaction_isolation, @@wait_timeout AS wait_timeout;"</span>;
         <span class="kw">let </span>expected = <span class="string">"\
-+--------------------------+----------------------+--------------------------+-----------------------+----------------------+------------------+----------------------+--------------+---------------------+---------+------------------------+--------------------+-------------------+--------------------+----------+------------------+-----------+-----------------------+---------------+
-| auto_increment_increment | character_set_client | character_set_connection | character_set_results | character_set_server | collation_server | collation_connection | init_connect | interactive_timeout | license | lower_case_table_names | max_allowed_packet | net_write_timeout | performance_schema | sql_mode | system_time_zone | time_zone | transaction_isolation | wait_timeout; |
-+--------------------------+----------------------+--------------------------+-----------------------+----------------------+------------------+----------------------+--------------+---------------------+---------+------------------------+--------------------+-------------------+--------------------+----------+------------------+-----------+-----------------------+---------------+
-| 0                        | 0                    | 0                        | 0                     | 0                    | 0                | 0                    | 0            | 31536000            | 0       | 0                      | 134217728          | 31536000          | 0                  | 0        | +08:00           |           | REPEATABLE-READ       | 31536000      |
-+--------------------------+----------------------+--------------------------+-----------------------+----------------------+------------------+----------------------+--------------+---------------------+---------+------------------------+--------------------+-------------------+--------------------+----------+------------------+-----------+-----------------------+---------------+"</span>;
++--------------------------+----------------------+--------------------------+-----------------------+----------------------+------------------+----------------------+--------------+---------------------+---------+------------------------+--------------------+-------------------+--------------------+----------+------------------+---------------+-----------------------+---------------+
+| auto_increment_increment | character_set_client | character_set_connection | character_set_results | character_set_server | collation_server | collation_connection | init_connect | interactive_timeout | license | lower_case_table_names | max_allowed_packet | net_write_timeout | performance_schema | sql_mode | system_time_zone | time_zone     | transaction_isolation | wait_timeout; |
++--------------------------+----------------------+--------------------------+-----------------------+----------------------+------------------+----------------------+--------------+---------------------+---------+------------------------+--------------------+-------------------+--------------------+----------+------------------+---------------+-----------------------+---------------+
+| 0                        | 0                    | 0                        | 0                     | 0                    | 0                | 0                    | 0            | 31536000            | 0       | 0                      | 134217728          | 31536000          | 0                  | 0        | Asia/Shanghai    | Asia/Shanghai | REPEATABLE-READ       | 31536000      |
++--------------------------+----------------------+--------------------------+-----------------------+----------------------+------------------+----------------------+--------------+---------------------+---------+------------------------+--------------------+-------------------+--------------------+----------+------------------+---------------+-----------------------+---------------+"</span>;
         test(query, expected);
 
         <span class="kw">let </span>query = <span class="string">"show variables"</span>;
@@ -908,8 +913,17 @@
     }
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_set_time_zone() {
+    </span><span class="kw">fn </span>test_set_timezone() {
+        <span class="comment">// test default is UTC when no config in greptimedb
+        </span>{
+            <span class="kw">let </span>session = Arc::new(Session::new(<span class="prelude-val">None</span>, Channel::Mysql));
+            <span class="kw">let </span>query_context = session.new_query_context();
+            <span class="macro">assert_eq!</span>(<span class="string">"UTC"</span>, query_context.timezone().to_string());
+        }
+        set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"Asia/Shanghai"</span>)).unwrap();
         <span class="kw">let </span>session = Arc::new(Session::new(<span class="prelude-val">None</span>, Channel::Mysql));
+        <span class="kw">let </span>query_context = session.new_query_context();
+        <span class="macro">assert_eq!</span>(<span class="string">"Asia/Shanghai"</span>, query_context.timezone().to_string());
         <span class="kw">let </span>output = check(
             <span class="string">"set time_zone = 'UTC'"</span>,
             QueryContext::arc(),
@@ -922,7 +936,7 @@
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         }
         <span class="kw">let </span>query_context = session.new_query_context();
-        <span class="macro">assert_eq!</span>(<span class="string">"UTC"</span>, query_context.time_zone().unwrap().to_string());
+        <span class="macro">assert_eq!</span>(<span class="string">"UTC"</span>, query_context.timezone().to_string());
 
         <span class="kw">let </span>output = check(<span class="string">"select @@time_zone"</span>, query_context.clone(), session.clone());
         <span class="kw">match </span>output.unwrap() {

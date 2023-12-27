@@ -2343,6 +2343,7 @@
 <a href="#2342" id="2342">2342</a>
 <a href="#2343" id="2343">2343</a>
 <a href="#2344" id="2344">2344</a>
+<a href="#2345" id="2345">2345</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -3535,6 +3536,7 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>arrow::datatypes::DataType <span class="kw">as </span>ArrowDataType;
+    <span class="kw">use </span>common_time::timezone::set_default_timezone;
     <span class="kw">use </span>num_traits::Float;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
@@ -4220,7 +4222,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_display() {
-        std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
+        set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"Asia/Shanghai"</span>)).unwrap();
         <span class="macro">assert_eq!</span>(Value::Null.to_string(), <span class="string">"Null"</span>);
         <span class="macro">assert_eq!</span>(Value::UInt8(<span class="number">8</span>).to_string(), <span class="string">"8"</span>);
         <span class="macro">assert_eq!</span>(Value::UInt16(<span class="number">16</span>).to_string(), <span class="string">"16"</span>);

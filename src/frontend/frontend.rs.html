@@ -103,6 +103,8 @@
 <a href="#102" id="102">102</a>
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -137,6 +139,7 @@
 </span><span class="kw">pub struct </span>FrontendOptions {
     <span class="kw">pub </span>mode: Mode,
     <span class="kw">pub </span>node_id: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="kw">pub </span>default_timezone: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="kw">pub </span>heartbeat: HeartbeatOptions,
     <span class="kw">pub </span>http: HttpOptions,
     <span class="kw">pub </span>grpc: GrpcOptions,
@@ -158,6 +161,7 @@
         <span class="self">Self </span>{
             mode: Mode::Standalone,
             node_id: <span class="prelude-val">None</span>,
+            default_timezone: <span class="prelude-val">None</span>,
             heartbeat: HeartbeatOptions::frontend_default(),
             http: HttpOptions::default(),
             grpc: GrpcOptions::default(),

@@ -296,6 +296,8 @@
 <a href="#295" id="295">295</a>
 <a href="#296" id="296">296</a>
 <a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -491,10 +493,12 @@
                     Value::Binary(v) =&gt; row_writer.write_col(v.deref())<span class="question-mark">?</span>,
                     Value::Date(v) =&gt; row_writer.write_col(v.to_chrono_date())<span class="question-mark">?</span>,
                     <span class="comment">// convert datetime and timestamp to timezone of current connection
-                    </span>Value::DateTime(v) =&gt; row_writer
-                        .write_col(v.to_chrono_datetime_with_timezone(query_context.time_zone()))<span class="question-mark">?</span>,
-                    Value::Timestamp(v) =&gt; row_writer
-                        .write_col(v.to_chrono_datetime_with_timezone(query_context.time_zone()))<span class="question-mark">?</span>,
+                    </span>Value::DateTime(v) =&gt; row_writer.write_col(
+                        v.to_chrono_datetime_with_timezone(<span class="prelude-val">Some</span>(query_context.timezone())),
+                    )<span class="question-mark">?</span>,
+                    Value::Timestamp(v) =&gt; row_writer.write_col(
+                        v.to_chrono_datetime_with_timezone(<span class="prelude-val">Some</span>(query_context.timezone())),
+                    )<span class="question-mark">?</span>,
                     Value::Interval(v) =&gt; row_writer.write_col(v.to_iso8601_string())<span class="question-mark">?</span>,
                     Value::Duration(v) =&gt; row_writer.write_col(v.to_std_duration())<span class="question-mark">?</span>,
                     Value::List(<span class="kw">_</span>) =&gt; {
@@ -506,7 +510,7 @@
                         })
                     }
                     Value::Time(v) =&gt; row_writer
-                        .write_col(v.to_timezone_aware_string(query_context.time_zone()))<span class="question-mark">?</span>,
+                        .write_col(v.to_timezone_aware_string(<span class="prelude-val">Some</span>(query_context.timezone())))<span class="question-mark">?</span>,
                     Value::Decimal128(v) =&gt; row_writer.write_col(v.to_string())<span class="question-mark">?</span>,
                 }
             }

@@ -501,6 +501,9 @@
 <a href="#500" id="500">500</a>
 <a href="#501" id="501">501</a>
 <a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a>
+<a href="#504" id="504">504</a>
+<a href="#505" id="505">505</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -525,6 +528,7 @@
 <span class="kw">use </span>common_meta::heartbeat::handler::parse_mailbox_message::ParseMailboxMessageHandler;
 <span class="kw">use </span>common_meta::heartbeat::handler::HandlerGroupExecutor;
 <span class="kw">use </span>common_telemetry::logging;
+<span class="kw">use </span>common_time::timezone::set_default_timezone;
 <span class="kw">use </span>frontend::frontend::FrontendOptions;
 <span class="kw">use </span>frontend::heartbeat::handler::invalidate_table_cache::InvalidateTableCacheHandler;
 <span class="kw">use </span>frontend::heartbeat::HeartbeatTask;
@@ -535,7 +539,7 @@
 <span class="kw">use </span>servers::Mode;
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
 
-<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, MissingConfigSnafu, <span class="prelude-ty">Result</span>, StartFrontendSnafu};
+<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, InitTimezoneSnafu, MissingConfigSnafu, <span class="prelude-ty">Result</span>, StartFrontendSnafu};
 <span class="kw">use </span><span class="kw">crate</span>::options::{CliOptions, Options};
 <span class="kw">use </span><span class="kw">crate</span>::App;
 
@@ -719,6 +723,8 @@
 
         <span class="macro">logging::info!</span>(<span class="string">"Frontend start command: {:#?}"</span>, <span class="self">self</span>);
         <span class="macro">logging::info!</span>(<span class="string">"Frontend options: {:#?}"</span>, opts);
+
+        set_default_timezone(opts.default_timezone.as_deref()).context(InitTimezoneSnafu)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>meta_client_options = opts.meta_client.as_ref().context(MissingConfigSnafu {
             msg: <span class="string">"'meta_client'"</span>,
