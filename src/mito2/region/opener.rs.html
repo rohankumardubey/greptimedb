@@ -410,6 +410,10 @@
 <a href="#409" id="409">409</a>
 <a href="#410" id="410">410</a>
 <a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -669,8 +673,9 @@
         <span class="kw">let </span>version_control = Arc::new(VersionControl::new(version));
         <span class="kw">if </span>!<span class="self">self</span>.skip_wal_replay {
             <span class="macro">info!</span>(
-                <span class="string">"Start replaying memtable at flushed_entry_id {} for region {}"</span>,
-                flushed_entry_id, region_id
+                <span class="string">"Start replaying memtable at flushed_entry_id + 1 {} for region {}"</span>,
+                flushed_entry_id + <span class="number">1</span>,
+                region_id
             );
             replay_memtable(
                 wal,
@@ -792,9 +797,12 @@
     // data in the WAL.
     </span><span class="kw">let </span><span class="kw-2">mut </span>last_entry_id = flushed_entry_id;
     <span class="kw">let </span><span class="kw-2">mut </span>region_write_ctx = RegionWriteCtx::new(region_id, version_control, wal_options.clone());
-    <span class="kw">let </span><span class="kw-2">mut </span>wal_stream = wal.scan(region_id, flushed_entry_id, wal_options)<span class="question-mark">?</span>;
+
+    <span class="kw">let </span>replay_from_entry_id = flushed_entry_id + <span class="number">1</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>wal_stream = wal.scan(region_id, replay_from_entry_id, wal_options)<span class="question-mark">?</span>;
     <span class="kw">while let </span><span class="prelude-val">Some</span>(res) = wal_stream.next().<span class="kw">await </span>{
         <span class="kw">let </span>(entry_id, entry) = res<span class="question-mark">?</span>;
+        <span class="macro">debug_assert!</span>(entry_id &gt; flushed_entry_id);
         last_entry_id = last_entry_id.max(entry_id);
         <span class="kw">for </span>mutation <span class="kw">in </span>entry.mutations {
             rows_replayed += mutation
