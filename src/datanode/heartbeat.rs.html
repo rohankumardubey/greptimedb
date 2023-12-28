@@ -419,6 +419,7 @@
 <a href="#418" id="418">418</a>
 <a href="#419" id="419">419</a>
 <a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -462,6 +463,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::region_server::RegionServer;
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>handler;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>task_tracker;
 
 <span class="kw">pub struct </span>HeartbeatTask {
     node_id: u64,

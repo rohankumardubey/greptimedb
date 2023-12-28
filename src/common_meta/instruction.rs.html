@@ -300,6 +300,8 @@
 <a href="#299" id="299">299</a>
 <a href="#300" id="300">300</a>
 <a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -316,6 +318,7 @@
 
 </span><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::fmt::{Display, Formatter};
+<span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>store_api::storage::{RegionId, RegionNumber};
@@ -442,11 +445,12 @@
     </span><span class="kw">pub </span>region_id: RegionId,
     <span class="doccomment">/// The `last_entry_id` of old leader region.
     </span><span class="kw">pub </span>last_entry_id: <span class="prelude-ty">Option</span>&lt;u64&gt;,
-    <span class="doccomment">/// The second of waiting for a wal replay.
+    <span class="doccomment">/// The timeout of waiting for a wal replay.
     ///
     /// `None` stands for no wait,
     /// it's helpful to verify whether the leader region is ready.
-    </span><span class="kw">pub </span>wait_for_replay_secs: <span class="prelude-ty">Option</span>&lt;u64&gt;,
+    </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
+    </span><span class="kw">pub </span>wait_for_replay_timeout: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
 }
 
 <span class="attr">#[derive(Debug, Clone, Serialize, Deserialize, Display)]
