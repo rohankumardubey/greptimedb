@@ -451,6 +451,11 @@
 <a href="#450" id="450">450</a>
 <a href="#451" id="451">451</a>
 <a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
+<a href="#456" id="456">456</a>
+<a href="#457" id="457">457</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -474,21 +479,23 @@
 <span class="kw">use </span>common_meta::peer::Peer;
 <span class="kw">use </span>common_meta::rpc::router::RegionRoute;
 <span class="kw">use </span>common_meta::ClusterId;
-<span class="kw">use </span>common_procedure::{watcher, ProcedureManagerRef, ProcedureWithId};
+<span class="kw">use </span>common_procedure::{watcher, ProcedureId, ProcedureManagerRef, ProcedureWithId};
 <span class="kw">use </span>common_telemetry::{error, info};
 <span class="kw">use </span>snafu::{ensure, OptionExt, ResultExt};
 <span class="kw">use </span>store_api::storage::RegionId;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::procedure::region_migration::{
-    ContextFactoryImpl, PersistentContext, RegionMigrationProcedure,
+    DefaultContextFactory, PersistentContext, RegionMigrationProcedure,
 };
 
+<span class="kw">pub type </span>RegionMigrationManagerRef = Arc&lt;RegionMigrationManager&gt;;
+
 <span class="doccomment">/// Manager of region migration procedure.
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RegionMigrationManager {
+</span><span class="kw">pub struct </span>RegionMigrationManager {
     procedure_manager: ProcedureManagerRef,
     running_procedures: Arc&lt;RwLock&lt;HashMap&lt;RegionId, RegionMigrationProcedureTask&gt;&gt;&gt;,
-    context_factory: ContextFactoryImpl,
+    context_factory: DefaultContextFactory,
 }
 
 <span class="doccomment">/// The guard of running [RegionMigrationProcedureTask].
@@ -508,10 +515,10 @@
 
 <span class="attr">#[derive(Debug, Clone)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>RegionMigrationProcedureTask {
-    cluster_id: ClusterId,
-    region_id: RegionId,
-    from_peer: Peer,
-    to_peer: Peer,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) cluster_id: ClusterId,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) region_id: RegionId,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) from_peer: Peer,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) to_peer: Peer,
 }
 
 <span class="kw">impl </span>Display <span class="kw">for </span>RegionMigrationProcedureTask {
@@ -546,7 +553,7 @@
     <span class="doccomment">/// Returns new [RegionMigrationManager]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
         procedure_manager: ProcedureManagerRef,
-        context_factory: ContextFactoryImpl,
+        context_factory: DefaultContextFactory,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             procedure_manager,
@@ -674,7 +681,10 @@
     }
 
     <span class="doccomment">/// Submits a new region migration procedure.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>submit_procedure(<span class="kw-2">&amp;</span><span class="self">self</span>, task: RegionMigrationProcedureTask) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>submit_procedure(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        task: RegionMigrationProcedureTask,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;ProcedureId&gt;&gt; {
         <span class="kw">let </span><span class="prelude-val">Some</span>(guard) = <span class="self">self</span>.insert_running_procedure(<span class="kw-2">&amp;</span>task) <span class="kw">else </span>{
             <span class="kw">return </span>error::MigrationRunningSnafu {
                 region_id: task.region_id,
@@ -696,7 +706,7 @@
 
         <span class="kw">if </span><span class="self">self</span>.has_migrated(<span class="kw-2">&amp;</span>region_route, <span class="kw-2">&amp;</span>task)<span class="question-mark">? </span>{
             <span class="macro">info!</span>(<span class="string">"Skipping region migration task: {task}"</span>);
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         }
 
         <span class="self">self</span>.verify_region_leader_peer(<span class="kw-2">&amp;</span>region_route, <span class="kw-2">&amp;</span>task)<span class="question-mark">?</span>;
@@ -727,7 +737,7 @@
             <span class="macro">info!</span>(<span class="string">"Region migration procedure {procedure_id} for {task} is finished successfully!"</span>);
         });
 
-        <span class="prelude-val">Ok</span>(())
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(procedure_id))
     }
 }
 
