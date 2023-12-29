@@ -254,8 +254,6 @@
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
 <a href="#255" id="255">255</a>
-<a href="#256" id="256">256</a>
-<a href="#257" id="257">257</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -455,8 +453,6 @@
                     &amp;&amp; entry.ns.region_id == region_id
                 {
                     <span class="kw">yield </span><span class="prelude-val">Ok</span>(entries);
-                } <span class="kw">else </span>{
-                    <span class="kw">yield </span><span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[]);
                 }
 
                 <span class="comment">// Terminates the stream if the entry with the end offset was read.

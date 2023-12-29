@@ -66,6 +66,7 @@
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,6 +96,7 @@
 
 <span class="doccomment">/// Configurations for kafka wal.
 </span><span class="attr">#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
 </span><span class="kw">pub struct </span>KafkaConfig {
     <span class="doccomment">/// The broker endpoints of the Kafka cluster.
     </span><span class="kw">pub </span>broker_endpoints: Vec&lt;String&gt;,
