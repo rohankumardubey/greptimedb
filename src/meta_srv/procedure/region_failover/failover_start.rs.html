@@ -195,7 +195,7 @@
             </span>.iter()
             .filter_map(|p| {
                 <span class="kw">if </span>p.id != failed_region.datanode_id {
-                    <span class="prelude-val">Some</span>(p.clone().into())
+                    <span class="prelude-val">Some</span>(p.clone())
                 } <span class="kw">else </span>{
                     <span class="prelude-val">None
                 </span>}

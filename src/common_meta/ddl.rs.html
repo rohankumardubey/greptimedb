@@ -73,16 +73,6 @@
 <a href="#72" id="72">72</a>
 <a href="#73" id="73">73</a>
 <a href="#74" id="74">74</a>
-<a href="#75" id="75">75</a>
-<a href="#76" id="76">76</a>
-<a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
-<a href="#80" id="80">80</a>
-<a href="#81" id="81">81</a>
-<a href="#82" id="82">82</a>
-<a href="#83" id="83">83</a>
-<a href="#84" id="84">84</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -109,11 +99,12 @@
 <span class="kw">use </span><span class="kw">crate</span>::key::table_route::TableRouteValue;
 <span class="kw">use </span><span class="kw">crate</span>::key::TableMetadataManagerRef;
 <span class="kw">use </span><span class="kw">crate</span>::region_keeper::MemoryRegionKeeperRef;
-<span class="kw">use </span><span class="kw">crate</span>::rpc::ddl::{CreateTableTask, SubmitDdlTaskRequest, SubmitDdlTaskResponse};
+<span class="kw">use </span><span class="kw">crate</span>::rpc::ddl::{SubmitDdlTaskRequest, SubmitDdlTaskResponse};
 
 <span class="kw">pub mod </span>alter_table;
 <span class="kw">pub mod </span>create_table;
 <span class="kw">pub mod </span>drop_table;
+<span class="kw">pub mod </span>table_meta;
 <span class="kw">pub mod </span>truncate_table;
 <span class="kw">pub mod </span>utils;
 
@@ -148,17 +139,6 @@
     </span><span class="comment">// If a region does not have an associated wal options, no key for the region would be found in the map.
     </span><span class="kw">pub </span>region_wal_options: HashMap&lt;RegionNumber, String&gt;,
 }
-
-<span class="attr">#[async_trait::async_trait]
-</span><span class="kw">pub trait </span>TableMetadataAllocator: Send + Sync {
-    <span class="kw">async fn </span>create(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        ctx: <span class="kw-2">&amp;</span>TableMetadataAllocatorContext,
-        task: <span class="kw-2">&amp;</span>CreateTableTask,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;TableMetadata&gt;;
-}
-
-<span class="kw">pub type </span>TableMetadataAllocatorRef = Arc&lt;<span class="kw">dyn </span>TableMetadataAllocator&gt;;
 
 <span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>DdlContext {

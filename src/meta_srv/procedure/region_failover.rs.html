@@ -785,6 +785,7 @@
 <a href="#784" id="784">784</a>
 <a href="#785" id="785">785</a>
 <a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1170,12 +1171,13 @@
     <span class="kw">use </span>std::sync::Mutex;
 
     <span class="kw">use </span>api::v1::meta::mailbox_message::Payload;
-    <span class="kw">use </span>api::v1::meta::{HeartbeatResponse, MailboxMessage, Peer, RequestHeader};
+    <span class="kw">use </span>api::v1::meta::{HeartbeatResponse, MailboxMessage, RequestHeader};
     <span class="kw">use </span>common_catalog::consts::{DEFAULT_CATALOG_NAME, DEFAULT_SCHEMA_NAME};
     <span class="kw">use </span>common_meta::ddl::utils::region_storage_path;
     <span class="kw">use </span>common_meta::instruction::{Instruction, InstructionReply, OpenRegion, SimpleReply};
     <span class="kw">use </span>common_meta::key::TableMetadataManager;
     <span class="kw">use </span>common_meta::kv_backend::memory::MemoryKvBackend;
+    <span class="kw">use </span>common_meta::peer::Peer;
     <span class="kw">use </span>common_meta::sequence::SequenceBuilder;
     <span class="kw">use </span>common_meta::DatanodeId;
     <span class="kw">use </span>common_procedure::{BoxedProcedure, ProcedureId};

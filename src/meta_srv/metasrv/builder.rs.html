@@ -432,6 +432,9 @@
 <a href="#431" id="431">431</a>
 <a href="#432" id="432">432</a>
 <a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -455,7 +458,7 @@
 <span class="kw">use </span>common_catalog::consts::MIN_USER_TABLE_ID;
 <span class="kw">use </span>common_grpc::channel_manager::ChannelConfig;
 <span class="kw">use </span>common_meta::datanode_manager::DatanodeManagerRef;
-<span class="kw">use </span>common_meta::ddl::TableMetadataAllocatorRef;
+<span class="kw">use </span>common_meta::ddl::table_meta::TableMetadataAllocator;
 <span class="kw">use </span>common_meta::ddl_manager::{DdlManager, DdlManagerRef};
 <span class="kw">use </span>common_meta::distributed_time_constants;
 <span class="kw">use </span>common_meta::key::{TableMetadataManager, TableMetadataManagerRef};
@@ -498,7 +501,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::service::mailbox::MailboxRef;
 <span class="kw">use </span><span class="kw">crate</span>::service::store::cached_kv::{CheckLeader, LeaderCachedKvBackend};
 <span class="kw">use </span><span class="kw">crate</span>::state::State;
-<span class="kw">use </span><span class="kw">crate</span>::table_meta_alloc::MetaSrvTableMetadataAllocator;
+<span class="kw">use </span><span class="kw">crate</span>::table_meta_alloc::MetasrvPeerAllocator;
 
 <span class="comment">// TODO(fys): try use derive_builder macro
 </span><span class="kw">pub struct </span>MetaSrvBuilder {
@@ -512,7 +515,7 @@
     lock: <span class="prelude-ty">Option</span>&lt;DistLockRef&gt;,
     datanode_manager: <span class="prelude-ty">Option</span>&lt;DatanodeManagerRef&gt;,
     plugins: <span class="prelude-ty">Option</span>&lt;Plugins&gt;,
-    table_metadata_allocator: <span class="prelude-ty">Option</span>&lt;TableMetadataAllocatorRef&gt;,
+    table_metadata_allocator: <span class="prelude-ty">Option</span>&lt;TableMetadataAllocator&gt;,
 }
 
 <span class="kw">impl </span>MetaSrvBuilder {
@@ -584,7 +587,7 @@
 
     <span class="kw">pub fn </span>table_metadata_allocator(
         <span class="kw-2">mut </span><span class="self">self</span>,
-        table_metadata_allocator: TableMetadataAllocatorRef,
+        table_metadata_allocator: TableMetadataAllocator,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.table_metadata_allocator = <span class="prelude-val">Some</span>(table_metadata_allocator);
         <span class="self">self
@@ -652,12 +655,15 @@
                     .step(<span class="number">10</span>)
                     .build(),
             );
-            Arc::new(MetaSrvTableMetadataAllocator::new(
+            <span class="kw">let </span>peer_allocator = Arc::new(MetasrvPeerAllocator::new(
                 selector_ctx.clone(),
                 selector.clone(),
-                sequence.clone(),
+            ));
+            TableMetadataAllocator::with_peer_allocator(
+                sequence,
                 wal_options_allocator.clone(),
-            ))
+                peer_allocator,
+            )
         });
 
         <span class="kw">let </span>opening_region_keeper = Arc::new(MemoryRegionKeeper::default());
@@ -816,7 +822,7 @@
     procedure_manager: <span class="kw-2">&amp;</span>ProcedureManagerRef,
     mailbox: <span class="kw-2">&amp;</span>MailboxRef,
     table_metadata_manager: <span class="kw-2">&amp;</span>TableMetadataManagerRef,
-    table_metadata_allocator: TableMetadataAllocatorRef,
+    table_metadata_allocator: TableMetadataAllocator,
     memory_region_keeper: <span class="kw-2">&amp;</span>MemoryRegionKeeperRef,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;DdlManagerRef&gt; {
     <span class="kw">let </span>datanode_clients = datanode_clients.unwrap_or_else(|| {

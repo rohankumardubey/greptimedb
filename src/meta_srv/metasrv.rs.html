@@ -477,13 +477,13 @@
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::Duration;
 
-<span class="kw">use </span>api::v1::meta::Peer;
 <span class="kw">use </span>common_base::Plugins;
 <span class="kw">use </span>common_greptimedb_telemetry::GreptimeDBTelemetryTask;
 <span class="kw">use </span>common_grpc::channel_manager;
 <span class="kw">use </span>common_meta::ddl::DdlTaskExecutorRef;
 <span class="kw">use </span>common_meta::key::TableMetadataManagerRef;
 <span class="kw">use </span>common_meta::kv_backend::{KvBackendRef, ResettableKvBackend, ResettableKvBackendRef};
+<span class="kw">use </span>common_meta::peer::Peer;
 <span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeperRef;
 <span class="kw">use </span>common_meta::wal::options_allocator::WalOptionsAllocatorRef;
 <span class="kw">use </span>common_meta::wal::WalConfig;
