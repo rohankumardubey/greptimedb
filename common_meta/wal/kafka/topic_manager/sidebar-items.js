@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["CREATED_TOPICS_KEY"],"struct":["TopicManager"]};
+window.SIDEBAR_ITEMS = {"constant":["CREATED_TOPICS_KEY","DEFAULT_PARTITION"],"struct":["TopicManager"]};
