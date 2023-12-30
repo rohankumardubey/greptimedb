@@ -476,6 +476,16 @@
 <a href="#475" id="475">475</a>
 <a href="#476" id="476">476</a>
 <a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -511,7 +521,12 @@
         <span class="kw">let </span>region_id = ctx.region_id();
         <span class="kw">let </span>table_route_value = ctx.get_table_route_value().<span class="kw">await</span><span class="question-mark">?</span>.clone();
 
-        <span class="kw">let </span><span class="kw-2">mut </span>region_routes = table_route_value.region_routes().clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>region_routes = table_route_value
+            .region_routes()
+            .context(error::UnexpectedLogicalRouteTableSnafu {
+                err_msg: <span class="string">"{self:?} is a non-physical TableRouteValue."</span>,
+            })<span class="question-mark">?
+            </span>.clone();
         <span class="kw">let </span>region_route = region_routes
             .iter_mut()
             .find(|route| route.region.id == region_id)
@@ -559,7 +574,12 @@
         <span class="kw">let </span>region_id = ctx.region_id();
         <span class="kw">let </span>table_route_value = ctx.get_table_route_value().<span class="kw">await</span><span class="question-mark">?</span>.clone();
 
-        <span class="kw">let </span>region_routes = table_route_value.region_routes().clone();
+        <span class="kw">let </span>region_routes = table_route_value
+            .region_routes()
+            .context(error::UnexpectedLogicalRouteTableSnafu {
+                err_msg: <span class="string">"{self:?} is a non-physical TableRouteValue."</span>,
+            })<span class="question-mark">?
+            </span>.clone();
         <span class="kw">let </span>region_route = region_routes
             .into_iter()
             .find(|route| route.region.id == region_id)
@@ -943,7 +963,7 @@
             </span>.unwrap()
             .unwrap()
             .into_inner();
-        <span class="kw">let </span>region_routes = table_route.region_routes();
+        <span class="kw">let </span>region_routes = table_route.region_routes().unwrap();
 
         <span class="macro">assert!</span>(ctx.volatile_ctx.table_route.is_none());
         <span class="macro">assert!</span>(ctx.volatile_ctx.opening_region_guard.is_none());

@@ -794,7 +794,7 @@
     <span class="kw">let </span>table_route_value =
         table_route_value.context(error::TableRouteNotFoundSnafu { table_id })<span class="question-mark">?</span>;
 
-    <span class="kw">let </span>table_route = table_route_value.into_inner().region_routes().clone();
+    <span class="kw">let </span>table_route = table_route_value.into_inner().region_routes()<span class="question-mark">?</span>.clone();
 
     <span class="kw">let </span>id = ddl_manager
         .submit_truncate_table_task(

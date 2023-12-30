@@ -1321,6 +1321,14 @@
 <a href="#1320" id="1320">1320</a>
 <a href="#1321" id="1321">1321</a>
 <a href="#1322" id="1322">1322</a>
+<a href="#1323" id="1323">1323</a>
+<a href="#1324" id="1324">1324</a>
+<a href="#1325" id="1325">1325</a>
+<a href="#1326" id="1326">1326</a>
+<a href="#1327" id="1327">1327</a>
+<a href="#1328" id="1328">1328</a>
+<a href="#1329" id="1329">1329</a>
+<a href="#1330" id="1330">1330</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1806,7 +1814,7 @@
             .build_delete_txn(table_id, table_info_value)<span class="question-mark">?</span>;
 
         <span class="comment">// Deletes datanode table key value pairs.
-        </span><span class="kw">let </span>distribution = region_distribution(table_route_value.region_routes())<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>distribution = region_distribution(table_route_value.region_routes()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
         <span class="kw">let </span>delete_datanode_txn = <span class="self">self
             </span>.datanode_table_manager()
             .build_delete_txn(table_id, distribution)<span class="question-mark">?</span>;
@@ -1931,7 +1939,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="comment">// Updates the datanode table key value pairs.
         </span><span class="kw">let </span>current_region_distribution =
-            region_distribution(current_table_route_value.region_routes())<span class="question-mark">?</span>;
+            region_distribution(current_table_route_value.region_routes()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
         <span class="kw">let </span>new_region_distribution = region_distribution(<span class="kw-2">&amp;</span>new_region_routes)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>update_datanode_table_txn = <span class="self">self</span>.datanode_table_manager().build_update_txn(
@@ -1944,7 +1952,7 @@
         )<span class="question-mark">?</span>;
 
         <span class="comment">// Updates the table_route.
-        </span><span class="kw">let </span>new_table_route_value = current_table_route_value.update(new_region_routes);
+        </span><span class="kw">let </span>new_table_route_value = current_table_route_value.update(new_region_routes)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>(update_table_route_txn, on_update_table_route_failure) = <span class="self">self
             </span>.table_route_manager()
@@ -1979,7 +1987,7 @@
     <span class="kw">where
         </span>F: Fn(<span class="kw-2">&amp;</span>RegionRoute) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="prelude-ty">Option</span>&lt;RegionStatus&gt;&gt;,
     {
-        <span class="kw">let </span><span class="kw-2">mut </span>new_region_routes = current_table_route_value.region_routes().clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>new_region_routes = current_table_route_value.region_routes()<span class="question-mark">?</span>.clone();
 
         <span class="kw">let </span><span class="kw-2">mut </span>updated = <span class="number">0</span>;
         <span class="kw">for </span>route <span class="kw">in </span><span class="kw-2">&amp;mut </span>new_region_routes {
@@ -1996,7 +2004,7 @@
         }
 
         <span class="comment">// Updates the table_route.
-        </span><span class="kw">let </span>new_table_route_value = current_table_route_value.update(new_region_routes);
+        </span><span class="kw">let </span>new_table_route_value = current_table_route_value.update(new_region_routes)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>(update_table_route_txn, on_update_table_route_failure) = <span class="self">self
             </span>.table_route_manager()
@@ -2220,7 +2228,11 @@
             table_info
         );
         <span class="macro">assert_eq!</span>(
-            remote_table_route.unwrap().into_inner().region_routes(),
+            remote_table_route
+                .unwrap()
+                .into_inner()
+                .region_routes()
+                .unwrap(),
             region_routes
         );
     }
@@ -2301,7 +2313,7 @@
             </span>.unwrap()
             .unwrap()
             .into_inner();
-        <span class="macro">assert_eq!</span>(removed_table_route.region_routes(), region_routes);
+        <span class="macro">assert_eq!</span>(removed_table_route.region_routes().unwrap(), region_routes);
     }
 
     <span class="attr">#[tokio::test]
@@ -2496,11 +2508,11 @@
             .unwrap();
 
         <span class="macro">assert_eq!</span>(
-            updated_route_value.region_routes()[<span class="number">0</span>].leader_status,
+            updated_route_value.region_routes().unwrap()[<span class="number">0</span>].leader_status,
             <span class="prelude-val">Some</span>(RegionStatus::Downgraded)
         );
         <span class="macro">assert_eq!</span>(
-            updated_route_value.region_routes()[<span class="number">1</span>].leader_status,
+            updated_route_value.region_routes().unwrap()[<span class="number">1</span>].leader_status,
             <span class="prelude-val">Some</span>(RegionStatus::Downgraded)
         );
     }
@@ -2594,7 +2606,8 @@
         <span class="kw">let </span>current_table_route_value = DeserializedValueWithBytes::from_inner(
             current_table_route_value
                 .inner
-                .update(new_region_routes.clone()),
+                .update(new_region_routes.clone())
+                .unwrap(),
         );
         <span class="kw">let </span>new_region_routes = <span class="macro">vec!</span>[new_region_route(<span class="number">2</span>, <span class="number">4</span>), new_region_route(<span class="number">5</span>, <span class="number">5</span>)];
         <span class="comment">// it should be ok.
@@ -2618,13 +2631,16 @@
 
         <span class="comment">// if the current_table_route_value is wrong, it should return an error.
         // The ABA problem.
-        </span><span class="kw">let </span>wrong_table_route_value =
-            DeserializedValueWithBytes::from_inner(current_table_route_value.update(<span class="macro">vec!</span>[
-                new_region_route(<span class="number">1</span>, <span class="number">1</span>),
-                new_region_route(<span class="number">2</span>, <span class="number">2</span>),
-                new_region_route(<span class="number">3</span>, <span class="number">3</span>),
-                new_region_route(<span class="number">4</span>, <span class="number">4</span>),
-            ]));
+        </span><span class="kw">let </span>wrong_table_route_value = DeserializedValueWithBytes::from_inner(
+            current_table_route_value
+                .update(<span class="macro">vec!</span>[
+                    new_region_route(<span class="number">1</span>, <span class="number">1</span>),
+                    new_region_route(<span class="number">2</span>, <span class="number">2</span>),
+                    new_region_route(<span class="number">3</span>, <span class="number">3</span>),
+                    new_region_route(<span class="number">4</span>, <span class="number">4</span>),
+                ])
+                .unwrap(),
+        );
         <span class="macro">assert!</span>(table_metadata_manager
             .update_table_route(
                 table_id,

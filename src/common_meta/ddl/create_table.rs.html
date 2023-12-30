@@ -698,7 +698,7 @@
                     </span>.context(TableRouteNotFoundSnafu {
                         table_id: physical_table_id,
                     })<span class="question-mark">?</span>;
-                <span class="kw">let </span>region_routes = physical_table_route.region_routes();
+                <span class="kw">let </span>region_routes = physical_table_route.region_routes()<span class="question-mark">?</span>;
 
                 <span class="kw">let </span>request_builder = <span class="self">self</span>.new_region_request_builder(<span class="prelude-val">Some</span>(physical_table_id))<span class="question-mark">?</span>;
 

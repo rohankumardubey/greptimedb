@@ -708,7 +708,7 @@
             .<span class="kw">await</span><span class="question-mark">?
             </span>.context(TableRouteNotFoundSnafu { table_id })<span class="question-mark">?
             </span>.into_inner();
-        <span class="kw">let </span>region_routes = table_route.region_routes();
+        <span class="kw">let </span>region_routes = table_route.region_routes()<span class="question-mark">?</span>;
 
         <span class="kw">let </span>leaders = find_leaders(region_routes);
         <span class="kw">let </span><span class="kw-2">mut </span>alter_region_tasks = Vec::with_capacity(leaders.len());

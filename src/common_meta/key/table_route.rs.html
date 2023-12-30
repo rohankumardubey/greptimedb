@@ -376,6 +376,28 @@
 <a href="#375" id="375">375</a>
 <a href="#376" id="376">376</a>
 <a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -394,12 +416,12 @@
 <span class="kw">use </span>std::fmt::Display;
 
 <span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>snafu::ResultExt;
+<span class="kw">use </span>snafu::{ensure, ResultExt};
 <span class="kw">use </span>store_api::storage::{RegionId, RegionNumber};
 <span class="kw">use </span>table::metadata::TableId;
 
 <span class="kw">use super</span>::{DeserializedValueWithBytes, TableMetaValue};
-<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="prelude-ty">Result</span>, SerdeJsonSnafu};
+<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="prelude-ty">Result</span>, SerdeJsonSnafu, UnexpectedLogicalRouteTableSnafu};
 <span class="kw">use </span><span class="kw">crate</span>::key::{to_removed_key, RegionDistribution, TableMetaKey, TABLE_ROUTE_PREFIX};
 <span class="kw">use </span><span class="kw">crate</span>::kv_backend::txn::{Compare, CompareOp, Txn, TxnOp, TxnOpResponse};
 <span class="kw">use </span><span class="kw">crate</span>::kv_backend::KvBackendRef;
@@ -440,29 +462,48 @@
     }
 
     <span class="doccomment">/// Returns a new version [TableRouteValue] with `region_routes`.
-    </span><span class="kw">pub fn </span>update(<span class="kw-2">&amp;</span><span class="self">self</span>, region_routes: Vec&lt;RegionRoute&gt;) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>update(<span class="kw-2">&amp;</span><span class="self">self</span>, region_routes: Vec&lt;RegionRoute&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="macro">ensure!</span>(
+            <span class="self">self</span>.is_physical(),
+            UnexpectedLogicalRouteTableSnafu {
+                err_msg: <span class="string">"{self:?} is a non-physical TableRouteValue."</span>,
+            }
+        );
         <span class="kw">let </span>version = <span class="self">self</span>.physical_table_route().version;
-        <span class="self">Self</span>::Physical(PhysicalTableRouteValue {
+        <span class="prelude-val">Ok</span>(<span class="self">Self</span>::Physical(PhysicalTableRouteValue {
             region_routes,
             version: version + <span class="number">1</span>,
-        })
+        }))
     }
 
     <span class="doccomment">/// Returns the version.
     ///
     /// For test purpose.
     </span><span class="attr">#[cfg(any(test, feature = <span class="string">"testing"</span>))]
-    </span><span class="kw">pub fn </span>version(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; u64 {
-        <span class="self">self</span>.physical_table_route().version
+    </span><span class="kw">pub fn </span>version(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;u64&gt; {
+        <span class="macro">ensure!</span>(
+            <span class="self">self</span>.is_physical(),
+            UnexpectedLogicalRouteTableSnafu {
+                err_msg: <span class="string">"{self:?} is a non-physical TableRouteValue."</span>,
+            }
+        );
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.physical_table_route().version)
     }
 
     <span class="doccomment">/// Returns the corresponding [RegionRoute].
-    </span><span class="kw">pub fn </span>region_route(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) -&gt; <span class="prelude-ty">Option</span>&lt;RegionRoute&gt; {
-        <span class="self">self</span>.physical_table_route()
+    </span><span class="kw">pub fn </span>region_route(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;RegionRoute&gt;&gt; {
+        <span class="macro">ensure!</span>(
+            <span class="self">self</span>.is_physical(),
+            UnexpectedLogicalRouteTableSnafu {
+                err_msg: <span class="string">"{self:?} is a non-physical TableRouteValue."</span>,
+            }
+        );
+        <span class="prelude-val">Ok</span>(<span class="self">self
+            </span>.physical_table_route()
             .region_routes
             .iter()
             .find(|route| route.region.id == region_id)
-            .cloned()
+            .cloned())
     }
 
     <span class="doccomment">/// Returns true if it's [TableRouteValue::Physical].
@@ -471,11 +512,14 @@
     }
 
     <span class="doccomment">/// Gets the [RegionRoute]s of this [TableRouteValue::Physical].
-    ///
-    /// # Panics
-    /// The route type is not the [TableRouteValue::Physical].
-    </span><span class="kw">pub fn </span>region_routes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;RegionRoute&gt; {
-        <span class="kw-2">&amp;</span><span class="self">self</span>.physical_table_route().region_routes
+    </span><span class="kw">pub fn </span>region_routes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>Vec&lt;RegionRoute&gt;&gt; {
+        <span class="macro">ensure!</span>(
+            <span class="self">self</span>.is_physical(),
+            UnexpectedLogicalRouteTableSnafu {
+                err_msg: <span class="string">"{self:?} is a non-physical TableRouteValue."</span>,
+            }
+        );
+        <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.physical_table_route().region_routes)
     }
 
     <span class="kw">fn </span>physical_table_route(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>PhysicalTableRouteValue {
@@ -732,7 +776,7 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;RegionDistribution&gt;&gt; {
         <span class="self">self</span>.get(table_id)
             .<span class="kw">await</span><span class="question-mark">?
-            </span>.map(|table_route| region_distribution(table_route.region_routes()))
+            </span>.map(|table_route| region_distribution(table_route.region_routes()<span class="question-mark">?</span>))
             .transpose()
     }
 }

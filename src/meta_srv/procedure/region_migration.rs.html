@@ -1730,7 +1730,7 @@
             .unwrap()
             .version();
         <span class="comment">// Should be unchanged.
-        </span><span class="macro">assert_eq!</span>(table_routes_version, <span class="number">0</span>);
+        </span><span class="macro">assert_eq!</span>(table_routes_version.unwrap(), <span class="number">0</span>);
     }
 
     <span class="attr">#[tokio::test]

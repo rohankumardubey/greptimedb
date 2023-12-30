@@ -756,6 +756,14 @@
 <a href="#755" id="755">755</a>
 <a href="#756" id="756">756</a>
 <a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1360,6 +1368,13 @@
 
     <span class="attr">#[snafu(display(<span class="string">"Weight array is not set"</span>))]
     </span>NotSetWeightArray { location: Location },
+
+    <span class="attr">#[snafu(display(<span class="string">"Unexpected table route type: {}"</span>, err_msg))]
+    </span>UnexpectedLogicalRouteTable {
+        location: Location,
+        err_msg: String,
+        source: common_meta::error::Error,
+    },
 }
 
 <span class="kw">impl </span>Error {
@@ -1475,7 +1490,8 @@
             | Error::TableMetadataManager { source, .. }
             | Error::KvBackend { source, .. }
             | Error::UpdateTableRoute { source, .. }
-            | Error::GetFullTableInfo { source, .. } =&gt; source.status_code(),
+            | Error::GetFullTableInfo { source, .. }
+            | Error::UnexpectedLogicalRouteTable { source, .. } =&gt; source.status_code(),
 
             Error::InitMetadata { source, .. } | Error::InitDdlManager { source, .. } =&gt; {
                 source.status_code()

@@ -487,6 +487,12 @@
 <a href="#486" id="486">486</a>
 <a href="#487" id="487">487</a>
 <a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -574,7 +580,12 @@
             </span>.context(error::TableMetadataManagerSnafu)<span class="question-mark">?
             </span>.context(TableRouteNotFoundSnafu { table_id })<span class="question-mark">?</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>new_region_routes = table_route_value.region_routes().clone();
+        <span class="kw">let </span><span class="kw-2">mut </span>new_region_routes = table_route_value
+            .region_routes()
+            .context(error::UnexpectedLogicalRouteTableSnafu {
+                err_msg: <span class="string">"{self:?} is a non-physical TableRouteValue."</span>,
+            })<span class="question-mark">?
+            </span>.clone();
 
         <span class="kw">for </span>region_route <span class="kw">in </span>new_region_routes.iter_mut() {
             <span class="kw">if </span>region_route.region.id.region_number() == failed_region.region_number {
@@ -723,6 +734,7 @@
                 .unwrap()
                 .into_inner()
                 .region_routes()
+                .unwrap()
                 .clone()
         }
 
@@ -885,8 +897,8 @@
                 .unwrap()
                 .into_inner();
 
-            <span class="kw">let </span>peers = <span class="kw-2">&amp;</span>extract_all_peers(table_route_value.region_routes());
-            <span class="kw">let </span>actual = table_route_value.region_routes();
+            <span class="kw">let </span>peers = <span class="kw-2">&amp;</span>extract_all_peers(table_route_value.region_routes().unwrap());
+            <span class="kw">let </span>actual = table_route_value.region_routes().unwrap();
             <span class="kw">let </span>expected = <span class="kw-2">&amp;</span><span class="macro">vec!</span>[
                 new_region_route(<span class="number">1</span>, peers, <span class="number">2</span>),
                 new_region_route(<span class="number">2</span>, peers, <span class="number">3</span>),
@@ -905,7 +917,7 @@
                 .unwrap()
                 .into_inner();
 
-            <span class="kw">let </span>map = region_distribution(table_route_value.region_routes()).unwrap();
+            <span class="kw">let </span>map = region_distribution(table_route_value.region_routes().unwrap()).unwrap();
             <span class="macro">assert_eq!</span>(map.len(), <span class="number">2</span>);
             <span class="macro">assert_eq!</span>(map.get(<span class="kw-2">&amp;</span><span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">3</span>]));
             <span class="macro">assert_eq!</span>(map.get(<span class="kw-2">&amp;</span><span class="number">3</span>), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">2</span>, <span class="number">4</span>]));

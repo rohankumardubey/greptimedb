@@ -449,7 +449,7 @@
 
     <span class="doccomment">/// Register dropping regions if doesn't exist.
     </span><span class="kw">fn </span>register_dropping_regions(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>region_routes = <span class="self">self</span>.data.region_routes();
+        <span class="kw">let </span>region_routes = <span class="self">self</span>.data.region_routes()<span class="question-mark">?</span>;
 
         <span class="kw">let </span>dropping_regions = operating_leader_regions(region_routes);
 
@@ -523,7 +523,7 @@
     <span class="kw">pub async fn </span>on_datanode_drop_regions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Status&gt; {
         <span class="kw">let </span>table_id = <span class="self">self</span>.data.table_id();
 
-        <span class="kw">let </span>region_routes = <span class="kw-2">&amp;</span><span class="self">self</span>.data.region_routes();
+        <span class="kw">let </span>region_routes = <span class="kw-2">&amp;</span><span class="self">self</span>.data.region_routes()<span class="question-mark">?</span>;
         <span class="kw">let </span>leaders = find_leaders(region_routes);
         <span class="kw">let </span><span class="kw-2">mut </span>drop_region_tasks = Vec::with_capacity(leaders.len());
 
@@ -639,7 +639,7 @@
         <span class="self">self</span>.task.table_ref()
     }
 
-    <span class="kw">fn </span>region_routes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;RegionRoute&gt; {
+    <span class="kw">fn </span>region_routes(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>Vec&lt;RegionRoute&gt;&gt; {
         <span class="self">self</span>.table_route_value.region_routes()
     }
 
