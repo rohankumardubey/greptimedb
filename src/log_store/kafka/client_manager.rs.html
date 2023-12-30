@@ -125,6 +125,16 @@
 <a href="#124" id="124">124</a>
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,17 +149,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::sync::Arc;
+</span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>common_config::wal::{KafkaConfig, KafkaWalTopic <span class="kw">as </span>Topic};
-<span class="kw">use </span>dashmap::mapref::entry::Entry <span class="kw">as </span>DashMapEntry;
-<span class="kw">use </span>dashmap::DashMap;
 <span class="kw">use </span>rskafka::client::partition::{PartitionClient, UnknownTopicHandling};
 <span class="kw">use </span>rskafka::client::producer::aggregator::RecordAggregator;
 <span class="kw">use </span>rskafka::client::producer::{BatchProducer, BatchProducerBuilder};
 <span class="kw">use </span>rskafka::client::{Client <span class="kw">as </span>RsKafkaClient, ClientBuilder};
 <span class="kw">use </span>rskafka::BackoffConfig;
 <span class="kw">use </span>snafu::ResultExt;
+<span class="kw">use </span>tokio::sync::RwLock;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{BuildClientSnafu, BuildPartitionClientSnafu, <span class="prelude-ty">Result</span>};
 
@@ -194,7 +204,7 @@
     </span>client_factory: RsKafkaClient,
     <span class="doccomment">/// A pool maintaining a collection of clients.
     /// Key: a topic. Value: the associated client of the topic.
-    </span>client_pool: DashMap&lt;Topic, Client&gt;,
+    </span>client_pool: RwLock&lt;HashMap&lt;Topic, Client&gt;&gt;,
 }
 
 <span class="kw">impl </span>ClientManager {
@@ -218,18 +228,28 @@
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             config: config.clone(),
             client_factory: client,
-            client_pool: DashMap::new(),
+            client_pool: RwLock::new(HashMap::new()),
         })
     }
 
     <span class="doccomment">/// Gets the client associated with the topic. If the client does not exist, a new one will
     /// be created and returned.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>get_or_insert(<span class="kw-2">&amp;</span><span class="self">self</span>, topic: <span class="kw-2">&amp;</span>Topic) -&gt; <span class="prelude-ty">Result</span>&lt;Client&gt; {
-        <span class="kw">match </span><span class="self">self</span>.client_pool.entry(topic.to_string()) {
-            DashMapEntry::Occupied(entry) =&gt; <span class="prelude-val">Ok</span>(entry.get().clone()),
-            DashMapEntry::Vacant(entry) =&gt; {
-                <span class="kw">let </span>topic_client = <span class="self">self</span>.try_create_client(topic).<span class="kw">await</span><span class="question-mark">?</span>;
-                <span class="prelude-val">Ok</span>(entry.insert(topic_client).clone())
+        <span class="kw">let </span>client_pool = <span class="self">self</span>.client_pool.read().<span class="kw">await</span>;
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = client_pool.get(topic) {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(client.clone());
+        }
+        <span class="comment">// Manullay releases the read lock.
+        </span>drop(client_pool);
+
+        <span class="comment">// Acquires the write lock.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>client_pool = <span class="self">self</span>.client_pool.write().<span class="kw">await</span>;
+        <span class="kw">match </span>client_pool.get(topic) {
+            <span class="prelude-val">Some</span>(client) =&gt; <span class="prelude-val">Ok</span>(client.clone()),
+            <span class="prelude-val">None </span>=&gt; {
+                <span class="kw">let </span>client = <span class="self">self</span>.try_create_client(topic).<span class="kw">await</span><span class="question-mark">?</span>;
+                client_pool.insert(topic.clone(), client.clone());
+                <span class="prelude-val">Ok</span>(client)
             }
         }
     }

@@ -253,7 +253,6 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
-<a href="#255" id="255">255</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -356,25 +355,24 @@
                 .push(entry);
         }
 
-        <span class="comment">// Builds a record from entries belong to a region and produces them to kafka server.
-        </span><span class="kw">let </span>region_ids = producers.keys().cloned().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="comment">// Produces entries for each region and gets the offset those entries written to.
+        // The returned offset is then converted into an entry id.
+        </span><span class="kw">let </span>last_entry_ids = futures::future::try_join_all(producers.into_iter().map(
+            |(region_id, producer)| <span class="kw">async move </span>{
+                <span class="kw">let </span>entry_id = producer
+                    .produce(<span class="kw-2">&amp;</span><span class="self">self</span>.client_manager)
+                    .<span class="kw">await
+                    </span>.map(TryInto::try_into)<span class="question-mark">??</span>;
+                <span class="prelude-val">Ok</span>((region_id, entry_id))
+            },
+        ))
+        .<span class="kw">await</span><span class="question-mark">?
+        </span>.into_iter()
+        .collect::&lt;HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;();
 
-        <span class="kw">let </span>tasks = producers
-            .into_values()
-            .map(|producer| producer.produce(<span class="kw-2">&amp;</span><span class="self">self</span>.client_manager))
-            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-        <span class="comment">// Each produce operation returns a kafka offset of the produced record.
-        // The offsets are then converted to entry ids.
-        </span><span class="kw">let </span>entry_ids = futures::future::try_join_all(tasks)
-            .<span class="kw">await</span><span class="question-mark">?
-            </span>.into_iter()
-            .map(TryInto::try_into)
-            .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;&gt;()<span class="question-mark">?</span>;
-        <span class="macro">debug!</span>(<span class="string">"The entries are appended at offsets {:?}"</span>, entry_ids);
+        <span class="macro">debug!</span>(<span class="string">"Append batch result: {:?}"</span>, last_entry_ids);
 
-        <span class="prelude-val">Ok</span>(AppendBatchResponse {
-            last_entry_ids: region_ids.into_iter().zip(entry_ids).collect(),
-        })
+        <span class="prelude-val">Ok</span>(AppendBatchResponse { last_entry_ids })
     }
 
     <span class="doccomment">/// Creates a new `EntryStream` to asynchronously generates `Entry` with entry ids
@@ -442,7 +440,7 @@
                     record_offset, ns_clone, high_watermark
                 );
 
-                <span class="comment">// Ignores the noop record.
+                <span class="comment">// Ignores noop records.
                 </span><span class="kw">if </span>record.record.value.is_none() {
                     <span class="kw">continue</span>;
                 }
