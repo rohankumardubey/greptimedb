@@ -324,6 +324,24 @@
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
 <a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -340,7 +358,7 @@
 
 </span><span class="kw">use </span>fst::map::OpBuilder;
 <span class="kw">use </span>fst::{IntoStreamer, Streamer};
-<span class="kw">use </span>regex_automata::DenseDFA;
+<span class="kw">use </span>regex_automata::dfa::dense::DFA;
 <span class="kw">use </span>snafu::{ensure, ResultExt};
 
 <span class="kw">use </span><span class="kw">crate</span>::inverted_index::error::{
@@ -350,15 +368,13 @@
 <span class="kw">use </span><span class="kw">crate</span>::inverted_index::search::predicate::{Predicate, Range};
 <span class="kw">use </span><span class="kw">crate</span>::inverted_index::FstMap;
 
-<span class="kw">type </span>Dfa = DenseDFA&lt;Vec&lt;usize&gt;, usize&gt;;
-
 <span class="doccomment">/// `IntersectionFstApplier` applies intersection operations on an FstMap using specified ranges and regex patterns.
 </span><span class="kw">pub struct </span>IntersectionFstApplier {
     <span class="doccomment">/// A list of `Range` which define inclusive or exclusive ranges for keys to be queried in the FstMap.
     </span>ranges: Vec&lt;Range&gt;,
 
     <span class="doccomment">/// A list of `Dfa` compiled from regular expression patterns.
-    </span>dfas: Vec&lt;Dfa&gt;,
+    </span>dfas: Vec&lt;DFA&lt;Vec&lt;u32&gt;&gt;&gt;,
 }
 
 <span class="kw">impl </span>FstApplier <span class="kw">for </span>IntersectionFstApplier {
@@ -414,8 +430,8 @@
             <span class="kw">match </span>predicate {
                 Predicate::Range(range) =&gt; ranges.push(range.range),
                 Predicate::RegexMatch(regex) =&gt; {
-                    <span class="kw">let </span>dfa = DenseDFA::new(<span class="kw-2">&amp;</span>regex.pattern);
-                    <span class="kw">let </span>dfa = dfa.context(ParseDFASnafu)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>dfa = DFA::new(<span class="kw-2">&amp;</span>regex.pattern);
+                    <span class="kw">let </span>dfa = dfa.map_err(Box::new).context(ParseDFASnafu)<span class="question-mark">?</span>;
                     dfas.push(dfa);
                 }
                 <span class="comment">// Rejection of `InList` predicates is enforced here.
@@ -536,47 +552,67 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_intersection_fst_applier_with_valid_pattern() {
-        <span class="kw">let </span>test_fst = FstMap::from_iter([(<span class="string">"aa"</span>, <span class="number">1</span>), (<span class="string">"bb"</span>, <span class="number">2</span>), (<span class="string">"cc"</span>, <span class="number">3</span>)]).unwrap();
+        <span class="kw">let </span>test_fst = FstMap::from_iter([(<span class="string">"123"</span>, <span class="number">1</span>), (<span class="string">"abc"</span>, <span class="number">2</span>)]).unwrap();
 
-        <span class="kw">let </span>applier = create_applier_from_pattern(<span class="string">"a.?"</span>).unwrap();
-        <span class="kw">let </span>results = applier.apply(<span class="kw-2">&amp;</span>test_fst);
-        <span class="macro">assert_eq!</span>(results, <span class="macro">vec!</span>[<span class="number">1</span>]);
+        <span class="kw">let </span>cases = <span class="macro">vec!</span>[
+            (<span class="string">"1"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"2"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"3"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"^1"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"^2"</span>, <span class="macro">vec!</span>[]),
+            (<span class="string">"^3"</span>, <span class="macro">vec!</span>[]),
+            (<span class="string">"^1.*"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"^.*2"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"^.*3"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"1$"</span>, <span class="macro">vec!</span>[]),
+            (<span class="string">"2$"</span>, <span class="macro">vec!</span>[]),
+            (<span class="string">"3$"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"1.*$"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"2.*$"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"3.*$"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"^1..$"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"^.2.$"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"^..3$"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"^[0-9]"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"^[0-9]+$"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"^[0-9][0-9]$"</span>, <span class="macro">vec!</span>[]),
+            (<span class="string">"^[0-9][0-9][0-9]$"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"^123$"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+            (<span class="string">"a"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"b"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"c"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"^a"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"^b"</span>, <span class="macro">vec!</span>[]),
+            (<span class="string">"^c"</span>, <span class="macro">vec!</span>[]),
+            (<span class="string">"^a.*"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"^.*b"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"^.*c"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"a$"</span>, <span class="macro">vec!</span>[]),
+            (<span class="string">"b$"</span>, <span class="macro">vec!</span>[]),
+            (<span class="string">"c$"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"a.*$"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"b.*$"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"c.*$"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"^.[a-z]"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"^abc$"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"^ab$"</span>, <span class="macro">vec!</span>[]),
+            (<span class="string">"abc$"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"^a.c$"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"^..c$"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">"ab"</span>, <span class="macro">vec!</span>[<span class="number">2</span>]),
+            (<span class="string">".*"</span>, <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>]),
+            (<span class="string">""</span>, <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>]),
+            (<span class="string">"^$"</span>, <span class="macro">vec!</span>[]),
+            (<span class="string">"1|a"</span>, <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>]),
+            (<span class="string">"^123$|^abc$"</span>, <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>]),
+            (<span class="string">"^123$|d"</span>, <span class="macro">vec!</span>[<span class="number">1</span>]),
+        ];
 
-        <span class="kw">let </span>applier = create_applier_from_pattern(<span class="string">"b.?"</span>).unwrap();
-        <span class="kw">let </span>results = applier.apply(<span class="kw-2">&amp;</span>test_fst);
-        <span class="macro">assert_eq!</span>(results, <span class="macro">vec!</span>[<span class="number">2</span>]);
-
-        <span class="kw">let </span>applier = create_applier_from_pattern(<span class="string">"c.?"</span>).unwrap();
-        <span class="kw">let </span>results = applier.apply(<span class="kw-2">&amp;</span>test_fst);
-        <span class="macro">assert_eq!</span>(results, <span class="macro">vec!</span>[<span class="number">3</span>]);
-
-        <span class="kw">let </span>applier = create_applier_from_pattern(<span class="string">"a.*"</span>).unwrap();
-        <span class="kw">let </span>results = applier.apply(<span class="kw-2">&amp;</span>test_fst);
-        <span class="macro">assert_eq!</span>(results, <span class="macro">vec!</span>[<span class="number">1</span>]);
-
-        <span class="kw">let </span>applier = create_applier_from_pattern(<span class="string">"b.*"</span>).unwrap();
-        <span class="kw">let </span>results = applier.apply(<span class="kw-2">&amp;</span>test_fst);
-        <span class="macro">assert_eq!</span>(results, <span class="macro">vec!</span>[<span class="number">2</span>]);
-
-        <span class="kw">let </span>applier = create_applier_from_pattern(<span class="string">"c.*"</span>).unwrap();
-        <span class="kw">let </span>results = applier.apply(<span class="kw-2">&amp;</span>test_fst);
-        <span class="macro">assert_eq!</span>(results, <span class="macro">vec!</span>[<span class="number">3</span>]);
-
-        <span class="kw">let </span>applier = create_applier_from_pattern(<span class="string">"d.?"</span>).unwrap();
-        <span class="kw">let </span>results = applier.apply(<span class="kw-2">&amp;</span>test_fst);
-        <span class="macro">assert!</span>(results.is_empty());
-
-        <span class="kw">let </span>applier = create_applier_from_pattern(<span class="string">"a.?|b.?"</span>).unwrap();
-        <span class="kw">let </span>results = applier.apply(<span class="kw-2">&amp;</span>test_fst);
-        <span class="macro">assert_eq!</span>(results, <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>]);
-
-        <span class="kw">let </span>applier = create_applier_from_pattern(<span class="string">"d.?|a.?"</span>).unwrap();
-        <span class="kw">let </span>results = applier.apply(<span class="kw-2">&amp;</span>test_fst);
-        <span class="macro">assert_eq!</span>(results, <span class="macro">vec!</span>[<span class="number">1</span>]);
-
-        <span class="kw">let </span>applier = create_applier_from_pattern(<span class="string">".*"</span>).unwrap();
-        <span class="kw">let </span>results = applier.apply(<span class="kw-2">&amp;</span>test_fst);
-        <span class="macro">assert_eq!</span>(results, <span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);
+        <span class="kw">for </span>(pattern, expected) <span class="kw">in </span>cases {
+            <span class="kw">let </span>applier = create_applier_from_pattern(pattern).unwrap();
+            <span class="kw">let </span>results = applier.apply(<span class="kw-2">&amp;</span>test_fst);
+            <span class="macro">assert_eq!</span>(results, expected);
+        }
     }
 
     <span class="attr">#[test]

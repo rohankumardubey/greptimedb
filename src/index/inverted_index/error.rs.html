@@ -322,7 +322,7 @@
     <span class="attr">#[snafu(display(<span class="string">"Failed to parse regex DFA"</span>))]
     </span>ParseDFA {
         <span class="attr">#[snafu(source)]
-        </span>error: regex_automata::Error,
+        </span>error: Box&lt;regex_automata::dfa::Error&gt;,
         location: Location,
     },
 
