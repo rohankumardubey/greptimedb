@@ -269,6 +269,16 @@
 <a href="#268" id="268">268</a>
 <a href="#269" id="269">269</a>
 <a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -284,6 +294,7 @@
 // limitations under the License.
 
 </span><span class="kw">mod </span>columns;
+<span class="kw">mod </span>key_column_usage;
 <span class="kw">mod </span>memory_table;
 <span class="kw">mod </span>schemata;
 <span class="kw">mod </span>table_names;
@@ -312,6 +323,7 @@
 
 <span class="kw">use </span><span class="self">self</span>::columns::InformationSchemaColumns;
 <span class="kw">use </span><span class="kw">crate</span>::error::Result;
+<span class="kw">use </span><span class="kw">crate</span>::information_schema::key_column_usage::InformationSchemaKeyColumnUsage;
 <span class="kw">use </span><span class="kw">crate</span>::information_schema::memory_table::{get_schema_columns, MemoryTable};
 <span class="kw">use </span><span class="kw">crate</span>::information_schema::schemata::InformationSchemaSchemata;
 <span class="kw">use </span><span class="kw">crate</span>::information_schema::tables::InformationSchemaTables;
@@ -402,6 +414,10 @@
         tables.insert(TABLES.to_string(), <span class="self">self</span>.build_table(TABLES).unwrap());
         tables.insert(SCHEMATA.to_string(), <span class="self">self</span>.build_table(SCHEMATA).unwrap());
         tables.insert(COLUMNS.to_string(), <span class="self">self</span>.build_table(COLUMNS).unwrap());
+        tables.insert(
+            KEY_COLUMN_USAGE.to_string(),
+            <span class="self">self</span>.build_table(KEY_COLUMN_USAGE).unwrap(),
+        );
 
         <span class="comment">// Add memory tables
         </span><span class="kw">for </span>name <span class="kw">in </span>MEMORY_TABLES.iter() {
@@ -444,6 +460,10 @@
             CHECK_CONSTRAINTS =&gt; <span class="macro">setup_memory_table!</span>(CHECK_CONSTRAINTS),
             EVENTS =&gt; <span class="macro">setup_memory_table!</span>(EVENTS),
             FILES =&gt; <span class="macro">setup_memory_table!</span>(FILES),
+            KEY_COLUMN_USAGE =&gt; <span class="prelude-val">Some</span>(Arc::new(InformationSchemaKeyColumnUsage::new(
+                <span class="self">self</span>.catalog_name.clone(),
+                <span class="self">self</span>.catalog_manager.clone(),
+            )) <span class="kw">as _</span>),
             SCHEMATA =&gt; <span class="prelude-val">Some</span>(Arc::new(InformationSchemaSchemata::new(
                 <span class="self">self</span>.catalog_name.clone(),
                 <span class="self">self</span>.catalog_manager.clone(),
