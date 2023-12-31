@@ -267,6 +267,8 @@
 <a href="#266" id="266">266</a>
 <a href="#267" id="267">267</a>
 <a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -327,6 +329,7 @@
         COLLATION_CHARACTER_SET_APPLICABILITY,
         CHECK_CONSTRAINTS,
         EVENTS,
+        FILES,
     ];
 }
 
@@ -440,6 +443,7 @@
             }
             CHECK_CONSTRAINTS =&gt; <span class="macro">setup_memory_table!</span>(CHECK_CONSTRAINTS),
             EVENTS =&gt; <span class="macro">setup_memory_table!</span>(EVENTS),
+            FILES =&gt; <span class="macro">setup_memory_table!</span>(FILES),
             SCHEMATA =&gt; <span class="prelude-val">Some</span>(Arc::new(InformationSchemaSchemata::new(
                 <span class="self">self</span>.catalog_name.clone(),
                 <span class="self">self</span>.catalog_manager.clone(),
