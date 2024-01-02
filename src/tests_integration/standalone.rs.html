@@ -182,6 +182,13 @@
 <a href="#181" id="181">181</a>
 <a href="#182" id="182">182</a>
 <a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -208,7 +215,7 @@
 <span class="kw">use </span>common_meta::key::TableMetadataManager;
 <span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeper;
 <span class="kw">use </span>common_meta::sequence::SequenceBuilder;
-<span class="kw">use </span>common_meta::wal::{WalConfig <span class="kw">as </span>MetaSrvWalConfig, WalOptionsAllocator};
+<span class="kw">use </span>common_meta::wal::{WalConfig <span class="kw">as </span>MetaWalConfig, WalOptionsAllocator};
 <span class="kw">use </span>common_procedure::options::ProcedureConfig;
 <span class="kw">use </span>common_telemetry::logging::LoggingOptions;
 <span class="kw">use </span>datanode::config::DatanodeOptions;
@@ -231,6 +238,7 @@
 </span><span class="kw">pub struct </span>GreptimeDbStandaloneBuilder {
     instance_name: String,
     wal_config: WalConfig,
+    meta_wal_config: MetaWalConfig,
     store_providers: <span class="prelude-ty">Option</span>&lt;Vec&lt;StorageType&gt;&gt;,
     default_store: <span class="prelude-ty">Option</span>&lt;StorageType&gt;,
     plugin: <span class="prelude-ty">Option</span>&lt;Plugins&gt;,
@@ -244,6 +252,7 @@
             plugin: <span class="prelude-val">None</span>,
             default_store: <span class="prelude-val">None</span>,
             wal_config: WalConfig::default(),
+            meta_wal_config: MetaWalConfig::default(),
         }
     }
 
@@ -272,6 +281,11 @@
 
     <span class="kw">pub fn </span>with_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_config: WalConfig) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.wal_config = wal_config;
+        <span class="self">self
+    </span>}
+
+    <span class="kw">pub fn </span>with_meta_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_meta: MetaWalConfig) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.meta_wal_config = wal_meta;
         <span class="self">self
     </span>}
 
@@ -316,7 +330,7 @@
                 .step(<span class="number">10</span>)
                 .build(),
         );
-        <span class="kw">let </span>wal_meta = MetaSrvWalConfig::default();
+        <span class="kw">let </span>wal_meta = <span class="self">self</span>.meta_wal_config.clone();
         <span class="kw">let </span>wal_options_allocator = Arc::new(WalOptionsAllocator::new(
             wal_meta.clone(),
             kv_backend.clone(),

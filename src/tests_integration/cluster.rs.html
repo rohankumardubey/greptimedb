@@ -385,6 +385,19 @@
 <a href="#384" id="384">384</a>
 <a href="#385" id="385">385</a>
 <a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -418,6 +431,7 @@
 <span class="kw">use </span>common_meta::kv_backend::memory::MemoryKvBackend;
 <span class="kw">use </span>common_meta::kv_backend::KvBackendRef;
 <span class="kw">use </span>common_meta::peer::Peer;
+<span class="kw">use </span>common_meta::wal::WalConfig <span class="kw">as </span>MetaWalConfig;
 <span class="kw">use </span>common_meta::DatanodeId;
 <span class="kw">use </span>common_runtime::Builder <span class="kw">as </span>RuntimeBuilder;
 <span class="kw">use </span>common_test_util::temp_dir::create_temp_dir;
@@ -460,6 +474,7 @@
     store_providers: <span class="prelude-ty">Option</span>&lt;Vec&lt;StorageType&gt;&gt;,
     datanodes: <span class="prelude-ty">Option</span>&lt;u32&gt;,
     wal_config: WalConfig,
+    meta_wal_config: MetaWalConfig,
 }
 
 <span class="kw">impl </span>GreptimeDbClusterBuilder {
@@ -486,6 +501,7 @@
             store_providers: <span class="prelude-val">None</span>,
             datanodes: <span class="prelude-val">None</span>,
             wal_config: WalConfig::default(),
+            meta_wal_config: MetaWalConfig::default(),
         }
     }
 
@@ -509,13 +525,29 @@
         <span class="self">self
     </span>}
 
+    <span class="kw">pub fn </span>with_meta_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_meta: MetaWalConfig) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.meta_wal_config = wal_meta;
+        <span class="self">self
+    </span>}
+
     <span class="kw">pub async fn </span>build(<span class="self">self</span>) -&gt; GreptimeDbCluster {
         <span class="kw">let </span>datanodes = <span class="self">self</span>.datanodes.unwrap_or(<span class="number">4</span>);
 
         <span class="kw">let </span>channel_config = ChannelConfig::new().timeout(Duration::from_secs(<span class="number">20</span>));
         <span class="kw">let </span>datanode_clients = Arc::new(DatanodeClients::new(channel_config));
 
-        <span class="kw">let </span>meta_srv = <span class="self">self</span>.build_metasrv(datanode_clients.clone()).<span class="kw">await</span>;
+        <span class="kw">let </span>opt = MetaSrvOptions {
+            procedure: ProcedureConfig {
+                <span class="comment">// Due to large network delay during cross data-center.
+                // We only make max_retry_times and retry_delay large than the default in tests.
+                </span>max_retry_times: <span class="number">5</span>,
+                retry_delay: Duration::from_secs(<span class="number">1</span>),
+            },
+            wal: <span class="self">self</span>.meta_wal_config.clone(),
+            ..Default::default()
+        };
+
+        <span class="kw">let </span>meta_srv = <span class="self">self</span>.build_metasrv(opt, datanode_clients.clone()).<span class="kw">await</span>;
 
         <span class="kw">let </span>(datanode_instances, storage_guards, dir_guards) =
             <span class="self">self</span>.build_datanodes(meta_srv.clone(), datanodes).<span class="kw">await</span>;
@@ -543,17 +575,11 @@
         }
     }
 
-    <span class="kw">async fn </span>build_metasrv(<span class="kw-2">&amp;</span><span class="self">self</span>, datanode_clients: Arc&lt;DatanodeClients&gt;) -&gt; MockInfo {
-        <span class="kw">let </span>opt = MetaSrvOptions {
-            procedure: ProcedureConfig {
-                <span class="comment">// Due to large network delay during cross data-center.
-                // We only make max_retry_times and retry_delay large than the default in tests.
-                </span>max_retry_times: <span class="number">5</span>,
-                retry_delay: Duration::from_secs(<span class="number">1</span>),
-            },
-            ..Default::default()
-        };
-
+    <span class="kw">async fn </span>build_metasrv(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        opt: MetaSrvOptions,
+        datanode_clients: Arc&lt;DatanodeClients&gt;,
+    ) -&gt; MockInfo {
         meta_srv::mocks::mock(opt, <span class="self">self</span>.kv_backend.clone(), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(datanode_clients)).<span class="kw">await
     </span>}
 
