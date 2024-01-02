@@ -493,6 +493,7 @@
 <a href="#492" id="492">492</a>
 <a href="#493" id="493">493</a>
 <a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -518,6 +519,7 @@
 <span class="kw">use </span>common_telemetry::info;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
+<span class="kw">use </span>store_api::storage::RegionNumber;
 
 <span class="kw">use </span><span class="kw">super</span>::invalidate_cache::InvalidateCache;
 <span class="kw">use super</span>::{RegionFailoverContext, State};
@@ -531,7 +533,7 @@
     region_storage_path: String,
     region_options: HashMap&lt;String, String&gt;,
     <span class="attr">#[serde(default)]
-    </span>region_wal_options: HashMap&lt;String, String&gt;,
+    </span>region_wal_options: HashMap&lt;RegionNumber, String&gt;,
 }
 
 <span class="kw">impl </span>UpdateRegionMetadata {
@@ -539,7 +541,7 @@
         candidate: Peer,
         region_storage_path: String,
         region_options: HashMap&lt;String, String&gt;,
-        region_wal_options: HashMap&lt;String, String&gt;,
+        region_wal_options: HashMap&lt;RegionNumber, String&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             candidate,

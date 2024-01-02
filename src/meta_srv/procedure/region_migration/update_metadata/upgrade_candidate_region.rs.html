@@ -478,14 +478,6 @@
 <a href="#477" id="477">477</a>
 <a href="#478" id="478">478</a>
 <a href="#479" id="479">479</a>
-<a href="#480" id="480">480</a>
-<a href="#481" id="481">481</a>
-<a href="#482" id="482">482</a>
-<a href="#483" id="483">483</a>
-<a href="#484" id="484">484</a>
-<a href="#485" id="485">485</a>
-<a href="#486" id="486">486</a>
-<a href="#487" id="487">487</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -500,10 +492,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
-
-<span class="kw">use </span>common_meta::ddl::utils::region_storage_path;
-<span class="kw">use </span>common_meta::key::datanode_table::RegionInfo;
+</span><span class="kw">use </span>common_meta::key::datanode_table::RegionInfo;
 <span class="kw">use </span>common_meta::rpc::router::RegionRoute;
 <span class="kw">use </span>common_telemetry::{info, warn};
 <span class="kw">use </span>snafu::{ensure, OptionExt, ResultExt};
@@ -626,19 +615,14 @@
         }
 
         <span class="kw">let </span>region_routes = <span class="self">self</span>.build_upgrade_candidate_region_metadata(ctx).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="kw">let </span>table_info_value = ctx.get_table_info_value().<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>table_info = <span class="kw-2">&amp;</span>table_info_value.table_info;
-        <span class="kw">let </span>region_storage_path =
-            region_storage_path(<span class="kw-2">&amp;</span>table_info.catalog_name, <span class="kw-2">&amp;</span>table_info.schema_name);
-        <span class="kw">let </span>engine = table_info.meta.engine.clone();
-        <span class="kw">let </span>region_options: HashMap&lt;String, String&gt; = (<span class="kw-2">&amp;</span>table_info.meta.options).into();
-
-        <span class="comment">// TODO(niebayes): properly fetch or construct region wal options.
-        </span><span class="kw">let </span>region_wal_options = HashMap::new();
-
-        <span class="comment">// No remote fetch.
-        </span><span class="kw">let </span>table_route_value = ctx.get_table_route_value().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>datanode_table_value = ctx.get_from_peer_datanode_table_value().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>RegionInfo {
+            region_storage_path,
+            region_options,
+            region_wal_options,
+            engine,
+        } = datanode_table_value.region_info.clone();
+        <span class="kw">let </span>table_route_value = ctx.get_table_route_value().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = table_metadata_manager
             .update_table_route(

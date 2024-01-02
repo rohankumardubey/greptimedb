@@ -1935,7 +1935,7 @@
         current_table_route_value: <span class="kw-2">&amp;</span>DeserializedValueWithBytes&lt;TableRouteValue&gt;,
         new_region_routes: Vec&lt;RegionRoute&gt;,
         new_region_options: <span class="kw-2">&amp;</span>HashMap&lt;String, String&gt;,
-        new_region_wal_options: <span class="kw-2">&amp;</span>HashMap&lt;String, String&gt;,
+        new_region_wal_options: <span class="kw-2">&amp;</span>HashMap&lt;RegionNumber, String&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="comment">// Updates the datanode table key value pairs.
         </span><span class="kw">let </span>current_region_distribution =

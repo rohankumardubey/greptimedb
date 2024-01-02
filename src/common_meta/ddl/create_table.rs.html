@@ -473,12 +473,6 @@
 <a href="#472" id="472">472</a>
 <a href="#473" id="473">473</a>
 <a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
-<a href="#478" id="478">478</a>
-<a href="#479" id="479">479</a>
-<a href="#480" id="480">480</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -501,7 +495,6 @@
 };
 <span class="kw">use </span>api::v1::{ColumnDef, SemanticType};
 <span class="kw">use </span>async_trait::async_trait;
-<span class="kw">use </span>common_config::WAL_OPTIONS_KEY;
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_procedure::error::{
     ExternalSnafu, FromJsonSnafu, <span class="prelude-ty">Result </span><span class="kw">as </span>ProcedureResult, ToJsonSnafu,
@@ -529,6 +522,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::rpc::router::{
     find_leader_regions, find_leaders, operating_leader_regions, RegionRoute,
 };
+<span class="kw">use </span><span class="kw">crate</span>::wal::prepare_wal_option;
 
 <span class="kw">pub struct </span>CreateTableProcedure {
     <span class="kw">pub </span>context: DdlContext,
@@ -936,13 +930,7 @@
         request.region_id = region_id.as_u64();
         request.path = storage_path;
         <span class="comment">// Stores the encoded wal options into the request options.
-        </span>region_wal_options
-            .get(<span class="kw-2">&amp;</span>region_id.region_number())
-            .and_then(|wal_options| {
-                request
-                    .options
-                    .insert(WAL_OPTIONS_KEY.to_string(), wal_options.clone())
-            });
+        </span>prepare_wal_option(<span class="kw-2">&amp;mut </span>request.options, region_id, region_wal_options);
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(physical_table_id) = <span class="self">self</span>.physical_table_id {
             <span class="comment">// Logical table has the same region numbers with physical table, and they have a one-to-one mapping.

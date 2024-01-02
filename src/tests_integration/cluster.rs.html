@@ -369,6 +369,22 @@
 <a href="#368" id="368">368</a>
 <a href="#369" id="369">369</a>
 <a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -393,6 +409,7 @@
 <span class="kw">use </span>client::client_manager::DatanodeClients;
 <span class="kw">use </span>client::Client;
 <span class="kw">use </span>common_base::Plugins;
+<span class="kw">use </span>common_config::WalConfig;
 <span class="kw">use </span>common_grpc::channel_manager::{ChannelConfig, ChannelManager};
 <span class="kw">use </span>common_meta::heartbeat::handler::parse_mailbox_message::ParseMailboxMessageHandler;
 <span class="kw">use </span>common_meta::heartbeat::handler::HandlerGroupExecutor;
@@ -435,12 +452,14 @@
     <span class="kw">pub </span>frontend: Arc&lt;FeInstance&gt;,
 }
 
-<span class="kw">pub struct </span>GreptimeDbClusterBuilder {
+<span class="attr">#[derive(Clone)]
+</span><span class="kw">pub struct </span>GreptimeDbClusterBuilder {
     cluster_name: String,
     kv_backend: KvBackendRef,
     store_config: <span class="prelude-ty">Option</span>&lt;ObjectStoreConfig&gt;,
     store_providers: <span class="prelude-ty">Option</span>&lt;Vec&lt;StorageType&gt;&gt;,
     datanodes: <span class="prelude-ty">Option</span>&lt;u32&gt;,
+    wal_config: WalConfig,
 }
 
 <span class="kw">impl </span>GreptimeDbClusterBuilder {
@@ -466,6 +485,7 @@
             store_config: <span class="prelude-val">None</span>,
             store_providers: <span class="prelude-val">None</span>,
             datanodes: <span class="prelude-val">None</span>,
+            wal_config: WalConfig::default(),
         }
     }
 
@@ -481,6 +501,11 @@
 
     <span class="kw">pub fn </span>with_datanodes(<span class="kw-2">mut </span><span class="self">self</span>, datanodes: u32) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.datanodes = <span class="prelude-val">Some</span>(datanodes);
+        <span class="self">self
+    </span>}
+
+    <span class="kw">pub fn </span>with_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_config: WalConfig) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.wal_config = wal_config;
         <span class="self">self
     </span>}
 
@@ -547,19 +572,27 @@
 
         <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..datanodes {
             <span class="kw">let </span>datanode_id = i <span class="kw">as </span>u64 + <span class="number">1</span>;
-
+            <span class="kw">let </span>mode = Mode::Distributed;
             <span class="kw">let </span><span class="kw-2">mut </span>opts = <span class="kw">if let </span><span class="prelude-val">Some</span>(store_config) = <span class="kw-2">&amp;</span><span class="self">self</span>.store_config {
                 <span class="kw">let </span>home_tmp_dir = create_temp_dir(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"gt_home_{}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.cluster_name));
                 <span class="kw">let </span>home_dir = home_tmp_dir.path().to_str().unwrap().to_string();
 
                 dir_guards.push(FileDirGuard::new(home_tmp_dir));
 
-                create_datanode_opts(store_config.clone(), <span class="macro">vec!</span>[], home_dir)
+                create_datanode_opts(
+                    mode,
+                    store_config.clone(),
+                    <span class="macro">vec!</span>[],
+                    home_dir,
+                    <span class="self">self</span>.wal_config.clone(),
+                )
             } <span class="kw">else </span>{
                 <span class="kw">let </span>(opts, guard) = create_tmp_dir_and_datanode_opts(
+                    mode,
                     StorageType::File,
                     <span class="self">self</span>.store_providers.clone().unwrap_or_default(),
                     <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{}-dn-{}"</span>, <span class="self">self</span>.cluster_name, datanode_id),
+                    <span class="self">self</span>.wal_config.clone(),
                 );
 
                 storage_guards.push(guard.storage_guards);
@@ -568,7 +601,6 @@
                 opts
             };
             opts.node_id = <span class="prelude-val">Some</span>(datanode_id);
-            opts.mode = Mode::Distributed;
 
             <span class="kw">let </span>datanode = <span class="self">self</span>.create_datanode(opts, meta_srv.clone()).<span class="kw">await</span>;
 

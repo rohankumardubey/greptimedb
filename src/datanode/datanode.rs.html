@@ -669,7 +669,6 @@
 <a href="#668" id="668">668</a>
 <a href="#669" id="669">669</a>
 <a href="#670" id="670">670</a>
-<a href="#671" id="671">671</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -694,11 +693,12 @@
 <span class="kw">use </span>catalog::memory::MemoryCatalogManager;
 <span class="kw">use </span>common_base::Plugins;
 <span class="kw">use </span>common_config::wal::{KafkaConfig, RaftEngineConfig};
-<span class="kw">use </span>common_config::{WalConfig, WAL_OPTIONS_KEY};
+<span class="kw">use </span>common_config::WalConfig;
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_greptimedb_telemetry::GreptimeDBTelemetryTask;
 <span class="kw">use </span>common_meta::key::datanode_table::{DatanodeTableManager, DatanodeTableValue};
 <span class="kw">use </span>common_meta::kv_backend::KvBackendRef;
+<span class="kw">use </span>common_meta::wal::prepare_wal_option;
 <span class="kw">pub use </span>common_procedure::options::ProcedureConfig;
 <span class="kw">use </span>common_runtime::Runtime;
 <span class="kw">use </span>common_telemetry::{error, info, warn};
@@ -1210,13 +1210,11 @@
         <span class="kw">for </span>region_number <span class="kw">in </span>table_value.regions {
             <span class="comment">// Augments region options with wal options if a wal options is provided.
             </span><span class="kw">let </span><span class="kw-2">mut </span>region_options = table_value.region_info.region_options.clone();
-            table_value
-                .region_info
-                .region_wal_options
-                .get(<span class="kw-2">&amp;</span>region_number.to_string())
-                .and_then(|wal_options| {
-                    region_options.insert(WAL_OPTIONS_KEY.to_string(), wal_options.clone())
-                });
+            prepare_wal_option(
+                <span class="kw-2">&amp;mut </span>region_options,
+                RegionId::new(table_value.table_id, region_number),
+                <span class="kw-2">&amp;</span>table_value.region_info.region_wal_options,
+            );
 
             regions.push((
                 RegionId::new(table_value.table_id, region_number),
