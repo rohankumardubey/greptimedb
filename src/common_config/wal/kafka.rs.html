@@ -141,8 +141,6 @@
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
 <a href="#142" id="142">142</a>
-<a href="#143" id="143">143</a>
-<a href="#144" id="144">144</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -187,14 +185,14 @@
     </span><span class="attr">#[serde(skip)]
     #[serde(default)]
     </span><span class="kw">pub </span>compression: RsKafkaCompression,
-    <span class="doccomment">/// The maximum log size a kafka batch producer could buffer.
+    <span class="doccomment">/// The max size of a single producer batch.
     </span><span class="kw">pub </span>max_batch_size: ReadableSize,
     <span class="doccomment">/// The linger duration of a kafka batch producer.
     </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
     </span><span class="kw">pub </span>linger: Duration,
-    <span class="doccomment">/// The maximum amount of time (in milliseconds) to wait for Kafka records to be returned.
+    <span class="doccomment">/// The consumer wait timeout.
     </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
-    </span><span class="kw">pub </span>produce_record_timeout: Duration,
+    </span><span class="kw">pub </span>consumer_wait_timeout: Duration,
     <span class="doccomment">/// The backoff config.
     </span><span class="attr">#[serde(flatten, with = <span class="string">"kafka_backoff"</span>)]
     </span><span class="kw">pub </span>backoff: KafkaBackoffConfig,
@@ -207,7 +205,7 @@
             compression: RsKafkaCompression::NoCompression,
             max_batch_size: ReadableSize::mb(<span class="number">4</span>),
             linger: Duration::from_millis(<span class="number">200</span>),
-            produce_record_timeout: Duration::from_millis(<span class="number">100</span>),
+            consumer_wait_timeout: Duration::from_millis(<span class="number">100</span>),
             backoff: KafkaBackoffConfig::default(),
         }
     }
@@ -218,17 +216,15 @@
 <span class="attr">#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(default)]
 </span><span class="kw">pub struct </span>KafkaBackoffConfig {
-    <span class="doccomment">/// The initial backoff for kafka clients.
+    <span class="doccomment">/// The initial backoff delay.
     </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
     </span><span class="kw">pub </span>init: Duration,
-    <span class="doccomment">/// The maximum backoff for kafka clients.
+    <span class="doccomment">/// The maximum backoff delay.
     </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
     </span><span class="kw">pub </span>max: Duration,
     <span class="doccomment">/// Exponential backoff rate, i.e. next backoff = base * current backoff.
-    </span><span class="comment">// Sets to u32 type since some structs containing the KafkaConfig need to derive the Eq trait.
     </span><span class="kw">pub </span>base: u32,
-    <span class="doccomment">/// Stop reconnecting if the total wait time reaches the deadline.
-    /// If it's None, the reconnecting won't terminate.
+    <span class="doccomment">/// The deadline of retries. `None` stands for no deadline.
     </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
     </span><span class="kw">pub </span>deadline: <span class="prelude-ty">Option</span>&lt;Duration&gt;,
 }
@@ -259,7 +255,7 @@
     </span><span class="kw">pub </span>num_partitions: i32,
     <span class="doccomment">/// The replication factor of each topic.
     </span><span class="kw">pub </span>replication_factor: i16,
-    <span class="doccomment">/// Above which a topic creation operation will be cancelled.
+    <span class="doccomment">/// The timeout of topic creation.
     </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
     </span><span class="kw">pub </span>create_topic_timeout: Duration,
 }

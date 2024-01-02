@@ -110,7 +110,7 @@
     </span><span class="kw">pub </span>num_partitions: i32,
     <span class="doccomment">/// The replication factor of each topic.
     </span><span class="kw">pub </span>replication_factor: i16,
-    <span class="doccomment">/// Above which a topic creation operation will be cancelled.
+    <span class="doccomment">/// The timeout of topic creation.
     </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
     </span><span class="kw">pub </span>create_topic_timeout: Duration,
     <span class="doccomment">/// The backoff config.

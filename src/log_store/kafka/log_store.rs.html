@@ -417,7 +417,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>stream_consumer = StreamConsumerBuilder::new(client, StartOffset::At(start_offset))
             .with_max_batch_size(<span class="self">self</span>.config.max_batch_size.as_bytes() <span class="kw">as </span>i32)
-            .with_max_wait_ms(<span class="self">self</span>.config.produce_record_timeout.as_millis() <span class="kw">as </span>i32)
+            .with_max_wait_ms(<span class="self">self</span>.config.consumer_wait_timeout.as_millis() <span class="kw">as </span>i32)
             .build();
 
         <span class="macro">debug!</span>(
