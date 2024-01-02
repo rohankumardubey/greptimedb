@@ -279,6 +279,26 @@
 <a href="#278" id="278">278</a>
 <a href="#279" id="279">279</a>
 <a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -342,6 +362,16 @@
         CHECK_CONSTRAINTS,
         EVENTS,
         FILES,
+        OPTIMIZER_TRACE,
+        PARAMETERS,
+        PROFILING,
+        REFERENTIAL_CONSTRAINTS,
+        ROUTINES,
+        SCHEMA_PRIVILEGES,
+        TABLE_PRIVILEGES,
+        TRIGGERS,
+        GLOBAL_STATUS,
+        SESSION_STATUS,
     ];
 }
 
@@ -460,6 +490,16 @@
             CHECK_CONSTRAINTS =&gt; <span class="macro">setup_memory_table!</span>(CHECK_CONSTRAINTS),
             EVENTS =&gt; <span class="macro">setup_memory_table!</span>(EVENTS),
             FILES =&gt; <span class="macro">setup_memory_table!</span>(FILES),
+            OPTIMIZER_TRACE =&gt; <span class="macro">setup_memory_table!</span>(OPTIMIZER_TRACE),
+            PARAMETERS =&gt; <span class="macro">setup_memory_table!</span>(PARAMETERS),
+            PROFILING =&gt; <span class="macro">setup_memory_table!</span>(PROFILING),
+            REFERENTIAL_CONSTRAINTS =&gt; <span class="macro">setup_memory_table!</span>(REFERENTIAL_CONSTRAINTS),
+            ROUTINES =&gt; <span class="macro">setup_memory_table!</span>(ROUTINES),
+            SCHEMA_PRIVILEGES =&gt; <span class="macro">setup_memory_table!</span>(SCHEMA_PRIVILEGES),
+            TABLE_PRIVILEGES =&gt; <span class="macro">setup_memory_table!</span>(TABLE_PRIVILEGES),
+            TRIGGERS =&gt; <span class="macro">setup_memory_table!</span>(TRIGGERS),
+            GLOBAL_STATUS =&gt; <span class="macro">setup_memory_table!</span>(GLOBAL_STATUS),
+            SESSION_STATUS =&gt; <span class="macro">setup_memory_table!</span>(SESSION_STATUS),
             KEY_COLUMN_USAGE =&gt; <span class="prelude-val">Some</span>(Arc::new(InformationSchemaKeyColumnUsage::new(
                 <span class="self">self</span>.catalog_name.clone(),
                 <span class="self">self</span>.catalog_manager.clone(),
