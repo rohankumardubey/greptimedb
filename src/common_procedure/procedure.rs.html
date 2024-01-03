@@ -393,6 +393,38 @@
 <a href="#392" id="392">392</a>
 <a href="#393" id="393">393</a>
 <a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -511,22 +543,49 @@
     }
 }
 
+<span class="attr">#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+</span><span class="kw">pub enum </span>StringKey {
+    Share(String),
+    Exclusive(String),
+}
+
 <span class="doccomment">/// Keys to identify required locks.
 ///
 /// [LockKey] always sorts keys lexicographically so that they can be acquired
 /// in the same order.
-</span><span class="comment">// Most procedures should only acquire 1 ~ 2 locks so we use smallvec to hold keys.
+/// Most procedures should only acquire 1 ~ 2 locks so we use smallvec to hold keys.
 </span><span class="attr">#[derive(Clone, Debug, Default, PartialEq, Eq)]
-</span><span class="kw">pub struct </span>LockKey(SmallVec&lt;[String; <span class="number">2</span>]&gt;);
+</span><span class="kw">pub struct </span>LockKey(SmallVec&lt;[StringKey; <span class="number">2</span>]&gt;);
+
+<span class="kw">impl </span>StringKey {
+    <span class="kw">pub fn </span>into_string(<span class="self">self</span>) -&gt; String {
+        <span class="kw">match </span><span class="self">self </span>{
+            StringKey::Share(s) =&gt; s,
+            StringKey::Exclusive(s) =&gt; s,
+        }
+    }
+
+    <span class="kw">pub fn </span>as_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>String {
+        <span class="kw">match </span><span class="self">self </span>{
+            StringKey::Share(s) =&gt; s,
+            StringKey::Exclusive(s) =&gt; s,
+        }
+    }
+}
 
 <span class="kw">impl </span>LockKey {
     <span class="doccomment">/// Returns a new [LockKey] with only one key.
-    </span><span class="kw">pub fn </span>single(key: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; LockKey {
+    </span><span class="kw">pub fn </span>single(key: <span class="kw">impl </span>Into&lt;StringKey&gt;) -&gt; LockKey {
         LockKey(<span class="macro">smallvec!</span>[key.into()])
     }
 
+    <span class="doccomment">/// Returns a new [LockKey] with only one key.
+    </span><span class="kw">pub fn </span>single_exclusive(key: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; LockKey {
+        LockKey(<span class="macro">smallvec!</span>[StringKey::Exclusive(key.into())])
+    }
+
     <span class="doccomment">/// Returns a new [LockKey] with keys from specific `iter`.
-    </span><span class="kw">pub fn </span>new(iter: <span class="kw">impl </span>IntoIterator&lt;Item = String&gt;) -&gt; LockKey {
+    </span><span class="kw">pub fn </span>new(iter: <span class="kw">impl </span>IntoIterator&lt;Item = StringKey&gt;) -&gt; LockKey {
         <span class="kw">let </span><span class="kw-2">mut </span>vec: SmallVec&lt;<span class="kw">_</span>&gt; = iter.into_iter().collect();
         vec.sort();
         <span class="comment">// Dedup keys to avoid acquiring the same key multiple times.
@@ -534,14 +593,14 @@
         LockKey(vec)
     }
 
-    <span class="doccomment">/// Returns the keys to lock.
-    </span><span class="kw">pub fn </span>keys_to_lock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span>String&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.iter()
+    <span class="doccomment">/// Returns a new [LockKey] with keys from specific `iter`.
+    </span><span class="kw">pub fn </span>new_exclusive(iter: <span class="kw">impl </span>IntoIterator&lt;Item = String&gt;) -&gt; LockKey {
+        <span class="self">Self</span>::new(iter.into_iter().map(StringKey::Exclusive))
     }
 
-    <span class="doccomment">/// Returns the keys to unlock.
-    </span><span class="kw">pub fn </span>keys_to_unlock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span>String&gt; {
-        <span class="self">self</span>.<span class="number">0</span>.iter().rev()
+    <span class="doccomment">/// Returns the keys to lock.
+    </span><span class="kw">pub fn </span>keys_to_lock(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = <span class="kw-2">&amp;</span>StringKey&gt; {
+        <span class="self">self</span>.<span class="number">0</span>.iter()
     }
 }
 
@@ -735,20 +794,25 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_lock_key() {
         <span class="kw">let </span>entity = <span class="string">"catalog.schema.my_table"</span>;
-        <span class="kw">let </span>key = LockKey::single(entity);
-        <span class="macro">assert_eq!</span>(<span class="macro">vec!</span>[entity], key.keys_to_lock().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;());
-        <span class="macro">assert_eq!</span>(<span class="macro">vec!</span>[entity], key.keys_to_unlock().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;());
+        <span class="kw">let </span>key = LockKey::single_exclusive(entity);
+        <span class="macro">assert_eq!</span>(
+            <span class="macro">vec!</span>[<span class="kw-2">&amp;</span>StringKey::Exclusive(entity.to_string())],
+            key.keys_to_lock().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
+        );
 
-        <span class="kw">let </span>key = LockKey::new([
+        <span class="kw">let </span>key = LockKey::new_exclusive([
             <span class="string">"b"</span>.to_string(),
             <span class="string">"c"</span>.to_string(),
             <span class="string">"a"</span>.to_string(),
             <span class="string">"c"</span>.to_string(),
         ]);
-        <span class="macro">assert_eq!</span>(<span class="macro">vec!</span>[<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>], key.keys_to_lock().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;());
         <span class="macro">assert_eq!</span>(
-            <span class="macro">vec!</span>[<span class="string">"c"</span>, <span class="string">"b"</span>, <span class="string">"a"</span>],
-            key.keys_to_unlock().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
+            <span class="macro">vec!</span>[
+                <span class="kw-2">&amp;</span>StringKey::Exclusive(<span class="string">"a"</span>.to_string()),
+                <span class="kw-2">&amp;</span>StringKey::Exclusive(<span class="string">"b"</span>.to_string()),
+                <span class="kw-2">&amp;</span>StringKey::Exclusive(<span class="string">"c"</span>.to_string())
+            ],
+            key.keys_to_lock().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
         );
     }
 

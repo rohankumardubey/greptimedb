@@ -1161,7 +1161,7 @@
     <span class="kw">fn </span>lock_key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LockKey {
         <span class="kw">let </span>region_ident = <span class="kw-2">&amp;</span><span class="self">self</span>.node.failed_region;
         <span class="kw">let </span>region_key = region_lock_key(region_ident.table_id, region_ident.region_number);
-        LockKey::single(region_key)
+        LockKey::single_exclusive(region_key)
     }
 }
 

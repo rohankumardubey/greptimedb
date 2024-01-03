@@ -911,7 +911,7 @@
     <span class="kw">fn </span>lock_key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LockKey {
         <span class="kw">let </span>key = <span class="self">self</span>.lock_key_inner();
 
-        LockKey::new(key)
+        LockKey::new_exclusive(key)
     }
 }
 
