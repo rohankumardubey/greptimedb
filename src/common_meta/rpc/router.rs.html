@@ -516,7 +516,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::table_name::TableName;
 <span class="kw">use </span><span class="kw">crate</span>::DatanodeId;
 
-<span class="kw">pub fn </span>region_distribution(region_routes: <span class="kw-2">&amp;</span>[RegionRoute]) -&gt; <span class="prelude-ty">Result</span>&lt;RegionDistribution&gt; {
+<span class="kw">pub fn </span>region_distribution(region_routes: <span class="kw-2">&amp;</span>[RegionRoute]) -&gt; RegionDistribution {
     <span class="kw">let </span><span class="kw-2">mut </span>regions_id_map = RegionDistribution::new();
     <span class="kw">for </span>route <span class="kw">in </span>region_routes.iter() {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(peer) = route.leader_peer.as_ref() {
@@ -528,7 +528,7 @@
         <span class="comment">// id asc
         </span>regions.sort()
     }
-    <span class="prelude-val">Ok</span>(regions_id_map)
+    regions_id_map
 }
 
 <span class="attr">#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]

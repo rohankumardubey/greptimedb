@@ -1758,7 +1758,7 @@
                 <span class="kw-2">&amp;</span>region_storage_path,
                 region_options,
                 region_wal_options,
-                region_distribution(<span class="kw-2">&amp;</span>x.region_routes)<span class="question-mark">?</span>,
+                region_distribution(<span class="kw-2">&amp;</span>x.region_routes),
             )<span class="question-mark">?</span>;
             txn = txn.merge(create_datanode_table_txn);
         }
@@ -1814,7 +1814,7 @@
             .build_delete_txn(table_id, table_info_value)<span class="question-mark">?</span>;
 
         <span class="comment">// Deletes datanode table key value pairs.
-        </span><span class="kw">let </span>distribution = region_distribution(table_route_value.region_routes()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>distribution = region_distribution(table_route_value.region_routes()<span class="question-mark">?</span>);
         <span class="kw">let </span>delete_datanode_txn = <span class="self">self
             </span>.datanode_table_manager()
             .build_delete_txn(table_id, distribution)<span class="question-mark">?</span>;
@@ -1939,8 +1939,8 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="comment">// Updates the datanode table key value pairs.
         </span><span class="kw">let </span>current_region_distribution =
-            region_distribution(current_table_route_value.region_routes()<span class="question-mark">?</span>)<span class="question-mark">?</span>;
-        <span class="kw">let </span>new_region_distribution = region_distribution(<span class="kw-2">&amp;</span>new_region_routes)<span class="question-mark">?</span>;
+            region_distribution(current_table_route_value.region_routes()<span class="question-mark">?</span>);
+        <span class="kw">let </span>new_region_distribution = region_distribution(<span class="kw-2">&amp;</span>new_region_routes);
 
         <span class="kw">let </span>update_datanode_table_txn = <span class="self">self</span>.datanode_table_manager().build_update_txn(
             table_id,
@@ -2522,7 +2522,7 @@
         table_id: u32,
         region_routes: <span class="kw-2">&amp;</span>[RegionRoute],
     ) {
-        <span class="kw">let </span>region_distribution = region_distribution(region_routes).unwrap();
+        <span class="kw">let </span>region_distribution = region_distribution(region_routes);
         <span class="kw">for </span>(datanode, regions) <span class="kw">in </span>region_distribution {
             <span class="kw">let </span>got = table_metadata_manager
                 .datanode_table_manager()

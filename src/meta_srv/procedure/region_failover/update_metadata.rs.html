@@ -919,7 +919,7 @@
                 .unwrap()
                 .into_inner();
 
-            <span class="kw">let </span>map = region_distribution(table_route_value.region_routes().unwrap()).unwrap();
+            <span class="kw">let </span>map = region_distribution(table_route_value.region_routes().unwrap());
             <span class="macro">assert_eq!</span>(map.len(), <span class="number">2</span>);
             <span class="macro">assert_eq!</span>(map.get(<span class="kw-2">&amp;</span><span class="number">2</span>), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">3</span>]));
             <span class="macro">assert_eq!</span>(map.get(<span class="kw-2">&amp;</span><span class="number">3</span>), <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">2</span>, <span class="number">4</span>]));
