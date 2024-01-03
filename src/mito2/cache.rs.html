@@ -342,6 +342,11 @@
 <a href="#341" id="341">341</a>
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -359,6 +364,9 @@
 </span><span class="doccomment">//! Cache for the engine.
 
 </span><span class="kw">mod </span>cache_size;
+<span class="comment">// TODO(yingwen): Remove this after the write cache is ready.
+</span><span class="attr">#[allow(unused)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>file_cache;
 <span class="attr">#[cfg(test)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>test_util;
 
@@ -382,6 +390,8 @@
 </span><span class="kw">const </span>VECTOR_TYPE: <span class="kw-2">&amp;</span>str = <span class="string">"vector"</span>;
 <span class="comment">// Metrics type key for pages.
 </span><span class="kw">const </span>PAGE_TYPE: <span class="kw-2">&amp;</span>str = <span class="string">"page"</span>;
+<span class="comment">// Metrics type key for files on the local store.
+</span><span class="kw">const </span>FILE_TYPE: <span class="kw-2">&amp;</span>str = <span class="string">"file"</span>;
 
 <span class="doccomment">/// Manages cached data for the engine.
 </span><span class="kw">pub struct </span>CacheManager {
