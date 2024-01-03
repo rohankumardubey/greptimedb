@@ -513,7 +513,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>region_routes = table_route_value
             .region_routes()
             .context(error::UnexpectedLogicalRouteTableSnafu {
-                err_msg: <span class="string">"{self:?} is a non-physical TableRouteValue."</span>,
+                err_msg: <span class="macro">format!</span>(<span class="string">"{self:?} is a non-physical TableRouteValue."</span>),
             })<span class="question-mark">?
             </span>.clone();
         <span class="kw">let </span>region_route = region_routes
@@ -566,7 +566,7 @@
         <span class="kw">let </span>region_routes = table_route_value
             .region_routes()
             .context(error::UnexpectedLogicalRouteTableSnafu {
-                err_msg: <span class="string">"{self:?} is a non-physical TableRouteValue."</span>,
+                err_msg: <span class="macro">format!</span>(<span class="string">"{self:?} is a non-physical TableRouteValue."</span>),
             })<span class="question-mark">?
             </span>.clone();
         <span class="kw">let </span>region_route = region_routes

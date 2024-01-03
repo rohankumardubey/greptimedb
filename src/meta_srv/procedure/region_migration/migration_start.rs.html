@@ -370,7 +370,7 @@
         <span class="kw">let </span>region_route = table_route
             .region_routes()
             .context(error::UnexpectedLogicalRouteTableSnafu {
-                err_msg: <span class="string">"{self:?} is a non-physical TableRouteValue."</span>,
+                err_msg: <span class="macro">format!</span>(<span class="string">"{self:?} is a non-physical TableRouteValue."</span>),
             })<span class="question-mark">?
             </span>.iter()
             .find(|route| route.region.id == region_id)
