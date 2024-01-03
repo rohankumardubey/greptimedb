@@ -189,6 +189,11 @@
 <a href="#188" id="188">188</a>
 <a href="#189" id="189">189</a>
 <a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -256,7 +261,8 @@
         }
     }
 
-    <span class="kw">pub fn </span>with_default_store_type(<span class="self">self</span>, store_type: StorageType) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_default_store_type(<span class="self">self</span>, store_type: StorageType) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             default_store: <span class="prelude-val">Some</span>(store_type),
             ..<span class="self">self
@@ -264,6 +270,7 @@
     }
 
     <span class="attr">#[cfg(test)]
+    #[must_use]
     </span><span class="kw">pub fn </span>with_store_providers(<span class="self">self</span>, store_providers: Vec&lt;StorageType&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             store_providers: <span class="prelude-val">Some</span>(store_providers),
@@ -272,6 +279,7 @@
     }
 
     <span class="attr">#[cfg(test)]
+    #[must_use]
     </span><span class="kw">pub fn </span>with_plugin(<span class="self">self</span>, plugin: Plugins) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             plugin: <span class="prelude-val">Some</span>(plugin),
@@ -279,12 +287,14 @@
         </span>}
     }
 
-    <span class="kw">pub fn </span>with_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_config: WalConfig) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_config: WalConfig) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.wal_config = wal_config;
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>with_meta_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_meta: MetaWalConfig) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_meta_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_meta: MetaWalConfig) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.meta_wal_config = wal_meta;
         <span class="self">self
     </span>}

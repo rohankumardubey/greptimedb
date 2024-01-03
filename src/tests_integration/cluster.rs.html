@@ -398,6 +398,31 @@
 <a href="#397" id="397">397</a>
 <a href="#398" id="398">398</a>
 <a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -443,17 +468,18 @@
 <span class="kw">use </span>frontend::instance::{FrontendInstance, Instance <span class="kw">as </span>FeInstance};
 <span class="kw">use </span>meta_client::client::MetaClientBuilder;
 <span class="kw">use </span>meta_srv::cluster::MetaPeerClientRef;
-<span class="kw">use </span>meta_srv::metasrv::{MetaSrv, MetaSrvOptions};
+<span class="kw">use </span>meta_srv::metasrv::{MetaSrv, MetaSrvOptions, SelectorRef};
 <span class="kw">use </span>meta_srv::mocks::MockInfo;
 <span class="kw">use </span>servers::grpc::GrpcServer;
 <span class="kw">use </span>servers::heartbeat_options::HeartbeatOptions;
 <span class="kw">use </span>servers::Mode;
+<span class="kw">use </span>tempfile::TempDir;
 <span class="kw">use </span>tonic::transport::Server;
 <span class="kw">use </span>tower::service_fn;
 
 <span class="kw">use </span><span class="kw">crate</span>::test_util::{
     <span class="self">self</span>, create_datanode_opts, create_tmp_dir_and_datanode_opts, FileDirGuard, StorageGuard,
-    StorageType,
+    StorageType, PEER_PLACEHOLDER_ADDR,
 };
 
 <span class="kw">pub struct </span>GreptimeDbCluster {
@@ -475,6 +501,8 @@
     datanodes: <span class="prelude-ty">Option</span>&lt;u32&gt;,
     wal_config: WalConfig,
     meta_wal_config: MetaWalConfig,
+    shared_home_dir: <span class="prelude-ty">Option</span>&lt;Arc&lt;TempDir&gt;&gt;,
+    meta_selector: <span class="prelude-ty">Option</span>&lt;SelectorRef&gt;,
 }
 
 <span class="kw">impl </span>GreptimeDbClusterBuilder {
@@ -502,31 +530,50 @@
             datanodes: <span class="prelude-val">None</span>,
             wal_config: WalConfig::default(),
             meta_wal_config: MetaWalConfig::default(),
+            shared_home_dir: <span class="prelude-val">None</span>,
+            meta_selector: <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="kw">pub fn </span>with_store_config(<span class="kw-2">mut </span><span class="self">self</span>, store_config: ObjectStoreConfig) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_store_config(<span class="kw-2">mut </span><span class="self">self</span>, store_config: ObjectStoreConfig) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.store_config = <span class="prelude-val">Some</span>(store_config);
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>with_store_providers(<span class="kw-2">mut </span><span class="self">self</span>, store_providers: Vec&lt;StorageType&gt;) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_store_providers(<span class="kw-2">mut </span><span class="self">self</span>, store_providers: Vec&lt;StorageType&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.store_providers = <span class="prelude-val">Some</span>(store_providers);
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>with_datanodes(<span class="kw-2">mut </span><span class="self">self</span>, datanodes: u32) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_datanodes(<span class="kw-2">mut </span><span class="self">self</span>, datanodes: u32) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.datanodes = <span class="prelude-val">Some</span>(datanodes);
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>with_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_config: WalConfig) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_config: WalConfig) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.wal_config = wal_config;
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>with_meta_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_meta: MetaWalConfig) -&gt; <span class="self">Self </span>{
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_meta_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_meta: MetaWalConfig) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.meta_wal_config = wal_meta;
+        <span class="self">self
+    </span>}
+
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_shared_home_dir(<span class="kw-2">mut </span><span class="self">self</span>, shared_home_dir: Arc&lt;TempDir&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.shared_home_dir = <span class="prelude-val">Some</span>(shared_home_dir);
+        <span class="self">self
+    </span>}
+
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub fn </span>with_meta_selector(<span class="kw-2">mut </span><span class="self">self</span>, selector: SelectorRef) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.meta_selector = <span class="prelude-val">Some</span>(selector);
         <span class="self">self
     </span>}
 
@@ -547,7 +594,13 @@
             ..Default::default()
         };
 
-        <span class="kw">let </span>meta_srv = <span class="self">self</span>.build_metasrv(opt, datanode_clients.clone()).<span class="kw">await</span>;
+        <span class="kw">let </span>meta_srv = meta_srv::mocks::mock(
+            opt,
+            <span class="self">self</span>.kv_backend.clone(),
+            <span class="self">self</span>.meta_selector.clone(),
+            <span class="prelude-val">Some</span>(datanode_clients.clone()),
+        )
+        .<span class="kw">await</span>;
 
         <span class="kw">let </span>(datanode_instances, storage_guards, dir_guards) =
             <span class="self">self</span>.build_datanodes(meta_srv.clone(), datanodes).<span class="kw">await</span>;
@@ -575,14 +628,6 @@
         }
     }
 
-    <span class="kw">async fn </span>build_metasrv(
-        <span class="kw-2">&amp;</span><span class="self">self</span>,
-        opt: MetaSrvOptions,
-        datanode_clients: Arc&lt;DatanodeClients&gt;,
-    ) -&gt; MockInfo {
-        meta_srv::mocks::mock(opt, <span class="self">self</span>.kv_backend.clone(), <span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(datanode_clients)).<span class="kw">await
-    </span>}
-
     <span class="kw">async fn </span>build_datanodes(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         meta_srv: MockInfo,
@@ -600,10 +645,15 @@
             <span class="kw">let </span>datanode_id = i <span class="kw">as </span>u64 + <span class="number">1</span>;
             <span class="kw">let </span>mode = Mode::Distributed;
             <span class="kw">let </span><span class="kw-2">mut </span>opts = <span class="kw">if let </span><span class="prelude-val">Some</span>(store_config) = <span class="kw-2">&amp;</span><span class="self">self</span>.store_config {
-                <span class="kw">let </span>home_tmp_dir = create_temp_dir(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"gt_home_{}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.cluster_name));
-                <span class="kw">let </span>home_dir = home_tmp_dir.path().to_str().unwrap().to_string();
+                <span class="kw">let </span>home_dir = <span class="kw">if let </span><span class="prelude-val">Some</span>(home_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.shared_home_dir {
+                    home_dir.path().to_str().unwrap().to_string()
+                } <span class="kw">else </span>{
+                    <span class="kw">let </span>home_tmp_dir = create_temp_dir(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"gt_home_{}"</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.cluster_name));
+                    <span class="kw">let </span>home_dir = home_tmp_dir.path().to_str().unwrap().to_string();
+                    dir_guards.push(FileDirGuard::new(home_tmp_dir));
 
-                dir_guards.push(FileDirGuard::new(home_tmp_dir));
+                    home_dir
+                };
 
                 create_datanode_opts(
                     mode,
@@ -770,8 +820,8 @@
     <span class="comment">// Move client to an option so we can _move_ the inner value
     // on the first attempt to connect. All other attempts will fail.
     </span><span class="kw">let </span><span class="kw-2">mut </span>client = <span class="prelude-val">Some</span>(client);
-    <span class="comment">// "127.0.0.1:3001" is just a placeholder, does not actually connect to it.
-    </span><span class="kw">let </span>addr = <span class="string">"127.0.0.1:3001"</span>;
+    <span class="comment">// `PEER_PLACEHOLDER_ADDR` is just a placeholder, does not actually connect to it.
+    </span><span class="kw">let </span>addr = PEER_PLACEHOLDER_ADDR;
     <span class="kw">let </span>channel_manager = ChannelManager::new();
     <span class="kw">let _ </span>= channel_manager
         .reset_with_connector(

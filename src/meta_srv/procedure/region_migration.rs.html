@@ -1014,6 +1014,7 @@
 <a href="#1013" id="1013">1013</a>
 <a href="#1014" id="1014">1014</a>
 <a href="#1015" id="1015">1015</a>
+<a href="#1016" id="1016">1016</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1058,6 +1059,7 @@
     Error <span class="kw">as </span>ProcedureError, FromJsonSnafu, <span class="prelude-ty">Result </span><span class="kw">as </span>ProcedureResult, ToJsonSnafu,
 };
 <span class="kw">use </span>common_procedure::{Context <span class="kw">as </span>ProcedureContext, LockKey, Procedure, Status};
+<span class="kw">pub use </span>manager::RegionMigrationProcedureTask;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>snafu::{location, Location, OptionExt, ResultExt};
 <span class="kw">use </span>store_api::storage::RegionId;
