@@ -438,6 +438,7 @@
 <a href="#437" id="437">437</a>
 <a href="#438" id="438">438</a>
 <a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -832,6 +833,7 @@
         <span class="comment">// from_peer: 1
         // to_peer: 2
         </span><span class="kw">let </span>persistent_context = new_persistent_context();
+        <span class="kw">let </span>from_peer_id = persistent_context.from_peer.id;
         <span class="kw">let </span>region_id = persistent_context.region_id;
         <span class="kw">let </span>to_peer_id = persistent_context.to_peer.id;
         <span class="kw">let </span><span class="kw-2">mut </span>env = TestingEnv::new();
@@ -840,7 +842,7 @@
         </span><span class="kw">let </span>table_info = new_test_table_info(<span class="number">1024</span>, <span class="macro">vec!</span>[<span class="number">1</span>]).into();
         <span class="kw">let </span>region_routes = <span class="macro">vec!</span>[RegionRoute {
             region: Region::new_test(persistent_context.region_id),
-            leader_peer: <span class="prelude-val">Some</span>(Peer::empty(<span class="number">1</span>)),
+            leader_peer: <span class="prelude-val">Some</span>(Peer::empty(from_peer_id)),
             ..Default::default()
         }];
 
