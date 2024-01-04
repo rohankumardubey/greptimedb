@@ -372,6 +372,7 @@
 <a href="#371" id="371">371</a>
 <a href="#372" id="372">372</a>
 <a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -386,7 +387,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::mem::size_of;
+</span><span class="kw">use </span>std::collections::BTreeSet;
+<span class="kw">use </span>std::mem::size_of;
 
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>common_base::BitVec;
@@ -417,11 +419,11 @@
 </span><span class="kw">impl </span>IndexApplier <span class="kw">for </span>PredicatesIndexApplier {
     <span class="doccomment">/// Applies all `FstApplier`s to the data in the inverted index reader, intersecting the individual
     /// bitmaps obtained for each index to result in a final set of indices.
-    </span><span class="kw">async fn </span>apply(
+    </span><span class="kw">async fn </span>apply&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         context: SearchContext,
-        reader: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>InvertedIndexReader,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;usize&gt;&gt; {
+        reader: <span class="kw-2">&amp;mut </span>(<span class="kw">dyn </span>InvertedIndexReader + <span class="lifetime">'a</span>),
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;BTreeSet&lt;usize&gt;&gt; {
         <span class="kw">let </span>metadata = reader.metadata().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>bitmap = <span class="self">Self</span>::bitmap_full_range(<span class="kw-2">&amp;</span>metadata);
@@ -434,7 +436,7 @@
             <span class="kw">let </span><span class="prelude-val">Some</span>(meta) = metadata.metas.get(name) <span class="kw">else </span>{
                 <span class="kw">match </span>context.index_not_found_strategy {
                     IndexNotFoundStrategy::ReturnEmpty =&gt; {
-                        <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[]);
+                        <span class="kw">return </span><span class="prelude-val">Ok</span>(BTreeSet::default());
                     }
                     IndexNotFoundStrategy::Ignore =&gt; {
                         <span class="kw">continue</span>;
@@ -583,7 +585,7 @@
             .apply(SearchContext::default(), <span class="kw-2">&amp;mut </span>mock_reader)
             .<span class="kw">await
             </span>.unwrap();
-        <span class="macro">assert_eq!</span>(indices, <span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">6</span>]);
+        <span class="macro">assert_eq!</span>(indices, BTreeSet::from_iter([<span class="number">0</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">6</span>]));
 
         <span class="comment">// An index reader with a single tag "tag-0" but without value "tag-0_value-0"
         </span><span class="kw">let </span><span class="kw-2">mut </span>mock_reader = MockInvertedIndexReader::new();
@@ -637,7 +639,7 @@
             .apply(SearchContext::default(), <span class="kw-2">&amp;mut </span>mock_reader)
             .<span class="kw">await
             </span>.unwrap();
-        <span class="macro">assert_eq!</span>(indices, <span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">4</span>, <span class="number">6</span>]);
+        <span class="macro">assert_eq!</span>(indices, BTreeSet::from_iter([<span class="number">0</span>, <span class="number">4</span>, <span class="number">6</span>]));
     }
 
     <span class="attr">#[tokio::test]
@@ -655,7 +657,7 @@
             .apply(SearchContext::default(), <span class="kw-2">&amp;mut </span>mock_reader)
             .<span class="kw">await
             </span>.unwrap();
-        <span class="macro">assert_eq!</span>(indices, <span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>]); <span class="comment">// full range to scan
+        <span class="macro">assert_eq!</span>(indices, BTreeSet::from_iter([<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>])); <span class="comment">// full range to scan
     </span>}
 
     <span class="attr">#[tokio::test]
@@ -727,7 +729,7 @@
             )
             .<span class="kw">await
             </span>.unwrap();
-        <span class="macro">assert_eq!</span>(indices, <span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>]);
+        <span class="macro">assert_eq!</span>(indices, BTreeSet::from_iter([<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>]));
     }
 
     <span class="attr">#[test]

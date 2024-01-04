@@ -255,6 +255,11 @@
 <a href="#254" id="254">254</a>
 <a href="#255" id="255">255</a>
 <a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -277,13 +282,13 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>common_time::Timestamp;
-<span class="kw">use </span>object_store::util::join_path;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>snafu::{ResultExt, Snafu};
 <span class="kw">use </span>store_api::storage::RegionId;
 <span class="kw">use </span>uuid::Uuid;
 
 <span class="kw">use </span><span class="kw">crate</span>::sst::file_purger::{FilePurgerRef, PurgeRequest};
+<span class="kw">use </span><span class="kw">crate</span>::sst::location;
 
 <span class="doccomment">/// Type to store SST level.
 </span><span class="kw">pub type </span>Level = u8;
@@ -313,6 +318,11 @@
     <span class="doccomment">/// Append `.parquet` to file id to make a complete file name
     </span><span class="kw">pub fn </span>as_parquet(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="macro">format!</span>(<span class="string">"{}{}"</span>, <span class="self">self</span>, <span class="string">".parquet"</span>)
+    }
+
+    <span class="doccomment">/// Append `.puffin` to file id to make a complete file name
+    </span><span class="kw">pub fn </span>as_puffin(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
+        <span class="macro">format!</span>(<span class="string">"{}{}"</span>, <span class="self">self</span>, <span class="string">".puffin"</span>)
     }
 }
 
@@ -388,7 +398,7 @@
 
     <span class="doccomment">/// Returns the complete file path of the file.
     </span><span class="kw">pub fn </span>file_path(<span class="kw-2">&amp;</span><span class="self">self</span>, file_dir: <span class="kw-2">&amp;</span>str) -&gt; String {
-        join_path(file_dir, <span class="kw-2">&amp;</span><span class="self">self</span>.file_id().as_parquet())
+        location::sst_file_path(file_dir, <span class="self">self</span>.file_id())
     }
 
     <span class="doccomment">/// Returns the time range of the file.

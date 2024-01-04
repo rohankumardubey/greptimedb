@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["applier","codec"]};
+window.SIDEBAR_ITEMS = {"constant":["INDEX_BLOB_TYPE"],"mod":["applier","codec","store"]};
