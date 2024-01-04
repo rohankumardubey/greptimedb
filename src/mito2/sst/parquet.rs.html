@@ -265,6 +265,12 @@
 <a href="#264" id="264">264</a>
 <a href="#265" id="265">265</a>
 <a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -381,8 +387,12 @@
             ..Default::default()
         };
 
-        <span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(file_path, metadata, source, object_store.clone());
-        <span class="kw">let </span>info = writer.write_all(<span class="kw-2">&amp;</span>write_opts).<span class="kw">await</span>.unwrap().unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(file_path, metadata, object_store.clone());
+        <span class="kw">let </span>info = writer
+            .write_all(source, <span class="kw-2">&amp;</span>write_opts)
+            .<span class="kw">await
+            </span>.unwrap()
+            .unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">200</span>, info.num_rows);
         <span class="macro">assert!</span>(info.file_size &gt; <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(
@@ -426,9 +436,12 @@
             ..Default::default()
         };
         <span class="comment">// Prepare data.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>writer =
-            ParquetWriter::new(file_path, metadata.clone(), source, object_store.clone());
-        writer.write_all(<span class="kw-2">&amp;</span>write_opts).<span class="kw">await</span>.unwrap().unwrap();
+        </span><span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(file_path, metadata.clone(), object_store.clone());
+        writer
+            .write_all(source, <span class="kw-2">&amp;</span>write_opts)
+            .<span class="kw">await
+            </span>.unwrap()
+            .unwrap();
 
         <span class="kw">let </span>cache = <span class="prelude-val">Some</span>(Arc::new(CacheManager::new(<span class="number">0</span>, <span class="number">0</span>, <span class="number">64 </span>* <span class="number">1024 </span>* <span class="number">1024</span>)));
         <span class="kw">let </span>builder = ParquetReaderBuilder::new(FILE_DIR.to_string(), handle.clone(), object_store)
@@ -487,10 +500,9 @@
 
         <span class="comment">// write the sst file and get sst info
         // sst info contains the parquet metadata, which is converted from FileMetaData
-        </span><span class="kw">let </span><span class="kw-2">mut </span>writer =
-            ParquetWriter::new(file_path, metadata.clone(), source, object_store.clone());
+        </span><span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(file_path, metadata.clone(), object_store.clone());
         <span class="kw">let </span>sst_info = writer
-            .write_all(<span class="kw-2">&amp;</span>write_opts)
+            .write_all(source, <span class="kw-2">&amp;</span>write_opts)
             .<span class="kw">await
             </span>.unwrap()
             .expect(<span class="string">"write_all should return sst info"</span>);

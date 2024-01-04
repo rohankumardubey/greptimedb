@@ -376,36 +376,6 @@
 <a href="#375" id="375">375</a>
 <a href="#376" id="376">376</a>
 <a href="#377" id="377">377</a>
-<a href="#378" id="378">378</a>
-<a href="#379" id="379">379</a>
-<a href="#380" id="380">380</a>
-<a href="#381" id="381">381</a>
-<a href="#382" id="382">382</a>
-<a href="#383" id="383">383</a>
-<a href="#384" id="384">384</a>
-<a href="#385" id="385">385</a>
-<a href="#386" id="386">386</a>
-<a href="#387" id="387">387</a>
-<a href="#388" id="388">388</a>
-<a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
-<a href="#392" id="392">392</a>
-<a href="#393" id="393">393</a>
-<a href="#394" id="394">394</a>
-<a href="#395" id="395">395</a>
-<a href="#396" id="396">396</a>
-<a href="#397" id="397">397</a>
-<a href="#398" id="398">398</a>
-<a href="#399" id="399">399</a>
-<a href="#400" id="400">400</a>
-<a href="#401" id="401">401</a>
-<a href="#402" id="402">402</a>
-<a href="#403" id="403">403</a>
-<a href="#404" id="404">404</a>
-<a href="#405" id="405">405</a>
-<a href="#406" id="406">406</a>
-<a href="#407" id="407">407</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -422,14 +392,15 @@
 
 </span><span class="doccomment">//! A cache for files.
 
-</span><span class="kw">use </span>std::time::Instant;
+</span><span class="kw">use </span>std::sync::Arc;
+<span class="kw">use </span>std::time::Instant;
 
 <span class="kw">use </span>common_base::readable_size::ReadableSize;
 <span class="kw">use </span>common_telemetry::{info, warn};
 <span class="kw">use </span>futures::{FutureExt, TryStreamExt};
 <span class="kw">use </span>moka::future::Cache;
 <span class="kw">use </span>moka::notification::RemovalCause;
-<span class="kw">use </span>object_store::util::{join_dir, join_path};
+<span class="kw">use </span>object_store::util::join_path;
 <span class="kw">use </span>object_store::{ErrorKind, Metakey, ObjectStore, Reader};
 <span class="kw">use </span>snafu::ResultExt;
 <span class="kw">use </span>store_api::storage::RegionId;
@@ -440,7 +411,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::sst::file::FileId;
 
 <span class="doccomment">/// Subdirectory of cached files.
-</span><span class="kw">const </span>FILE_DIR: <span class="kw-2">&amp;</span>str = <span class="string">"files"</span>;
+</span><span class="kw">const </span>FILE_DIR: <span class="kw-2">&amp;</span>str = <span class="string">"files/"</span>;
 
 <span class="doccomment">/// A file cache manages files on local store and evict files based
 /// on size.
@@ -448,25 +419,18 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>FileCache {
     <span class="doccomment">/// Local store to cache files.
     </span>local_store: ObjectStore,
-    <span class="doccomment">/// Cached file directory under cache home.
-    </span>file_dir: String,
     <span class="doccomment">/// Index to track cached files.
     ///
     /// File id is enough to identity a file uniquely.
     </span>memory_index: Cache&lt;IndexKey, IndexValue&gt;,
 }
 
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type </span>FileCacheRef = Arc&lt;FileCache&gt;;
+
 <span class="kw">impl </span>FileCache {
     <span class="doccomment">/// Creates a new file cache.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
-        local_store: ObjectStore,
-        cache_home: String,
-        capacity: ReadableSize,
-    ) -&gt; FileCache {
-        <span class="comment">// Stores files under `cache_home/{FILE_DIR}`.
-        </span><span class="kw">let </span>file_dir = cache_file_dir(<span class="kw-2">&amp;</span>cache_home);
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(local_store: ObjectStore, capacity: ReadableSize) -&gt; FileCache {
         <span class="kw">let </span>cache_store = local_store.clone();
-        <span class="kw">let </span>cache_file_dir = file_dir.clone();
         <span class="kw">let </span>memory_index = Cache::builder()
             .weigher(|_key, value: <span class="kw-2">&amp;</span>IndexValue| -&gt; u32 {
                 <span class="comment">// We only measure space on local store.
@@ -475,7 +439,8 @@
             .max_capacity(capacity.as_bytes())
             .async_eviction_listener(<span class="kw">move </span>|key, value, cause| {
                 <span class="kw">let </span>store = cache_store.clone();
-                <span class="kw">let </span>file_path = cache_file_path(<span class="kw-2">&amp;</span>cache_file_dir, <span class="kw-2">*</span>key);
+                <span class="comment">// Stores files under FILE_DIR.
+                </span><span class="kw">let </span>file_path = cache_file_path(FILE_DIR, <span class="kw-2">*</span>key);
                 <span class="kw">async move </span>{
                     <span class="kw">if let </span>RemovalCause::Replaced = cause {
                         <span class="comment">// The cache is replaced by another file. This is unexpected, we don't remove the same
@@ -499,7 +464,6 @@
             .build();
         FileCache {
             local_store,
-            file_dir,
             memory_index,
         }
     }
@@ -553,7 +517,7 @@
 
         <span class="kw">let </span><span class="kw-2">mut </span>lister = <span class="self">self
             </span>.local_store
-            .lister_with(<span class="kw-2">&amp;</span><span class="self">self</span>.file_dir)
+            .lister_with(FILE_DIR)
             .metakey(Metakey::ContentLength)
             .<span class="kw">await
             </span>.context(OpenDalSnafu)<span class="question-mark">?</span>;
@@ -590,7 +554,7 @@
 
     <span class="doccomment">/// Returns the cache file path for the key.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>cache_file_path(<span class="kw-2">&amp;</span><span class="self">self</span>, key: IndexKey) -&gt; String {
-        cache_file_path(<span class="kw-2">&amp;</span><span class="self">self</span>.file_dir, key)
+        cache_file_path(FILE_DIR, key)
     }
 
     <span class="doccomment">/// Returns the local store of the file cache.
@@ -609,11 +573,6 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>IndexValue {
     <span class="doccomment">/// Size of the file in bytes.
     </span>file_size: u32,
-}
-
-<span class="doccomment">/// Returns the directory to store files.
-</span><span class="kw">fn </span>cache_file_dir(cache_home: <span class="kw-2">&amp;</span>str) -&gt; String {
-    join_dir(cache_home, FILE_DIR)
 }
 
 <span class="doccomment">/// Generates the path to the cached file.
@@ -653,13 +612,8 @@
     </span><span class="kw">async fn </span>test_file_cache_basic() {
         <span class="kw">let </span>dir = create_temp_dir(<span class="string">""</span>);
         <span class="kw">let </span>local_store = new_fs_store(dir.path().to_str().unwrap());
-        <span class="kw">let </span>cache_home = <span class="string">"cache"</span>.to_string();
 
-        <span class="kw">let </span>cache = FileCache::new(
-            local_store.clone(),
-            cache_home.clone(),
-            ReadableSize::mb(<span class="number">10</span>),
-        );
+        <span class="kw">let </span>cache = FileCache::new(local_store.clone(), ReadableSize::mb(<span class="number">10</span>));
         <span class="kw">let </span>region_id = RegionId::new(<span class="number">2000</span>, <span class="number">0</span>);
         <span class="kw">let </span>file_id = FileId::random();
         <span class="kw">let </span>key = (region_id, file_id);
@@ -699,13 +653,8 @@
     </span><span class="kw">async fn </span>test_file_cache_file_removed() {
         <span class="kw">let </span>dir = create_temp_dir(<span class="string">""</span>);
         <span class="kw">let </span>local_store = new_fs_store(dir.path().to_str().unwrap());
-        <span class="kw">let </span>cache_home = <span class="string">"cache"</span>.to_string();
 
-        <span class="kw">let </span>cache = FileCache::new(
-            local_store.clone(),
-            cache_home.clone(),
-            ReadableSize::mb(<span class="number">10</span>),
-        );
+        <span class="kw">let </span>cache = FileCache::new(local_store.clone(), ReadableSize::mb(<span class="number">10</span>));
         <span class="kw">let </span>region_id = RegionId::new(<span class="number">2000</span>, <span class="number">0</span>);
         <span class="kw">let </span>file_id = FileId::random();
         <span class="kw">let </span>key = (region_id, file_id);
@@ -734,12 +683,7 @@
     </span><span class="kw">async fn </span>test_file_cache_recover() {
         <span class="kw">let </span>dir = create_temp_dir(<span class="string">""</span>);
         <span class="kw">let </span>local_store = new_fs_store(dir.path().to_str().unwrap());
-        <span class="kw">let </span>cache_home = <span class="string">"cache"</span>.to_string();
-        <span class="kw">let </span>cache = FileCache::new(
-            local_store.clone(),
-            cache_home.clone(),
-            ReadableSize::mb(<span class="number">10</span>),
-        );
+        <span class="kw">let </span>cache = FileCache::new(local_store.clone(), ReadableSize::mb(<span class="number">10</span>));
 
         <span class="kw">let </span>region_id = RegionId::new(<span class="number">2000</span>, <span class="number">0</span>);
         <span class="comment">// Write N files.
@@ -762,11 +706,7 @@
         }
 
         <span class="comment">// Recover the cache.
-        </span><span class="kw">let </span>cache = FileCache::new(
-            local_store.clone(),
-            cache_home.clone(),
-            ReadableSize::mb(<span class="number">10</span>),
-        );
+        </span><span class="kw">let </span>cache = FileCache::new(local_store.clone(), ReadableSize::mb(<span class="number">10</span>));
         <span class="comment">// No entry before recovery.
         </span><span class="macro">assert!</span>(cache.reader((region_id, file_ids[<span class="number">0</span>])).<span class="kw">await</span>.is_none());
         cache.recover().<span class="kw">await</span>.unwrap();

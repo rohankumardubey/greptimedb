@@ -696,6 +696,10 @@
 <a href="#695" id="695">695</a>
 <a href="#696" id="696">696</a>
 <a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -984,7 +988,11 @@
             scheduler: <span class="self">self</span>.scheduler.clone(),
             write_buffer_manager: <span class="self">self</span>.write_buffer_manager,
             flush_scheduler: FlushScheduler::new(<span class="self">self</span>.scheduler.clone()),
-            compaction_scheduler: CompactionScheduler::new(<span class="self">self</span>.scheduler, sender.clone()),
+            compaction_scheduler: CompactionScheduler::new(
+                <span class="self">self</span>.scheduler,
+                sender.clone(),
+                <span class="self">self</span>.cache_manager.clone(),
+            ),
             stalled_requests: StalledRequests::default(),
             listener: <span class="self">self</span>.listener,
             cache_manager: <span class="self">self</span>.cache_manager,

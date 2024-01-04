@@ -387,8 +387,7 @@
         row_group_size: <span class="prelude-ty">Option</span>&lt;usize&gt;,
         engine_config: Arc&lt;MitoConfig&gt;,
     ) -&gt; RegionFlushTask {
-        <span class="comment">// TODO(yingwen): metrics for flush requested.
-        </span>RegionFlushTask {
+        RegionFlushTask {
             region_id: region.region_id,
             reason,
             senders: Vec::new(),
@@ -399,6 +398,7 @@
             listener: <span class="self">self</span>.listener.clone(),
             engine_config,
             row_group_size,
+            cache_manager: <span class="self">self</span>.cache_manager.clone(),
         }
     }
 }

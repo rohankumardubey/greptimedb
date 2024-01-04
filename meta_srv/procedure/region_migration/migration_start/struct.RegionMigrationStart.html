@@ -6,8 +6,8 @@
 </div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-RegionMigrationStart" class="impl"><a class="src rightside" href="../../../../src/meta_srv/procedure/region_migration/migration_start.rs.html#79-162">source</a><a href="#impl-RegionMigrationStart" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.RegionMigrationStart.html" title="struct meta_srv::procedure::region_migration::migration_start::RegionMigrationStart">RegionMigrationStart</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.retrieve_region_route" class="method"><a class="src rightside" href="../../../../src/meta_srv/procedure/region_migration/migration_start.rs.html#88-112">source</a><h4 class="code-header">async fn <a href="#method.retrieve_region_route" class="fn">retrieve_region_route</a>(
     &amp;self,
     ctx: &amp;mut <a class="struct" href="../struct.Context.html" title="struct meta_srv::procedure::region_migration::Context">Context</a>,
-    region_id: <a class="struct" href="../../../../store_api/storage/descriptors/struct.RegionId.html" title="struct store_api::storage::descriptors::RegionId">RegionId</a>
-) -&gt; <a class="type" href="../../../error/type.Result.html" title="type meta_srv::error::Result">Result</a>&lt;<a class="struct" href="../../../../common_meta/rpc/router/struct.RegionRoute.html" title="struct common_meta::rpc::router::RegionRoute">RegionRoute</a>&gt;</h4></section></summary><div class="docblock"><p>Retrieves region route.</p>
+    region_id: RegionId
+) -&gt; <a class="type" href="../../../error/type.Result.html" title="type meta_srv::error::Result">Result</a>&lt;RegionRoute&gt;</h4></section></summary><div class="docblock"><p>Retrieves region route.</p>
 <p>Abort(non-retry):</p>
 <ul>
 <li>TableRoute is not found.</li>
@@ -19,14 +19,14 @@
 </ul>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.check_candidate_region_on_peer" class="method"><a class="src rightside" href="../../../../src/meta_srv/procedure/region_migration/migration_start.rs.html#116-123">source</a><h4 class="code-header">fn <a href="#method.check_candidate_region_on_peer" class="fn">check_candidate_region_on_peer</a>(
     &amp;self,
-    region_route: &amp;<a class="struct" href="../../../../common_meta/rpc/router/struct.RegionRoute.html" title="struct common_meta::rpc::router::RegionRoute">RegionRoute</a>,
-    to_peer: &amp;<a class="struct" href="../../../../common_meta/peer/struct.Peer.html" title="struct common_meta::peer::Peer">Peer</a>
+    region_route: &amp;RegionRoute,
+    to_peer: &amp;Peer
 ) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Checks whether the candidate region on region has been opened.
 Returns true if it’s been opened.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.invalid_leader_peer" class="method"><a class="src rightside" href="../../../../src/meta_srv/procedure/region_migration/migration_start.rs.html#129-141">source</a><h4 class="code-header">fn <a href="#method.invalid_leader_peer" class="fn">invalid_leader_peer</a>(
     &amp;self,
-    region_route: &amp;<a class="struct" href="../../../../common_meta/rpc/router/struct.RegionRoute.html" title="struct common_meta::rpc::router::RegionRoute">RegionRoute</a>,
-    from_peer: &amp;<a class="struct" href="../../../../common_meta/peer/struct.Peer.html" title="struct common_meta::peer::Peer">Peer</a>
+    region_route: &amp;RegionRoute,
+    from_peer: &amp;Peer
 ) -&gt; <a class="type" href="../../../error/type.Result.html" title="type meta_srv::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>&gt;</h4></section></summary><div class="docblock"><p>Returns true if the region leader is not the <code>from_peer</code>.</p>
 <p>Abort(non-retry):</p>
 <ul>
@@ -34,8 +34,8 @@ Returns true if it’s been opened.</p>
 </ul>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.has_migrated" class="method"><a class="src rightside" href="../../../../src/meta_srv/procedure/region_migration/migration_start.rs.html#148-161">source</a><h4 class="code-header">fn <a href="#method.has_migrated" class="fn">has_migrated</a>(
     &amp;self,
-    region_route: &amp;<a class="struct" href="../../../../common_meta/rpc/router/struct.RegionRoute.html" title="struct common_meta::rpc::router::RegionRoute">RegionRoute</a>,
-    to_peer: &amp;<a class="struct" href="../../../../common_meta/peer/struct.Peer.html" title="struct common_meta::peer::Peer">Peer</a>
+    region_route: &amp;RegionRoute,
+    to_peer: &amp;Peer
 ) -&gt; <a class="type" href="../../../error/type.Result.html" title="type meta_srv::error::Result">Result</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.bool.html">bool</a>&gt;</h4></section></summary><div class="docblock"><p>Checks whether the region has been migrated.
 Returns true if it’s.</p>
 <p>Abort(non-retry):</p>

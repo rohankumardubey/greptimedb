@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["AccessLayer"],"type":["AccessLayerRef"]};
+window.SIDEBAR_ITEMS = {"struct":["AccessLayer","SstWriteRequest"],"type":["AccessLayerRef"]};
