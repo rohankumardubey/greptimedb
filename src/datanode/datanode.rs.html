@@ -770,8 +770,8 @@
         <span class="self">self</span>.start_telemetry();
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(t) = <span class="self">self</span>.export_metrics_task.as_ref() {
-            t.start()
-        }
+            t.start(<span class="prelude-val">None</span>).context(StartServerSnafu)<span class="question-mark">?
+        </span>}
 
         <span class="self">self</span>.start_services().<span class="kw">await
     </span>}

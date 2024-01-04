@@ -344,8 +344,8 @@
         <span class="self">self</span>.meta_srv.try_start().<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(t) = <span class="self">self</span>.export_metrics_task.as_ref() {
-            t.start()
-        }
+            t.start(<span class="prelude-val">None</span>).context(InitExportMetricsTaskSnafu)<span class="question-mark">?
+        </span>}
 
         <span class="kw">let </span>(tx, rx) = mpsc::channel::&lt;()&gt;(<span class="number">1</span>);
 

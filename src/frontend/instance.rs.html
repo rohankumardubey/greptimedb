@@ -611,6 +611,13 @@
 <a href="#610" id="610">610</a>
 <a href="#611" id="611">611</a>
 <a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -668,7 +675,7 @@
 <span class="kw">use </span>raft_engine::{Config, ReadableSize, RecoveryMode};
 <span class="kw">use </span>servers::error <span class="kw">as </span>server_error;
 <span class="kw">use </span>servers::error::{AuthSnafu, ExecuteQuerySnafu, ParsePromQLSnafu};
-<span class="kw">use </span>servers::export_metrics::{ExportMetricsOption, ExportMetricsTask};
+<span class="kw">use </span>servers::export_metrics::ExportMetricsTask;
 <span class="kw">use </span>servers::interceptor::{
     PromQueryInterceptor, PromQueryInterceptorRef, SqlQueryInterceptor, SqlQueryInterceptorRef,
 };
@@ -689,6 +696,7 @@
 <span class="kw">use </span>sqlparser::ast::ObjectName;
 <span class="kw">pub use </span>standalone::StandaloneDatanodeManager;
 
+<span class="kw">use </span><span class="self">self</span>::prom_store::ExportMetricHandler;
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     <span class="self">self</span>, Error, ExecLogicalPlanSnafu, ExecutePromqlSnafu, ExternalSnafu, ParseSqlSnafu,
     PermissionSnafu, PlanStatementSnafu, <span class="prelude-ty">Result</span>, SqlExecInterceptedSnafu, StartServerSnafu,
@@ -803,15 +811,13 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         opts: <span class="kw">impl </span>Into&lt;FrontendOptions&gt; + TomlSerializable,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>opts: FrontendOptions = opts.into();
+        <span class="self">self</span>.export_metrics_task =
+            ExportMetricsTask::try_new(<span class="kw-2">&amp;</span>opts.export_metrics, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.plugins))
+                .context(StartServerSnafu)<span class="question-mark">?</span>;
         <span class="kw">let </span>servers = Services::build(opts, Arc::new(<span class="self">self</span>.clone()), <span class="self">self</span>.plugins.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="self">self</span>.servers = Arc::new(servers);
 
-        <span class="prelude-val">Ok</span>(())
-    }
-
-    <span class="kw">pub fn </span>build_export_metrics_task(<span class="kw-2">&amp;mut </span><span class="self">self</span>, opts: <span class="kw-2">&amp;</span>ExportMetricsOption) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.export_metrics_task =
-            ExportMetricsTask::try_new(opts, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.plugins)).context(StartServerSnafu)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -845,7 +851,15 @@
         <span class="self">self</span>.script_executor.start(<span class="self">self</span>)<span class="question-mark">?</span>;
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(t) = <span class="self">self</span>.export_metrics_task.as_ref() {
-            t.start()
+            <span class="kw">if </span>t.send_by_handler {
+                <span class="kw">let </span>handler = ExportMetricHandler::new_handler(
+                    <span class="self">self</span>.inserter.clone(),
+                    <span class="self">self</span>.statement_executor.clone(),
+                );
+                t.start(<span class="prelude-val">Some</span>(handler)).context(StartServerSnafu)<span class="question-mark">?
+            </span>} <span class="kw">else </span>{
+                t.start(<span class="prelude-val">None</span>).context(StartServerSnafu)<span class="question-mark">?</span>;
+            }
         }
 
         futures::future::try_join_all(<span class="self">self</span>.servers.iter().map(|(name, handler)| <span class="kw">async move </span>{
