@@ -278,6 +278,26 @@
 <a href="#277" id="277">277</a>
 <a href="#278" id="278">278</a>
 <a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -301,6 +321,7 @@
 <span class="kw">mod </span>region_metadata;
 <span class="kw">mod </span>state;
 
+<span class="kw">use </span>std::any::Any;
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>async_trait::async_trait;
@@ -318,7 +339,9 @@
 
 <span class="kw">use </span><span class="self">self</span>::state::MetricEngineState;
 <span class="kw">use </span><span class="kw">crate</span>::data_region::DataRegion;
+<span class="kw">use </span><span class="kw">crate</span>::error::Result;
 <span class="kw">use </span><span class="kw">crate</span>::metadata_region::MetadataRegion;
+<span class="kw">use </span><span class="kw">crate</span>::utils;
 
 <span class="attr">#[cfg_attr(doc, aquamarine::aquamarine)]
 </span><span class="doccomment">/// # Metric Engine
@@ -448,12 +471,18 @@
 
     <span class="kw">fn </span>set_writable(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId, writable: bool) -&gt; <span class="prelude-ty">Result</span>&lt;(), BoxedError&gt; {
         <span class="comment">// ignore the region not found error
-        </span><span class="kw">let </span>result = <span class="self">self</span>.inner.mito.set_writable(region_id, writable);
-
-        <span class="kw">match </span>result {
-            <span class="prelude-val">Err</span>(e) <span class="kw">if </span>e.status_code() == StatusCode::RegionNotFound =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_ </span>=&gt; result,
+        </span><span class="kw">for </span>x <span class="kw">in </span>[
+            utils::to_metadata_region_id(region_id),
+            utils::to_data_region_id(region_id),
+            region_id,
+        ] {
+            <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self</span>.inner.mito.set_writable(x, writable)
+                &amp;&amp; e.status_code() != StatusCode::RegionNotFound
+            {
+                <span class="kw">return </span><span class="prelude-val">Err</span>(e);
+            }
         }
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">async fn </span>set_readonly_gracefully(
@@ -466,6 +495,10 @@
     <span class="kw">fn </span>role(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) -&gt; <span class="prelude-ty">Option</span>&lt;RegionRole&gt; {
         <span class="macro">todo!</span>()
     }
+
+    <span class="kw">fn </span>as_any(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn </span>Any {
+        <span class="self">self
+    </span>}
 }
 
 <span class="kw">impl </span>MetricEngine {
@@ -481,6 +514,13 @@
             }),
         }
     }
+
+    <span class="kw">pub async fn </span>logical_regions(<span class="kw-2">&amp;</span><span class="self">self</span>, physical_region_id: RegionId) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;RegionId&gt;&gt; {
+        <span class="self">self</span>.inner
+            .metadata_region
+            .logical_regions(physical_region_id)
+            .<span class="kw">await
+    </span>}
 }
 
 <span class="kw">struct </span>MetricEngineInner {

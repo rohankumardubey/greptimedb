@@ -189,6 +189,37 @@
 <a href="#188" id="188">188</a>
 <a href="#189" id="189">189</a>
 <a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -209,12 +240,15 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>common_catalog::consts::METRIC_ENGINE;
 <span class="kw">use </span>common_telemetry::{debug, info};
-<span class="kw">use </span>snafu::ensure;
+<span class="kw">use </span>snafu::{ensure, OptionExt};
+<span class="kw">use </span>store_api::metric_engine_consts::LOGICAL_TABLE_METADATA_KEY;
 <span class="kw">use </span>store_api::storage::{RegionId, RegionNumber, TableId};
 
 <span class="kw">use </span><span class="kw">crate</span>::ddl::{TableMetadata, TableMetadataAllocatorContext};
-<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="prelude-ty">Result</span>, UnsupportedSnafu};
+<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="prelude-ty">Result</span>, TableNotFoundSnafu, UnsupportedSnafu};
+<span class="kw">use </span><span class="kw">crate</span>::key::table_name::TableNameKey;
 <span class="kw">use </span><span class="kw">crate</span>::key::table_route::{LogicalTableRouteValue, PhysicalTableRouteValue, TableRouteValue};
+<span class="kw">use </span><span class="kw">crate</span>::key::TableMetadataManagerRef;
 <span class="kw">use </span><span class="kw">crate</span>::peer::Peer;
 <span class="kw">use </span><span class="kw">crate</span>::rpc::ddl::CreateTableTask;
 <span class="kw">use </span><span class="kw">crate</span>::rpc::router::{Region, RegionRoute};
@@ -224,6 +258,7 @@
 <span class="kw">pub struct </span>TableMetadataAllocator {
     table_id_sequence: SequenceRef,
     wal_options_allocator: WalOptionsAllocatorRef,
+    table_metadata_manager: TableMetadataManagerRef,
     peer_allocator: PeerAllocatorRef,
 }
 
@@ -231,10 +266,12 @@
     <span class="kw">pub fn </span>new(
         table_id_sequence: SequenceRef,
         wal_options_allocator: WalOptionsAllocatorRef,
+        table_metadata_manager: TableMetadataManagerRef,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self</span>::with_peer_allocator(
             table_id_sequence,
             wal_options_allocator,
+            table_metadata_manager,
             Arc::new(NoopPeerAllocator),
         )
     }
@@ -242,11 +279,13 @@
     <span class="kw">pub fn </span>with_peer_allocator(
         table_id_sequence: SequenceRef,
         wal_options_allocator: WalOptionsAllocatorRef,
+        table_metadata_manager: TableMetadataManagerRef,
         peer_allocator: PeerAllocatorRef,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             table_id_sequence,
             wal_options_allocator,
+            table_metadata_manager,
             peer_allocator,
         }
     }
@@ -306,8 +345,31 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;TableRouteValue&gt; {
         <span class="kw">let </span>regions = task.partitions.len();
 
-        <span class="kw">let </span>table_route = <span class="kw">if </span>task.create_table.engine == METRIC_ENGINE {
-            TableRouteValue::Logical(LogicalTableRouteValue {})
+        <span class="kw">let </span>table_route = <span class="kw">if </span>task.create_table.engine == METRIC_ENGINE
+            &amp;&amp; <span class="kw">let </span><span class="prelude-val">Some</span>(physical_table_name) = task
+                .create_table
+                .table_options
+                .get(LOGICAL_TABLE_METADATA_KEY)
+        {
+            <span class="kw">let </span>physical_table_id = <span class="self">self
+                </span>.table_metadata_manager
+                .table_name_manager()
+                .get(TableNameKey::new(
+                    <span class="kw-2">&amp;</span>task.create_table.catalog_name,
+                    <span class="kw-2">&amp;</span>task.create_table.schema_name,
+                    physical_table_name,
+                ))
+                .<span class="kw">await</span><span class="question-mark">?
+                </span>.context(TableNotFoundSnafu {
+                    table_name: physical_table_name,
+                })<span class="question-mark">?
+                </span>.table_id();
+
+            <span class="kw">let </span>region_ids = (<span class="number">0</span>..regions)
+                .map(|i| RegionId::new(table_id, i <span class="kw">as </span>RegionNumber))
+                .collect();
+
+            TableRouteValue::Logical(LogicalTableRouteValue::new(physical_table_id, region_ids))
         } <span class="kw">else </span>{
             <span class="kw">let </span>peers = <span class="self">self</span>.peer_allocator.alloc(ctx, regions).<span class="kw">await</span><span class="question-mark">?</span>;
 

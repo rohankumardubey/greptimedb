@@ -1150,6 +1150,49 @@
 <a href="#1149" id="1149">1149</a>
 <a href="#1150" id="1150">1150</a>
 <a href="#1151" id="1151">1151</a>
+<a href="#1152" id="1152">1152</a>
+<a href="#1153" id="1153">1153</a>
+<a href="#1154" id="1154">1154</a>
+<a href="#1155" id="1155">1155</a>
+<a href="#1156" id="1156">1156</a>
+<a href="#1157" id="1157">1157</a>
+<a href="#1158" id="1158">1158</a>
+<a href="#1159" id="1159">1159</a>
+<a href="#1160" id="1160">1160</a>
+<a href="#1161" id="1161">1161</a>
+<a href="#1162" id="1162">1162</a>
+<a href="#1163" id="1163">1163</a>
+<a href="#1164" id="1164">1164</a>
+<a href="#1165" id="1165">1165</a>
+<a href="#1166" id="1166">1166</a>
+<a href="#1167" id="1167">1167</a>
+<a href="#1168" id="1168">1168</a>
+<a href="#1169" id="1169">1169</a>
+<a href="#1170" id="1170">1170</a>
+<a href="#1171" id="1171">1171</a>
+<a href="#1172" id="1172">1172</a>
+<a href="#1173" id="1173">1173</a>
+<a href="#1174" id="1174">1174</a>
+<a href="#1175" id="1175">1175</a>
+<a href="#1176" id="1176">1176</a>
+<a href="#1177" id="1177">1177</a>
+<a href="#1178" id="1178">1178</a>
+<a href="#1179" id="1179">1179</a>
+<a href="#1180" id="1180">1180</a>
+<a href="#1181" id="1181">1181</a>
+<a href="#1182" id="1182">1182</a>
+<a href="#1183" id="1183">1183</a>
+<a href="#1184" id="1184">1184</a>
+<a href="#1185" id="1185">1185</a>
+<a href="#1186" id="1186">1186</a>
+<a href="#1187" id="1187">1187</a>
+<a href="#1188" id="1188">1188</a>
+<a href="#1189" id="1189">1189</a>
+<a href="#1190" id="1190">1190</a>
+<a href="#1191" id="1191">1191</a>
+<a href="#1192" id="1192">1192</a>
+<a href="#1193" id="1193">1193</a>
+<a href="#1194" id="1194">1194</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1195,6 +1238,7 @@
 <span class="kw">use </span>datafusion_expr::{Expr <span class="kw">as </span>DfExpr, TableProviderFilterPushDown, TableType};
 <span class="kw">use </span>datatypes::arrow::datatypes::SchemaRef;
 <span class="kw">use </span>futures_util::future::try_join_all;
+<span class="kw">use </span>metric_engine::engine::MetricEngine;
 <span class="kw">use </span>prost::Message;
 <span class="kw">use </span>query::QueryEngineRef;
 <span class="kw">use </span>servers::error::{<span class="self">self </span><span class="kw">as </span>servers_error, ExecuteGrpcRequestSnafu, <span class="prelude-ty">Result </span><span class="kw">as </span>ServerResult};
@@ -1203,6 +1247,7 @@
 <span class="kw">use </span>session::context::{QueryContextBuilder, QueryContextRef};
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
 <span class="kw">use </span>store_api::metadata::RegionMetadataRef;
+<span class="kw">use </span>store_api::metric_engine_consts::{METRIC_ENGINE_NAME, PHYSICAL_TABLE_METADATA_KEY};
 <span class="kw">use </span>store_api::region_engine::{RegionEngineRef, RegionRole, SetReadonlyResponse};
 <span class="kw">use </span>store_api::region_request::{AffectedRows, RegionCloseRequest, RegionRequest};
 <span class="kw">use </span>store_api::storage::{RegionId, ScanRequest};
@@ -1212,8 +1257,9 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     <span class="self">self</span>, BuildRegionRequestsSnafu, DecodeLogicalPlanSnafu, ExecuteLogicalPlanSnafu,
-    GetRegionMetadataSnafu, HandleRegionRequestSnafu, RegionEngineNotFoundSnafu,
-    RegionNotFoundSnafu, <span class="prelude-ty">Result</span>, StopRegionEngineSnafu, UnsupportedOutputSnafu,
+    FindLogicalRegionsSnafu, GetRegionMetadataSnafu, HandleRegionRequestSnafu,
+    RegionEngineNotFoundSnafu, RegionNotFoundSnafu, <span class="prelude-ty">Result</span>, StopRegionEngineSnafu, UnexpectedSnafu,
+    UnsupportedOutputSnafu,
 };
 <span class="kw">use </span><span class="kw">crate</span>::event_listener::RegionServerEventListenerRef;
 
@@ -1521,7 +1567,7 @@
         <span class="kw">let </span>current_region_status = <span class="self">self</span>.region_map.get(<span class="kw-2">&amp;</span>region_id);
 
         <span class="kw">let </span>engine = <span class="kw">match </span>region_change {
-            RegionChange::Register(<span class="kw-2">ref </span>engine_type) =&gt; <span class="kw">match </span>current_region_status {
+            RegionChange::Register(<span class="kw-2">ref </span>engine_type, <span class="kw">_</span>) =&gt; <span class="kw">match </span>current_region_status {
                 <span class="prelude-val">Some</span>(status) =&gt; <span class="kw">match </span>status.clone() {
                     RegionEngineWithStatus::Registering(<span class="kw">_</span>) =&gt; {
                         <span class="kw">return </span><span class="prelude-val">Ok</span>(CurrentEngine::EarlyReturn(<span class="number">0</span>))
@@ -1579,8 +1625,12 @@
             .start_timer();
 
         <span class="kw">let </span>region_change = <span class="kw">match </span><span class="kw-2">&amp;</span>request {
-            RegionRequest::Create(create) =&gt; RegionChange::Register(create.engine.clone()),
-            RegionRequest::Open(open) =&gt; RegionChange::Register(open.engine.clone()),
+            RegionRequest::Create(create) =&gt; RegionChange::Register(create.engine.clone(), <span class="bool-val">false</span>),
+            RegionRequest::Open(open) =&gt; {
+                <span class="kw">let </span>is_opening_physical_region =
+                    open.options.contains_key(PHYSICAL_TABLE_METADATA_KEY);
+                RegionChange::Register(open.engine.clone(), is_opening_physical_region)
+            }
             RegionRequest::Close(<span class="kw">_</span>) | RegionRequest::Drop(<span class="kw">_</span>) =&gt; RegionChange::Deregisters,
             RegionRequest::Put(<span class="kw">_</span>)
             | RegionRequest::Delete(<span class="kw">_</span>)
@@ -1612,7 +1662,8 @@
         {
             <span class="prelude-val">Ok</span>(result) =&gt; {
                 <span class="comment">// Sets corresponding region status to ready.
-                </span><span class="self">self</span>.set_region_status_ready(region_id, engine, region_change);
+                </span><span class="self">self</span>.set_region_status_ready(region_id, engine, region_change)
+                    .<span class="kw">await</span><span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(result)
             }
             <span class="prelude-val">Err</span>(err) =&gt; {
@@ -1630,7 +1681,7 @@
         region_change: <span class="kw-2">&amp;</span>RegionChange,
     ) {
         <span class="kw">match </span>region_change {
-            RegionChange::Register(<span class="kw">_</span>) =&gt; {
+            RegionChange::Register(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; {
                 <span class="self">self</span>.region_map.insert(
                     region_id,
                     RegionEngineWithStatus::Registering(engine.clone()),
@@ -1649,7 +1700,7 @@
     <span class="kw">fn </span>unset_region_status(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId, region_change: RegionChange) {
         <span class="kw">match </span>region_change {
             RegionChange::None =&gt; {}
-            RegionChange::Register(<span class="kw">_</span>) | RegionChange::Deregisters =&gt; {
+            RegionChange::Register(<span class="kw">_</span>, <span class="kw">_</span>) | RegionChange::Deregisters =&gt; {
                 <span class="self">self</span>.region_map
                     .remove(<span class="kw-2">&amp;</span>region_id)
                     .map(|(id, engine)| engine.set_writable(id, <span class="bool-val">false</span>));
@@ -1657,16 +1708,20 @@
         }
     }
 
-    <span class="kw">fn </span>set_region_status_ready(
+    <span class="kw">async fn </span>set_region_status_ready(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         region_id: RegionId,
         engine: RegionEngineRef,
         region_change: RegionChange,
-    ) {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>engine_type = engine.name();
         <span class="kw">match </span>region_change {
             RegionChange::None =&gt; {}
-            RegionChange::Register(<span class="kw">_</span>) =&gt; {
+            RegionChange::Register(<span class="kw">_</span>, is_opening_physical_region) =&gt; {
+                <span class="kw">if </span>is_opening_physical_region {
+                    <span class="self">self</span>.register_logical_regions(<span class="kw-2">&amp;</span>engine, region_id).<span class="kw">await</span><span class="question-mark">?</span>;
+                }
+
                 <span class="macro">info!</span>(<span class="string">"Region {region_id} is registered to engine {engine_type}"</span>);
                 <span class="self">self</span>.region_map
                     .insert(region_id, RegionEngineWithStatus::Ready(engine));
@@ -1680,6 +1735,37 @@
                 <span class="self">self</span>.event_listener.on_region_deregistered(region_id);
             }
         }
+        <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">async fn </span>register_logical_regions(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        engine: <span class="kw-2">&amp;</span>RegionEngineRef,
+        physical_region_id: RegionId,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>metric_engine =
+            engine
+                .as_any()
+                .downcast_ref::&lt;MetricEngine&gt;()
+                .context(UnexpectedSnafu {
+                    violated: <span class="macro">format!</span>(
+                        <span class="string">"expecting engine type '{}', actual '{}'"</span>,
+                        METRIC_ENGINE_NAME,
+                        engine.name(),
+                    ),
+                })<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>logical_regions = metric_engine
+            .logical_regions(physical_region_id)
+            .<span class="kw">await
+            </span>.context(FindLogicalRegionsSnafu { physical_region_id })<span class="question-mark">?</span>;
+
+        <span class="kw">for </span>region <span class="kw">in </span>logical_regions {
+            <span class="self">self</span>.region_map
+                .insert(region, RegionEngineWithStatus::Ready(engine.clone()));
+            <span class="macro">info!</span>(<span class="string">"Logical region {} is registered!"</span>, region);
+        }
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="kw">pub async fn </span>handle_read(<span class="kw-2">&amp;</span><span class="self">self</span>, request: QueryRequest) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt; {
@@ -1774,7 +1860,7 @@
 
 <span class="kw">enum </span>RegionChange {
     <span class="prelude-val">None</span>,
-    Register(String),
+    Register(String, bool),
     Deregisters,
 }
 
@@ -2203,7 +2289,7 @@
             </span>CurrentEngineTest {
                 region_id,
                 current_region_status: <span class="prelude-val">None</span>,
-                region_change: RegionChange::Register(engine.name().to_string()),
+                region_change: RegionChange::Register(engine.name().to_string(), <span class="bool-val">false</span>),
                 assert: Box::new(|result| {
                     <span class="kw">let </span>current_engine = result.unwrap();
                     <span class="macro">assert_matches!</span>(current_engine, CurrentEngine::Engine(<span class="kw">_</span>));
@@ -2212,7 +2298,7 @@
             CurrentEngineTest {
                 region_id,
                 current_region_status: <span class="prelude-val">Some</span>(RegionEngineWithStatus::Registering(engine.clone())),
-                region_change: RegionChange::Register(engine.name().to_string()),
+                region_change: RegionChange::Register(engine.name().to_string(), <span class="bool-val">false</span>),
                 assert: Box::new(|result| {
                     <span class="kw">let </span>current_engine = result.unwrap();
                     <span class="macro">assert_matches!</span>(current_engine, CurrentEngine::EarlyReturn(<span class="kw">_</span>));
@@ -2221,7 +2307,7 @@
             CurrentEngineTest {
                 region_id,
                 current_region_status: <span class="prelude-val">Some</span>(RegionEngineWithStatus::Deregistering(engine.clone())),
-                region_change: RegionChange::Register(engine.name().to_string()),
+                region_change: RegionChange::Register(engine.name().to_string(), <span class="bool-val">false</span>),
                 assert: Box::new(|result| {
                     <span class="kw">let </span>err = result.unwrap_err();
                     <span class="macro">assert_eq!</span>(err.status_code(), StatusCode::RegionBusy);
@@ -2230,7 +2316,7 @@
             CurrentEngineTest {
                 region_id,
                 current_region_status: <span class="prelude-val">Some</span>(RegionEngineWithStatus::Ready(engine.clone())),
-                region_change: RegionChange::Register(engine.name().to_string()),
+                region_change: RegionChange::Register(engine.name().to_string(), <span class="bool-val">false</span>),
                 assert: Box::new(|result| {
                     <span class="kw">let </span>current_engine = result.unwrap();
                     <span class="macro">assert_matches!</span>(current_engine, CurrentEngine::Engine(<span class="kw">_</span>));

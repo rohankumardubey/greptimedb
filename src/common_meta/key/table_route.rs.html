@@ -398,6 +398,14 @@
 <a href="#397" id="397">397</a>
 <a href="#398" id="398">398</a>
 <a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -453,8 +461,9 @@
 
 <span class="attr">#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 </span><span class="kw">pub struct </span>LogicalTableRouteValue {
-    <span class="comment">// TODO(LFC): Add table route for MetricsEngine table.
-</span>}
+    physical_table_id: TableId,
+    region_ids: Vec&lt;RegionId&gt;,
+}
 
 <span class="kw">impl </span>TableRouteValue {
     <span class="kw">pub fn </span>physical(region_routes: Vec&lt;RegionRoute&gt;) -&gt; <span class="self">Self </span>{
@@ -574,12 +583,19 @@
 }
 
 <span class="kw">impl </span>LogicalTableRouteValue {
-    <span class="kw">pub fn </span>physical_table_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TableId {
-        <span class="macro">todo!</span>()
+    <span class="kw">pub fn </span>new(physical_table_id: TableId, region_ids: Vec&lt;RegionId&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            physical_table_id,
+            region_ids,
+        }
     }
 
-    <span class="kw">pub fn </span>region_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;RegionId&gt; {
-        <span class="macro">todo!</span>()
+    <span class="kw">pub fn </span>physical_table_id(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TableId {
+        <span class="self">self</span>.physical_table_id
+    }
+
+    <span class="kw">pub fn </span>region_ids(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;RegionId&gt; {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.region_ids
     }
 }
 

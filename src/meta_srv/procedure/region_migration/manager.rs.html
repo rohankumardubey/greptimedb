@@ -470,6 +470,9 @@
 <a href="#469" id="469">469</a>
 <a href="#470" id="470">470</a>
 <a href="#471" id="471">471</a>
+<a href="#472" id="472">472</a>
+<a href="#473" id="473">473</a>
+<a href="#474" id="474">474</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -935,7 +938,10 @@
         };
 
         <span class="kw">let </span>err = manager
-            .verify_table_route(<span class="kw-2">&amp;</span>TableRouteValue::Logical(LogicalTableRouteValue {}), <span class="kw-2">&amp;</span>task)
+            .verify_table_route(
+                <span class="kw-2">&amp;</span>TableRouteValue::Logical(LogicalTableRouteValue::new(<span class="number">0</span>, <span class="macro">vec!</span>[])),
+                <span class="kw-2">&amp;</span>task,
+            )
             .unwrap_err();
 
         <span class="macro">assert_matches!</span>(err, error::Error::Unexpected { .. });
