@@ -515,6 +515,26 @@
 <a href="#514" id="514">514</a>
 <a href="#515" id="515">515</a>
 <a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
+<a href="#519" id="519">519</a>
+<a href="#520" id="520">520</a>
+<a href="#521" id="521">521</a>
+<a href="#522" id="522">522</a>
+<a href="#523" id="523">523</a>
+<a href="#524" id="524">524</a>
+<a href="#525" id="525">525</a>
+<a href="#526" id="526">526</a>
+<a href="#527" id="527">527</a>
+<a href="#528" id="528">528</a>
+<a href="#529" id="529">529</a>
+<a href="#530" id="530">530</a>
+<a href="#531" id="531">531</a>
+<a href="#532" id="532">532</a>
+<a href="#533" id="533">533</a>
+<a href="#534" id="534">534</a>
+<a href="#535" id="535">535</a>
+<a href="#536" id="536">536</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -557,9 +577,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::cache_invalidator::Context;
 <span class="kw">use </span><span class="kw">crate</span>::ddl::utils::handle_operate_region_error;
 <span class="kw">use </span><span class="kw">crate</span>::ddl::DdlContext;
-<span class="kw">use </span><span class="kw">crate</span>::error::{
-    <span class="self">self</span>, ConvertAlterTableRequestSnafu, InvalidProtoMsgSnafu, <span class="prelude-ty">Result</span>, TableRouteNotFoundSnafu,
-};
+<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, ConvertAlterTableRequestSnafu, InvalidProtoMsgSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::key::table_info::TableInfoValue;
 <span class="kw">use </span><span class="kw">crate</span>::key::table_name::TableNameKey;
 <span class="kw">use </span><span class="kw">crate</span>::key::DeserializedValueWithBytes;
@@ -582,6 +600,7 @@
         cluster_id: u64,
         task: AlterTableTask,
         table_info_value: DeserializedValueWithBytes&lt;TableInfoValue&gt;,
+        physical_table_name: <span class="prelude-ty">Option</span>&lt;TableName&gt;,
         context: DdlContext,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>alter_kind = task
@@ -601,7 +620,13 @@
 
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             context,
-            data: AlterTableData::new(task, table_info_value, cluster_id, next_column_id),
+            data: AlterTableData::new(
+                task,
+                table_info_value,
+                physical_table_name,
+                cluster_id,
+                next_column_id,
+            ),
             kind,
         })
     }
@@ -699,23 +724,19 @@
 
     <span class="kw">pub async fn </span>submit_alter_region_requests(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Status&gt; {
         <span class="kw">let </span>table_id = <span class="self">self</span>.data.table_id();
-
-        <span class="kw">let </span>table_route = <span class="self">self
+        <span class="kw">let </span>(<span class="kw">_</span>, physical_table_route) = <span class="self">self
             </span>.context
             .table_metadata_manager
             .table_route_manager()
-            .get(table_id)
-            .<span class="kw">await</span><span class="question-mark">?
-            </span>.context(TableRouteNotFoundSnafu { table_id })<span class="question-mark">?
-            </span>.into_inner();
-        <span class="kw">let </span>region_routes = table_route.region_routes()<span class="question-mark">?</span>;
+            .get_physical_table_route(table_id)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">let </span>leaders = find_leaders(region_routes);
+        <span class="kw">let </span>leaders = find_leaders(<span class="kw-2">&amp;</span>physical_table_route.region_routes);
         <span class="kw">let </span><span class="kw-2">mut </span>alter_region_tasks = Vec::with_capacity(leaders.len());
 
         <span class="kw">for </span>datanode <span class="kw">in </span>leaders {
             <span class="kw">let </span>requester = <span class="self">self</span>.context.datanode_manager.datanode(<span class="kw-2">&amp;</span>datanode).<span class="kw">await</span>;
-            <span class="kw">let </span>regions = find_leader_regions(region_routes, <span class="kw-2">&amp;</span>datanode);
+            <span class="kw">let </span>regions = find_leader_regions(<span class="kw-2">&amp;</span>physical_table_route.region_routes, <span class="kw-2">&amp;</span>datanode);
 
             <span class="kw">for </span>region <span class="kw">in </span>regions {
                 <span class="kw">let </span>region_id = RegionId::new(table_id, region);
@@ -852,13 +873,24 @@
     }
 
     <span class="kw">fn </span>lock_key_inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;String&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>lock_key = <span class="macro">vec!</span>[];
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(physical_table_name) = <span class="self">self</span>.data.physical_table_name() {
+            <span class="kw">let </span>physical_table_key = common_catalog::format_full_table_name(
+                <span class="kw-2">&amp;</span>physical_table_name.catalog_name,
+                <span class="kw-2">&amp;</span>physical_table_name.schema_name,
+                <span class="kw-2">&amp;</span>physical_table_name.table_name,
+            );
+            lock_key.push(physical_table_key);
+        }
+
         <span class="kw">let </span>table_ref = <span class="self">self</span>.data.table_ref();
         <span class="kw">let </span>table_key = common_catalog::format_full_table_name(
             table_ref.catalog,
             table_ref.schema,
             table_ref.table,
         );
-        <span class="kw">let </span><span class="kw-2">mut </span>lock_key = <span class="macro">vec!</span>[table_key];
+        lock_key.push(table_key);
 
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(Kind::RenameTable(RenameTable { new_table_name })) = <span class="self">self</span>.alter_kind() {
             lock_key.push(common_catalog::format_full_table_name(
@@ -932,6 +964,8 @@
     task: AlterTableTask,
     <span class="doccomment">/// Table info value before alteration.
     </span>table_info_value: DeserializedValueWithBytes&lt;TableInfoValue&gt;,
+    <span class="doccomment">/// Physical table name, if the table to alter is a logical table.
+    </span>physical_table_name: <span class="prelude-ty">Option</span>&lt;TableName&gt;,
     cluster_id: u64,
     <span class="doccomment">/// Next column id of the table if the task adds columns to the table.
     </span>next_column_id: <span class="prelude-ty">Option</span>&lt;ColumnId&gt;,
@@ -941,6 +975,7 @@
     <span class="kw">pub fn </span>new(
         task: AlterTableTask,
         table_info_value: DeserializedValueWithBytes&lt;TableInfoValue&gt;,
+        physical_table_name: <span class="prelude-ty">Option</span>&lt;TableName&gt;,
         cluster_id: u64,
         next_column_id: <span class="prelude-ty">Option</span>&lt;ColumnId&gt;,
     ) -&gt; <span class="self">Self </span>{
@@ -948,6 +983,7 @@
             state: AlterTableState::Prepare,
             task,
             table_info_value,
+            physical_table_name,
             cluster_id,
             next_column_id,
         }
@@ -963,6 +999,10 @@
 
     <span class="kw">fn </span>table_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>RawTableInfo {
         <span class="kw-2">&amp;</span><span class="self">self</span>.table_info_value.table_info
+    }
+
+    <span class="kw">fn </span>physical_table_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>TableName&gt; {
+        <span class="self">self</span>.physical_table_name.as_ref()
     }
 }
 

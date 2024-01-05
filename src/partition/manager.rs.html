@@ -287,31 +287,6 @@
 <a href="#286" id="286">286</a>
 <a href="#287" id="287">287</a>
 <a href="#288" id="288">288</a>
-<a href="#289" id="289">289</a>
-<a href="#290" id="290">290</a>
-<a href="#291" id="291">291</a>
-<a href="#292" id="292">292</a>
-<a href="#293" id="293">293</a>
-<a href="#294" id="294">294</a>
-<a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
-<a href="#297" id="297">297</a>
-<a href="#298" id="298">298</a>
-<a href="#299" id="299">299</a>
-<a href="#300" id="300">300</a>
-<a href="#301" id="301">301</a>
-<a href="#302" id="302">302</a>
-<a href="#303" id="303">303</a>
-<a href="#304" id="304">304</a>
-<a href="#305" id="305">305</a>
-<a href="#306" id="306">306</a>
-<a href="#307" id="307">307</a>
-<a href="#308" id="308">308</a>
-<a href="#309" id="309">309</a>
-<a href="#310" id="310">310</a>
-<a href="#311" id="311">311</a>
-<a href="#312" id="312">312</a>
-<a href="#313" id="313">313</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -330,7 +305,7 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>api::v1::Rows;
-<span class="kw">use </span>common_meta::key::table_route::{TableRouteManager, TableRouteValue};
+<span class="kw">use </span>common_meta::key::table_route::TableRouteManager;
 <span class="kw">use </span>common_meta::kv_backend::KvBackendRef;
 <span class="kw">use </span>common_meta::peer::Peer;
 <span class="kw">use </span>common_meta::rpc::router;
@@ -343,7 +318,7 @@
 <span class="kw">use </span>table::metadata::TableId;
 
 <span class="kw">use </span><span class="kw">crate</span>::columns::RangeColumnsPartitionRule;
-<span class="kw">use </span><span class="kw">crate</span>::error::{FindLeaderSnafu, InvalidTableRouteDataSnafu, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::error::{FindLeaderSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::partition::{PartitionBound, PartitionDef, PartitionExpr};
 <span class="kw">use </span><span class="kw">crate</span>::range::RangePartitionRule;
 <span class="kw">use </span><span class="kw">crate</span>::splitter::RowSplitter;
@@ -379,38 +354,13 @@
         }
     }
 
-    <span class="doccomment">/// Find table route of given table name.
-    </span><span class="kw">async fn </span>find_table_route(<span class="kw-2">&amp;</span><span class="self">self</span>, table_id: TableId) -&gt; <span class="prelude-ty">Result</span>&lt;TableRouteValue&gt; {
-        <span class="kw">let </span>route = <span class="self">self
-            </span>.table_route_manager
-            .get(table_id)
-            .<span class="kw">await
-            </span>.context(error::TableRouteManagerSnafu)<span class="question-mark">?
-            </span>.context(error::FindTableRoutesSnafu { table_id })<span class="question-mark">?
-            </span>.into_inner();
-        <span class="prelude-val">Ok</span>(route)
-    }
-
     <span class="kw">async fn </span>find_region_routes(<span class="kw-2">&amp;</span><span class="self">self</span>, table_id: TableId) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;RegionRoute&gt;&gt; {
-        <span class="kw">let </span>table_route = <span class="self">self</span>.find_table_route(table_id).<span class="kw">await</span><span class="question-mark">?</span>;
-
-        <span class="kw">let </span>region_routes = <span class="kw">match </span>table_route {
-            TableRouteValue::Physical(x) =&gt; x.region_routes,
-
-            TableRouteValue::Logical(x) =&gt; {
-                <span class="kw">let </span>TableRouteValue::Physical(physical_table_route) =
-                    <span class="self">self</span>.find_table_route(x.physical_table_id()).<span class="kw">await</span><span class="question-mark">?
-                </span><span class="kw">else </span>{
-                    <span class="kw">return </span>InvalidTableRouteDataSnafu {
-                        table_id: x.physical_table_id(),
-                        err_msg: <span class="string">"expected to be a physical table route"</span>,
-                    }
-                    .fail();
-                };
-                physical_table_route.region_routes
-            }
-        };
-        <span class="prelude-val">Ok</span>(region_routes)
+        <span class="kw">let </span>(<span class="kw">_</span>, route) = <span class="self">self
+            </span>.table_route_manager
+            .get_physical_table_route(table_id)
+            .<span class="kw">await
+            </span>.context(error::TableRouteManagerSnafu)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(route.region_routes)
     }
 
     <span class="kw">pub async fn </span>find_table_partitions(<span class="kw-2">&amp;</span><span class="self">self</span>, table_id: TableId) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;PartitionInfo&gt;&gt; {
