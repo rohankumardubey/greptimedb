@@ -153,7 +153,7 @@
 
 <span class="macro">lazy_static::lazy_static! </span>{
     <span class="kw">static </span><span class="kw-2">ref </span>APP_VERSION: prometheus::IntGaugeVec =
-        <span class="macro">prometheus::register_int_gauge_vec!</span>(<span class="string">"app_version"</span>, <span class="string">"app version"</span>, <span class="kw-2">&amp;</span>[<span class="string">"short_version"</span>, <span class="string">"version"</span>]).unwrap();
+        <span class="macro">prometheus::register_int_gauge_vec!</span>(<span class="string">"greptime_app_version"</span>, <span class="string">"app version"</span>, <span class="kw-2">&amp;</span>[<span class="string">"short_version"</span>, <span class="string">"version"</span>]).unwrap();
 }
 
 <span class="attr">#[async_trait]

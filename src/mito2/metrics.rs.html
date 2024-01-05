@@ -222,13 +222,13 @@
 <span class="macro">lazy_static! </span>{
     <span class="doccomment">/// Global write buffer size in bytes.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>WRITE_BUFFER_BYTES: IntGauge =
-        <span class="macro">register_int_gauge!</span>(<span class="string">"mito_write_buffer_bytes"</span>, <span class="string">"mito write buffer bytes"</span>).unwrap();
+        <span class="macro">register_int_gauge!</span>(<span class="string">"greptime_mito_write_buffer_bytes"</span>, <span class="string">"mito write buffer bytes"</span>).unwrap();
     <span class="doccomment">/// Gauge for open regions
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>REGION_COUNT: IntGauge =
-        <span class="macro">register_int_gauge!</span>(<span class="string">"mito_region_count"</span>, <span class="string">"mito region count"</span>).unwrap();
+        <span class="macro">register_int_gauge!</span>(<span class="string">"greptime_mito_region_count"</span>, <span class="string">"mito region count"</span>).unwrap();
     <span class="doccomment">/// Elapsed time to handle requests.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>HANDLE_REQUEST_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-            <span class="string">"mito_handle_request_elapsed"</span>,
+            <span class="string">"greptime_mito_handle_request_elapsed"</span>,
             <span class="string">"mito handle request elapsed"</span>,
             <span class="kw-2">&amp;</span>[TYPE_LABEL]
         )
@@ -238,44 +238,44 @@
     </span><span class="doccomment">/// Counter of scheduled flush requests.
     /// Note that the flush scheduler may merge some flush requests.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>FLUSH_REQUESTS_TOTAL: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-            <span class="string">"mito_flush_requests_total"</span>,
+            <span class="string">"greptime_mito_flush_requests_total"</span>,
             <span class="string">"mito flush requests total"</span>,
             <span class="kw-2">&amp;</span>[FLUSH_REASON]
         )
         .unwrap();
     <span class="doccomment">/// Counter of scheduled failed flush jobs.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>FLUSH_ERRORS_TOTAL: IntCounter =
-        <span class="macro">register_int_counter!</span>(<span class="string">"mito_flush_errors_total"</span>, <span class="string">"mito flush errors total"</span>).unwrap();
+        <span class="macro">register_int_counter!</span>(<span class="string">"greptime_mito_flush_errors_total"</span>, <span class="string">"mito flush errors total"</span>).unwrap();
     <span class="doccomment">/// Elapsed time of a flush job.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>FLUSH_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-            <span class="string">"mito_flush_elapsed"</span>,
+            <span class="string">"greptime_mito_flush_elapsed"</span>,
             <span class="string">"mito flush elapsed"</span>,
             <span class="kw-2">&amp;</span>[TYPE_LABEL]
         )
         .unwrap();
     <span class="doccomment">/// Histogram of flushed bytes.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>FLUSH_BYTES_TOTAL: IntCounter =
-        <span class="macro">register_int_counter!</span>(<span class="string">"mito_flush_bytes_total"</span>, <span class="string">"mito flush bytes total"</span>).unwrap();
+        <span class="macro">register_int_counter!</span>(<span class="string">"greptime_mito_flush_bytes_total"</span>, <span class="string">"mito flush bytes total"</span>).unwrap();
     <span class="comment">// ------ End of flush related metrics
 
 
     // ------ Write related metrics
     </span><span class="doccomment">/// Counter of stalled write requests.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>WRITE_STALL_TOTAL: IntCounter =
-        <span class="macro">register_int_counter!</span>(<span class="string">"mito_write_stall_total"</span>, <span class="string">"mito write stall total"</span>).unwrap();
+        <span class="macro">register_int_counter!</span>(<span class="string">"greptime_mito_write_stall_total"</span>, <span class="string">"mito write stall total"</span>).unwrap();
     <span class="doccomment">/// Counter of rejected write requests.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>WRITE_REJECT_TOTAL: IntCounter =
-        <span class="macro">register_int_counter!</span>(<span class="string">"mito_write_reject_total"</span>, <span class="string">"mito write reject total"</span>).unwrap();
+        <span class="macro">register_int_counter!</span>(<span class="string">"greptime_mito_write_reject_total"</span>, <span class="string">"mito write reject total"</span>).unwrap();
     <span class="doccomment">/// Elapsed time of each write stage.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>WRITE_STAGE_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-            <span class="string">"mito_write_stage_elapsed"</span>,
+            <span class="string">"greptime_mito_write_stage_elapsed"</span>,
             <span class="string">"mito write stage elapsed"</span>,
             <span class="kw-2">&amp;</span>[STAGE_LABEL]
         )
         .unwrap();
     <span class="doccomment">/// Counter of rows to write.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>WRITE_ROWS_TOTAL: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-        <span class="string">"mito_write_rows_total"</span>,
+        <span class="string">"greptime_mito_write_rows_total"</span>,
         <span class="string">"mito write rows total"</span>,
         <span class="kw-2">&amp;</span>[TYPE_LABEL]
     )
@@ -286,56 +286,56 @@
     // Compaction metrics
     </span><span class="doccomment">/// Timer of different stages in compaction.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>COMPACTION_STAGE_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">"mito_compaction_stage_elapsed"</span>,
+        <span class="string">"greptime_mito_compaction_stage_elapsed"</span>,
         <span class="string">"mito compaction stage elapsed"</span>,
         <span class="kw-2">&amp;</span>[STAGE_LABEL]
     )
     .unwrap();
     <span class="doccomment">/// Timer of whole compaction task.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>COMPACTION_ELAPSED_TOTAL: Histogram =
-        <span class="macro">register_histogram!</span>(<span class="string">"mito_compaction_total_elapsed"</span>, <span class="string">"mito compaction total elapsed"</span>).unwrap();
+        <span class="macro">register_histogram!</span>(<span class="string">"greptime_mito_compaction_total_elapsed"</span>, <span class="string">"mito compaction total elapsed"</span>).unwrap();
     <span class="doccomment">/// Counter of all requested compaction task.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>COMPACTION_REQUEST_COUNT: IntCounter =
-        <span class="macro">register_int_counter!</span>(<span class="string">"mito_compaction_requests_total"</span>, <span class="string">"mito compaction requests total"</span>).unwrap();
+        <span class="macro">register_int_counter!</span>(<span class="string">"greptime_mito_compaction_requests_total"</span>, <span class="string">"mito compaction requests total"</span>).unwrap();
     <span class="doccomment">/// Counter of failed compaction task.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>COMPACTION_FAILURE_COUNT: IntCounter =
-        <span class="macro">register_int_counter!</span>(<span class="string">"mito_compaction_failure_total"</span>, <span class="string">"mito compaction failure total"</span>).unwrap();
+        <span class="macro">register_int_counter!</span>(<span class="string">"greptime_mito_compaction_failure_total"</span>, <span class="string">"mito compaction failure total"</span>).unwrap();
     <span class="comment">// ------- End of compaction metrics.
 
     // Query metrics.
     </span><span class="doccomment">/// Timer of different stages in query.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>READ_STAGE_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
-        <span class="string">"mito_read_stage_elapsed"</span>,
+        <span class="string">"greptime_mito_read_stage_elapsed"</span>,
         <span class="string">"mito read stage elapsed"</span>,
         <span class="kw-2">&amp;</span>[STAGE_LABEL]
     )
     .unwrap();
     <span class="doccomment">/// Counter of rows read.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>READ_ROWS_TOTAL: IntCounterVec =
-        <span class="macro">register_int_counter_vec!</span>(<span class="string">"mito_read_rows_total"</span>, <span class="string">"mito read rows total"</span>, <span class="kw-2">&amp;</span>[TYPE_LABEL]).unwrap();
+        <span class="macro">register_int_counter_vec!</span>(<span class="string">"greptime_mito_read_rows_total"</span>, <span class="string">"mito read rows total"</span>, <span class="kw-2">&amp;</span>[TYPE_LABEL]).unwrap();
     <span class="doccomment">/// Counter of filtered rows during merge.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>MERGE_FILTER_ROWS_TOTAL: IntCounterVec =
-        <span class="macro">register_int_counter_vec!</span>(<span class="string">"mito_merge_filter_rows_total"</span>, <span class="string">"mito merge filter rows total"</span>, <span class="kw-2">&amp;</span>[TYPE_LABEL]).unwrap();
+        <span class="macro">register_int_counter_vec!</span>(<span class="string">"greptime_mito_merge_filter_rows_total"</span>, <span class="string">"mito merge filter rows total"</span>, <span class="kw-2">&amp;</span>[TYPE_LABEL]).unwrap();
     <span class="comment">// ------- End of query metrics.
 
     // Cache related metrics.
     </span><span class="doccomment">/// Cache hit counter.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>CACHE_HIT: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-        <span class="string">"mito_cache_hit"</span>,
+        <span class="string">"greptime_mito_cache_hit"</span>,
         <span class="string">"mito cache hit"</span>,
         <span class="kw-2">&amp;</span>[TYPE_LABEL]
     )
     .unwrap();
     <span class="doccomment">/// Cache miss counter.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>CACHE_MISS: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-        <span class="string">"mito_cache_miss"</span>,
+        <span class="string">"greptime_mito_cache_miss"</span>,
         <span class="string">"mito cache miss"</span>,
         <span class="kw-2">&amp;</span>[TYPE_LABEL]
     )
     .unwrap();
     <span class="doccomment">/// Cache size in bytes.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>CACHE_BYTES: IntGaugeVec = <span class="macro">register_int_gauge_vec!</span>(
-        <span class="string">"mito_cache_bytes"</span>,
+        <span class="string">"greptime_mito_cache_bytes"</span>,
         <span class="string">"mito cache bytes"</span>,
         <span class="kw-2">&amp;</span>[TYPE_LABEL]
     )
@@ -351,13 +351,13 @@
     .unwrap();
     <span class="doccomment">/// Gauge of index apply memory usage.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_APPLY_MEMORY_USAGE: IntGauge = <span class="macro">register_int_gauge!</span>(
-        <span class="string">"index_apply_memory_usage"</span>,
+        <span class="string">"greptime_index_apply_memory_usage"</span>,
         <span class="string">"index apply memory usage"</span>,
     )
     .unwrap();
     <span class="doccomment">/// Counter of r/w bytes on index related IO operations.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_IO_BYTES_TOTAL: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-        <span class="string">"index_io_bytes_total"</span>,
+        <span class="string">"greptime_index_io_bytes_total"</span>,
         <span class="string">"index io bytes total"</span>,
         <span class="kw-2">&amp;</span>[TYPE_LABEL, FILE_TYPE_LABEL]
     )
@@ -368,7 +368,7 @@
 
     <span class="doccomment">/// Counter of r/w operations on index related IO operations, e.g. read, write, seek and flush.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_IO_OP_TOTAL: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
-        <span class="string">"index_io_op_total"</span>,
+        <span class="string">"greptime_index_io_op_total"</span>,
         <span class="string">"index io op total"</span>,
         <span class="kw-2">&amp;</span>[TYPE_LABEL, FILE_TYPE_LABEL]
     )
