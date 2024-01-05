@@ -232,7 +232,7 @@
     <span class="macro">format!</span>(<span class="string">"{}/region-{}"</span>, table_id, region_number)
 }
 
-<span class="attr">#[cfg(test)]
+<span class="attr">#[cfg(feature = <span class="string">"mock"</span>)]
 </span><span class="kw">pub mod </span>mock {
     <span class="kw">use </span>std::io::Error;
     <span class="kw">use </span>std::sync::Arc;

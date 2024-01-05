@@ -53,6 +53,6 @@
 <span class="kw">pub mod </span>metrics;
 <span class="kw">pub mod </span>region_server;
 <span class="kw">mod </span>store;
-<span class="attr">#[cfg(test)]
-</span><span class="kw">mod </span>tests;
+<span class="attr">#[cfg(any(test, feature = <span class="string">"testing"</span>))]
+</span><span class="kw">pub mod </span>tests;
 </code></pre></div></section></main></body></html>
