@@ -141,6 +141,7 @@
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
 <a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -203,7 +204,8 @@
         <span class="self">Self </span>{
             broker_endpoints: <span class="macro">vec!</span>[<span class="string">"127.0.0.1:9092"</span>.to_string()],
             compression: RsKafkaCompression::NoCompression,
-            max_batch_size: ReadableSize::mb(<span class="number">4</span>),
+            <span class="comment">// Warning: Kafka has a default limit of 1MB per message in a topic.
+            </span>max_batch_size: ReadableSize::mb(<span class="number">1</span>),
             linger: Duration::from_millis(<span class="number">200</span>),
             consumer_wait_timeout: Duration::from_millis(<span class="number">100</span>),
             backoff: KafkaBackoffConfig::default(),

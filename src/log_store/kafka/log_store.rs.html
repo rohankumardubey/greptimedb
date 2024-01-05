@@ -253,6 +253,28 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -281,10 +303,10 @@
 <span class="kw">use </span>store_api::logstore::namespace::Id <span class="kw">as </span>NamespaceId;
 <span class="kw">use </span>store_api::logstore::{AppendBatchResponse, AppendResponse, LogStore};
 
-<span class="kw">use </span><span class="kw">crate</span>::error::{ConsumeRecordSnafu, Error, GetOffsetSnafu, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::error::{ConsumeRecordSnafu, Error, GetOffsetSnafu, IllegalSequenceSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::kafka::client_manager::{ClientManager, ClientManagerRef};
-<span class="kw">use </span><span class="kw">crate</span>::kafka::offset::Offset;
-<span class="kw">use </span><span class="kw">crate</span>::kafka::record_utils::{decode_from_record, RecordProducer};
+<span class="kw">use </span><span class="kw">crate</span>::kafka::util::offset::Offset;
+<span class="kw">use </span><span class="kw">crate</span>::kafka::util::record::{maybe_emit_entry, Record, RecordProducer};
 <span class="kw">use </span><span class="kw">crate</span>::kafka::{EntryImpl, NamespaceImpl};
 
 <span class="doccomment">/// A log store backed by Kafka.
@@ -340,8 +362,6 @@
     <span class="doccomment">/// Appends a batch of entries and returns a response containing a map where the key is a region id
     /// while the value is the id of the last successfully written entry of the region.
     </span><span class="kw">async fn </span>append_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, entries: Vec&lt;<span class="self">Self</span>::Entry&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;AppendBatchResponse&gt; {
-        <span class="macro">debug!</span>(<span class="string">"LogStore handles append_batch with entries {:?}"</span>, entries);
-
         <span class="kw">if </span>entries.is_empty() {
             <span class="kw">return </span><span class="prelude-val">Ok</span>(AppendBatchResponse::default());
         }
@@ -351,7 +371,7 @@
         <span class="kw">for </span>entry <span class="kw">in </span>entries {
             producers
                 .entry(entry.ns.region_id)
-                .or_insert(RecordProducer::new(entry.ns.clone()))
+                .or_insert_with(|| RecordProducer::new(entry.ns.clone()))
                 .push(entry);
         }
 
@@ -370,8 +390,6 @@
         </span>.into_iter()
         .collect::&lt;HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;();
 
-        <span class="macro">debug!</span>(<span class="string">"Append batch result: {:?}"</span>, last_entry_ids);
-
         <span class="prelude-val">Ok</span>(AppendBatchResponse { last_entry_ids })
     }
 
@@ -382,13 +400,10 @@
         ns: <span class="kw-2">&amp;</span><span class="self">Self</span>::Namespace,
         entry_id: EntryId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;SendableEntryStream&lt;<span class="self">Self</span>::Entry, <span class="self">Self</span>::Error&gt;&gt; {
-        <span class="kw">let </span>topic = ns.topic.clone();
-        <span class="kw">let </span>region_id = ns.region_id;
-
         <span class="comment">// Gets the client associated with the topic.
         </span><span class="kw">let </span>client = <span class="self">self
             </span>.client_manager
-            .get_or_insert(<span class="kw-2">&amp;</span>topic)
+            .get_or_insert(<span class="kw-2">&amp;</span>ns.topic)
             .<span class="kw">await</span><span class="question-mark">?
             </span>.raw_client
             .clone();
@@ -403,13 +418,13 @@
             </span>.context(GetOffsetSnafu { ns: ns.clone() })<span class="question-mark">?
             </span>- <span class="number">1</span>;
         <span class="comment">// Reads entries with offsets in the range [start_offset, end_offset).
-        </span><span class="kw">let </span>start_offset = Offset::try_from(entry_id)<span class="question-mark">?</span>.<span class="number">0</span>;
+        </span><span class="kw">let </span>start_offset: i64 = Offset::try_from(entry_id)<span class="question-mark">?</span>.<span class="number">0</span>;
 
         <span class="comment">// Abort if there're no new entries.
         // FIXME(niebayes): how come this case happens?
         </span><span class="kw">if </span>start_offset &gt; end_offset {
             <span class="macro">warn!</span>(
-                <span class="string">"No new entries for ns {} in range [{}, {})"</span>,
+                <span class="string">"No new entries for ns {} in range [{}, {}]"</span>,
                 ns, start_offset, end_offset
             );
             <span class="kw">return </span><span class="prelude-val">Ok</span>(futures_util::stream::empty().boxed());
@@ -421,44 +436,52 @@
             .build();
 
         <span class="macro">debug!</span>(
-            <span class="string">"Built a stream consumer for ns {} to consume entries in range [{}, {})"</span>,
+            <span class="string">"Built a stream consumer for ns {} to consume entries in range [{}, {}]"</span>,
             ns, start_offset, end_offset
         );
 
+        <span class="comment">// Key: entry id, Value: the records associated with the entry.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>entry_records: HashMap&lt;<span class="kw">_</span>, Vec&lt;<span class="kw">_</span>&gt;&gt; = HashMap::new();
         <span class="kw">let </span>ns_clone = ns.clone();
         <span class="kw">let </span>stream = <span class="macro">async_stream::stream!</span>({
             <span class="kw">while let </span><span class="prelude-val">Some</span>(consume_result) = stream_consumer.next().<span class="kw">await </span>{
-                <span class="comment">// Each next will prdoce a `RecordAndOffset` and a high watermark offset.
+                <span class="comment">// Each next on the stream consumer produces a `RecordAndOffset` and a high watermark offset.
                 // The `RecordAndOffset` contains the record data and its start offset.
-                // The high watermark offset is the end offset of the latest record in the partition.
-                </span><span class="kw">let </span>(record, high_watermark) = consume_result.context(ConsumeRecordSnafu {
-                    ns: ns_clone.clone(),
-                })<span class="question-mark">?</span>;
-                <span class="kw">let </span>record_offset = record.offset;
+                // The high watermark offset is the offset of the last record plus one.
+                </span><span class="kw">let </span>(record_and_offset, high_watermark) =
+                    consume_result.with_context(|<span class="kw">_</span>| ConsumeRecordSnafu {
+                        ns: ns_clone.clone(),
+                    })<span class="question-mark">?</span>;
+                <span class="kw">let </span>(kafka_record, offset) = (record_and_offset.record, record_and_offset.offset);
+
                 <span class="macro">debug!</span>(
                     <span class="string">"Read a record at offset {} for ns {}, high watermark: {}"</span>,
-                    record_offset, ns_clone, high_watermark
+                    offset, ns_clone, high_watermark
                 );
 
-                <span class="comment">// Ignores noop records.
-                </span><span class="kw">if </span>record.record.value.is_none() {
+                <span class="comment">// Ignores no-op records.
+                </span><span class="kw">if </span>kafka_record.value.is_none() {
+                    <span class="kw">if </span>check_termination(offset, end_offset, <span class="kw-2">&amp;</span>entry_records)<span class="question-mark">? </span>{
+                        <span class="kw">break</span>;
+                    }
                     <span class="kw">continue</span>;
                 }
-                <span class="kw">let </span>entries = decode_from_record(record.record)<span class="question-mark">?</span>;
 
-                <span class="comment">// Filters entries by region id.
-                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(entry) = entries.first()
-                    &amp;&amp; entry.ns.region_id == region_id
-                {
-                    <span class="kw">yield </span><span class="prelude-val">Ok</span>(entries);
+                <span class="comment">// Filters records by namespace.
+                </span><span class="kw">let </span>record = Record::try_from(kafka_record)<span class="question-mark">?</span>;
+                <span class="kw">if </span>record.meta.ns != ns_clone {
+                    <span class="kw">if </span>check_termination(offset, end_offset, <span class="kw-2">&amp;</span>entry_records)<span class="question-mark">? </span>{
+                        <span class="kw">break</span>;
+                    }
+                    <span class="kw">continue</span>;
                 }
 
-                <span class="comment">// Terminates the stream if the entry with the end offset was read.
-                </span><span class="kw">if </span>record_offset &gt;= end_offset {
-                    <span class="macro">debug!</span>(
-                        <span class="string">"Stream consumer for ns {} terminates at offset {}"</span>,
-                        ns_clone, record_offset
-                    );
+                <span class="comment">// Tries to construct an entry from records consumed so far.
+                </span><span class="kw">if let </span><span class="prelude-val">Some</span>(entry) = maybe_emit_entry(record, <span class="kw-2">&amp;mut </span>entry_records)<span class="question-mark">? </span>{
+                    <span class="kw">yield </span><span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[entry]);
+                }
+
+                <span class="kw">if </span>check_termination(offset, end_offset, <span class="kw-2">&amp;</span>entry_records)<span class="question-mark">? </span>{
                     <span class="kw">break</span>;
                 }
             }
@@ -505,6 +528,27 @@
     <span class="doccomment">/// Stops components of the logstore.
     </span><span class="kw">async fn </span>stop(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="prelude-val">Ok</span>(())
+    }
+}
+
+<span class="kw">fn </span>check_termination(
+    offset: i64,
+    end_offset: i64,
+    entry_records: <span class="kw-2">&amp;</span>HashMap&lt;EntryId, Vec&lt;Record&gt;&gt;,
+) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
+    <span class="comment">// Terminates the stream if the entry with the end offset was read.
+    </span><span class="kw">if </span>offset &gt;= end_offset {
+        <span class="macro">debug!</span>(<span class="string">"Stream consumer terminates at offset {}"</span>, offset);
+        <span class="comment">// There must have no records when the stream terminates.
+        </span><span class="kw">if </span>!entry_records.is_empty() {
+            <span class="kw">return </span>IllegalSequenceSnafu {
+                error: <span class="string">"Found records leftover"</span>,
+            }
+            .fail();
+        }
+        <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
+    } <span class="kw">else </span>{
+        <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>)
     }
 }
 </code></pre></div></section></main></body></html>

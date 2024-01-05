@@ -199,7 +199,7 @@
 <span class="doccomment">/// Manages client construction and accesses.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ClientManager {
-    config: KafkaConfig,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) config: KafkaConfig,
     <span class="doccomment">/// Top-level client in kafka. All clients are constructed by this client.
     </span>client_factory: RsKafkaClient,
     <span class="doccomment">/// A pool maintaining a collection of clients.
