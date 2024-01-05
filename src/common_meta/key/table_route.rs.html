@@ -406,6 +406,8 @@
 <a href="#405" id="405">405</a>
 <a href="#406" id="406">406</a>
 <a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -499,7 +501,9 @@
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.physical_table_route().version)
     }
 
-    <span class="doccomment">/// Returns the corresponding [RegionRoute].
+    <span class="doccomment">/// Returns the corresponding [RegionRoute], returns `None` if it's the specific region is not found.
+    ///
+    /// Note: It throws an error if it's a logical table
     </span><span class="kw">pub fn </span>region_route(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;RegionRoute&gt;&gt; {
         <span class="macro">ensure!</span>(
             <span class="self">self</span>.is_physical(),
