@@ -288,6 +288,24 @@
 <a href="#287" id="287">287</a>
 <a href="#288" id="288">288</a>
 <a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -319,14 +337,16 @@
 <span class="kw">use </span>datatypes::prelude::{ConcreteDataType, DataType};
 <span class="kw">use </span>datatypes::scalars::ScalarVectorBuilder;
 <span class="kw">use </span>datatypes::schema::{ColumnSchema, Schema, SchemaRef};
+<span class="kw">use </span>datatypes::value::Value;
 <span class="kw">use </span>datatypes::vectors::{StringVectorBuilder, VectorRef};
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
-<span class="kw">use </span>store_api::storage::TableId;
+<span class="kw">use </span>store_api::storage::{ScanRequest, TableId};
 
 <span class="kw">use super</span>::{InformationTable, COLUMNS};
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     CreateRecordBatchSnafu, InternalSnafu, <span class="prelude-ty">Result</span>, UpgradeWeakCatalogManagerRefSnafu,
 };
+<span class="kw">use </span><span class="kw">crate</span>::information_schema::Predicates;
 <span class="kw">use </span><span class="kw">crate</span>::CatalogManager;
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>InformationSchemaColumns {
@@ -392,14 +412,14 @@
         <span class="self">self</span>.schema.clone()
     }
 
-    <span class="kw">fn </span>to_stream(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt; {
+    <span class="kw">fn </span>to_stream(<span class="kw-2">&amp;</span><span class="self">self</span>, request: ScanRequest) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt; {
         <span class="kw">let </span>schema = <span class="self">self</span>.schema.arrow_schema().clone();
         <span class="kw">let </span><span class="kw-2">mut </span>builder = <span class="self">self</span>.builder();
         <span class="kw">let </span>stream = Box::pin(DfRecordBatchStreamAdapter::new(
             schema,
             futures::stream::once(<span class="kw">async move </span>{
                 builder
-                    .make_columns()
+                    .make_columns(<span class="prelude-val">Some</span>(request))
                     .<span class="kw">await
                     </span>.map(|x| x.into_df_record_batch())
                     .map_err(Into::into)
@@ -455,12 +475,13 @@
     }
 
     <span class="doccomment">/// Construct the `information_schema.columns` virtual table
-    </span><span class="kw">async fn </span>make_columns(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RecordBatch&gt; {
+    </span><span class="kw">async fn </span>make_columns(<span class="kw-2">&amp;mut </span><span class="self">self</span>, request: <span class="prelude-ty">Option</span>&lt;ScanRequest&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;RecordBatch&gt; {
         <span class="kw">let </span>catalog_name = <span class="self">self</span>.catalog_name.clone();
         <span class="kw">let </span>catalog_manager = <span class="self">self
             </span>.catalog_manager
             .upgrade()
             .context(UpgradeWeakCatalogManagerRefSnafu)<span class="question-mark">?</span>;
+        <span class="kw">let </span>predicates = Predicates::from_scan_request(<span class="kw-2">&amp;</span>request);
 
         <span class="kw">for </span>schema_name <span class="kw">in </span>catalog_manager.schema_names(<span class="kw-2">&amp;</span>catalog_name).<span class="kw">await</span><span class="question-mark">? </span>{
             <span class="kw">if </span>!catalog_manager
@@ -491,6 +512,7 @@
                         };
 
                         <span class="self">self</span>.add_column(
+                            <span class="kw-2">&amp;</span>predicates,
                             <span class="kw-2">&amp;</span>catalog_name,
                             <span class="kw-2">&amp;</span>schema_name,
                             <span class="kw-2">&amp;</span>table_name,
@@ -509,6 +531,7 @@
 
     <span class="kw">fn </span>add_column(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        predicates: <span class="kw-2">&amp;</span>Predicates,
         catalog_name: <span class="kw-2">&amp;</span>str,
         schema_name: <span class="kw-2">&amp;</span>str,
         table_name: <span class="kw-2">&amp;</span>str,
@@ -516,6 +539,19 @@
         column_schema: <span class="kw-2">&amp;</span>ColumnSchema,
     ) {
         <span class="kw">let </span>data_type = <span class="kw-2">&amp;</span>column_schema.data_type.name();
+
+        <span class="kw">let </span>row = [
+            (TABLE_CATALOG, <span class="kw-2">&amp;</span>Value::from(catalog_name)),
+            (TABLE_SCHEMA, <span class="kw-2">&amp;</span>Value::from(schema_name)),
+            (TABLE_NAME, <span class="kw-2">&amp;</span>Value::from(table_name)),
+            (COLUMN_NAME, <span class="kw-2">&amp;</span>Value::from(column_schema.name.as_str())),
+            (DATA_TYPE, <span class="kw-2">&amp;</span>Value::from(data_type.as_str())),
+            (SEMANTIC_TYPE, <span class="kw-2">&amp;</span>Value::from(semantic_type)),
+        ];
+
+        <span class="kw">if </span>!predicates.eval(<span class="kw-2">&amp;</span>row) {
+            <span class="kw">return</span>;
+        }
 
         <span class="self">self</span>.catalog_names.push(<span class="prelude-val">Some</span>(catalog_name));
         <span class="self">self</span>.schema_names.push(<span class="prelude-val">Some</span>(schema_name));
@@ -569,7 +605,7 @@
             schema,
             futures::stream::once(<span class="kw">async move </span>{
                 builder
-                    .make_columns()
+                    .make_columns(<span class="prelude-val">None</span>)
                     .<span class="kw">await
                     </span>.map(|x| x.into_df_record_batch())
                     .map_err(Into::into)

@@ -299,6 +299,8 @@
 <a href="#298" id="298">298</a>
 <a href="#299" id="299">299</a>
 <a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -316,6 +318,7 @@
 </span><span class="kw">mod </span>columns;
 <span class="kw">mod </span>key_column_usage;
 <span class="kw">mod </span>memory_table;
+<span class="kw">mod </span>predicate;
 <span class="kw">mod </span>schemata;
 <span class="kw">mod </span>table_names;
 <span class="kw">mod </span>tables;
@@ -330,6 +333,7 @@
 <span class="kw">use </span>futures_util::StreamExt;
 <span class="kw">use </span>lazy_static::lazy_static;
 <span class="kw">use </span>paste::paste;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use </span>predicate::Predicates;
 <span class="kw">use </span>snafu::ResultExt;
 <span class="kw">use </span>store_api::data_source::DataSource;
 <span class="kw">use </span>store_api::storage::{ScanRequest, TableId};
@@ -460,7 +464,7 @@
     <span class="kw">fn </span>build_table(<span class="kw-2">&amp;</span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;TableRef&gt; {
         <span class="self">self</span>.information_table(name).map(|table| {
             <span class="kw">let </span>table_info = <span class="self">Self</span>::table_info(<span class="self">self</span>.catalog_name.clone(), <span class="kw-2">&amp;</span>table);
-            <span class="kw">let </span>filter_pushdown = FilterPushDownType::Unsupported;
+            <span class="kw">let </span>filter_pushdown = FilterPushDownType::Inexact;
             <span class="kw">let </span>thin_table = ThinTable::new(table_info, filter_pushdown);
 
             <span class="kw">let </span>data_source = Arc::new(InformationTableDataSource::new(table));
@@ -539,7 +543,7 @@
 
     <span class="kw">fn </span>schema(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; SchemaRef;
 
-    <span class="kw">fn </span>to_stream(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt;;
+    <span class="kw">fn </span>to_stream(<span class="kw-2">&amp;</span><span class="self">self</span>, request: ScanRequest) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt;;
 
     <span class="kw">fn </span>table_type(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; TableType {
         TableType::Temporary
@@ -573,7 +577,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         request: ScanRequest,
     ) -&gt; std::result::Result&lt;SendableRecordBatchStream, BoxedError&gt; {
-        <span class="kw">let </span>projection = request.projection;
+        <span class="kw">let </span>projection = request.projection.clone();
         <span class="kw">let </span>projected_schema = <span class="kw">match </span><span class="kw-2">&amp;</span>projection {
             <span class="prelude-val">Some</span>(projection) =&gt; <span class="self">self</span>.try_project(projection)<span class="question-mark">?</span>,
             <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.table.schema(),
@@ -581,7 +585,7 @@
 
         <span class="kw">let </span>stream = <span class="self">self
             </span>.table
-            .to_stream()
+            .to_stream(request)
             .map_err(BoxedError::new)
             .context(TablesRecordBatchSnafu)
             .map_err(BoxedError::new)<span class="question-mark">?

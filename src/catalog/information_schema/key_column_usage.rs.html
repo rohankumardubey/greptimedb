@@ -337,6 +337,15 @@
 <a href="#336" id="336">336</a>
 <a href="#337" id="337">337</a>
 <a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -364,16 +373,25 @@
 <span class="kw">use </span>datafusion::physical_plan::SendableRecordBatchStream <span class="kw">as </span>DfSendableRecordBatchStream;
 <span class="kw">use </span>datatypes::prelude::{ConcreteDataType, ScalarVectorBuilder, VectorRef};
 <span class="kw">use </span>datatypes::schema::{ColumnSchema, Schema, SchemaRef};
+<span class="kw">use </span>datatypes::value::Value;
 <span class="kw">use </span>datatypes::vectors::{StringVectorBuilder, UInt32VectorBuilder};
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
-<span class="kw">use </span>store_api::storage::TableId;
+<span class="kw">use </span>store_api::storage::{ScanRequest, TableId};
 
 <span class="kw">use </span><span class="kw">super</span>::KEY_COLUMN_USAGE;
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     CreateRecordBatchSnafu, InternalSnafu, <span class="prelude-ty">Result</span>, UpgradeWeakCatalogManagerRefSnafu,
 };
-<span class="kw">use </span><span class="kw">crate</span>::information_schema::InformationTable;
+<span class="kw">use </span><span class="kw">crate</span>::information_schema::{InformationTable, Predicates};
 <span class="kw">use </span><span class="kw">crate</span>::CatalogManager;
+
+<span class="kw">const </span>CONSTRAINT_SCHEMA: <span class="kw-2">&amp;</span>str = <span class="string">"constraint_schema"</span>;
+<span class="kw">const </span>CONSTRAINT_NAME: <span class="kw-2">&amp;</span>str = <span class="string">"constraint_name"</span>;
+<span class="kw">const </span>TABLE_CATALOG: <span class="kw-2">&amp;</span>str = <span class="string">"table_catalog"</span>;
+<span class="kw">const </span>TABLE_SCHEMA: <span class="kw-2">&amp;</span>str = <span class="string">"table_schema"</span>;
+<span class="kw">const </span>TABLE_NAME: <span class="kw-2">&amp;</span>str = <span class="string">"table_name"</span>;
+<span class="kw">const </span>COLUMN_NAME: <span class="kw-2">&amp;</span>str = <span class="string">"column_name"</span>;
+<span class="kw">const </span>ORDINAL_POSITION: <span class="kw-2">&amp;</span>str = <span class="string">"ordinal_position"</span>;
 
 <span class="doccomment">/// The virtual table implementation for `information_schema.KEY_COLUMN_USAGE`.
 </span><span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">struct </span>InformationSchemaKeyColumnUsage {
@@ -399,24 +417,16 @@
                 <span class="bool-val">false</span>,
             ),
             ColumnSchema::new(
-                <span class="string">"constraint_schema"</span>,
+                CONSTRAINT_SCHEMA,
                 ConcreteDataType::string_datatype(),
                 <span class="bool-val">false</span>,
             ),
-            ColumnSchema::new(
-                <span class="string">"constraint_name"</span>,
-                ConcreteDataType::string_datatype(),
-                <span class="bool-val">false</span>,
-            ),
-            ColumnSchema::new(<span class="string">"table_catalog"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
-            ColumnSchema::new(<span class="string">"table_schema"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
-            ColumnSchema::new(<span class="string">"table_name"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
-            ColumnSchema::new(<span class="string">"column_name"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
-            ColumnSchema::new(
-                <span class="string">"ordinal_position"</span>,
-                ConcreteDataType::uint32_datatype(),
-                <span class="bool-val">false</span>,
-            ),
+            ColumnSchema::new(CONSTRAINT_NAME, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
+            ColumnSchema::new(TABLE_CATALOG, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
+            ColumnSchema::new(TABLE_SCHEMA, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
+            ColumnSchema::new(TABLE_NAME, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
+            ColumnSchema::new(COLUMN_NAME, ConcreteDataType::string_datatype(), <span class="bool-val">false</span>),
+            ColumnSchema::new(ORDINAL_POSITION, ConcreteDataType::uint32_datatype(), <span class="bool-val">false</span>),
             ColumnSchema::new(
                 <span class="string">"position_in_unique_constraint"</span>,
                 ConcreteDataType::uint32_datatype(),
@@ -462,14 +472,14 @@
         <span class="self">self</span>.schema.clone()
     }
 
-    <span class="kw">fn </span>to_stream(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt; {
+    <span class="kw">fn </span>to_stream(<span class="kw-2">&amp;</span><span class="self">self</span>, request: ScanRequest) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt; {
         <span class="kw">let </span>schema = <span class="self">self</span>.schema.arrow_schema().clone();
         <span class="kw">let </span><span class="kw-2">mut </span>builder = <span class="self">self</span>.builder();
         <span class="kw">let </span>stream = Box::pin(DfRecordBatchStreamAdapter::new(
             schema,
             futures::stream::once(<span class="kw">async move </span>{
                 builder
-                    .make_key_column_usage()
+                    .make_key_column_usage(<span class="prelude-val">Some</span>(request))
                     .<span class="kw">await
                     </span>.map(|x| x.into_df_record_batch())
                     .map_err(Into::into)
@@ -531,14 +541,14 @@
     }
 
     <span class="doccomment">/// Construct the `information_schema.KEY_COLUMN_USAGE` virtual table
-    </span><span class="kw">async fn </span>make_key_column_usage(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;RecordBatch&gt; {
+    </span><span class="kw">async fn </span>make_key_column_usage(<span class="kw-2">&amp;mut </span><span class="self">self</span>, request: <span class="prelude-ty">Option</span>&lt;ScanRequest&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;RecordBatch&gt; {
         <span class="kw">let </span>catalog_name = <span class="self">self</span>.catalog_name.clone();
         <span class="kw">let </span>catalog_manager = <span class="self">self
             </span>.catalog_manager
             .upgrade()
             .context(UpgradeWeakCatalogManagerRefSnafu)<span class="question-mark">?</span>;
+        <span class="kw">let </span>predicates = Predicates::from_scan_request(<span class="kw-2">&amp;</span>request);
 
-        <span class="kw">let </span><span class="kw-2">mut </span>time_index_constraints = <span class="macro">vec!</span>[];
         <span class="kw">let </span><span class="kw-2">mut </span>primary_constraints = <span class="macro">vec!</span>[];
 
         <span class="kw">for </span>schema_name <span class="kw">in </span>catalog_manager.schema_names(<span class="kw-2">&amp;</span>catalog_name).<span class="kw">await</span><span class="question-mark">? </span>{
@@ -562,11 +572,15 @@
 
                     <span class="kw">for </span>(idx, column) <span class="kw">in </span>schema.column_schemas().iter().enumerate() {
                         <span class="kw">if </span>column.is_time_index() {
-                            time_index_constraints.push((
-                                schema_name.clone(),
-                                table_name.clone(),
-                                column.name.clone(),
-                            ));
+                            <span class="self">self</span>.add_key_column_usage(
+                                <span class="kw-2">&amp;</span>predicates,
+                                <span class="kw-2">&amp;</span>schema_name,
+                                <span class="string">"TIME INDEX"</span>,
+                                <span class="kw-2">&amp;</span>schema_name,
+                                <span class="kw-2">&amp;</span>table_name,
+                                <span class="kw-2">&amp;</span>column.name,
+                                <span class="number">1</span>, <span class="comment">//always 1 for time index
+                            </span>);
                         }
                         <span class="kw">if </span>keys.contains(<span class="kw-2">&amp;</span>idx) {
                             primary_constraints.push((
@@ -584,21 +598,10 @@
         }
 
         <span class="kw">for </span>(i, (schema_name, table_name, column_name)) <span class="kw">in
-            </span>time_index_constraints.into_iter().enumerate()
-        {
-            <span class="self">self</span>.add_key_column_usage(
-                <span class="kw-2">&amp;</span>schema_name,
-                <span class="string">"TIME INDEX"</span>,
-                <span class="kw-2">&amp;</span>schema_name,
-                <span class="kw-2">&amp;</span>table_name,
-                <span class="kw-2">&amp;</span>column_name,
-                i <span class="kw">as </span>u32 + <span class="number">1</span>,
-            );
-        }
-        <span class="kw">for </span>(i, (schema_name, table_name, column_name)) <span class="kw">in
             </span>primary_constraints.into_iter().enumerate()
         {
             <span class="self">self</span>.add_key_column_usage(
+                <span class="kw-2">&amp;</span>predicates,
                 <span class="kw-2">&amp;</span>schema_name,
                 <span class="string">"PRIMARY"</span>,
                 <span class="kw-2">&amp;</span>schema_name,
@@ -613,8 +616,10 @@
 
     <span class="comment">// TODO(dimbtp): Foreign key constraint has not `None` value for last 4
     // fields, but it is not supported yet.
+    </span><span class="attr">#[allow(clippy::too_many_arguments)]
     </span><span class="kw">fn </span>add_key_column_usage(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        predicates: <span class="kw-2">&amp;</span>Predicates,
         constraint_schema: <span class="kw-2">&amp;</span>str,
         constraint_name: <span class="kw-2">&amp;</span>str,
         table_schema: <span class="kw-2">&amp;</span>str,
@@ -622,6 +627,19 @@
         column_name: <span class="kw-2">&amp;</span>str,
         ordinal_position: u32,
     ) {
+        <span class="kw">let </span>row = [
+            (CONSTRAINT_SCHEMA, <span class="kw-2">&amp;</span>Value::from(constraint_schema)),
+            (CONSTRAINT_NAME, <span class="kw-2">&amp;</span>Value::from(constraint_name)),
+            (TABLE_SCHEMA, <span class="kw-2">&amp;</span>Value::from(table_schema)),
+            (TABLE_NAME, <span class="kw-2">&amp;</span>Value::from(table_name)),
+            (COLUMN_NAME, <span class="kw-2">&amp;</span>Value::from(column_name)),
+            (ORDINAL_POSITION, <span class="kw-2">&amp;</span>Value::from(ordinal_position)),
+        ];
+
+        <span class="kw">if </span>!predicates.eval(<span class="kw-2">&amp;</span>row) {
+            <span class="kw">return</span>;
+        }
+
         <span class="self">self</span>.constraint_catalog.push(<span class="prelude-val">Some</span>(<span class="string">"def"</span>));
         <span class="self">self</span>.constraint_schema.push(<span class="prelude-val">Some</span>(constraint_schema));
         <span class="self">self</span>.constraint_name.push(<span class="prelude-val">Some</span>(constraint_name));
@@ -667,7 +685,7 @@
             schema,
             futures::stream::once(<span class="kw">async move </span>{
                 builder
-                    .make_key_column_usage()
+                    .make_key_column_usage(<span class="prelude-val">None</span>)
                     .<span class="kw">await
                     </span>.map(|x| x.into_df_record_batch())
                     .map_err(Into::into)

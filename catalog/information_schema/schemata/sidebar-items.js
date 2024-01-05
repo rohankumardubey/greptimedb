@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["InformationSchemaSchemata","InformationSchemaSchemataBuilder"]};
+window.SIDEBAR_ITEMS = {"constant":["CATALOG_NAME","DEFAULT_CHARACTER_SET_NAME","DEFAULT_COLLATION_NAME","SCHEMA_NAME"],"struct":["InformationSchemaSchemata","InformationSchemaSchemataBuilder"]};
