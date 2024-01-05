@@ -138,22 +138,22 @@
         <span class="kw">if </span><span class="self">self
             </span>.state
             .read()
-            .<span class="kw">await
-            </span>.physical_regions()
+            .unwrap()
+            .physical_regions()
             .contains_key(<span class="kw-2">&amp;</span>data_region_id)
         {
             <span class="self">self</span>.close_physical_region(data_region_id).<span class="kw">await</span><span class="question-mark">?</span>;
             <span class="self">self</span>.state
                 .write()
-                .<span class="kw">await
-                </span>.remove_physical_region(data_region_id)<span class="question-mark">?</span>;
+                .unwrap()
+                .remove_physical_region(data_region_id)<span class="question-mark">?</span>;
 
             <span class="prelude-val">Ok</span>(<span class="number">0</span>)
         } <span class="kw">else if </span><span class="self">self
             </span>.state
             .read()
-            .<span class="kw">await
-            </span>.logical_regions()
+            .unwrap()
+            .logical_regions()
             .contains_key(<span class="kw-2">&amp;</span>region_id)
         {
             <span class="prelude-val">Ok</span>(<span class="number">0</span>)

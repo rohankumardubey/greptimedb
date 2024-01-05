@@ -662,8 +662,8 @@
         <span class="comment">// remember this table
         </span><span class="self">self</span>.state
             .write()
-            .<span class="kw">await
-            </span>.add_physical_region(data_region_id, physical_column_set);
+            .unwrap()
+            .add_physical_region(data_region_id, physical_column_set);
 
         <span class="prelude-val">Ok</span>(())
     }
@@ -709,7 +709,7 @@
         <span class="comment">// find new columns to add
         </span><span class="kw">let </span><span class="kw-2">mut </span>new_columns = <span class="macro">vec!</span>[];
         {
-            <span class="kw">let </span>state = <span class="kw-2">&amp;</span><span class="self">self</span>.state.read().<span class="kw">await</span>;
+            <span class="kw">let </span>state = <span class="kw-2">&amp;</span><span class="self">self</span>.state.read().unwrap();
             <span class="kw">let </span>physical_columns =
                 state
                     .physical_columns()
@@ -747,8 +747,8 @@
         // Safety: previous steps ensure the physical region exist
         </span><span class="self">self</span>.state
             .write()
-            .<span class="kw">await
-            </span>.add_logical_region(physical_region_id, logical_region_id);
+            .unwrap()
+            .add_logical_region(physical_region_id, logical_region_id);
         <span class="macro">info!</span>(<span class="string">"Created new logical region {logical_region_id} on physical region {data_region_id}"</span>);
         LOGICAL_REGION_COUNT.inc();
 
@@ -775,7 +775,7 @@
         }
 
         <span class="comment">// safety: previous step has checked this
-        </span><span class="self">self</span>.state.write().<span class="kw">await</span>.add_physical_columns(
+        </span><span class="self">self</span>.state.write().unwrap().add_physical_columns(
             data_region_id,
             new_columns
                 .iter()

@@ -1193,6 +1193,9 @@
 <a href="#1192" id="1192">1192</a>
 <a href="#1193" id="1193">1193</a>
 <a href="#1194" id="1194">1194</a>
+<a href="#1195" id="1195">1195</a>
+<a href="#1196" id="1196">1196</a>
+<a href="#1197" id="1197">1197</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1321,7 +1324,10 @@
         <span class="self">self</span>.inner.handle_read(request).<span class="kw">await
     </span>}
 
-    <span class="kw">pub fn </span>opened_regions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;RegionStat&gt; {
+    <span class="doccomment">/// Returns all opened and reportable regions.
+    ///
+    /// Notes: except all metrics regions.
+    </span><span class="kw">pub fn </span>reportable_regions(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;RegionStat&gt; {
         <span class="self">self</span>.inner
             .region_map
             .iter()

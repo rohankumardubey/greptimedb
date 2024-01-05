@@ -312,6 +312,10 @@
 <a href="#311" id="311">311</a>
 <a href="#312" id="312">312</a>
 <a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -353,12 +357,7 @@
         region_id: RegionId,
         request: ScanRequest,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt; {
-        <span class="kw">let </span>is_reading_physical_region = <span class="self">self
-            </span>.state
-            .read()
-            .<span class="kw">await
-            </span>.physical_regions()
-            .contains_key(<span class="kw-2">&amp;</span>region_id);
+        <span class="kw">let </span>is_reading_physical_region = <span class="self">self</span>.is_physical_region(region_id);
 
         <span class="kw">if </span>is_reading_physical_region {
             <span class="macro">info!</span>(
@@ -402,8 +401,8 @@
         <span class="kw">let </span>is_reading_physical_region = <span class="self">self
             </span>.state
             .read()
-            .<span class="kw">await
-            </span>.physical_regions()
+            .unwrap()
+            .physical_regions()
             .contains_key(<span class="kw-2">&amp;</span>region_id);
 
         <span class="kw">if </span>is_reading_physical_region {
@@ -418,8 +417,17 @@
         </span>}
     }
 
+    <span class="doccomment">/// Returns true if it's a physical region.
+    </span><span class="kw">pub fn </span>is_physical_region(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) -&gt; bool {
+        <span class="self">self</span>.state
+            .read()
+            .unwrap()
+            .physical_regions()
+            .contains_key(<span class="kw-2">&amp;</span>region_id)
+    }
+
     <span class="kw">async fn </span>get_physical_region_id(<span class="kw-2">&amp;</span><span class="self">self</span>, logical_region_id: RegionId) -&gt; <span class="prelude-ty">Result</span>&lt;RegionId&gt; {
-        <span class="kw">let </span>state = <span class="kw-2">&amp;</span><span class="self">self</span>.state.read().<span class="kw">await</span>;
+        <span class="kw">let </span>state = <span class="kw-2">&amp;</span><span class="self">self</span>.state.read().unwrap();
         state
             .get_physical_region_id(logical_region_id)
             .with_context(|| {

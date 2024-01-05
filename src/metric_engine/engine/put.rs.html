@@ -395,8 +395,8 @@
         <span class="kw">let </span>is_putting_physical_region = <span class="self">self
             </span>.state
             .read()
-            .<span class="kw">await
-            </span>.physical_regions()
+            .unwrap()
+            .physical_regions()
             .contains_key(<span class="kw-2">&amp;</span>region_id);
 
         <span class="kw">if </span>is_putting_physical_region {
@@ -419,8 +419,8 @@
         <span class="kw">let </span>physical_region_id = <span class="kw-2">*</span><span class="self">self
             </span>.state
             .read()
-            .<span class="kw">await
-            </span>.logical_regions()
+            .unwrap()
+            .logical_regions()
             .get(<span class="kw-2">&amp;</span>logical_region_id)
             .with_context(|| LogicalRegionNotFoundSnafu {
                 region_id: logical_region_id,
