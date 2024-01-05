@@ -376,6 +376,17 @@
 <a href="#375" id="375">375</a>
 <a href="#376" id="376">376</a>
 <a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -478,6 +489,14 @@
         <span class="self">self</span>.memory_index.insert(key, value).<span class="kw">await</span>;
     }
 
+    <span class="kw">async fn </span>get_reader(<span class="kw-2">&amp;</span><span class="self">self</span>, file_path: <span class="kw-2">&amp;</span>str) -&gt; object_store::Result&lt;<span class="prelude-ty">Option</span>&lt;Reader&gt;&gt; {
+        <span class="kw">if </span><span class="self">self</span>.local_store.is_exist(file_path).<span class="kw">await</span><span class="question-mark">? </span>{
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="self">self</span>.local_store.reader(file_path).<span class="kw">await</span><span class="question-mark">?</span>))
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+        }
+    }
+
     <span class="doccomment">/// Reads a file from the cache.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>reader(<span class="kw-2">&amp;</span><span class="self">self</span>, key: IndexKey) -&gt; <span class="prelude-ty">Option</span>&lt;Reader&gt; {
         <span class="kw">if </span>!<span class="self">self</span>.memory_index.contains_key(<span class="kw-2">&amp;</span>key) {
@@ -486,26 +505,29 @@
         }
 
         <span class="kw">let </span>file_path = <span class="self">self</span>.cache_file_path(key);
-        <span class="kw">match </span><span class="self">self</span>.local_store.reader(<span class="kw-2">&amp;</span>file_path).<span class="kw">await </span>{
-            <span class="prelude-val">Ok</span>(reader) =&gt; {
+        <span class="kw">match </span><span class="self">self</span>.get_reader(<span class="kw-2">&amp;</span>file_path).<span class="kw">await </span>{
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(reader)) =&gt; {
                 CACHE_HIT.with_label_values(<span class="kw-2">&amp;</span>[FILE_TYPE]).inc();
-                <span class="prelude-val">Some</span>(reader)
+                <span class="kw">return </span><span class="prelude-val">Some</span>(reader);
             }
             <span class="prelude-val">Err</span>(e) =&gt; {
                 <span class="kw">if </span>e.kind() != ErrorKind::NotFound {
                     <span class="macro">warn!</span>(<span class="string">"Failed to get file for key {:?}, err: {}"</span>, key, e);
                 }
-                <span class="comment">// We removes the file from the index.
-                </span><span class="self">self</span>.memory_index.remove(<span class="kw-2">&amp;</span>key).<span class="kw">await</span>;
-                CACHE_MISS.with_label_values(<span class="kw-2">&amp;</span>[FILE_TYPE]).inc();
-                <span class="prelude-val">None
-            </span>}
+            }
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; {}
         }
-    }
+
+        <span class="comment">// We removes the file from the index.
+        </span><span class="self">self</span>.memory_index.remove(<span class="kw-2">&amp;</span>key).<span class="kw">await</span>;
+        CACHE_MISS.with_label_values(<span class="kw-2">&amp;</span>[FILE_TYPE]).inc();
+        <span class="prelude-val">None
+    </span>}
 
     <span class="doccomment">/// Removes a file from the cache explicitly.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>remove(<span class="kw-2">&amp;</span><span class="self">self</span>, key: IndexKey) {
         <span class="kw">let </span>file_path = <span class="self">self</span>.cache_file_path(key);
+        <span class="self">self</span>.memory_index.remove(<span class="kw-2">&amp;</span>key).<span class="kw">await</span>;
         <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = <span class="self">self</span>.local_store.delete(<span class="kw-2">&amp;</span>file_path).<span class="kw">await </span>{
             <span class="macro">warn!</span>(e; <span class="string">"Failed to delete a cached file {}"</span>, file_path);
         }
