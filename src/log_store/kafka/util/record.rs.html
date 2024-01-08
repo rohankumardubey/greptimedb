@@ -563,6 +563,10 @@
 <a href="#562" id="562">562</a>
 <a href="#563" id="563">563</a>
 <a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -860,10 +864,11 @@
 
     <span class="kw">use </span>common_base::readable_size::ReadableSize;
     <span class="kw">use </span>common_config::wal::KafkaConfig;
-    <span class="kw">use </span>rand::Rng;
+    <span class="kw">use </span>uuid::Uuid;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::kafka::client_manager::ClientManager;
+    <span class="kw">use </span><span class="kw">crate</span>::kafka::util::test_util::run_test_with_kafka_wal;
 
     <span class="comment">// Implements some utility methods for testing.
     </span><span class="kw">impl </span>Default <span class="kw">for </span>Record {
@@ -1109,22 +1114,25 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_produce_large_entry() {
-        <span class="kw">let </span>topic = <span class="macro">format!</span>(<span class="string">"greptimedb_wal_topic_{}"</span>, rand::thread_rng().gen::&lt;usize&gt;());
-        <span class="kw">let </span>ns = NamespaceImpl {
-            region_id: <span class="number">1</span>,
-            topic,
-        };
-        <span class="kw">let </span>entry = new_test_entry([<span class="string">b'1'</span>; <span class="number">2000000</span>], <span class="number">0</span>, ns.clone());
-        <span class="kw">let </span>producer = RecordProducer::new(ns.clone()).with_entries(<span class="macro">vec!</span>[entry]);
-
-        <span class="comment">// TODO(niebayes): get broker endpoints from env vars.
-        </span><span class="kw">let </span>config = KafkaConfig {
-            broker_endpoints: <span class="macro">vec!</span>[<span class="string">"localhost:9092"</span>.to_string()],
-            max_batch_size: ReadableSize::mb(<span class="number">1</span>),
-            ..Default::default()
-        };
-        <span class="kw">let </span>manager = Arc::new(ClientManager::try_new(<span class="kw-2">&amp;</span>config).<span class="kw">await</span>.unwrap());
-        producer.produce(<span class="kw-2">&amp;</span>manager).<span class="kw">await</span>.unwrap();
-    }
+        run_test_with_kafka_wal(|broker_endpoints| {
+            Box::pin(<span class="kw">async </span>{
+                <span class="kw">let </span>topic = <span class="macro">format!</span>(<span class="string">"greptimedb_wal_topic_{}"</span>, Uuid::new_v4());
+                <span class="kw">let </span>ns = NamespaceImpl {
+                    region_id: <span class="number">1</span>,
+                    topic,
+                };
+                <span class="kw">let </span>entry = new_test_entry([<span class="string">b'1'</span>; <span class="number">2000000</span>], <span class="number">0</span>, ns.clone());
+                <span class="kw">let </span>producer = RecordProducer::new(ns.clone()).with_entries(<span class="macro">vec!</span>[entry]);
+                <span class="kw">let </span>config = KafkaConfig {
+                    broker_endpoints,
+                    max_batch_size: ReadableSize::mb(<span class="number">1</span>),
+                    ..Default::default()
+                };
+                <span class="kw">let </span>manager = Arc::new(ClientManager::try_new(<span class="kw-2">&amp;</span>config).<span class="kw">await</span>.unwrap());
+                producer.produce(<span class="kw-2">&amp;</span>manager).<span class="kw">await</span>.unwrap();
+            })
+        })
+        .<span class="kw">await
+    </span>}
 }
 </code></pre></div></section></main></body></html>
