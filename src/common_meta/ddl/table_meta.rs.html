@@ -221,6 +221,7 @@
 <a href="#220" id="220">220</a>
 <a href="#221" id="221">221</a>
 <a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -256,7 +257,8 @@
 <span class="kw">use </span><span class="kw">crate</span>::sequence::SequenceRef;
 <span class="kw">use </span><span class="kw">crate</span>::wal::{allocate_region_wal_options, WalOptionsAllocatorRef};
 
-<span class="kw">pub struct </span>TableMetadataAllocator {
+<span class="attr">#[derive(Clone)]
+</span><span class="kw">pub struct </span>TableMetadataAllocator {
     table_id_sequence: SequenceRef,
     wal_options_allocator: WalOptionsAllocatorRef,
     table_metadata_manager: TableMetadataManagerRef,
