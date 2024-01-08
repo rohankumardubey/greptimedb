@@ -126,9 +126,6 @@
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
 <a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -150,12 +147,9 @@
 
 <span class="kw">use </span>common_config::wal::StandaloneWalConfig;
 <span class="kw">use </span>common_config::WAL_OPTIONS_KEY;
-<span class="kw">use </span>common_telemetry::warn;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>serde_with::with_prefix;
 <span class="kw">use </span>store_api::storage::{RegionId, RegionNumber};
 
-<span class="kw">use </span><span class="kw">crate</span>::error::Result;
 <span class="kw">use </span><span class="kw">crate</span>::wal::kafka::KafkaConfig;
 <span class="kw">pub use </span><span class="kw">crate</span>::wal::kafka::Topic <span class="kw">as </span>KafkaWalTopic;
 <span class="kw">pub use </span><span class="kw">crate</span>::wal::options_allocator::{
@@ -174,7 +168,7 @@
 <span class="kw">impl </span>From&lt;StandaloneWalConfig&gt; <span class="kw">for </span>WalConfig {
     <span class="kw">fn </span>from(value: StandaloneWalConfig) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span>value {
-            StandaloneWalConfig::RaftEngine(config) =&gt; WalConfig::RaftEngine,
+            StandaloneWalConfig::RaftEngine(<span class="kw">_</span>) =&gt; WalConfig::RaftEngine,
             StandaloneWalConfig::Kafka(config) =&gt; WalConfig::Kafka(KafkaConfig {
                 broker_endpoints: config.base.broker_endpoints,
                 num_topics: config.num_topics,

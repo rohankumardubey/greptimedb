@@ -297,6 +297,34 @@
 <a href="#296" id="296">296</a>
 <a href="#297" id="297">297</a>
 <a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -313,10 +341,9 @@
 
 </span><span class="kw">use </span>std::collections::HashSet;
 <span class="kw">use </span>std::sync::Arc;
-<span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>common_config::wal::kafka::TopicSelectorType;
-<span class="kw">use </span>common_telemetry::{debug, error, info};
+<span class="kw">use </span>common_telemetry::{error, info};
 <span class="kw">use </span>rskafka::client::controller::ControllerClient;
 <span class="kw">use </span>rskafka::client::error::Error <span class="kw">as </span>RsKafkaError;
 <span class="kw">use </span>rskafka::client::error::ProtocolError::TopicAlreadyExists;
@@ -324,7 +351,7 @@
 <span class="kw">use </span>rskafka::client::{Client, ClientBuilder};
 <span class="kw">use </span>rskafka::record::Record;
 <span class="kw">use </span>rskafka::BackoffConfig;
-<span class="kw">use </span>snafu::{ensure, AsErrorSource, ResultExt};
+<span class="kw">use </span>snafu::{ensure, ResultExt};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     BuildKafkaClientSnafu, BuildKafkaCtrlClientSnafu, BuildKafkaPartitionClientSnafu,
@@ -346,9 +373,8 @@
 <span class="doccomment">/// Manages topic initialization and selection.
 </span><span class="kw">pub struct </span>TopicManager {
     config: KafkaConfig,
-    <span class="comment">// TODO(niebayes): maybe add a guard to ensure all topics in the topic pool are created.
-    </span>topic_pool: Vec&lt;Topic&gt;,
-    topic_selector: TopicSelectorRef,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) topic_pool: Vec&lt;Topic&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) topic_selector: TopicSelectorRef,
     kv_backend: KvBackendRef,
 }
 
@@ -467,7 +493,7 @@
                 <span class="macro">vec!</span>[Record {
                     key: <span class="prelude-val">None</span>,
                     value: <span class="prelude-val">None</span>,
-                    timestamp: rskafka::chrono::Utc::now(),
+                    timestamp: chrono::Utc::now(),
                     headers: Default::default(),
                 }],
                 Compression::NoCompression,
@@ -539,13 +565,9 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>std::env;
-
-    <span class="kw">use </span>common_telemetry::info;
-
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::kv_backend::memory::MemoryKvBackend;
-    <span class="kw">use </span><span class="kw">crate</span>::kv_backend::{<span class="self">self</span>};
+    <span class="kw">use </span><span class="kw">crate</span>::wal::kafka::test_util::run_test_with_kafka_wal;
 
     <span class="comment">// Tests that topics can be successfully persisted into the kv backend and can be successfully restored from the kv backend.
     </span><span class="attr">#[tokio::test]
@@ -572,27 +594,61 @@
         <span class="macro">assert_eq!</span>(topics, restored_topics);
     }
 
-    <span class="attr">#[tokio::test]
-    </span><span class="kw">async fn </span>test_topic_manager() {
-        <span class="kw">let </span>endpoints = env::var(<span class="string">"GT_KAFKA_ENDPOINTS"</span>).unwrap_or_default();
-        common_telemetry::init_default_ut_logging();
+    <span class="doccomment">/// Tests that the topic manager could allocate topics correctly.
+    </span><span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_alloc_topics() {
+        run_test_with_kafka_wal(|broker_endpoints| {
+            Box::pin(<span class="kw">async </span>{
+                <span class="comment">// Constructs topics that should be created.
+                </span><span class="kw">let </span>topics = (<span class="number">0</span>..<span class="number">256</span>)
+                    .map(|i| <span class="macro">format!</span>(<span class="string">"test_alloc_topics_{}_{}"</span>, i, uuid::Uuid::new_v4()))
+                    .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
 
-        <span class="kw">if </span>endpoints.is_empty() {
-            <span class="macro">info!</span>(<span class="string">"The endpoints is empty, skipping the test."</span>);
-            <span class="kw">return</span>;
-        }
-        <span class="comment">// TODO: supports topic prefix
-        </span><span class="kw">let </span>kv_backend = Arc::new(MemoryKvBackend::new());
-        <span class="kw">let </span>config = KafkaConfig {
-            replication_factor: <span class="number">1</span>,
-            broker_endpoints: endpoints
-                .split(<span class="string">','</span>)
-                .map(|s| s.to_string())
-                .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(),
-            ..Default::default()
-        };
-        <span class="kw">let </span>manager = TopicManager::new(config, kv_backend);
-        manager.start().<span class="kw">await</span>.unwrap();
+                <span class="comment">// Creates a topic manager.
+                </span><span class="kw">let </span>config = KafkaConfig {
+                    replication_factor: broker_endpoints.len() <span class="kw">as </span>i16,
+                    broker_endpoints,
+                    ..Default::default()
+                };
+                <span class="kw">let </span>kv_backend = Arc::new(MemoryKvBackend::new()) <span class="kw">as </span>KvBackendRef;
+                <span class="kw">let </span><span class="kw-2">mut </span>manager = TopicManager::new(config.clone(), kv_backend);
+                <span class="comment">// Replaces the default topic pool with the constructed topics.
+                </span>manager.topic_pool = topics.clone();
+                <span class="comment">// Replaces the default selector with a round-robin selector without shuffled.
+                </span>manager.topic_selector = Arc::new(RoundRobinTopicSelector::default());
+                manager.start().<span class="kw">await</span>.unwrap();
+
+                <span class="comment">// Selects exactly the number of `num_topics` topics one by one.
+                </span><span class="kw">let </span>got = (<span class="number">0</span>..topics.len())
+                    .map(|<span class="kw">_</span>| manager.select().unwrap())
+                    .cloned()
+                    .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+                <span class="macro">assert_eq!</span>(got, topics);
+
+                <span class="comment">// Selects exactly the number of `num_topics` topics in a batching manner.
+                </span><span class="kw">let </span>got = manager
+                    .select_batch(topics.len())
+                    .unwrap()
+                    .into_iter()
+                    .map(ToString::to_string)
+                    .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+                <span class="macro">assert_eq!</span>(got, topics);
+
+                <span class="comment">// Selects more than the number of `num_topics` topics.
+                </span><span class="kw">let </span>got = manager
+                    .select_batch(<span class="number">2 </span>* topics.len())
+                    .unwrap()
+                    .into_iter()
+                    .map(ToString::to_string)
+                    .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+                <span class="kw">let </span>expected = <span class="macro">vec!</span>[topics.clone(); <span class="number">2</span>]
+                    .into_iter()
+                    .flatten()
+                    .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+                <span class="macro">assert_eq!</span>(got, expected);
+            })
+        })
+        .<span class="kw">await</span>;
     }
 }
 </code></pre></div></section></main></body></html>

@@ -567,6 +567,7 @@
 <a href="#566" id="566">566</a>
 <a href="#567" id="567">567</a>
 <a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -718,6 +719,7 @@
     }
 
     <span class="doccomment">/// Produces the buffered entries to Kafka sever. Those entries may span several Kafka records.
+    /// Returns the offset of the last successfully produced record.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>produce(<span class="self">self</span>, client_manager: <span class="kw-2">&amp;</span>ClientManagerRef) -&gt; <span class="prelude-ty">Result</span>&lt;Offset&gt; {
         <span class="macro">ensure!</span>(!<span class="self">self</span>.entries.is_empty(), EmptyEntriesSnafu);
 
