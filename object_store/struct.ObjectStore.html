@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Operator is the entry for all public async APIs."><title>ObjectStore in object_store - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../static.files/rustdoc-804b98a1284a310a.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="object_store" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0-nightly (3f28fe133 2023-12-18)" data-channel="nightly" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc struct"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button></nav><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../object_store/index.html">object_store</a><span class="version">0.5.0</span></h2></div><h2 class="location"><a href="#">ObjectStore</a></h2><div class="sidebar-elems"><section><h3><a href="#fields">Fields</a></h3><ul class="block structfield"><li><a href="#structfield.accessor">accessor</a></li><li><a href="#structfield.limit">limit</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.blocking">blocking</a></li><li><a href="#method.check">check</a></li><li><a href="#method.copy">copy</a></li><li><a href="#method.create_dir">create_dir</a></li><li><a href="#method.delete">delete</a></li><li><a href="#method.delete_with">delete_with</a></li><li><a href="#method.from_map">from_map</a></li><li><a href="#method.info">info</a></li><li><a href="#method.is_exist">is_exist</a></li><li><a href="#method.layer">layer</a></li><li><a href="#method.limit">limit</a></li><li><a href="#method.list">list</a></li><li><a href="#method.list_with">list_with</a></li><li><a href="#method.lister">lister</a></li><li><a href="#method.lister_with">lister_with</a></li><li><a href="#method.new">new</a></li><li><a href="#method.presign_read">presign_read</a></li><li><a href="#method.presign_read_with">presign_read_with</a></li><li><a href="#method.presign_stat">presign_stat</a></li><li><a href="#method.presign_stat_with">presign_stat_with</a></li><li><a href="#method.presign_write">presign_write</a></li><li><a href="#method.presign_write_with">presign_write_with</a></li><li><a href="#method.read">read</a></li><li><a href="#method.read_with">read_with</a></li><li><a href="#method.reader">reader</a></li><li><a href="#method.reader_with">reader_with</a></li><li><a href="#method.remove">remove</a></li><li><a href="#method.remove_all">remove_all</a></li><li><a href="#method.remove_via">remove_via</a></li><li><a href="#method.rename">rename</a></li><li><a href="#method.stat">stat</a></li><li><a href="#method.stat_with">stat_with</a></li><li><a href="#method.via_map">via_map</a></li><li><a href="#method.with_limit">with_limit</a></li><li><a href="#method.write">write</a></li><li><a href="#method.write_with">write_with</a></li><li><a href="#method.writer">writer</a></li><li><a href="#method.writer_with">writer_with</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Clone-for-Operator">Clone</a></li><li><a href="#impl-Debug-for-Operator">Debug</a></li><li><a href="#impl-From%3CBlockingOperator%3E-for-Operator">From&lt;BlockingOperator&gt;</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-RefUnwindSafe-for-Operator">!RefUnwindSafe</a></li><li><a href="#impl-UnwindSafe-for-Operator">!UnwindSafe</a></li><li><a href="#impl-Send-for-Operator">Send</a></li><li><a href="#impl-Sync-for-Operator">Sync</a></li><li><a href="#impl-Unpin-for-Operator">Unpin</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T">Borrow&lt;T&gt;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T">BorrowMut&lt;T&gt;</a></li><li><a href="#impl-From%3CT%3E-for-T">From&lt;T&gt;</a></li><li><a href="#impl-FromRef%3CT%3E-for-T">FromRef&lt;T&gt;</a></li><li><a href="#impl-FutureExt-for-T">FutureExt</a></li><li><a href="#impl-Instrument-for-T">Instrument</a></li><li><a href="#impl-Into%3CU%3E-for-T">Into&lt;U&gt;</a></li><li><a href="#impl-IntoRequest%3CT%3E-for-T">IntoRequest&lt;T&gt;</a></li><li><a href="#impl-IntoRequest%3CT%3E-for-T-1">IntoRequest&lt;T&gt;</a></li><li><a href="#impl-Pointable-for-T">Pointable</a></li><li><a href="#impl-Same-for-T">Same</a></li><li><a href="#impl-ToOwned-for-T">ToOwned</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T">TryFrom&lt;U&gt;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T">TryInto&lt;U&gt;</a></li><li><a href="#impl-VZip%3CV%3E-for-T">VZip&lt;V&gt;</a></li><li><a href="#impl-WithSubscriber-for-T">WithSubscriber</a></li></ul></section><h2><a href="index.html">In crate object_store</a></h2></div></nav><div class="sidebar-resizer"></div>
     <main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../object_store/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1>Struct <a href="index.html">object_store</a>::<wbr><a class="struct" href="#">ObjectStore</a><button id="copy-path" title="Copy item path to clipboard"><img src="../static.files/clipboard-7571035ce49a181d.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><button id="toggle-all-docs" title="collapse all docs">[<span>&#x2212;</span>]</button></span></div><pre class="rust item-decl"><code>pub struct ObjectStore {
-    accessor: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/sync/struct.Arc.html" title="struct alloc::sync::Arc">Arc</a>&lt;dyn Accessor&lt;BlockingWriter = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingWrite&gt;, Lister = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn List&gt;, BlockingLister = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingList&gt;, Reader = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn Read&gt;, Writer = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn Write&gt;, BlockingReader = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingRead&gt;&gt;&gt;,
+    accessor: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/sync/struct.Arc.html" title="struct alloc::sync::Arc">Arc</a>&lt;dyn Accessor&lt;BlockingLister = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingList&gt;, Lister = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn List&gt;, Writer = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn Write&gt;, BlockingReader = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingRead&gt;, BlockingWriter = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingWrite&gt;, Reader = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn Read&gt;&gt;&gt;,
     limit: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>,
 }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Operator is the entry for all public async APIs.</p>
 <p>Developer should manipulate the data from storage service through Operator only by right.</p>
@@ -26,7 +26,7 @@ Read [<code>concepts</code>][docs::concepts] for more about <a href="struct.Obje
 
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
-</div></details><h2 id="fields" class="fields section-header">Fields<a href="#fields" class="anchor">§</a></h2><span id="structfield.accessor" class="structfield section-header"><a href="#structfield.accessor" class="anchor field">§</a><code>accessor: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/sync/struct.Arc.html" title="struct alloc::sync::Arc">Arc</a>&lt;dyn Accessor&lt;BlockingWriter = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingWrite&gt;, Lister = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn List&gt;, BlockingLister = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingList&gt;, Reader = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn Read&gt;, Writer = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn Write&gt;, BlockingReader = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingRead&gt;&gt;&gt;</code></span><span id="structfield.limit" class="structfield section-header"><a href="#structfield.limit" class="anchor field">§</a><code>limit: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a></code></span><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Operator" class="impl"><a href="#impl-Operator" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.ObjectStore.html" title="struct object_store::ObjectStore">Operator</a></h3></section></summary><div class="docblock"><h4 id="operator-basic-api"><a href="#operator-basic-api">Operator basic API.</a></h4></div><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.limit" class="method"><h4 class="code-header">pub fn <a href="#method.limit" class="fn">limit</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a></h4></section></summary><div class="docblock"><p>Get current operator’s limit.
+</div></details><h2 id="fields" class="fields section-header">Fields<a href="#fields" class="anchor">§</a></h2><span id="structfield.accessor" class="structfield section-header"><a href="#structfield.accessor" class="anchor field">§</a><code>accessor: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/sync/struct.Arc.html" title="struct alloc::sync::Arc">Arc</a>&lt;dyn Accessor&lt;BlockingLister = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingList&gt;, Lister = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn List&gt;, Writer = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn Write&gt;, BlockingReader = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingRead&gt;, BlockingWriter = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingWrite&gt;, Reader = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn Read&gt;&gt;&gt;</code></span><span id="structfield.limit" class="structfield section-header"><a href="#structfield.limit" class="anchor field">§</a><code>limit: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a></code></span><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Operator" class="impl"><a href="#impl-Operator" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.ObjectStore.html" title="struct object_store::ObjectStore">Operator</a></h3></section></summary><div class="docblock"><h4 id="operator-basic-api"><a href="#operator-basic-api">Operator basic API.</a></h4></div><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.limit" class="method"><h4 class="code-header">pub fn <a href="#method.limit" class="fn">limit</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a></h4></section></summary><div class="docblock"><p>Get current operator’s limit.
 Limit is usually the maximum size of data that operator will handle in one operation.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.with_limit" class="method"><h4 class="code-header">pub fn <a href="#method.with_limit" class="fn">with_limit</a>(&amp;self, limit: <a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.usize.html">usize</a>) -&gt; <a class="struct" href="struct.ObjectStore.html" title="struct object_store::ObjectStore">Operator</a></h4></section></summary><div class="docblock"><p>Specify the batch limit.</p>
 <p>Default: 1000</p>
@@ -260,21 +260,23 @@ op.remove_via(stream).<span class="kw">await</span><span class="question-mark">?
 delete instead.</p>
 <h5 id="examples-19"><a href="#examples-19">Examples</a></h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code>op.remove_all(<span class="string">"path/to/dir"</span>).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.list" class="method"><h4 class="code-header">pub async fn <a href="#method.list" class="fn">list</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="struct.Entry.html" title="struct object_store::Entry">Entry</a>&gt;, <a class="struct" href="struct.Error.html" title="struct object_store::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>List entries within a given directory.</p>
-<h5 id="notes-12"><a href="#notes-12">Notes</a></h5><h6 id="listing-recursively"><a href="#listing-recursively">Listing recursively</a></h6>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.list" class="method"><h4 class="code-header">pub async fn <a href="#method.list" class="fn">list</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;<a class="struct" href="struct.Entry.html" title="struct object_store::Entry">Entry</a>&gt;, <a class="struct" href="struct.Error.html" title="struct object_store::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>List entries that starts with given <code>path</code> in parent dir.</p>
+<h5 id="notes-12"><a href="#notes-12">Notes</a></h5><h6 id="recursively-list"><a href="#recursively-list">Recursively list</a></h6>
 <p>This function only read the children of the given directory. To read
 all entries recursively, use <code>Operator::list_with(&quot;path&quot;).recursive(true)</code>
 instead.</p>
-<h6 id="streaming"><a href="#streaming">Streaming</a></h6>
+<h6 id="streaming-list"><a href="#streaming-list">Streaming list</a></h6>
 <p>This function will read all entries in the given directory. It could
 take very long time and consume a lot of memory if the directory
 contains a lot of entries.</p>
 <p>In order to avoid this, you can use <a href="struct.ObjectStore.html#method.lister" title="method object_store::ObjectStore::lister"><code>Operator::lister</code></a> to list entries in
 a streaming way.</p>
-<h6 id="metadata"><a href="#metadata">Metadata</a></h6>
+<h6 id="reuse-metadata"><a href="#reuse-metadata">Reuse Metadata</a></h6>
 <p>The only metadata that is guaranteed to be available is the <code>Mode</code>.
 For fetching more metadata, please use <a href="struct.ObjectStore.html#method.list_with" title="method object_store::ObjectStore::list_with"><code>Operator::list_with</code></a> and <code>metakey</code>.</p>
-<h5 id="examples-20"><a href="#examples-20">Examples</a></h5>
+<h5 id="examples-20"><a href="#examples-20">Examples</a></h5><h6 id="list-entries-under-a-dir"><a href="#list-entries-under-a-dir">List entries under a dir</a></h6>
+<p>This example will list all entries under the dir <code>path/to/dir/</code>.</p>
+
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>opendal::EntryMode;
 <span class="kw">use </span>opendal::Metakey;
 <span class="kw">use </span>opendal::Operator;
@@ -290,41 +292,68 @@ For fetching more metadata, please use <a href="struct.ObjectStore.html#method.l
         EntryMode::Unknown =&gt; <span class="kw">continue</span>,
     }
 }</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.list_with" class="method"><h4 class="code-header">pub fn <a href="#method.list_with" class="fn">list_with</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; FutureList</h4></section></summary><div class="docblock"><p>List entries within a given directory with options.</p>
-<h5 id="notes-13"><a href="#notes-13">Notes</a></h5><h6 id="for-streaming"><a href="#for-streaming">For streaming</a></h6>
-<p>This function will read all entries in the given directory. It could
-take very long time and consume a lot of memory if the directory
-contains a lot of entries.</p>
-<p>In order to avoid this, you can use <a href="struct.ObjectStore.html#method.lister" title="method object_store::ObjectStore::lister"><code>Operator::lister</code></a> to list entries in
-a streaming way.</p>
-<h6 id="metadata-1"><a href="#metadata-1">Metadata</a></h6>
-<p>The only metadata that is guaranteed to be available is the <code>Mode</code>.
-For fetching more metadata, please specify the <code>metakey</code>.</p>
-<h5 id="examples-21"><a href="#examples-21">Examples</a></h5><h6 id="list-entries-with-prefix"><a href="#list-entries-with-prefix">List entries with prefix</a></h6>
-<p>This function can also be used to list entries in recursive way.</p>
+<h6 id="list-entries-with-prefix"><a href="#list-entries-with-prefix">List entries with prefix</a></h6>
+<p>This example will list all entries under the prefix <code>path/to/prefix</code>.</p>
+<p>NOTE: it’s possible that the prefix itself is also a dir. In this case, you could get
+<code>path/to/prefix/</code>, <code>path/to/prefix_1</code> and so on. If you do want to list a dir, please
+make sure the path is end with <code>/</code>.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>opendal::EntryMode;
 <span class="kw">use </span>opendal::Metakey;
 <span class="kw">use </span>opendal::Operator;
-<span class="kw">let </span><span class="kw-2">mut </span>entries = op.list_with(<span class="string">"prefix/"</span>).recursive(<span class="bool-val">true</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+<span class="kw">let </span><span class="kw-2">mut </span>entries = op.list(<span class="string">"path/to/prefix"</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 <span class="kw">for </span>entry <span class="kw">in </span>entries {
     <span class="kw">match </span>entry.metadata().mode() {
         EntryMode::FILE =&gt; {
             <span class="macro">println!</span>(<span class="string">"Handling file"</span>)
         }
         EntryMode::DIR =&gt; {
-            <span class="macro">println!</span>(<span class="string">"Handling dir like start a new list via meta.path()"</span>)
+            <span class="macro">println!</span>(<span class="string">"Handling dir {}"</span>, entry.path())
         }
         EntryMode::Unknown =&gt; <span class="kw">continue</span>,
     }
 }</code></pre></div>
-<h6 id="list-entries-with-metakey-for-more-metadata"><a href="#list-entries-with-metakey-for-more-metadata">List entries with metakey for more metadata</a></h6>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.list_with" class="method"><h4 class="code-header">pub fn <a href="#method.list_with" class="fn">list_with</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; FutureList</h4></section></summary><div class="docblock"><p>List entries that starts with given <code>path</code> in parent dir with more options.</p>
+<h5 id="notes-13"><a href="#notes-13">Notes</a></h5><h6 id="streaming-list-1"><a href="#streaming-list-1">Streaming list</a></h6>
+<p>This function will read all entries in the given directory. It could
+take very long time and consume a lot of memory if the directory
+contains a lot of entries.</p>
+<p>In order to avoid this, you can use <a href="struct.ObjectStore.html#method.lister" title="method object_store::ObjectStore::lister"><code>Operator::lister</code></a> to list entries in
+a streaming way.</p>
+<h5 id="options"><a href="#options">Options</a></h5><h6 id="start_after"><a href="#start_after"><code>start_after</code></a></h6>
+<p>Specify the specified key to start listing from.</p>
+<p>This feature can be used to resume a listing from a previous point.</p>
+<p>The following example will resume the list operation from the <code>breakpoint</code>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>opendal::Operator;
+<span class="kw">let </span><span class="kw-2">mut </span>entries = op
+    .list_with(<span class="string">"path/to/dir/"</span>)
+    .start_after(<span class="string">"breakpoint"</span>)
+    .<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
+<h6 id="recursive"><a href="#recursive"><code>recursive</code></a></h6>
+<p>Specify whether to list recursively or not.</p>
+<p>If <code>recursive</code> is set to <code>true</code>, we will list all entries recursively. If not, we’ll only
+list the entries in the specified dir.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>opendal::Operator;
+<span class="kw">let </span><span class="kw-2">mut </span>entries = op.list_with(<span class="string">"path/to/dir/"</span>).recursive(<span class="bool-val">true</span>).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
+<h6 id="metakey"><a href="#metakey"><code>metakey</code></a></h6>
+<p>Specify the metadata that required to be fetched in entries.</p>
+<p>If <code>metakey</code> is not set, we will fetch only the entry’s <code>mode</code>. Otherwise, we will retrieve
+the required metadata from storage services. Even if <code>metakey</code> is specified, the metadata
+may still be <code>None</code>, indicating that the storage service does not supply this information.</p>
+<p>Some storage services like <code>s3</code> could return more metadata like <code>content-length</code> and
+<code>last-modified</code>. By using <code>metakey</code>, we can fetch those metadata without an extra <code>stat</code> call.
+Please pick up the metadata you need to reduce the extra <code>stat</code> cost.</p>
+<p>This example shows how to list entries with <code>content-length</code> and <code>last-modified</code> metadata:</p>
+
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>opendal::EntryMode;
 <span class="kw">use </span>opendal::Metakey;
 <span class="kw">use </span>opendal::Operator;
 <span class="kw">let </span><span class="kw-2">mut </span>entries = op
     .list_with(<span class="string">"dir/"</span>)
-    .metakey(Metakey::ContentLength | Metakey::LastModified)
+    <span class="comment">// Make sure content-length and last-modified been fetched.
+    </span>.metakey(Metakey::ContentLength | Metakey::LastModified)
     .<span class="kw">await</span><span class="question-mark">?</span>;
 <span class="kw">for </span>entry <span class="kw">in </span>entries {
     <span class="kw">let </span>meta = entry.metadata();
@@ -342,14 +371,50 @@ For fetching more metadata, please specify the <code>metakey</code>.</p>
         EntryMode::Unknown =&gt; <span class="kw">continue</span>,
     }
 }</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.lister" class="method"><h4 class="code-header">pub async fn <a href="#method.lister" class="fn">lister</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="struct.Lister.html" title="struct object_store::Lister">Lister</a>, <a class="struct" href="struct.Error.html" title="struct object_store::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>List entries within a given directory as a stream.</p>
-<p>This function will create a new handle to list entries.</p>
-<p>An error will be returned if given path doesn’t end with <code>/</code>.</p>
-<h5 id="notes-14"><a href="#notes-14">Notes</a></h5><h6 id="listing-recursively-1"><a href="#listing-recursively-1">Listing recursively</a></h6>
+<h5 id="examples-21"><a href="#examples-21">Examples</a></h5><h6 id="list-all-entries-recursively"><a href="#list-all-entries-recursively">List all entries recursively</a></h6>
+<p>This example will list all entries under the dir <code>path/to/dir/</code></p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>opendal::EntryMode;
+<span class="kw">use </span>opendal::Metakey;
+<span class="kw">use </span>opendal::Operator;
+<span class="kw">let </span><span class="kw-2">mut </span>entries = op.list_with(<span class="string">"path/to/dir/"</span>).recursive(<span class="bool-val">true</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+<span class="kw">for </span>entry <span class="kw">in </span>entries {
+    <span class="kw">match </span>entry.metadata().mode() {
+        EntryMode::FILE =&gt; {
+            <span class="macro">println!</span>(<span class="string">"Handling file"</span>)
+        }
+        EntryMode::DIR =&gt; {
+            <span class="macro">println!</span>(<span class="string">"Handling dir like start a new list via meta.path()"</span>)
+        }
+        EntryMode::Unknown =&gt; <span class="kw">continue</span>,
+    }
+}</code></pre></div>
+<h6 id="list-all-entries-start-with-prefix"><a href="#list-all-entries-start-with-prefix">List all entries start with prefix</a></h6>
+<p>This example will list all entries starts with prefix <code>path/to/prefix</code></p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>opendal::EntryMode;
+<span class="kw">use </span>opendal::Metakey;
+<span class="kw">use </span>opendal::Operator;
+<span class="kw">let </span><span class="kw-2">mut </span>entries = op.list_with(<span class="string">"path/to/prefix"</span>).recursive(<span class="bool-val">true</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+<span class="kw">for </span>entry <span class="kw">in </span>entries {
+    <span class="kw">match </span>entry.metadata().mode() {
+        EntryMode::FILE =&gt; {
+            <span class="macro">println!</span>(<span class="string">"Handling file"</span>)
+        }
+        EntryMode::DIR =&gt; {
+            <span class="macro">println!</span>(<span class="string">"Handling dir like start a new list via meta.path()"</span>)
+        }
+        EntryMode::Unknown =&gt; <span class="kw">continue</span>,
+    }
+}</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.lister" class="method"><h4 class="code-header">pub async fn <a href="#method.lister" class="fn">lister</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="struct.Lister.html" title="struct object_store::Lister">Lister</a>, <a class="struct" href="struct.Error.html" title="struct object_store::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>List entries that starts with given <code>path</code> in parent dir.</p>
+<p>This function will create a new <a href="struct.Lister.html" title="struct object_store::Lister"><code>Lister</code></a> to list entries. Users can stop listing via
+dropping this <a href="struct.Lister.html" title="struct object_store::Lister"><code>Lister</code></a>.</p>
+<h5 id="notes-14"><a href="#notes-14">Notes</a></h5><h6 id="recursively-list-1"><a href="#recursively-list-1">Recursively list</a></h6>
 <p>This function only read the children of the given directory. To read
 all entries recursively, use <a href="struct.ObjectStore.html#method.lister_with" title="method object_store::ObjectStore::lister_with"><code>Operator::lister_with</code></a> and <code>recursive(true)</code>
 instead.</p>
-<h6 id="metadata-2"><a href="#metadata-2">Metadata</a></h6>
+<h6 id="reuse-metadata-1"><a href="#reuse-metadata-1">Reuse Metadata</a></h6>
 <p>The only metadata that is guaranteed to be available is the <code>Mode</code>.
 For fetching more metadata, please use <a href="struct.ObjectStore.html#method.lister_with" title="method object_store::ObjectStore::lister_with"><code>Operator::lister_with</code></a> and <code>metakey</code>.</p>
 <h5 id="examples-22"><a href="#examples-22">Examples</a></h5>
@@ -369,23 +434,54 @@ For fetching more metadata, please use <a href="struct.ObjectStore.html#method.l
         EntryMode::Unknown =&gt; <span class="kw">continue</span>,
     }
 }</code></pre></div>
-</div></details><details class="toggle method-toggle" open><summary><section id="method.lister_with" class="method"><h4 class="code-header">pub fn <a href="#method.lister_with" class="fn">lister_with</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; FutureLister</h4></section></summary><div class="docblock"><p>List entries within a given directory as a stream with options.</p>
-<p>This function will create a new handle to list entries.</p>
-<p>An error will be returned if given path doesn’t end with <code>/</code>.</p>
-<h5 id="examples-23"><a href="#examples-23">Examples</a></h5><h6 id="list-current-dir"><a href="#list-current-dir">List current dir</a></h6>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.lister_with" class="method"><h4 class="code-header">pub fn <a href="#method.lister_with" class="fn">lister_with</a>(&amp;self, path: &amp;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.str.html">str</a>) -&gt; FutureLister</h4></section></summary><div class="docblock"><p>List entries that starts with given <code>path</code> in parent dir with options.</p>
+<p>This function will create a new <a href="struct.Lister.html" title="struct object_store::Lister"><code>Lister</code></a> to list entries. Users can stop listing via
+dropping this <a href="struct.Lister.html" title="struct object_store::Lister"><code>Lister</code></a>.</p>
+<h5 id="options-1"><a href="#options-1">Options</a></h5><h6 id="start_after-1"><a href="#start_after-1"><code>start_after</code></a></h6>
+<p>Specify the specified key to start listing from.</p>
+<p>This feature can be used to resume a listing from a previous point.</p>
+<p>The following example will resume the list operation from the <code>breakpoint</code>.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>opendal::Operator;
+<span class="kw">let </span><span class="kw-2">mut </span>lister = op
+    .lister_with(<span class="string">"path/to/dir/"</span>)
+    .start_after(<span class="string">"breakpoint"</span>)
+    .<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
+<h6 id="recursive-1"><a href="#recursive-1"><code>recursive</code></a></h6>
+<p>Specify whether to list recursively or not.</p>
+<p>If <code>recursive</code> is set to <code>true</code>, we will list all entries recursively. If not, we’ll only
+list the entries in the specified dir.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>opendal::Operator;
+<span class="kw">let </span><span class="kw-2">mut </span>lister = op.lister_with(<span class="string">"path/to/dir/"</span>).recursive(<span class="bool-val">true</span>).<span class="kw">await</span><span class="question-mark">?</span>;</code></pre></div>
+<h6 id="metakey-1"><a href="#metakey-1"><code>metakey</code></a></h6>
+<p>Specify the metadata that required to be fetched in entries.</p>
+<p>If <code>metakey</code> is not set, we will fetch only the entry’s <code>mode</code>. Otherwise, we will retrieve
+the required metadata from storage services. Even if <code>metakey</code> is specified, the metadata
+may still be <code>None</code>, indicating that the storage service does not supply this information.</p>
+<p>Some storage services like <code>s3</code> could return more metadata like <code>content-length</code> and
+<code>last-modified</code>. By using <code>metakey</code>, we can fetch those metadata without an extra <code>stat</code> call.
+Please pick up the metadata you need to reduce the extra <code>stat</code> cost.</p>
+<p>This example shows how to list entries with <code>content-length</code> and <code>last-modified</code> metadata:</p>
+
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>futures::TryStreamExt;
 <span class="kw">use </span>opendal::EntryMode;
 <span class="kw">use </span>opendal::Metakey;
 <span class="kw">use </span>opendal::Operator;
-<span class="kw">let </span><span class="kw-2">mut </span>ds = op
-    .lister_with(<span class="string">"path/to/dir/"</span>)
-    .limit(<span class="number">10</span>)
-    .start_after(<span class="string">"start"</span>)
+<span class="kw">let </span><span class="kw-2">mut </span>lister = op
+    .lister_with(<span class="string">"dir/"</span>)
+    <span class="comment">// Make sure content-length and last-modified been fetched.
+    </span>.metakey(Metakey::ContentLength | Metakey::LastModified)
     .<span class="kw">await</span><span class="question-mark">?</span>;
-<span class="kw">while let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>entry) = ds.try_next().<span class="kw">await</span><span class="question-mark">? </span>{
-    <span class="kw">match </span>entry.metadata().mode() {
+<span class="kw">while let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>entry) = lister.try_next().<span class="kw">await</span><span class="question-mark">? </span>{
+    <span class="kw">let </span>meta = entry.metadata();
+    <span class="kw">match </span>meta.mode() {
         EntryMode::FILE =&gt; {
-            <span class="macro">println!</span>(<span class="string">"Handling file {}"</span>, entry.path())
+            <span class="macro">println!</span>(
+                <span class="string">"Handling file {} with size {}"</span>,
+                entry.path(),
+                meta.content_length()
+            )
         }
         EntryMode::DIR =&gt; {
             <span class="macro">println!</span>(<span class="string">"Handling dir {}"</span>, entry.path())
@@ -393,13 +489,13 @@ For fetching more metadata, please use <a href="struct.ObjectStore.html#method.l
         EntryMode::Unknown =&gt; <span class="kw">continue</span>,
     }
 }</code></pre></div>
-<h6 id="list-all-files-recursively"><a href="#list-all-files-recursively">List all files recursively</a></h6>
+<h5 id="examples-23"><a href="#examples-23">Examples</a></h5><h6 id="list-all-files-recursively"><a href="#list-all-files-recursively">List all files recursively</a></h6>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>futures::TryStreamExt;
 <span class="kw">use </span>opendal::EntryMode;
 <span class="kw">use </span>opendal::Metakey;
 <span class="kw">use </span>opendal::Operator;
-<span class="kw">let </span><span class="kw-2">mut </span>ds = op.lister_with(<span class="string">"path/to/dir/"</span>).recursive(<span class="bool-val">true</span>).<span class="kw">await</span><span class="question-mark">?</span>;
-<span class="kw">while let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>entry) = ds.try_next().<span class="kw">await</span><span class="question-mark">? </span>{
+<span class="kw">let </span><span class="kw-2">mut </span>lister = op.lister_with(<span class="string">"path/to/dir/"</span>).recursive(<span class="bool-val">true</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+<span class="kw">while let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>entry) = lister.try_next().<span class="kw">await</span><span class="question-mark">? </span>{
     <span class="kw">match </span>entry.metadata().mode() {
         EntryMode::FILE =&gt; {
             <span class="macro">println!</span>(<span class="string">"Handling file {}"</span>, entry.path())
@@ -649,7 +745,7 @@ type parameter which is not always easy to be used.</p>
     <span class="prelude-val">Ok</span>(())
 }</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.layer" class="method"><h4 class="code-header">pub fn <a href="#method.layer" class="fn">layer</a>&lt;L&gt;(self, layer: L) -&gt; <a class="struct" href="struct.ObjectStore.html" title="struct object_store::ObjectStore">Operator</a><div class="where">where
-    L: Layer&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/sync/struct.Arc.html" title="struct alloc::sync::Arc">Arc</a>&lt;dyn Accessor&lt;BlockingWriter = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingWrite&gt;, Lister = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn List&gt;, BlockingLister = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingList&gt;, Reader = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn Read&gt;, Writer = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn Write&gt;, BlockingReader = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingRead&gt;&gt;&gt;&gt;,</div></h4></section></summary><div class="docblock"><p>Create a new layer with dynamic dispatch.</p>
+    L: Layer&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/sync/struct.Arc.html" title="struct alloc::sync::Arc">Arc</a>&lt;dyn Accessor&lt;BlockingLister = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingList&gt;, Lister = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn List&gt;, Writer = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn Write&gt;, BlockingReader = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingRead&gt;, BlockingWriter = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn BlockingWrite&gt;, Reader = <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/boxed/struct.Box.html" title="struct alloc::boxed::Box">Box</a>&lt;dyn Read&gt;&gt;&gt;&gt;,</div></h4></section></summary><div class="docblock"><p>Create a new layer with dynamic dispatch.</p>
 <h5 id="notes-17"><a href="#notes-17">Notes</a></h5>
 <p><code>OperatorBuilder::layer()</code> is using static dispatch which is zero
 cost. <code>Operator::layer()</code> is using dynamic dispatch which has a
