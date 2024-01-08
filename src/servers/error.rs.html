@@ -636,6 +636,9 @@
 <a href="#635" id="635">635</a>
 <a href="#636" id="636">636</a>
 <a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1207,7 +1210,7 @@
     (<span class="macro-nonterminal">$Error</span>: ty) =&gt; {
         <span class="kw">impl </span>From&lt;<span class="macro-nonterminal">$Error</span>&gt; <span class="kw">for </span>tonic::Status {
             <span class="kw">fn </span>from(err: <span class="macro-nonterminal">$Error</span>) -&gt; <span class="self">Self </span>{
-                <span class="kw">use </span>common_error::{GREPTIME_ERROR_CODE, GREPTIME_ERROR_MSG};
+                <span class="kw">use </span>common_error::{GREPTIME_DB_HEADER_ERROR_CODE, GREPTIME_DB_HEADER_ERROR_MSG};
                 <span class="kw">use </span>tonic::codegen::http::{HeaderMap, HeaderValue};
                 <span class="kw">use </span>tonic::metadata::MetadataMap;
 
@@ -1216,11 +1219,14 @@
                 <span class="comment">// If either of the status_code or error msg cannot convert to valid HTTP header value
                 // (which is a very rare case), just ignore. Client will use Tonic status code and message.
                 </span><span class="kw">let </span>status_code = err.status_code();
-                headers.insert(GREPTIME_ERROR_CODE, HeaderValue::from(status_code <span class="kw">as </span>u32));
+                headers.insert(
+                    GREPTIME_DB_HEADER_ERROR_CODE,
+                    HeaderValue::from(status_code <span class="kw">as </span>u32),
+                );
                 <span class="kw">let </span>root_error = err.output_msg();
 
                 <span class="kw">if let </span><span class="prelude-val">Ok</span>(err_msg) = HeaderValue::from_bytes(root_error.as_bytes()) {
-                    <span class="kw">let _ </span>= headers.insert(GREPTIME_ERROR_MSG, err_msg);
+                    <span class="kw">let _ </span>= headers.insert(GREPTIME_DB_HEADER_ERROR_MSG, err_msg);
                 }
 
                 <span class="kw">let </span>metadata = MetadataMap::from_headers(headers);

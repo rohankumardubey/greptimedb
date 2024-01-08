@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"static":["GREPTIME_DB_NAME_HEADER_NAME"],"struct":["GreptimeDbName"]};
+window.SIDEBAR_ITEMS = {"constant":["GREPTIME_DB_HEADER_EXECUTION_TIME","GREPTIME_DB_HEADER_FORMAT"],"static":["GREPTIME_DB_HEADER_NAME"],"struct":["GreptimeDbName"]};

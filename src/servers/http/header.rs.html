@@ -51,6 +51,9 @@
 <a href="#50" id="50">50</a>
 <a href="#51" id="51">51</a>
 <a href="#52" id="52">52</a>
+<a href="#53" id="53">53</a>
+<a href="#54" id="54">54</a>
+<a href="#55" id="55">55</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,13 +70,16 @@
 
 </span><span class="kw">use </span>headers::{Header, HeaderName, HeaderValue};
 
-<span class="kw">pub static </span>GREPTIME_DB_NAME_HEADER_NAME: HeaderName = HeaderName::from_static(<span class="string">"x-greptime-db-name"</span>);
+<span class="kw">pub const </span>GREPTIME_DB_HEADER_FORMAT: <span class="kw-2">&amp;</span>str = <span class="string">"x-greptime-format"</span>;
+<span class="kw">pub const </span>GREPTIME_DB_HEADER_EXECUTION_TIME: <span class="kw-2">&amp;</span>str = <span class="string">"x-greptime-execution-time"</span>;
+
+<span class="kw">pub static </span>GREPTIME_DB_HEADER_NAME: HeaderName = HeaderName::from_static(<span class="string">"x-greptime-name"</span>);
 
 <span class="kw">pub struct </span>GreptimeDbName(<span class="prelude-ty">Option</span>&lt;String&gt;);
 
 <span class="kw">impl </span>Header <span class="kw">for </span>GreptimeDbName {
     <span class="kw">fn </span>name() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>HeaderName {
-        <span class="kw-2">&amp;</span>GREPTIME_DB_NAME_HEADER_NAME
+        <span class="kw-2">&amp;</span>GREPTIME_DB_HEADER_NAME
     }
 
     <span class="kw">fn </span>decode&lt;<span class="lifetime">'i</span>, I&gt;(values: <span class="kw-2">&amp;mut </span>I) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, headers::Error&gt;

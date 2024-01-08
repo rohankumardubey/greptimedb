@@ -439,8 +439,6 @@
 <a href="#438" id="438">438</a>
 <a href="#439" id="439">439</a>
 <a href="#440" id="440">440</a>
-<a href="#441" id="441">441</a>
-<a href="#442" id="442">442</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -460,7 +458,6 @@
 <span class="kw">use </span>axum::http::{<span class="self">self</span>, Request, StatusCode};
 <span class="kw">use </span>axum::middleware::Next;
 <span class="kw">use </span>axum::response::{IntoResponse, Response};
-<span class="kw">use </span>axum::Json;
 <span class="kw">use </span>base64::prelude::BASE64_STANDARD;
 <span class="kw">use </span>base64::Engine;
 <span class="kw">use </span>common_catalog::consts::DEFAULT_SCHEMA_NAME;
@@ -473,11 +470,12 @@
 <span class="kw">use </span>snafu::{ensure, OptionExt, ResultExt};
 
 <span class="kw">use </span><span class="kw">super</span>::header::GreptimeDbName;
-<span class="kw">use super</span>::{JsonResponse, ResponseFormat, PUBLIC_APIS};
+<span class="kw">use super</span>::{ResponseFormat, PUBLIC_APIS};
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     <span class="self">self</span>, InvalidAuthorizationHeaderSnafu, InvalidParameterSnafu, InvisibleASCIISnafu,
     NotFoundInfluxAuthSnafu, <span class="prelude-ty">Result</span>, UnsupportedAuthSchemeSnafu, UrlDecodeSnafu,
 };
+<span class="kw">use </span><span class="kw">crate</span>::http::error_result::ErrorResponse;
 <span class="kw">use </span><span class="kw">crate</span>::http::HTTP_API_PREFIX;
 
 <span class="doccomment">/// AuthState is a holder state for [`UserProviderRef`]
@@ -561,14 +559,12 @@
 }
 
 <span class="kw">fn </span>err_response(is_influxdb: bool, err: <span class="kw">impl </span>ErrorExt) -&gt; <span class="kw">impl </span>IntoResponse {
-    <span class="kw">let </span>format = <span class="kw">if </span>is_influxdb {
+    <span class="kw">let </span>ty = <span class="kw">if </span>is_influxdb {
         ResponseFormat::InfluxdbV1
     } <span class="kw">else </span>{
         ResponseFormat::GreptimedbV1
     };
-
-    <span class="kw">let </span>body = JsonResponse::with_error(err, format);
-    (StatusCode::UNAUTHORIZED, Json(body))
+    (StatusCode::UNAUTHORIZED, ErrorResponse::from_error(ty, err))
 }
 
 <span class="kw">fn </span>extract_catalog_and_schema&lt;B&gt;(request: <span class="kw-2">&amp;</span>Request&lt;B&gt;) -&gt; (<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>str) {
