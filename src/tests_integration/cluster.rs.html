@@ -417,12 +417,6 @@
 <a href="#416" id="416">416</a>
 <a href="#417" id="417">417</a>
 <a href="#418" id="418">418</a>
-<a href="#419" id="419">419</a>
-<a href="#420" id="420">420</a>
-<a href="#421" id="421">421</a>
-<a href="#422" id="422">422</a>
-<a href="#423" id="423">423</a>
-<a href="#424" id="424">424</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -470,7 +464,7 @@
 <span class="kw">use </span>meta_srv::cluster::MetaPeerClientRef;
 <span class="kw">use </span>meta_srv::metasrv::{MetaSrv, MetaSrvOptions, SelectorRef};
 <span class="kw">use </span>meta_srv::mocks::MockInfo;
-<span class="kw">use </span>servers::grpc::GrpcServer;
+<span class="kw">use </span>servers::grpc::builder::GrpcServerBuilder;
 <span class="kw">use </span>servers::heartbeat_options::HeartbeatOptions;
 <span class="kw">use </span>servers::Mode;
 <span class="kw">use </span>tempfile::TempDir;
@@ -798,17 +792,11 @@
             .unwrap(),
     );
 
-    <span class="kw">let </span>flight_handler = <span class="prelude-val">Some</span>(Arc::new(datanode.region_server()) <span class="kw">as _</span>);
-    <span class="kw">let </span>region_server_handler = <span class="prelude-val">Some</span>(Arc::new(datanode.region_server()) <span class="kw">as _</span>);
-    <span class="kw">let </span>grpc_server = GrpcServer::new(
-        <span class="prelude-val">None</span>,
-        <span class="prelude-val">None</span>,
-        <span class="prelude-val">None</span>,
-        flight_handler,
-        region_server_handler,
-        <span class="prelude-val">None</span>,
-        runtime,
-    );
+    <span class="kw">let </span>grpc_server = GrpcServerBuilder::new(runtime)
+        .flight_handler(Arc::new(datanode.region_server()))
+        .region_server_handler(Arc::new(datanode.region_server()))
+        .build();
+
     <span class="kw">let </span>_handle = tokio::spawn(<span class="kw">async move </span>{
         Server::builder()
             .add_service(grpc_server.create_flight_service())

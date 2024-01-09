@@ -226,7 +226,8 @@
 <span class="kw">use </span>common_base::Plugins;
 <span class="kw">use </span>common_runtime::Builder <span class="kw">as </span>RuntimeBuilder;
 <span class="kw">use </span>servers::error::InternalIoSnafu;
-<span class="kw">use </span>servers::grpc::{GrpcServer, GrpcServerConfig};
+<span class="kw">use </span>servers::grpc::builder::GrpcServerBuilder;
+<span class="kw">use </span>servers::grpc::GrpcServerConfig;
 <span class="kw">use </span>servers::http::HttpServerBuilder;
 <span class="kw">use </span>servers::metrics_handler::MetricsHandler;
 <span class="kw">use </span>servers::mysql::server::{MysqlServer, MysqlSpawnConfig, MysqlSpawnRef};
@@ -275,15 +276,14 @@
                 max_recv_message_size: opts.max_recv_message_size.as_bytes() <span class="kw">as </span>usize,
                 max_send_message_size: opts.max_send_message_size.as_bytes() <span class="kw">as </span>usize,
             };
-            <span class="kw">let </span>grpc_server = GrpcServer::new(
-                <span class="prelude-val">Some</span>(grpc_config),
-                <span class="prelude-val">Some</span>(ServerGrpcQueryHandlerAdapter::arc(instance.clone())),
-                <span class="prelude-val">Some</span>(instance.clone()),
-                <span class="prelude-val">None</span>,
-                <span class="prelude-val">None</span>,
-                user_provider.clone(),
-                grpc_runtime,
-            );
+
+            <span class="kw">let </span>grpc_server = GrpcServerBuilder::new(grpc_runtime)
+                .config(grpc_config)
+                .query_handler(ServerGrpcQueryHandlerAdapter::arc(instance.clone()))
+                .prometheus_handler(instance.clone())
+                .otlp_handler(instance.clone())
+                .user_provider(user_provider.clone())
+                .build();
 
             result.push((Box::new(grpc_server), grpc_addr));
         }

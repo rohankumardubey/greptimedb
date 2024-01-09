@@ -639,6 +639,10 @@
 <a href="#638" id="638">638</a>
 <a href="#639" id="639">639</a>
 <a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1062,6 +1066,9 @@
 
     <span class="attr">#[snafu(display(<span class="string">"Failed to convert Mysql value, error: {}"</span>, err_msg))]
     </span>MysqlValueConversion { err_msg: String, location: Location },
+
+    <span class="attr">#[snafu(display(<span class="string">"Missing query context"</span>))]
+    </span>MissingQueryContext { location: Location },
 }
 
 <span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T&gt; = std::result::Result&lt;T, Error&gt;;
@@ -1117,6 +1124,7 @@
             | TimePrecision { .. }
             | UrlDecode { .. }
             | IncompatibleSchema { .. }
+            | MissingQueryContext { .. }
             | MysqlValueConversion { .. } =&gt; StatusCode::InvalidArguments,
 
             InfluxdbLinesWrite { source, .. }

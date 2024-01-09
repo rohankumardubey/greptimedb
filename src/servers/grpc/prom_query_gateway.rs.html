@@ -139,6 +139,7 @@
 <a href="#138" id="138">138</a>
 <a href="#139" id="139">139</a>
 <a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -172,8 +173,9 @@
 <span class="kw">use </span>snafu::OptionExt;
 <span class="kw">use </span>tonic::{Request, Response};
 
+<span class="kw">use </span><span class="kw">super</span>::greptime_handler::create_query_context;
 <span class="kw">use </span><span class="kw">crate</span>::error::InvalidQuerySnafu;
-<span class="kw">use </span><span class="kw">crate</span>::grpc::greptime_handler::{auth, create_query_context};
+<span class="kw">use </span><span class="kw">crate</span>::grpc::greptime_handler::auth;
 <span class="kw">use </span><span class="kw">crate</span>::grpc::TonicResult;
 <span class="kw">use </span><span class="kw">crate</span>::http::prometheus::{retrieve_metric_name_and_result_type, PrometheusJsonResponse};
 <span class="kw">use </span><span class="kw">crate</span>::prometheus_handler::PrometheusHandlerRef;

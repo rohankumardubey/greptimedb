@@ -567,7 +567,7 @@
     (StatusCode::UNAUTHORIZED, ErrorResponse::from_error(ty, err))
 }
 
-<span class="kw">fn </span>extract_catalog_and_schema&lt;B&gt;(request: <span class="kw-2">&amp;</span>Request&lt;B&gt;) -&gt; (<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>str) {
+<span class="kw">pub fn </span>extract_catalog_and_schema&lt;B&gt;(request: <span class="kw-2">&amp;</span>Request&lt;B&gt;) -&gt; (<span class="kw-2">&amp;</span>str, <span class="kw-2">&amp;</span>str) {
     <span class="comment">// parse database from header
     </span><span class="kw">let </span>dbname = request
         .headers()
@@ -624,7 +624,7 @@
     }
 }
 
-<span class="kw">fn </span>extract_username_and_password&lt;B&gt;(
+<span class="kw">pub fn </span>extract_username_and_password&lt;B&gt;(
     is_influxdb: bool,
     request: <span class="kw-2">&amp;</span>Request&lt;B&gt;,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(Username, Password)&gt; {
