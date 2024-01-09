@@ -700,6 +700,35 @@
 <a href="#699" id="699">699</a>
 <a href="#700" id="700">700</a>
 <a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
+<a href="#716" id="716">716</a>
+<a href="#717" id="717">717</a>
+<a href="#718" id="718">718</a>
+<a href="#719" id="719">719</a>
+<a href="#720" id="720">720</a>
+<a href="#721" id="721">721</a>
+<a href="#722" id="722">722</a>
+<a href="#723" id="723">723</a>
+<a href="#724" id="724">724</a>
+<a href="#725" id="725">725</a>
+<a href="#726" id="726">726</a>
+<a href="#727" id="727">727</a>
+<a href="#728" id="728">728</a>
+<a href="#729" id="729">729</a>
+<a href="#730" id="730">730</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -744,6 +773,7 @@
 <span class="kw">use </span>tokio::sync::mpsc::{Receiver, Sender};
 <span class="kw">use </span>tokio::sync::{mpsc, oneshot, Mutex};
 
+<span class="kw">use </span><span class="kw">crate</span>::cache::write_cache::{WriteCache, WriteCacheRef};
 <span class="kw">use </span><span class="kw">crate</span>::cache::{CacheManager, CacheManagerRef};
 <span class="kw">use </span><span class="kw">crate</span>::compaction::CompactionScheduler;
 <span class="kw">use </span><span class="kw">crate</span>::config::MitoConfig;
@@ -813,20 +843,24 @@
     <span class="doccomment">/// Starts a worker group.
     ///
     /// The number of workers should be power of two.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>start&lt;S: LogStore&gt;(
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>start&lt;S: LogStore&gt;(
         config: Arc&lt;MitoConfig&gt;,
         log_store: Arc&lt;S&gt;,
         object_store_manager: ObjectStoreManagerRef,
-    ) -&gt; WorkerGroup {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;WorkerGroup&gt; {
         <span class="kw">let </span>write_buffer_manager = Arc::new(WriteBufferManagerImpl::new(
             config.global_write_buffer_size.as_bytes() <span class="kw">as </span>usize,
         ));
         <span class="kw">let </span>scheduler = Arc::new(LocalScheduler::new(config.max_background_jobs));
-        <span class="kw">let </span>cache_manager = Arc::new(CacheManager::new(
-            config.sst_meta_cache_size.as_bytes(),
-            config.vector_cache_size.as_bytes(),
-            config.page_cache_size.as_bytes(),
-        ));
+        <span class="kw">let </span>write_cache = write_cache_from_config(<span class="kw-2">&amp;</span>config, object_store_manager.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>cache_manager = Arc::new(
+            CacheManager::builder()
+                .sst_meta_cache_size(config.sst_meta_cache_size.as_bytes())
+                .vector_cache_size(config.vector_cache_size.as_bytes())
+                .page_cache_size(config.page_cache_size.as_bytes())
+                .write_cache(write_cache)
+                .build(),
+        );
 
         <span class="kw">let </span>workers = (<span class="number">0</span>..config.num_workers)
             .map(|id| {
@@ -844,11 +878,11 @@
             })
             .collect();
 
-        WorkerGroup {
+        <span class="prelude-val">Ok</span>(WorkerGroup {
             workers,
             scheduler,
             cache_manager,
-        }
+        })
     }
 
     <span class="doccomment">/// Stops the worker group.
@@ -906,24 +940,28 @@
     <span class="doccomment">/// Starts a worker group with `write_buffer_manager` and `listener` for tests.
     ///
     /// The number of workers should be power of two.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>start_for_test&lt;S: LogStore&gt;(
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>start_for_test&lt;S: LogStore&gt;(
         config: Arc&lt;MitoConfig&gt;,
         log_store: Arc&lt;S&gt;,
         object_store_manager: ObjectStoreManagerRef,
         write_buffer_manager: <span class="prelude-ty">Option</span>&lt;WriteBufferManagerRef&gt;,
         listener: <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::engine::listener::EventListenerRef&gt;,
-    ) -&gt; WorkerGroup {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;WorkerGroup&gt; {
         <span class="kw">let </span>write_buffer_manager = write_buffer_manager.unwrap_or_else(|| {
             Arc::new(WriteBufferManagerImpl::new(
                 config.global_write_buffer_size.as_bytes() <span class="kw">as </span>usize,
             ))
         });
         <span class="kw">let </span>scheduler = Arc::new(LocalScheduler::new(config.max_background_jobs));
-        <span class="kw">let </span>cache_manager = Arc::new(CacheManager::new(
-            config.sst_meta_cache_size.as_bytes(),
-            config.vector_cache_size.as_bytes(),
-            config.page_cache_size.as_bytes(),
-        ));
+        <span class="kw">let </span>write_cache = write_cache_from_config(<span class="kw-2">&amp;</span>config, object_store_manager.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>cache_manager = Arc::new(
+            CacheManager::builder()
+                .sst_meta_cache_size(config.sst_meta_cache_size.as_bytes())
+                .vector_cache_size(config.vector_cache_size.as_bytes())
+                .page_cache_size(config.page_cache_size.as_bytes())
+                .write_cache(write_cache)
+                .build(),
+        );
 
         <span class="kw">let </span>workers = (<span class="number">0</span>..config.num_workers)
             .map(|id| {
@@ -941,16 +979,36 @@
             })
             .collect();
 
-        WorkerGroup {
+        <span class="prelude-val">Ok</span>(WorkerGroup {
             workers,
             scheduler,
             cache_manager,
-        }
+        })
     }
 }
 
 <span class="kw">fn </span>value_to_index(value: usize, num_workers: usize) -&gt; usize {
     value % num_workers
+}
+
+<span class="kw">async fn </span>write_cache_from_config(
+    config: <span class="kw-2">&amp;</span>MitoConfig,
+    object_store_manager: ObjectStoreManagerRef,
+) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;WriteCacheRef&gt;&gt; {
+    <span class="kw">if </span>!config.enable_experimental_write_cache {
+        <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+    }
+
+    <span class="comment">// TODO(yingwen): Remove this and document the config once the write cache is ready.
+    </span><span class="macro">warn!</span>(<span class="string">"Write cache is an experimental feature"</span>);
+
+    <span class="kw">let </span>cache = WriteCache::new_fs(
+        <span class="kw-2">&amp;</span>config.experimental_write_cache_path,
+        object_store_manager,
+        config.experimental_write_cache_size,
+    )
+    .<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Arc::new(cache)))
 }
 
 <span class="doccomment">/// Worker start config.

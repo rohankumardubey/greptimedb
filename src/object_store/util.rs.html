@@ -92,6 +92,25 @@
 <a href="#91" id="91">91</a>
 <a href="#92" id="92">92</a>
 <a href="#93" id="93">93</a>
+<a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -107,9 +126,14 @@
 // limitations under the License.
 
 </span><span class="kw">use </span>futures::TryStreamExt;
+<span class="kw">use </span>opendal::layers::{LoggingLayer, TracingLayer};
 <span class="kw">use </span>opendal::{Entry, Lister};
 
-<span class="kw">pub async fn </span>collect(stream: Lister) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Entry&gt;, opendal::Error&gt; {
+<span class="kw">use </span><span class="kw">crate</span>::layers::PrometheusMetricsLayer;
+<span class="kw">use </span><span class="kw">crate</span>::ObjectStore;
+
+<span class="doccomment">/// Collect all entries from the [Lister].
+</span><span class="kw">pub async fn </span>collect(stream: Lister) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Entry&gt;, opendal::Error&gt; {
     stream.try_collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;().<span class="kw">await
 </span>}
 
@@ -144,6 +168,20 @@
 </span><span class="kw">pub fn </span>join_path(parent: <span class="kw-2">&amp;</span>str, child: <span class="kw-2">&amp;</span>str) -&gt; String {
     <span class="kw">let </span>output = <span class="macro">format!</span>(<span class="string">"{parent}/{child}"</span>);
     opendal::raw::normalize_path(<span class="kw-2">&amp;</span>output)
+}
+
+<span class="doccomment">/// Attaches instrument layers to the object store.
+</span><span class="kw">pub fn </span>with_instrument_layers(object_store: ObjectStore) -&gt; ObjectStore {
+    object_store
+        .layer(
+            LoggingLayer::default()
+                <span class="comment">// Print the expected error only in DEBUG level.
+                // See https://docs.rs/opendal/latest/opendal/layers/struct.LoggingLayer.html#method.with_error_level
+                </span>.with_error_level(<span class="prelude-val">Some</span>(<span class="string">"debug"</span>))
+                .expect(<span class="string">"input error level must be valid"</span>),
+        )
+        .layer(TracingLayer)
+        .layer(PrometheusMetricsLayer)
 }
 
 <span class="attr">#[cfg(test)]

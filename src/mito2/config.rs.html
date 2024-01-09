@@ -161,6 +161,31 @@
 <a href="#160" id="160">160</a>
 <a href="#161" id="161">161</a>
 <a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -182,6 +207,9 @@
 <span class="kw">use </span>common_base::readable_size::ReadableSize;
 <span class="kw">use </span>common_telemetry::warn;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>snafu::ensure;
+
+<span class="kw">use </span><span class="kw">crate</span>::error::{InvalidConfigSnafu, <span class="prelude-ty">Result</span>};
 
 <span class="doccomment">/// Default max running background job.
 </span><span class="kw">const </span>DEFAULT_MAX_BG_JOB: usize = <span class="number">4</span>;
@@ -230,6 +258,12 @@
     </span><span class="kw">pub </span>vector_cache_size: ReadableSize,
     <span class="doccomment">/// Cache size for pages of SST row groups (default 512MB). Setting it to 0 to disable the cache.
     </span><span class="kw">pub </span>page_cache_size: ReadableSize,
+    <span class="doccomment">/// Whether to enable the experimental write cache.
+    </span><span class="kw">pub </span>enable_experimental_write_cache: bool,
+    <span class="doccomment">/// Path for write cache.
+    </span><span class="kw">pub </span>experimental_write_cache_path: String,
+    <span class="doccomment">/// Capacity for write cache.
+    </span><span class="kw">pub </span>experimental_write_cache_size: ReadableSize,
 
     <span class="comment">// Other configs:
     </span><span class="doccomment">/// Buffer size for SST writing.
@@ -258,6 +292,9 @@
             sst_meta_cache_size: ReadableSize::mb(<span class="number">128</span>),
             vector_cache_size: ReadableSize::mb(<span class="number">512</span>),
             page_cache_size: ReadableSize::mb(<span class="number">512</span>),
+            enable_experimental_write_cache: <span class="bool-val">false</span>,
+            experimental_write_cache_path: String::new(),
+            experimental_write_cache_size: ReadableSize::mb(<span class="number">512</span>),
             sst_write_buffer_size: ReadableSize::mb(<span class="number">8</span>),
             scan_parallelism: divide_num_cpus(<span class="number">4</span>),
             parallel_scan_channel_size: DEFAULT_SCAN_CHANNEL_SIZE,
@@ -267,7 +304,9 @@
 
 <span class="kw">impl </span>MitoConfig {
     <span class="doccomment">/// Sanitize incorrect configurations.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>sanitize(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+    ///
+    /// Returns an error if there is a configuration that unable to sanitize.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>sanitize(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="comment">// Use default value if `num_workers` is 0.
         </span><span class="kw">if </span><span class="self">self</span>.num_workers == <span class="number">0 </span>{
             <span class="self">self</span>.num_workers = divide_num_cpus(<span class="number">2</span>);
@@ -312,6 +351,17 @@
                 <span class="self">self</span>.parallel_scan_channel_size
             );
         }
+
+        <span class="kw">if </span><span class="self">self</span>.enable_experimental_write_cache {
+            <span class="macro">ensure!</span>(
+                !<span class="self">self</span>.experimental_write_cache_path.is_empty(),
+                InvalidConfigSnafu {
+                    reason: <span class="string">"experimental_write_cache_path should not be empty"</span>,
+                }
+            );
+        }
+
+        <span class="prelude-val">Ok</span>(())
     }
 }
 

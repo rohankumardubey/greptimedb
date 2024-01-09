@@ -362,6 +362,34 @@
 <a href="#361" id="361">361</a>
 <a href="#362" id="362">362</a>
 <a href="#363" id="363">363</a>
+<a href="#364" id="364">364</a>
+<a href="#365" id="365">365</a>
+<a href="#366" id="366">366</a>
+<a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
+<a href="#385" id="385">385</a>
+<a href="#386" id="386">386</a>
+<a href="#387" id="387">387</a>
+<a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -411,9 +439,10 @@
 <span class="comment">// Metrics type key for files on the local store.
 </span><span class="kw">const </span>FILE_TYPE: <span class="kw-2">&amp;</span>str = <span class="string">"file"</span>;
 
-<span class="comment">// TODO(yingwen): Builder for cache manager.
-
-</span><span class="doccomment">/// Manages cached data for the engine.
+<span class="doccomment">/// Manages cached data for the engine.
+///
+/// All caches are disabled by default.
+</span><span class="attr">#[derive(Default)]
 </span><span class="kw">pub struct </span>CacheManager {
     <span class="doccomment">/// Cache for SST metadata.
     </span>sst_meta_cache: <span class="prelude-ty">Option</span>&lt;SstMetaCache&gt;,
@@ -422,70 +451,15 @@
     <span class="doccomment">/// Cache for SST pages.
     </span>page_cache: <span class="prelude-ty">Option</span>&lt;PageCache&gt;,
     <span class="doccomment">/// A Cache for writing files to object stores.
-    </span><span class="comment">// TODO(yingwen): Remove this once the cache is ready.
-    </span><span class="attr">#[allow(unused)]
     </span>write_cache: <span class="prelude-ty">Option</span>&lt;WriteCacheRef&gt;,
 }
 
 <span class="kw">pub type </span>CacheManagerRef = Arc&lt;CacheManager&gt;;
 
 <span class="kw">impl </span>CacheManager {
-    <span class="doccomment">/// Creates a new manager with specific cache size in bytes.
-    </span><span class="kw">pub fn </span>new(
-        sst_meta_cache_size: u64,
-        vector_cache_size: u64,
-        page_cache_size: u64,
-    ) -&gt; CacheManager {
-        <span class="kw">let </span>sst_meta_cache = <span class="kw">if </span>sst_meta_cache_size == <span class="number">0 </span>{
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="kw">let </span>cache = Cache::builder()
-                .max_capacity(sst_meta_cache_size)
-                .weigher(meta_cache_weight)
-                .eviction_listener(|k, v, _cause| {
-                    <span class="kw">let </span>size = meta_cache_weight(<span class="kw-2">&amp;</span>k, <span class="kw-2">&amp;</span>v);
-                    CACHE_BYTES
-                        .with_label_values(<span class="kw-2">&amp;</span>[SST_META_TYPE])
-                        .sub(size.into());
-                })
-                .build();
-            <span class="prelude-val">Some</span>(cache)
-        };
-        <span class="kw">let </span>vector_cache = <span class="kw">if </span>vector_cache_size == <span class="number">0 </span>{
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="kw">let </span>cache = Cache::builder()
-                .max_capacity(vector_cache_size)
-                .weigher(vector_cache_weight)
-                .eviction_listener(|k, v, _cause| {
-                    <span class="kw">let </span>size = vector_cache_weight(<span class="kw-2">&amp;</span>k, <span class="kw-2">&amp;</span>v);
-                    CACHE_BYTES
-                        .with_label_values(<span class="kw-2">&amp;</span>[VECTOR_TYPE])
-                        .sub(size.into());
-                })
-                .build();
-            <span class="prelude-val">Some</span>(cache)
-        };
-        <span class="kw">let </span>page_cache = <span class="kw">if </span>page_cache_size == <span class="number">0 </span>{
-            <span class="prelude-val">None
-        </span>} <span class="kw">else </span>{
-            <span class="kw">let </span>cache = Cache::builder()
-                .max_capacity(page_cache_size)
-                .weigher(page_cache_weight)
-                .eviction_listener(|k, v, _cause| {
-                    <span class="kw">let </span>size = page_cache_weight(<span class="kw-2">&amp;</span>k, <span class="kw-2">&amp;</span>v);
-                    CACHE_BYTES.with_label_values(<span class="kw-2">&amp;</span>[PAGE_TYPE]).sub(size.into());
-                })
-                .build();
-            <span class="prelude-val">Some</span>(cache)
-        };
-
-        CacheManager {
-            sst_meta_cache,
-            vector_cache,
-            page_cache,
-            write_cache: <span class="prelude-val">None</span>,
-        }
+    <span class="doccomment">/// Returns a builder to build the cache.
+    </span><span class="kw">pub fn </span>builder() -&gt; CacheManagerBuilder {
+        CacheManagerBuilder::default()
     }
 
     <span class="doccomment">/// Gets cached [ParquetMetaData].
@@ -562,6 +536,86 @@
     <span class="doccomment">/// Gets the the write cache.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>write_cache(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>WriteCacheRef&gt; {
         <span class="self">self</span>.write_cache.as_ref()
+    }
+}
+
+<span class="doccomment">/// Builder to construct a [CacheManager].
+</span><span class="attr">#[derive(Default)]
+</span><span class="kw">pub struct </span>CacheManagerBuilder {
+    sst_meta_cache_size: u64,
+    vector_cache_size: u64,
+    page_cache_size: u64,
+    write_cache: <span class="prelude-ty">Option</span>&lt;WriteCacheRef&gt;,
+}
+
+<span class="kw">impl </span>CacheManagerBuilder {
+    <span class="doccomment">/// Sets meta cache size.
+    </span><span class="kw">pub fn </span>sst_meta_cache_size(<span class="kw-2">mut </span><span class="self">self</span>, bytes: u64) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.sst_meta_cache_size = bytes;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Sets vector cache size.
+    </span><span class="kw">pub fn </span>vector_cache_size(<span class="kw-2">mut </span><span class="self">self</span>, bytes: u64) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.vector_cache_size = bytes;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Sets page cache size.
+    </span><span class="kw">pub fn </span>page_cache_size(<span class="kw-2">mut </span><span class="self">self</span>, bytes: u64) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.page_cache_size = bytes;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Sets write cache.
+    </span><span class="kw">pub fn </span>write_cache(<span class="kw-2">mut </span><span class="self">self</span>, cache: <span class="prelude-ty">Option</span>&lt;WriteCacheRef&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.write_cache = cache;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Builds the [CacheManager].
+    </span><span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; CacheManager {
+        <span class="kw">let </span>sst_meta_cache = (<span class="self">self</span>.sst_meta_cache_size != <span class="number">0</span>).then(|| {
+            Cache::builder()
+                .max_capacity(<span class="self">self</span>.sst_meta_cache_size)
+                .weigher(meta_cache_weight)
+                .eviction_listener(|k, v, _cause| {
+                    <span class="kw">let </span>size = meta_cache_weight(<span class="kw-2">&amp;</span>k, <span class="kw-2">&amp;</span>v);
+                    CACHE_BYTES
+                        .with_label_values(<span class="kw-2">&amp;</span>[SST_META_TYPE])
+                        .sub(size.into());
+                })
+                .build()
+        });
+        <span class="kw">let </span>vector_cache = (<span class="self">self</span>.vector_cache_size != <span class="number">0</span>).then(|| {
+            Cache::builder()
+                .max_capacity(<span class="self">self</span>.vector_cache_size)
+                .weigher(vector_cache_weight)
+                .eviction_listener(|k, v, _cause| {
+                    <span class="kw">let </span>size = vector_cache_weight(<span class="kw-2">&amp;</span>k, <span class="kw-2">&amp;</span>v);
+                    CACHE_BYTES
+                        .with_label_values(<span class="kw-2">&amp;</span>[VECTOR_TYPE])
+                        .sub(size.into());
+                })
+                .build()
+        });
+        <span class="kw">let </span>page_cache = (<span class="self">self</span>.page_cache_size != <span class="number">0</span>).then(|| {
+            Cache::builder()
+                .max_capacity(<span class="self">self</span>.page_cache_size)
+                .weigher(page_cache_weight)
+                .eviction_listener(|k, v, _cause| {
+                    <span class="kw">let </span>size = page_cache_weight(<span class="kw-2">&amp;</span>k, <span class="kw-2">&amp;</span>v);
+                    CACHE_BYTES.with_label_values(<span class="kw-2">&amp;</span>[PAGE_TYPE]).sub(size.into());
+                })
+                .build()
+        });
+
+        CacheManager {
+            sst_meta_cache,
+            vector_cache,
+            page_cache,
+            write_cache: <span class="self">self</span>.write_cache,
+        }
     }
 }
 
@@ -657,7 +711,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_disable_cache() {
-        <span class="kw">let </span>cache = CacheManager::new(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);
+        <span class="kw">let </span>cache = CacheManager::default();
         <span class="macro">assert!</span>(cache.sst_meta_cache.is_none());
         <span class="macro">assert!</span>(cache.vector_cache.is_none());
         <span class="macro">assert!</span>(cache.page_cache.is_none());
@@ -682,11 +736,13 @@
         <span class="kw">let </span>pages = Arc::new(PageValue::new(Vec::new()));
         cache.put_pages(key.clone(), pages);
         <span class="macro">assert!</span>(cache.get_pages(<span class="kw-2">&amp;</span>key).is_none());
+
+        <span class="macro">assert!</span>(cache.write_cache().is_none());
     }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_parquet_meta_cache() {
-        <span class="kw">let </span>cache = CacheManager::new(<span class="number">2000</span>, <span class="number">0</span>, <span class="number">0</span>);
+        <span class="kw">let </span>cache = CacheManager::builder().sst_meta_cache_size(<span class="number">2000</span>).build();
         <span class="kw">let </span>region_id = RegionId::new(<span class="number">1</span>, <span class="number">1</span>);
         <span class="kw">let </span>file_id = FileId::random();
         <span class="macro">assert!</span>(cache.get_parquet_meta_data(region_id, file_id).is_none());
@@ -699,7 +755,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_repeated_vector_cache() {
-        <span class="kw">let </span>cache = CacheManager::new(<span class="number">0</span>, <span class="number">4096</span>, <span class="number">0</span>);
+        <span class="kw">let </span>cache = CacheManager::builder().vector_cache_size(<span class="number">4096</span>).build();
         <span class="kw">let </span>value = Value::Int64(<span class="number">10</span>);
         <span class="macro">assert!</span>(cache.get_repeated_vector(<span class="kw-2">&amp;</span>value).is_none());
         <span class="kw">let </span>vector: VectorRef = Arc::new(Int64Vector::from_slice([<span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>, <span class="number">10</span>]));
@@ -710,7 +766,7 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_page_cache() {
-        <span class="kw">let </span>cache = CacheManager::new(<span class="number">0</span>, <span class="number">0</span>, <span class="number">1000</span>);
+        <span class="kw">let </span>cache = CacheManager::builder().page_cache_size(<span class="number">1000</span>).build();
         <span class="kw">let </span>region_id = RegionId::new(<span class="number">1</span>, <span class="number">1</span>);
         <span class="kw">let </span>file_id = FileId::random();
         <span class="kw">let </span>key = PageKey {

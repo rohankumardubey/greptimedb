@@ -271,6 +271,11 @@
 <a href="#270" id="270">270</a>
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -443,7 +448,12 @@
             </span>.unwrap()
             .unwrap();
 
-        <span class="kw">let </span>cache = <span class="prelude-val">Some</span>(Arc::new(CacheManager::new(<span class="number">0</span>, <span class="number">0</span>, <span class="number">64 </span>* <span class="number">1024 </span>* <span class="number">1024</span>)));
+        <span class="comment">// Enable page cache.
+        </span><span class="kw">let </span>cache = <span class="prelude-val">Some</span>(Arc::new(
+            CacheManager::builder()
+                .page_cache_size(<span class="number">64 </span>* <span class="number">1024 </span>* <span class="number">1024</span>)
+                .build(),
+        ));
         <span class="kw">let </span>builder = ParquetReaderBuilder::new(FILE_DIR.to_string(), handle.clone(), object_store)
             .cache(cache.clone());
         <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">3 </span>{

@@ -387,6 +387,19 @@
 <a href="#386" id="386">386</a>
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
+<a href="#389" id="389">389</a>
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -489,17 +502,11 @@
         <span class="self">self</span>.memory_index.insert(key, value).<span class="kw">await</span>;
     }
 
-    <span class="kw">async fn </span>get_reader(<span class="kw-2">&amp;</span><span class="self">self</span>, file_path: <span class="kw-2">&amp;</span>str) -&gt; object_store::Result&lt;<span class="prelude-ty">Option</span>&lt;Reader&gt;&gt; {
-        <span class="kw">if </span><span class="self">self</span>.local_store.is_exist(file_path).<span class="kw">await</span><span class="question-mark">? </span>{
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="self">self</span>.local_store.reader(file_path).<span class="kw">await</span><span class="question-mark">?</span>))
-        } <span class="kw">else </span>{
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
-        }
-    }
-
     <span class="doccomment">/// Reads a file from the cache.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>reader(<span class="kw-2">&amp;</span><span class="self">self</span>, key: IndexKey) -&gt; <span class="prelude-ty">Option</span>&lt;Reader&gt; {
-        <span class="kw">if </span>!<span class="self">self</span>.memory_index.contains_key(<span class="kw-2">&amp;</span>key) {
+        <span class="comment">// We must use `get()` to update the estimator of the cache.
+        // See https://docs.rs/moka/latest/moka/future/struct.Cache.html#method.contains_key
+        </span><span class="kw">if </span><span class="self">self</span>.memory_index.get(<span class="kw-2">&amp;</span>key).<span class="kw">await</span>.is_none() {
             CACHE_MISS.with_label_values(<span class="kw-2">&amp;</span>[FILE_TYPE]).inc();
             <span class="kw">return </span><span class="prelude-val">None</span>;
         }
@@ -583,6 +590,14 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>local_store(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; ObjectStore {
         <span class="self">self</span>.local_store.clone()
     }
+
+    <span class="kw">async fn </span>get_reader(<span class="kw-2">&amp;</span><span class="self">self</span>, file_path: <span class="kw-2">&amp;</span>str) -&gt; object_store::Result&lt;<span class="prelude-ty">Option</span>&lt;Reader&gt;&gt; {
+        <span class="kw">if </span><span class="self">self</span>.local_store.is_exist(file_path).<span class="kw">await</span><span class="question-mark">? </span>{
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="self">self</span>.local_store.reader(file_path).<span class="kw">await</span><span class="question-mark">?</span>))
+        } <span class="kw">else </span>{
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+        }
+    }
 }
 
 <span class="doccomment">/// Key of file cache index.
@@ -660,6 +675,10 @@
         reader.read_to_string(<span class="kw-2">&amp;mut </span>buf).<span class="kw">await</span>.unwrap();
         <span class="macro">assert_eq!</span>(<span class="string">"hello"</span>, buf);
 
+        <span class="comment">// Get weighted size.
+        </span>cache.memory_index.run_pending_tasks().<span class="kw">await</span>;
+        <span class="macro">assert_eq!</span>(<span class="number">5</span>, cache.memory_index.weighted_size());
+
         <span class="comment">// Remove the file.
         </span>cache.remove(key).<span class="kw">await</span>;
         <span class="macro">assert!</span>(cache.reader(key).<span class="kw">await</span>.is_none());
@@ -669,6 +688,7 @@
 
         <span class="comment">// The file also not exists.
         </span><span class="macro">assert!</span>(!local_store.is_exist(<span class="kw-2">&amp;</span>file_path).<span class="kw">await</span>.unwrap());
+        <span class="macro">assert_eq!</span>(<span class="number">0</span>, cache.memory_index.weighted_size());
     }
 
     <span class="attr">#[tokio::test]
@@ -710,6 +730,7 @@
         <span class="kw">let </span>region_id = RegionId::new(<span class="number">2000</span>, <span class="number">0</span>);
         <span class="comment">// Write N files.
         </span><span class="kw">let </span>file_ids: Vec&lt;<span class="kw">_</span>&gt; = (<span class="number">0</span>..<span class="number">10</span>).map(|<span class="kw">_</span>| FileId::random()).collect();
+        <span class="kw">let </span><span class="kw-2">mut </span>total_size = <span class="number">0</span>;
         <span class="kw">for </span>(i, file_id) <span class="kw">in </span>file_ids.iter().enumerate() {
             <span class="kw">let </span>key = (region_id, <span class="kw-2">*</span>file_id);
             <span class="kw">let </span>file_path = cache.cache_file_path(key);
@@ -725,6 +746,7 @@
                     },
                 )
                 .<span class="kw">await</span>;
+            total_size += bytes.len();
         }
 
         <span class="comment">// Recover the cache.
@@ -732,6 +754,10 @@
         <span class="comment">// No entry before recovery.
         </span><span class="macro">assert!</span>(cache.reader((region_id, file_ids[<span class="number">0</span>])).<span class="kw">await</span>.is_none());
         cache.recover().<span class="kw">await</span>.unwrap();
+
+        <span class="comment">// Check size.
+        </span>cache.memory_index.run_pending_tasks().<span class="kw">await</span>;
+        <span class="macro">assert_eq!</span>(total_size, cache.memory_index.weighted_size() <span class="kw">as </span>usize);
 
         <span class="kw">for </span>(i, file_id) <span class="kw">in </span>file_ids.iter().enumerate() {
             <span class="kw">let </span>key = (region_id, <span class="kw-2">*</span>file_id);

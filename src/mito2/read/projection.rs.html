@@ -389,6 +389,7 @@
 <a href="#388" id="388">388</a>
 <a href="#389" id="389">389</a>
 <a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -733,7 +734,8 @@
         <span class="macro">assert_eq!</span>([<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], mapper.column_ids());
         <span class="macro">assert_eq!</span>([<span class="number">3</span>, <span class="number">4</span>], mapper.batch_fields());
 
-        <span class="kw">let </span>cache = CacheManager::new(<span class="number">0</span>, <span class="number">1024</span>, <span class="number">0</span>);
+        <span class="comment">// With vector cache.
+        </span><span class="kw">let </span>cache = CacheManager::builder().vector_cache_size(<span class="number">1024</span>).build();
         <span class="kw">let </span>batch = new_batch(<span class="number">0</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>], <span class="kw-2">&amp;</span>[(<span class="number">3</span>, <span class="number">3</span>), (<span class="number">4</span>, <span class="number">4</span>)], <span class="number">3</span>);
         <span class="kw">let </span>record_batch = mapper.convert(<span class="kw-2">&amp;</span>batch, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>cache)).unwrap();
         <span class="kw">let </span>expect = <span class="string">"\

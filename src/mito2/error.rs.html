@@ -563,6 +563,14 @@
 <a href="#562" id="562">562</a>
 <a href="#563" id="563">563</a>
 <a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
+<a href="#569" id="569">569</a>
+<a href="#570" id="570">570</a>
+<a href="#571" id="571">571</a>
+<a href="#572" id="572">572</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -994,36 +1002,31 @@
 
     <span class="attr">#[snafu(display(<span class="string">"Failed to build index applier"</span>))]
     </span>BuildIndexApplier {
-        <span class="attr">#[snafu(source)]
-        </span>source: index::inverted_index::error::Error,
+        source: index::inverted_index::error::Error,
         location: Location,
     },
 
     <span class="attr">#[snafu(display(<span class="string">"Failed to convert value"</span>))]
     </span>ConvertValue {
-        <span class="attr">#[snafu(source)]
-        </span>source: datatypes::error::Error,
+        source: datatypes::error::Error,
         location: Location,
     },
 
     <span class="attr">#[snafu(display(<span class="string">"Failed to apply index"</span>))]
     </span>ApplyIndex {
-        <span class="attr">#[snafu(source)]
-        </span>source: index::inverted_index::error::Error,
+        source: index::inverted_index::error::Error,
         location: Location,
     },
 
     <span class="attr">#[snafu(display(<span class="string">"Failed to read puffin metadata"</span>))]
     </span>PuffinReadMetadata {
-        <span class="attr">#[snafu(source)]
-        </span>source: puffin::error::Error,
+        source: puffin::error::Error,
         location: Location,
     },
 
     <span class="attr">#[snafu(display(<span class="string">"Failed to read puffin blob"</span>))]
     </span>PuffinReadBlob {
-        <span class="attr">#[snafu(source)]
-        </span>source: puffin::error::Error,
+        source: puffin::error::Error,
         location: Location,
     },
 
@@ -1032,6 +1035,17 @@
         blob_type: String,
         location: Location,
     },
+
+    <span class="attr">#[snafu(display(<span class="string">"Failed to clean dir {dir}"</span>))]
+    </span>CleanDir {
+        dir: String,
+        <span class="attr">#[snafu(source)]
+        </span>error: std::io::Error,
+        location: Location,
+    },
+
+    <span class="attr">#[snafu(display(<span class="string">"Invalid config, {reason}"</span>))]
+    </span>InvalidConfig { reason: String, location: Location },
 }
 
 <span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T, E = Error&gt; = std::result::Result&lt;T, E&gt;;
@@ -1120,6 +1134,8 @@
             PuffinReadMetadata { source, .. } | PuffinReadBlob { source, .. } =&gt; {
                 source.status_code()
             }
+            CleanDir { .. } =&gt; StatusCode::Unexpected,
+            InvalidConfig { .. } =&gt; StatusCode::InvalidArguments,
         }
     }
 

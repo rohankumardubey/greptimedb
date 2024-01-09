@@ -669,6 +669,19 @@
 <a href="#668" id="668">668</a>
 <a href="#669" id="669">669</a>
 <a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -713,7 +726,7 @@
 <span class="kw">use </span>mito2::config::MitoConfig;
 <span class="kw">use </span>mito2::engine::MitoEngine;
 <span class="kw">use </span>object_store::manager::{ObjectStoreManager, ObjectStoreManagerRef};
-<span class="kw">use </span>object_store::util::normalize_dir;
+<span class="kw">use </span>object_store::util::{join_dir, normalize_dir};
 <span class="kw">use </span>query::QueryEngineFactory;
 <span class="kw">use </span>servers::export_metrics::ExportMetricsTask;
 <span class="kw">use </span>servers::grpc::{GrpcServer, GrpcServerConfig};
@@ -731,9 +744,9 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::config::{DatanodeOptions, RegionEngineConfig};
 <span class="kw">use </span><span class="kw">crate</span>::error::{
-    CreateDirSnafu, GetMetadataSnafu, MissingKvBackendSnafu, MissingNodeIdSnafu, OpenLogStoreSnafu,
-    ParseAddrSnafu, <span class="prelude-ty">Result</span>, RuntimeResourceSnafu, ShutdownInstanceSnafu, ShutdownServerSnafu,
-    StartServerSnafu,
+    BuildMitoEngineSnafu, CreateDirSnafu, GetMetadataSnafu, MissingKvBackendSnafu,
+    MissingNodeIdSnafu, OpenLogStoreSnafu, ParseAddrSnafu, <span class="prelude-ty">Result</span>, RuntimeResourceSnafu,
+    ShutdownInstanceSnafu, ShutdownServerSnafu, StartServerSnafu,
 };
 <span class="kw">use </span><span class="kw">crate</span>::event_listener::{
     new_region_server_event_channel, NoopRegionServerEventListener, RegionServerEventListenerRef,
@@ -1129,20 +1142,33 @@
     </span><span class="kw">async fn </span>build_mito_engine(
         opts: <span class="kw-2">&amp;</span>DatanodeOptions,
         object_store_manager: ObjectStoreManagerRef,
-        config: MitoConfig,
+        <span class="kw-2">mut </span>config: MitoConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MitoEngine&gt; {
+        <span class="comment">// Sets write cache path if it is empty.
+        </span><span class="kw">if </span>config.experimental_write_cache_path.is_empty() {
+            config.experimental_write_cache_path = join_dir(<span class="kw-2">&amp;</span>opts.storage.data_home, <span class="string">"write_cache"</span>);
+            <span class="macro">info!</span>(
+                <span class="string">"Sets write cache path to {}"</span>,
+                config.experimental_write_cache_path
+            );
+        }
+
         <span class="kw">let </span>mito_engine = <span class="kw">match </span><span class="kw-2">&amp;</span>opts.wal {
             WalConfig::RaftEngine(raft_engine_config) =&gt; MitoEngine::new(
                 config,
                 <span class="self">Self</span>::build_raft_engine_log_store(<span class="kw-2">&amp;</span>opts.storage.data_home, raft_engine_config)
                     .<span class="kw">await</span><span class="question-mark">?</span>,
                 object_store_manager,
-            ),
+            )
+            .<span class="kw">await
+            </span>.context(BuildMitoEngineSnafu)<span class="question-mark">?</span>,
             WalConfig::Kafka(kafka_config) =&gt; MitoEngine::new(
                 config,
                 <span class="self">Self</span>::build_kafka_log_store(kafka_config).<span class="kw">await</span><span class="question-mark">?</span>,
                 object_store_manager,
-            ),
+            )
+            .<span class="kw">await
+            </span>.context(BuildMitoEngineSnafu)<span class="question-mark">?</span>,
         };
         <span class="prelude-val">Ok</span>(mito_engine)
     }

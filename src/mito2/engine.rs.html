@@ -339,6 +339,7 @@
 <a href="#338" id="338">338</a>
 <a href="#339" id="339">339</a>
 <a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -418,16 +419,16 @@
 
 <span class="kw">impl </span>MitoEngine {
     <span class="doccomment">/// Returns a new [MitoEngine] with specific `config`, `log_store` and `object_store`.
-    </span><span class="kw">pub fn </span>new&lt;S: LogStore&gt;(
+    </span><span class="kw">pub async fn </span>new&lt;S: LogStore&gt;(
         <span class="kw-2">mut </span>config: MitoConfig,
         log_store: Arc&lt;S&gt;,
         object_store_manager: ObjectStoreManagerRef,
-    ) -&gt; MitoEngine {
-        config.sanitize();
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;MitoEngine&gt; {
+        config.sanitize()<span class="question-mark">?</span>;
 
-        MitoEngine {
-            inner: Arc::new(EngineInner::new(config, log_store, object_store_manager)),
-        }
+        <span class="prelude-val">Ok</span>(MitoEngine {
+            inner: Arc::new(EngineInner::new(config, log_store, object_store_manager).<span class="kw">await</span><span class="question-mark">?</span>),
+        })
     }
 
     <span class="doccomment">/// Returns true if the specific region exists.
@@ -467,16 +468,16 @@
 
 <span class="kw">impl </span>EngineInner {
     <span class="doccomment">/// Returns a new [EngineInner] with specific `config`, `log_store` and `object_store`.
-    </span><span class="kw">fn </span>new&lt;S: LogStore&gt;(
+    </span><span class="kw">async fn </span>new&lt;S: LogStore&gt;(
         config: MitoConfig,
         log_store: Arc&lt;S&gt;,
         object_store_manager: ObjectStoreManagerRef,
-    ) -&gt; EngineInner {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;EngineInner&gt; {
         <span class="kw">let </span>config = Arc::new(config);
-        EngineInner {
-            workers: WorkerGroup::start(config.clone(), log_store, object_store_manager),
+        <span class="prelude-val">Ok</span>(EngineInner {
+            workers: WorkerGroup::start(config.clone(), log_store, object_store_manager).<span class="kw">await</span><span class="question-mark">?</span>,
             config,
-        }
+        })
     }
 
     <span class="doccomment">/// Stop the inner engine.
@@ -655,17 +656,17 @@
 </span><span class="attr">#[cfg(any(test, feature = <span class="string">"test"</span>))]
 </span><span class="kw">impl </span>MitoEngine {
     <span class="doccomment">/// Returns a new [MitoEngine] for tests.
-    </span><span class="kw">pub fn </span>new_for_test&lt;S: LogStore&gt;(
+    </span><span class="kw">pub async fn </span>new_for_test&lt;S: LogStore&gt;(
         <span class="kw-2">mut </span>config: MitoConfig,
         log_store: Arc&lt;S&gt;,
         object_store_manager: ObjectStoreManagerRef,
         write_buffer_manager: <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::flush::WriteBufferManagerRef&gt;,
         listener: <span class="prelude-ty">Option</span>&lt;<span class="kw">crate</span>::engine::listener::EventListenerRef&gt;,
-    ) -&gt; MitoEngine {
-        config.sanitize();
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;MitoEngine&gt; {
+        config.sanitize()<span class="question-mark">?</span>;
 
         <span class="kw">let </span>config = Arc::new(config);
-        MitoEngine {
+        <span class="prelude-val">Ok</span>(MitoEngine {
             inner: Arc::new(EngineInner {
                 workers: WorkerGroup::start_for_test(
                     config.clone(),
@@ -673,10 +674,11 @@
                     object_store_manager,
                     write_buffer_manager,
                     listener,
-                ),
+                )
+                .<span class="kw">await</span><span class="question-mark">?</span>,
                 config,
             }),
-        }
+        })
     }
 }
 </code></pre></div></section></main></body></html>
