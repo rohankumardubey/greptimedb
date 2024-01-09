@@ -750,6 +750,7 @@
 <a href="#749" id="749">749</a>
 <a href="#750" id="750">750</a>
 <a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1058,6 +1059,7 @@
             <span class="kw">let </span>metadata = <span class="self">self</span>.metadata.clone();
             <span class="kw">let </span>sst_layer = <span class="self">self</span>.sst_layer.clone();
             <span class="kw">let </span>region_id = <span class="self">self</span>.region_id;
+            <span class="kw">let </span>file_id = output.output_file_id;
             <span class="kw">let </span>cache_manager = <span class="self">self</span>.cache_manager.clone();
             <span class="kw">let </span>storage = <span class="self">self</span>.storage.clone();
             futs.push(<span class="kw">async move </span>{
@@ -1066,7 +1068,7 @@
                 <span class="kw">let </span>file_meta_opt = sst_layer
                     .write_sst(
                         SstWriteRequest {
-                            file_id: output.output_file_id,
+                            file_id,
                             metadata,
                             source: Source::Reader(reader),
                             cache_manager,
@@ -1077,7 +1079,7 @@
                     .<span class="kw">await</span><span class="question-mark">?
                     </span>.map(|sst_info| FileMeta {
                         region_id,
-                        file_id: output.output_file_id,
+                        file_id,
                         time_range: sst_info.time_range,
                         level: output.output_level,
                         file_size: sst_info.file_size,

@@ -756,6 +756,7 @@
 <a href="#755" id="755">755</a>
 <a href="#756" id="756">756</a>
 <a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1089,6 +1090,7 @@
                 <span class="comment">// No data written.
                 </span><span class="kw">continue</span>;
             };
+
             flushed_bytes += sst_info.file_size;
             <span class="kw">let </span>file_meta = FileMeta {
                 region_id: <span class="self">self</span>.region_id,

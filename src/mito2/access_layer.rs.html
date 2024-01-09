@@ -150,6 +150,20 @@
 <a href="#149" id="149">149</a>
 <a href="#150" id="150">150</a>
 <a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
+<a href="#160" id="160">160</a>
+<a href="#161" id="161">161</a>
+<a href="#162" id="162">162</a>
+<a href="#163" id="163">163</a>
+<a href="#164" id="164">164</a>
+<a href="#165" id="165">165</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -241,10 +255,11 @@
         write_opts: <span class="kw-2">&amp;</span>WriteOptions,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;SstInfo&gt;&gt; {
         <span class="kw">let </span>path = location::sst_file_path(<span class="kw-2">&amp;</span><span class="self">self</span>.region_dir, request.file_id);
+        <span class="kw">let </span>region_id = request.metadata.region_id;
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(write_cache) = request.cache_manager.write_cache() {
+        <span class="kw">let </span>sst_info = <span class="kw">if let </span><span class="prelude-val">Some</span>(write_cache) = request.cache_manager.write_cache() {
             <span class="comment">// Write to the write cache.
-            </span><span class="kw">return </span>write_cache
+            </span>write_cache
                 .write_and_upload_sst(
                     SstUploadRequest {
                         file_id: request.file_id,
@@ -256,13 +271,26 @@
                     },
                     write_opts,
                 )
-                .<span class="kw">await</span>;
+                .<span class="kw">await</span><span class="question-mark">?
+        </span>} <span class="kw">else </span>{
+            <span class="comment">// Write cache is disabled.
+            </span><span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(path, request.metadata, <span class="self">self</span>.object_store.clone());
+            writer.write_all(request.source, write_opts).<span class="kw">await</span><span class="question-mark">?
+        </span>};
+
+        <span class="comment">// Put parquet metadata to cache manager.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(sst_info) = <span class="kw-2">&amp;</span>sst_info {
+            <span class="kw">if let </span><span class="prelude-val">Some</span>(parquet_metadata) = <span class="kw-2">&amp;</span>sst_info.file_metadata {
+                request.cache_manager.put_parquet_meta_data(
+                    region_id,
+                    request.file_id,
+                    parquet_metadata.clone(),
+                )
+            }
         }
 
-        <span class="comment">// Write cache is disabled.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(path, request.metadata, <span class="self">self</span>.object_store.clone());
-        writer.write_all(request.source, write_opts).<span class="kw">await
-    </span>}
+        <span class="prelude-val">Ok</span>(sst_info)
+    }
 }
 
 <span class="doccomment">/// Contents to build a SST.

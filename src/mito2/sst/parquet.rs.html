@@ -276,6 +276,8 @@
 <a href="#275" id="275">275</a>
 <a href="#276" id="276">276</a>
 <a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -299,6 +301,8 @@
 <span class="kw">pub mod </span>row_group;
 <span class="kw">mod </span>stats;
 <span class="kw">pub mod </span>writer;
+
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>common_base::readable_size::ReadableSize;
 <span class="kw">use </span>parquet::file::metadata::ParquetMetaData;
@@ -340,7 +344,7 @@
     <span class="doccomment">/// Number of rows.
     </span><span class="kw">pub </span>num_rows: usize,
     <span class="doccomment">/// File Meta Data
-    </span><span class="kw">pub </span>file_metadata: <span class="prelude-ty">Option</span>&lt;ParquetMetaData&gt;,
+    </span><span class="kw">pub </span>file_metadata: <span class="prelude-ty">Option</span>&lt;Arc&lt;ParquetMetaData&gt;&gt;,
 }
 
 <span class="attr">#[cfg(test)]
