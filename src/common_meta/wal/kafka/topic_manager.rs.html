@@ -324,7 +324,6 @@
 <a href="#323" id="323">323</a>
 <a href="#324" id="324">324</a>
 <a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -360,7 +359,6 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::kv_backend::KvBackendRef;
 <span class="kw">use </span><span class="kw">crate</span>::rpc::store::PutRequest;
-<span class="kw">use </span><span class="kw">crate</span>::wal::kafka::topic::Topic;
 <span class="kw">use </span><span class="kw">crate</span>::wal::kafka::topic_selector::{RoundRobinTopicSelector, TopicSelectorRef};
 <span class="kw">use </span><span class="kw">crate</span>::wal::kafka::KafkaConfig;
 
@@ -373,7 +371,7 @@
 <span class="doccomment">/// Manages topic initialization and selection.
 </span><span class="kw">pub struct </span>TopicManager {
     config: KafkaConfig,
-    <span class="kw">pub</span>(<span class="kw">crate</span>) topic_pool: Vec&lt;Topic&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) topic_pool: Vec&lt;String&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) topic_selector: TopicSelectorRef,
     kv_backend: KvBackendRef,
 }
@@ -413,7 +411,7 @@
         </span><span class="kw">let </span>created_topics = <span class="self">Self</span>::restore_created_topics(<span class="kw-2">&amp;</span><span class="self">self</span>.kv_backend)
             .<span class="kw">await</span><span class="question-mark">?
             </span>.into_iter()
-            .collect::&lt;HashSet&lt;Topic&gt;&gt;();
+            .collect::&lt;HashSet&lt;String&gt;&gt;();
 
         <span class="comment">// Creates missing topics.
         </span><span class="kw">let </span>to_be_created = topics
@@ -435,7 +433,7 @@
     }
 
     <span class="doccomment">/// Tries to create topics specified by indexes in `to_be_created`.
-    </span><span class="kw">async fn </span>try_create_topics(<span class="kw-2">&amp;</span><span class="self">self</span>, topics: <span class="kw-2">&amp;</span>[Topic], to_be_created: <span class="kw-2">&amp;</span>[usize]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    </span><span class="kw">async fn </span>try_create_topics(<span class="kw-2">&amp;</span><span class="self">self</span>, topics: <span class="kw-2">&amp;</span>[String], to_be_created: <span class="kw-2">&amp;</span>[usize]) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="comment">// Builds an kafka controller client for creating topics.
         </span><span class="kw">let </span>backoff_config = BackoffConfig {
             init_backoff: <span class="self">self</span>.config.backoff.init,
@@ -468,18 +466,18 @@
     }
 
     <span class="doccomment">/// Selects one topic from the topic pool through the topic selector.
-    </span><span class="kw">pub fn </span>select(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>Topic&gt; {
+    </span><span class="kw">pub fn </span>select(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;</span>String&gt; {
         <span class="self">self</span>.topic_selector.select(<span class="kw-2">&amp;</span><span class="self">self</span>.topic_pool)
     }
 
     <span class="doccomment">/// Selects a batch of topics from the topic pool through the topic selector.
-    </span><span class="kw">pub fn </span>select_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, num_topics: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw-2">&amp;</span>Topic&gt;&gt; {
+    </span><span class="kw">pub fn </span>select_batch(<span class="kw-2">&amp;</span><span class="self">self</span>, num_topics: usize) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw-2">&amp;</span>String&gt;&gt; {
         (<span class="number">0</span>..num_topics)
             .map(|<span class="kw">_</span>| <span class="self">self</span>.topic_selector.select(<span class="kw-2">&amp;</span><span class="self">self</span>.topic_pool))
             .collect()
     }
 
-    <span class="kw">async fn </span>try_append_noop_record(<span class="kw-2">&amp;</span><span class="self">self</span>, topic: <span class="kw-2">&amp;</span>Topic, client: <span class="kw-2">&amp;</span>Client) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>try_append_noop_record(<span class="kw-2">&amp;</span><span class="self">self</span>, topic: <span class="kw-2">&amp;</span>String, client: <span class="kw-2">&amp;</span>Client) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>partition_client = client
             .partition_client(topic, DEFAULT_PARTITION, UnknownTopicHandling::Retry)
             .<span class="kw">await
@@ -504,7 +502,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">async fn </span>try_create_topic(<span class="kw-2">&amp;</span><span class="self">self</span>, topic: <span class="kw-2">&amp;</span>Topic, client: <span class="kw-2">&amp;</span>ControllerClient) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>try_create_topic(<span class="kw-2">&amp;</span><span class="self">self</span>, topic: <span class="kw-2">&amp;</span>String, client: <span class="kw-2">&amp;</span>ControllerClient) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">match </span>client
             .create_topic(
                 topic.clone(),
@@ -530,7 +528,7 @@
         }
     }
 
-    <span class="kw">async fn </span>restore_created_topics(kv_backend: <span class="kw-2">&amp;</span>KvBackendRef) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Topic&gt;&gt; {
+    <span class="kw">async fn </span>restore_created_topics(kv_backend: <span class="kw-2">&amp;</span>KvBackendRef) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;String&gt;&gt; {
         kv_backend
             .get(CREATED_TOPICS_KEY.as_bytes())
             .<span class="kw">await</span><span class="question-mark">?
@@ -540,7 +538,7 @@
             )
     }
 
-    <span class="kw">async fn </span>persist_created_topics(topics: <span class="kw-2">&amp;</span>[Topic], kv_backend: <span class="kw-2">&amp;</span>KvBackendRef) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+    <span class="kw">async fn </span>persist_created_topics(topics: <span class="kw-2">&amp;</span>[String], kv_backend: <span class="kw-2">&amp;</span>KvBackendRef) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">let </span>raw_topics = serde_json::to_vec(topics).context(EncodeJsonSnafu)<span class="question-mark">?</span>;
         kv_backend
             .put(PutRequest {

@@ -83,7 +83,6 @@
 <a href="#82" id="82">82</a>
 <a href="#83" id="83">83</a>
 <a href="#84" id="84">84</a>
-<a href="#85" id="85">85</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -104,7 +103,6 @@
 
 <span class="kw">use </span>std::fmt::Display;
 
-<span class="kw">use </span>common_meta::wal::KafkaWalTopic <span class="kw">as </span>Topic;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>store_api::logstore::entry::{Entry, Id <span class="kw">as </span>EntryId};
 <span class="kw">use </span>store_api::logstore::namespace::Namespace;
@@ -115,7 +113,7 @@
 </span><span class="attr">#[derive(Debug, PartialEq, Eq, Hash, Clone, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>NamespaceImpl {
     <span class="kw">pub </span>region_id: u64,
-    <span class="kw">pub </span>topic: Topic,
+    <span class="kw">pub </span>topic: String,
 }
 
 <span class="kw">impl </span>Namespace <span class="kw">for </span>NamespaceImpl {

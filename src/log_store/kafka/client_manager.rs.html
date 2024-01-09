@@ -243,7 +243,7 @@
 </span><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>common_config::wal::{KafkaConfig, KafkaWalTopic <span class="kw">as </span>Topic};
+<span class="kw">use </span>common_config::wal::KafkaConfig;
 <span class="kw">use </span>rskafka::client::partition::{PartitionClient, UnknownTopicHandling};
 <span class="kw">use </span>rskafka::client::producer::aggregator::RecordAggregator;
 <span class="kw">use </span>rskafka::client::producer::{BatchProducer, BatchProducerBuilder};
@@ -295,7 +295,7 @@
     </span>client_factory: RsKafkaClient,
     <span class="doccomment">/// A pool maintaining a collection of clients.
     /// Key: a topic. Value: the associated client of the topic.
-    </span>client_pool: RwLock&lt;HashMap&lt;Topic, Client&gt;&gt;,
+    </span>client_pool: RwLock&lt;HashMap&lt;String, Client&gt;&gt;,
 }
 
 <span class="kw">impl </span>ClientManager {
@@ -325,7 +325,7 @@
 
     <span class="doccomment">/// Gets the client associated with the topic. If the client does not exist, a new one will
     /// be created and returned.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>get_or_insert(<span class="kw-2">&amp;</span><span class="self">self</span>, topic: <span class="kw-2">&amp;</span>Topic) -&gt; <span class="prelude-ty">Result</span>&lt;Client&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>get_or_insert(<span class="kw-2">&amp;</span><span class="self">self</span>, topic: <span class="kw-2">&amp;</span>String) -&gt; <span class="prelude-ty">Result</span>&lt;Client&gt; {
         {
             <span class="kw">let </span>client_pool = <span class="self">self</span>.client_pool.read().<span class="kw">await</span>;
             <span class="kw">if let </span><span class="prelude-val">Some</span>(client) = client_pool.get(topic) {
@@ -344,7 +344,7 @@
         }
     }
 
-    <span class="kw">async fn </span>try_create_client(<span class="kw-2">&amp;</span><span class="self">self</span>, topic: <span class="kw-2">&amp;</span>Topic) -&gt; <span class="prelude-ty">Result</span>&lt;Client&gt; {
+    <span class="kw">async fn </span>try_create_client(<span class="kw-2">&amp;</span><span class="self">self</span>, topic: <span class="kw-2">&amp;</span>String) -&gt; <span class="prelude-ty">Result</span>&lt;Client&gt; {
         <span class="comment">// Sets to Retry to retry connecting if the kafka cluter replies with an UnknownTopic error.
         // That's because the topic is believed to exist as the metasrv is expected to create required topics upon start.
         // The reconnecting won't stop until succeed or a different error returns.
@@ -375,7 +375,7 @@
         test_name: <span class="kw-2">&amp;</span>str,
         num_topics: usize,
         broker_endpoints: Vec&lt;String&gt;,
-    ) -&gt; (ClientManager, Vec&lt;Topic&gt;) {
+    ) -&gt; (ClientManager, Vec&lt;String&gt;) {
         <span class="kw">let </span>topics = create_topics(
             num_topics,
             |i| <span class="macro">format!</span>(<span class="string">"{test_name}_{}_{}"</span>, i, uuid::Uuid::new_v4()),

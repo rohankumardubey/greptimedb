@@ -66,8 +66,6 @@
 <a href="#65" id="65">65</a>
 <a href="#66" id="66">66</a>
 <a href="#67" id="67">67</a>
-<a href="#68" id="68">68</a>
-<a href="#69" id="69">69</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -84,7 +82,6 @@
 
 </span><span class="attr">#[cfg(any(test, feature = <span class="string">"testing"</span>))]
 </span><span class="kw">pub mod </span>test_util;
-<span class="kw">pub mod </span>topic;
 <span class="kw">pub mod </span>topic_manager;
 <span class="kw">pub mod </span>topic_selector;
 
@@ -93,7 +90,6 @@
 <span class="kw">use </span>common_config::wal::kafka::{kafka_backoff, KafkaBackoffConfig, TopicSelectorType};
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 
-<span class="kw">pub use </span><span class="kw">crate</span>::wal::kafka::topic::Topic;
 <span class="kw">pub use </span><span class="kw">crate</span>::wal::kafka::topic_manager::TopicManager;
 
 <span class="doccomment">/// Configurations for kafka wal.

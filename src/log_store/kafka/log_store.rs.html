@@ -481,7 +481,6 @@
 <a href="#480" id="480">480</a>
 <a href="#481" id="481">481</a>
 <a href="#482" id="482">482</a>
-<a href="#483" id="483">483</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -767,7 +766,6 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>common_base::readable_size::ReadableSize;
-    <span class="kw">use </span>common_config::wal::KafkaWalTopic <span class="kw">as </span>Topic;
     <span class="kw">use </span>rand::seq::IteratorRandom;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
@@ -788,7 +786,7 @@
         test_name: <span class="kw-2">&amp;</span>str,
         num_topics: usize,
         broker_endpoints: Vec&lt;String&gt;,
-    ) -&gt; (KafkaLogStore, Vec&lt;Topic&gt;) {
+    ) -&gt; (KafkaLogStore, Vec&lt;String&gt;) {
         <span class="kw">let </span>topics = create_topics(
             num_topics,
             |i| <span class="macro">format!</span>(<span class="string">"{test_name}_{}_{}"</span>, i, uuid::Uuid::new_v4()),
