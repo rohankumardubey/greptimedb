@@ -643,6 +643,14 @@
 <a href="#642" id="642">642</a>
 <a href="#643" id="643">643</a>
 <a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -682,6 +690,12 @@
 </span><span class="kw">pub enum </span>Error {
     <span class="attr">#[snafu(display(<span class="string">"Internal error: {}"</span>, err_msg))]
     </span>Internal { err_msg: String },
+
+    <span class="attr">#[snafu(display(<span class="string">"Unsupported data type: {}, reason: {}"</span>, data_type, reason))]
+    </span>UnsupportedDataType {
+        data_type: ConcreteDataType,
+        reason: String,
+    },
 
     <span class="attr">#[snafu(display(<span class="string">"Internal IO error"</span>))]
     </span>InternalIo {
@@ -1090,6 +1104,8 @@
             | CatalogError { .. }
             | GrpcReflectionService { .. }
             | BuildHttpResponse { .. } =&gt; StatusCode::Internal,
+
+            UnsupportedDataType { .. } =&gt; StatusCode::Unsupported,
 
             <span class="attr">#[cfg(not(windows))]
             </span>UpdateJemallocMetrics { .. } =&gt; StatusCode::Internal,
