@@ -584,6 +584,38 @@
 <a href="#583" id="583">583</a>
 <a href="#584" id="584">584</a>
 <a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
+<a href="#589" id="589">589</a>
+<a href="#590" id="590">590</a>
+<a href="#591" id="591">591</a>
+<a href="#592" id="592">592</a>
+<a href="#593" id="593">593</a>
+<a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
+<a href="#597" id="597">597</a>
+<a href="#598" id="598">598</a>
+<a href="#599" id="599">599</a>
+<a href="#600" id="600">600</a>
+<a href="#601" id="601">601</a>
+<a href="#602" id="602">602</a>
+<a href="#603" id="603">603</a>
+<a href="#604" id="604">604</a>
+<a href="#605" id="605">605</a>
+<a href="#606" id="606">606</a>
+<a href="#607" id="607">607</a>
+<a href="#608" id="608">608</a>
+<a href="#609" id="609">609</a>
+<a href="#610" id="610">610</a>
+<a href="#611" id="611">611</a>
+<a href="#612" id="612">612</a>
+<a href="#613" id="613">613</a>
+<a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1031,6 +1063,21 @@
         location: Location,
     },
 
+    <span class="attr">#[snafu(display(<span class="string">"Failed to push index value"</span>))]
+    </span>PushIndexValue {
+        source: index::inverted_index::error::Error,
+        location: Location,
+    },
+
+    <span class="attr">#[snafu(display(<span class="string">"Failed to write index completely"</span>))]
+    </span>IndexFinish {
+        source: index::inverted_index::error::Error,
+        location: Location,
+    },
+
+    <span class="attr">#[snafu(display(<span class="string">"Operate on aborted index"</span>))]
+    </span>OperateAbortedIndex { location: Location },
+
     <span class="attr">#[snafu(display(<span class="string">"Failed to read puffin metadata"</span>))]
     </span>PuffinReadMetadata {
         source: puffin::error::Error,
@@ -1046,6 +1093,18 @@
     <span class="attr">#[snafu(display(<span class="string">"Blob type not found, blob_type: {blob_type}"</span>))]
     </span>PuffinBlobTypeNotFound {
         blob_type: String,
+        location: Location,
+    },
+
+    <span class="attr">#[snafu(display(<span class="string">"Failed to write puffin completely"</span>))]
+    </span>PuffinFinish {
+        source: puffin::error::Error,
+        location: Location,
+    },
+
+    <span class="attr">#[snafu(display(<span class="string">"Failed to add blob to puffin file"</span>))]
+    </span>PuffinAddBlob {
+        source: puffin::error::Error,
         location: Location,
     },
 
@@ -1108,6 +1167,7 @@
             | RegionCorrupted { .. }
             | CreateDefault { .. }
             | InvalidParquet { .. }
+            | OperateAbortedIndex { .. }
             | PuffinBlobTypeNotFound { .. }
             | UnexpectedReplay { .. } =&gt; StatusCode::Unexpected,
             RegionNotFound { .. } =&gt; StatusCode::RegionNotFound,
@@ -1155,10 +1215,14 @@
             EmptyRegionDir { .. } | EmptyManifestDir { .. } =&gt; StatusCode::RegionNotFound,
             ArrowReader { .. } =&gt; StatusCode::StorageUnavailable,
             ConvertValue { source, .. } =&gt; source.status_code(),
-            BuildIndexApplier { source, .. } | ApplyIndex { source, .. } =&gt; source.status_code(),
-            PuffinReadMetadata { source, .. } | PuffinReadBlob { source, .. } =&gt; {
-                source.status_code()
-            }
+            BuildIndexApplier { source, .. }
+            | PushIndexValue { source, .. }
+            | ApplyIndex { source, .. }
+            | IndexFinish { source, .. } =&gt; source.status_code(),
+            PuffinReadMetadata { source, .. }
+            | PuffinReadBlob { source, .. }
+            | PuffinFinish { source, .. }
+            | PuffinAddBlob { source, .. } =&gt; source.status_code(),
             CleanDir { .. } =&gt; StatusCode::Unexpected,
             InvalidConfig { .. } =&gt; StatusCode::InvalidArguments,
             StaleLogEntry { .. } =&gt; StatusCode::Unexpected,

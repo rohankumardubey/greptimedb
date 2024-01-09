@@ -193,6 +193,47 @@
 <a href="#192" id="192">192</a>
 <a href="#193" id="193">193</a>
 <a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -345,7 +386,7 @@
     // Index metrics.
     </span><span class="doccomment">/// Timer of index application.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_APPLY_ELAPSED: Histogram = <span class="macro">register_histogram!</span>(
-        <span class="string">"index_apply_elapsed"</span>,
+        <span class="string">"greptime_index_apply_elapsed"</span>,
         <span class="string">"index apply elapsed"</span>,
     )
     .unwrap();
@@ -355,6 +396,26 @@
         <span class="string">"index apply memory usage"</span>,
     )
     .unwrap();
+    <span class="doccomment">/// Timer of index creation.
+    </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_CREATE_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
+        <span class="string">"greptime_index_create_elapsed"</span>,
+        <span class="string">"index create elapsed"</span>,
+        <span class="kw-2">&amp;</span>[STAGE_LABEL]
+    )
+    .unwrap();
+    <span class="doccomment">/// Counter of rows indexed.
+    </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_CREATE_ROWS_TOTAL: IntCounter = <span class="macro">register_int_counter!</span>(
+        <span class="string">"greptime_index_create_rows_total"</span>,
+        <span class="string">"index create rows total"</span>,
+    )
+    .unwrap();
+    <span class="doccomment">/// Counter of created index bytes.
+    </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_CREATE_BYTES_TOTAL: IntCounter = <span class="macro">register_int_counter!</span>(
+        <span class="string">"greptime_index_create_bytes_total"</span>,
+        <span class="string">"index create bytes total"</span>,
+    )
+    .unwrap();
+
     <span class="doccomment">/// Counter of r/w bytes on index related IO operations.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_IO_BYTES_TOTAL: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
         <span class="string">"greptime_index_io_bytes_total"</span>,
@@ -365,6 +426,15 @@
     <span class="doccomment">/// Counter of read bytes on puffin files.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_PUFFIN_READ_BYTES_TOTAL: IntCounter = INDEX_IO_BYTES_TOTAL
         .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"read"</span>, <span class="string">"puffin"</span>]);
+    <span class="doccomment">/// Counter of write bytes on puffin files.
+    </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_PUFFIN_WRITE_BYTES_TOTAL: IntCounter = INDEX_IO_BYTES_TOTAL
+        .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"write"</span>, <span class="string">"puffin"</span>]);
+    <span class="doccomment">/// Counter of read bytes on intermediate files.
+    </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_INTERMEDIATE_READ_BYTES_TOTAL: IntCounter = INDEX_IO_BYTES_TOTAL
+        .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"read"</span>, <span class="string">"intermediate"</span>]);
+    <span class="doccomment">/// Counter of write bytes on intermediate files.
+    </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_INTERMEDIATE_WRITE_BYTES_TOTAL: IntCounter = INDEX_IO_BYTES_TOTAL
+        .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"write"</span>, <span class="string">"intermediate"</span>]);
 
     <span class="doccomment">/// Counter of r/w operations on index related IO operations, e.g. read, write, seek and flush.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_IO_OP_TOTAL: IntCounterVec = <span class="macro">register_int_counter_vec!</span>(
@@ -385,6 +455,18 @@
     <span class="doccomment">/// Counter of flush operations on puffin files.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_PUFFIN_FLUSH_OP_TOTAL: IntCounter = INDEX_IO_OP_TOTAL
         .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"flush"</span>, <span class="string">"puffin"</span>]);
+    <span class="doccomment">/// Counter of read operations on intermediate files.
+    </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_INTERMEDIATE_READ_OP_TOTAL: IntCounter = INDEX_IO_OP_TOTAL
+        .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"read"</span>, <span class="string">"intermediate"</span>]);
+    <span class="doccomment">/// Counter of seek operations on intermediate files.
+    </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_INTERMEDIATE_SEEK_OP_TOTAL: IntCounter = INDEX_IO_OP_TOTAL
+        .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"seek"</span>, <span class="string">"intermediate"</span>]);
+    <span class="doccomment">/// Counter of write operations on intermediate files.
+    </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_INTERMEDIATE_WRITE_OP_TOTAL: IntCounter = INDEX_IO_OP_TOTAL
+        .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"write"</span>, <span class="string">"intermediate"</span>]);
+    <span class="doccomment">/// Counter of flush operations on intermediate files.
+    </span><span class="kw">pub static </span><span class="kw-2">ref </span>INDEX_INTERMEDIATE_FLUSH_OP_TOTAL: IntCounter = INDEX_IO_OP_TOTAL
+        .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"flush"</span>, <span class="string">"intermediate"</span>]);
     <span class="comment">// ------- End of index metrics.
 </span>}
 </code></pre></div></section></main></body></html>

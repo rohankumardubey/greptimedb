@@ -334,14 +334,14 @@
         <span class="kw">let </span><span class="prelude-val">Some</span>(lit) = <span class="self">Self</span>::nonnull_lit(right).or_else(|| <span class="self">Self</span>::nonnull_lit(left)) <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         };
-        <span class="kw">let </span><span class="prelude-val">Some</span>(data_type) = <span class="self">self</span>.tag_column_type(column_name)<span class="question-mark">? </span><span class="kw">else </span>{
+        <span class="kw">let </span><span class="prelude-val">Some</span>((column_id, data_type)) = <span class="self">self</span>.tag_column_id_and_type(column_name)<span class="question-mark">? </span><span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         };
 
         <span class="kw">let </span>predicate = Predicate::InList(InListPredicate {
             list: HashSet::from_iter([<span class="self">Self</span>::encode_lit(lit, data_type)<span class="question-mark">?</span>]),
         });
-        <span class="self">self</span>.add_predicate(column_name, predicate);
+        <span class="self">self</span>.add_predicate(column_id, predicate);
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -362,7 +362,7 @@
         <span class="kw">let </span><span class="prelude-val">Some</span>(lit) = <span class="self">Self</span>::nonnull_lit(right).or_else(|| <span class="self">Self</span>::nonnull_lit(left)) <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         };
-        <span class="kw">let </span><span class="prelude-val">Some</span>(data_type) = <span class="self">self</span>.tag_column_type(column_name)<span class="question-mark">? </span><span class="kw">else </span>{
+        <span class="kw">let </span><span class="prelude-val">Some</span>((column_id, data_type)) = <span class="self">self</span>.tag_column_id_and_type(column_name)<span class="question-mark">? </span><span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         };
 
@@ -371,7 +371,7 @@
 
         <span class="kw">if </span><span class="self">Self</span>::collect_eq_list_inner(column_name, <span class="kw-2">&amp;</span>data_type, or_list, <span class="kw-2">&amp;mut </span>inlist)<span class="question-mark">? </span>{
             <span class="kw">let </span>predicate = Predicate::InList(InListPredicate { list: inlist });
-            <span class="self">self</span>.add_predicate(column_name, predicate);
+            <span class="self">self</span>.add_predicate(column_id, predicate);
         }
 
         <span class="prelude-val">Ok</span>(())
@@ -445,7 +445,7 @@
             .collect_eq(<span class="kw-2">&amp;</span>string_lit(<span class="string">"bar"</span>), <span class="kw-2">&amp;</span>tag_column())
             .unwrap();
 
-        <span class="kw">let </span>predicates = builder.output.get(<span class="string">"a"</span>).unwrap();
+        <span class="kw">let </span>predicates = builder.output.get(<span class="kw-2">&amp;</span><span class="number">1</span>).unwrap();
         <span class="macro">assert_eq!</span>(predicates.len(), <span class="number">2</span>);
         <span class="macro">assert_eq!</span>(
             predicates[<span class="number">0</span>],
@@ -530,7 +530,7 @@
 
         builder.collect_or_eq_list(<span class="kw-2">&amp;</span>eq_expr, <span class="kw-2">&amp;</span>or_eq_list).unwrap();
 
-        <span class="kw">let </span>predicates = builder.output.get(<span class="string">"a"</span>).unwrap();
+        <span class="kw">let </span>predicates = builder.output.get(<span class="kw-2">&amp;</span><span class="number">1</span>).unwrap();
         <span class="macro">assert_eq!</span>(predicates.len(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(
             predicates[<span class="number">0</span>],

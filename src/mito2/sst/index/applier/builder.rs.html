@@ -331,6 +331,7 @@
 <a href="#330" id="330">330</a>
 <a href="#331" id="331">331</a>
 <a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -365,13 +366,12 @@
 <span class="kw">use </span>object_store::ObjectStore;
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
 <span class="kw">use </span>store_api::metadata::RegionMetadata;
+<span class="kw">use </span>store_api::storage::ColumnId;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{BuildIndexApplierSnafu, ColumnNotFoundSnafu, ConvertValueSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::row_converter::SortField;
 <span class="kw">use </span><span class="kw">crate</span>::sst::index::applier::SstIndexApplier;
 <span class="kw">use </span><span class="kw">crate</span>::sst::index::codec::IndexValueCodec;
-
-<span class="kw">type </span>ColumnName = String;
 
 <span class="doccomment">/// Constructs an [`SstIndexApplier`] which applies predicates to SST files during scan.
 </span><span class="kw">pub struct </span>SstIndexApplierBuilder&lt;<span class="lifetime">'a</span>&gt; {
@@ -385,7 +385,7 @@
     </span>metadata: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>RegionMetadata,
 
     <span class="doccomment">/// Stores predicates during traversal on the Expr tree.
-    </span>output: HashMap&lt;ColumnName, Vec&lt;Predicate&gt;&gt;,
+    </span>output: HashMap&lt;ColumnId, Vec&lt;Predicate&gt;&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; SstIndexApplierBuilder&lt;<span class="lifetime">'a</span>&gt; {
@@ -414,7 +414,11 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         }
 
-        <span class="kw">let </span>predicates = <span class="self">self</span>.output.into_iter().collect();
+        <span class="kw">let </span>predicates = <span class="self">self
+            </span>.output
+            .into_iter()
+            .map(|(column_id, predicates)| (column_id.to_string(), predicates))
+            .collect();
         <span class="kw">let </span>applier = PredicatesIndexApplier::try_from(predicates);
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(SstIndexApplier::new(
             <span class="self">self</span>.region_dir,
@@ -455,18 +459,16 @@
     }
 
     <span class="doccomment">/// Helper function to add a predicate to the output.
-    </span><span class="kw">fn </span>add_predicate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, column_name: <span class="kw-2">&amp;</span>str, predicate: Predicate) {
-        <span class="kw">match </span><span class="self">self</span>.output.get_mut(column_name) {
-            <span class="prelude-val">Some</span>(predicates) =&gt; predicates.push(predicate),
-            <span class="prelude-val">None </span>=&gt; {
-                <span class="self">self</span>.output.insert(column_name.to_string(), <span class="macro">vec!</span>[predicate]);
-            }
-        }
+    </span><span class="kw">fn </span>add_predicate(<span class="kw-2">&amp;mut </span><span class="self">self</span>, column_id: ColumnId, predicate: Predicate) {
+        <span class="self">self</span>.output.entry(column_id).or_default().push(predicate);
     }
 
-    <span class="doccomment">/// Helper function to get the column type of a tag column.
+    <span class="doccomment">/// Helper function to get the column id and the column type of a tag column.
     /// Returns `None` if the column is not a tag column.
-    </span><span class="kw">fn </span>tag_column_type(<span class="kw-2">&amp;</span><span class="self">self</span>, column_name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;ConcreteDataType&gt;&gt; {
+    </span><span class="kw">fn </span>tag_column_id_and_type(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        column_name: <span class="kw-2">&amp;</span>str,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;(ColumnId, ConcreteDataType)&gt;&gt; {
         <span class="kw">let </span>column = <span class="self">self
             </span>.metadata
             .column_by_name(column_name)
@@ -475,7 +477,7 @@
             })<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>((column.semantic_type == SemanticType::Tag)
-            .then(|| column.column_schema.data_type.clone()))
+            .then(|| (column.column_id, column.column_schema.data_type.clone())))
     }
 
     <span class="doccomment">/// Helper function to get a non-null literal.
@@ -636,7 +638,7 @@
         });
 
         builder.traverse_and_collect(<span class="kw-2">&amp;</span>expr);
-        <span class="kw">let </span>predicates = builder.output.get(<span class="string">"a"</span>).unwrap();
+        <span class="kw">let </span>predicates = builder.output.get(<span class="kw-2">&amp;</span><span class="number">1</span>).unwrap();
         <span class="macro">assert_eq!</span>(predicates.len(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(
             predicates[<span class="number">0</span>],
@@ -644,7 +646,7 @@
                 pattern: <span class="string">"bar"</span>.to_string()
             })
         );
-        <span class="kw">let </span>predicates = builder.output.get(<span class="string">"b"</span>).unwrap();
+        <span class="kw">let </span>predicates = builder.output.get(<span class="kw-2">&amp;</span><span class="number">2</span>).unwrap();
         <span class="macro">assert_eq!</span>(predicates.len(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(
             predicates[<span class="number">0</span>],

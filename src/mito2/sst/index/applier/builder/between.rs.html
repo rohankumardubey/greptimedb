@@ -200,7 +200,7 @@
         <span class="kw">let </span><span class="prelude-val">Some</span>(column_name) = <span class="self">Self</span>::column_name(<span class="kw-2">&amp;</span>between.expr) <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         };
-        <span class="kw">let </span><span class="prelude-val">Some</span>(data_type) = <span class="self">self</span>.tag_column_type(column_name)<span class="question-mark">? </span><span class="kw">else </span>{
+        <span class="kw">let </span><span class="prelude-val">Some</span>((column_id, data_type)) = <span class="self">self</span>.tag_column_id_and_type(column_name)<span class="question-mark">? </span><span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         };
         <span class="kw">let </span><span class="prelude-val">Some</span>(low) = <span class="self">Self</span>::nonnull_lit(<span class="kw-2">&amp;</span>between.low) <span class="kw">else </span>{
@@ -223,7 +223,7 @@
             },
         });
 
-        <span class="self">self</span>.add_predicate(column_name, predicate);
+        <span class="self">self</span>.add_predicate(column_id, predicate);
         <span class="prelude-val">Ok</span>(())
     }
 }
@@ -252,7 +252,7 @@
 
         builder.collect_between(<span class="kw-2">&amp;</span>between).unwrap();
 
-        <span class="kw">let </span>predicates = builder.output.get(<span class="string">"a"</span>).unwrap();
+        <span class="kw">let </span>predicates = builder.output.get(<span class="kw-2">&amp;</span><span class="number">1</span>).unwrap();
         <span class="macro">assert_eq!</span>(predicates.len(), <span class="number">1</span>);
         <span class="macro">assert_eq!</span>(
             predicates[<span class="number">0</span>],

@@ -260,6 +260,20 @@
 <a href="#259" id="259">259</a>
 <a href="#260" id="260">260</a>
 <a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -336,6 +350,20 @@
             write_count,
             flush_count,
         ))
+    }
+
+    <span class="doccomment">/// Proxies to [`ObjectStore::list`].
+    </span><span class="kw">pub async fn </span>list(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;object_store::Entry&gt;&gt; {
+        <span class="kw">let </span>list = <span class="self">self</span>.object_store.list(path).<span class="kw">await</span>.context(OpenDalSnafu)<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(list)
+    }
+
+    <span class="doccomment">/// Proxies to [`ObjectStore::remove_all`].
+    </span><span class="kw">pub async fn </span>remove_all(<span class="kw-2">&amp;</span><span class="self">self</span>, path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="self">self</span>.object_store
+            .remove_all(path)
+            .<span class="kw">await
+            </span>.context(OpenDalSnafu)
     }
 }
 

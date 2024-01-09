@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["IndexValueCodec"]};
+window.SIDEBAR_ITEMS = {"struct":["IndexValueCodec","IndexValuesCodec"],"type":["ColumnId"]};
