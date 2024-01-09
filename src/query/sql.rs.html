@@ -605,7 +605,6 @@
 <a href="#604" id="604">604</a>
 <a href="#605" id="605">605</a>
 <a href="#606" id="606">606</a>
-<a href="#607" id="607">607</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -633,6 +632,7 @@
 <span class="kw">use </span>common_datasource::lister::{Lister, Source};
 <span class="kw">use </span>common_datasource::object_store::build_backend;
 <span class="kw">use </span>common_datasource::util::find_dir_and_filename;
+<span class="kw">use </span>common_query::prelude::GREPTIME_TIMESTAMP;
 <span class="kw">use </span>common_query::Output;
 <span class="kw">use </span>common_recordbatch::{RecordBatch, RecordBatches};
 <span class="kw">use </span>common_time::Timestamp;
@@ -664,8 +664,6 @@
 <span class="kw">const </span>NULLABLE_YES: <span class="kw-2">&amp;</span>str = <span class="string">"YES"</span>;
 <span class="kw">const </span>NULLABLE_NO: <span class="kw-2">&amp;</span>str = <span class="string">"NO"</span>;
 <span class="kw">const </span>PRI_KEY: <span class="kw-2">&amp;</span>str = <span class="string">"PRI"</span>;
-
-<span class="kw">const </span>GREPTIME_TIMESTAMP: <span class="kw-2">&amp;</span>str = <span class="string">"greptime_timestamp"</span>;
 
 <span class="kw">static </span>DESCRIBE_TABLE_OUTPUT_SCHEMA: Lazy&lt;Arc&lt;Schema&gt;&gt; = Lazy::new(|| {
     Arc::new(Schema::new(<span class="macro">vec!</span>[

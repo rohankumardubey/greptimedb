@@ -870,6 +870,7 @@
 <a href="#869" id="869">869</a>
 <a href="#870" id="870">870</a>
 <a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -894,6 +895,7 @@
 <span class="kw">use </span>common_catalog::parse_catalog_and_schema_from_db_string;
 <span class="kw">use </span>common_error::ext::ErrorExt;
 <span class="kw">use </span>common_error::status_code::StatusCode;
+<span class="kw">use </span>common_query::prelude::{GREPTIME_TIMESTAMP, GREPTIME_VALUE};
 <span class="kw">use </span>common_query::Output;
 <span class="kw">use </span>common_recordbatch::RecordBatches;
 <span class="kw">use </span>common_time::util::{current_time_rfc3339, yesterday_rfc3339};
@@ -915,7 +917,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     CollectRecordbatchSnafu, Error, InternalSnafu, InvalidQuerySnafu, <span class="prelude-ty">Result</span>, UnexpectedResultSnafu,
 };
-<span class="kw">use </span><span class="kw">crate</span>::prom_store::{FIELD_COLUMN_NAME, METRIC_NAME_LABEL, TIMESTAMP_COLUMN_NAME};
+<span class="kw">use </span><span class="kw">crate</span>::prom_store::METRIC_NAME_LABEL;
 <span class="kw">use </span><span class="kw">crate</span>::prometheus_handler::PrometheusHandlerRef;
 
 <span class="attr">#[derive(Debug, Default, Serialize, Deserialize, JsonSchema, PartialEq)]
@@ -1371,8 +1373,8 @@
         }
     }
 
-    <span class="kw">let _ </span>= labels.remove(TIMESTAMP_COLUMN_NAME);
-    <span class="kw">let _ </span>= labels.remove(FIELD_COLUMN_NAME);
+    <span class="kw">let _ </span>= labels.remove(GREPTIME_TIMESTAMP);
+    <span class="kw">let _ </span>= labels.remove(GREPTIME_VALUE);
 
     <span class="kw">let </span><span class="kw-2">mut </span>sorted_labels: Vec&lt;String&gt; = labels.into_iter().collect();
     sorted_labels.sort();
