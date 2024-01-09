@@ -675,6 +675,45 @@
 <a href="#674" id="674">674</a>
 <a href="#675" id="675">675</a>
 <a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
+<a href="#698" id="698">698</a>
+<a href="#699" id="699">699</a>
+<a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
+<a href="#704" id="704">704</a>
+<a href="#705" id="705">705</a>
+<a href="#706" id="706">706</a>
+<a href="#707" id="707">707</a>
+<a href="#708" id="708">708</a>
+<a href="#709" id="709">709</a>
+<a href="#710" id="710">710</a>
+<a href="#711" id="711">711</a>
+<a href="#712" id="712">712</a>
+<a href="#713" id="713">713</a>
+<a href="#714" id="714">714</a>
+<a href="#715" id="715">715</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -689,7 +728,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::collections::HashMap;
+</span><span class="kw">use </span>std::collections::hash_map::Entry;
+<span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::fmt::{Debug, Formatter};
 <span class="kw">use </span>std::sync::atomic::{AtomicI64, Ordering};
 <span class="kw">use </span>std::sync::Arc;
@@ -700,15 +740,15 @@
 <span class="kw">use </span>common_telemetry::{error, info};
 <span class="kw">use </span>raft_engine::{Config, Engine, LogBatch, MessageExt, ReadableSize, RecoveryMode};
 <span class="kw">use </span>snafu::{ensure, ResultExt};
-<span class="kw">use </span>store_api::logstore::entry::{Entry, Id <span class="kw">as </span>EntryId};
+<span class="kw">use </span>store_api::logstore::entry::Id <span class="kw">as </span>EntryId;
 <span class="kw">use </span>store_api::logstore::entry_stream::SendableEntryStream;
 <span class="kw">use </span>store_api::logstore::namespace::{Id <span class="kw">as </span>NamespaceId, Namespace <span class="kw">as </span>NamespaceTrait};
 <span class="kw">use </span>store_api::logstore::{AppendBatchResponse, AppendResponse, LogStore};
 
-<span class="kw">use </span><span class="kw">crate</span>::error;
 <span class="kw">use </span><span class="kw">crate</span>::error::{
-    AddEntryLogBatchSnafu, Error, FetchEntrySnafu, IllegalNamespaceSnafu, IllegalStateSnafu,
-    OverrideCompactedEntrySnafu, RaftEngineSnafu, <span class="prelude-ty">Result</span>, StartGcTaskSnafu, StopGcTaskSnafu,
+    AddEntryLogBatchSnafu, DiscontinuousLogIndexSnafu, Error, FetchEntrySnafu,
+    IllegalNamespaceSnafu, IllegalStateSnafu, OverrideCompactedEntrySnafu, RaftEngineSnafu, <span class="prelude-ty">Result</span>,
+    StartGcTaskSnafu, StopGcTaskSnafu,
 };
 <span class="kw">use </span><span class="kw">crate</span>::raft_engine::backend::SYSTEM_NAMESPACE;
 <span class="kw">use </span><span class="kw">crate</span>::raft_engine::protos::logstore::{EntryImpl, NamespaceImpl <span class="kw">as </span>Namespace};
@@ -798,22 +838,65 @@
         )
     }
 
-    <span class="doccomment">/// Checks if entry does not override the min index of namespace.
-    </span><span class="kw">fn </span>check_entry(<span class="kw-2">&amp;</span><span class="self">self</span>, e: <span class="kw-2">&amp;</span>EntryImpl) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">if </span><span class="macro">cfg!</span>(debug_assertions) {
+    <span class="doccomment">/// Converts entries to `LogBatch` and checks if entry ids are valid.
+    /// Returns the `LogBatch` converted along with the last entry id
+    /// to append in each namespace(region).
+    </span><span class="kw">fn </span>entries_to_batch(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        entries: Vec&lt;EntryImpl&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(LogBatch, HashMap&lt;NamespaceId, EntryId&gt;)&gt; {
+        <span class="comment">// Records the last entry id for each region's entries.
+        </span><span class="kw">let </span><span class="kw-2">mut </span>entry_ids: HashMap&lt;NamespaceId, EntryId&gt; = HashMap::with_capacity(entries.len());
+        <span class="kw">let </span><span class="kw-2">mut </span>batch = LogBatch::with_capacity(entries.len());
+
+        <span class="kw">for </span>e <span class="kw">in </span>entries {
             <span class="kw">let </span>ns_id = e.namespace_id;
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(first_index) = <span class="self">self</span>.engine.first_index(ns_id) {
-                <span class="macro">ensure!</span>(
-                    e.id() &gt;= first_index,
-                    OverrideCompactedEntrySnafu {
-                        namespace: ns_id,
-                        first_index,
-                        attempt_index: e.id(),
+            <span class="kw">match </span>entry_ids.entry(ns_id) {
+                Entry::Occupied(<span class="kw-2">mut </span>o) =&gt; {
+                    <span class="kw">let </span>prev = <span class="kw-2">*</span>o.get();
+                    <span class="macro">ensure!</span>(
+                        e.id == prev + <span class="number">1</span>,
+                        DiscontinuousLogIndexSnafu {
+                            region_id: ns_id,
+                            last_index: prev,
+                            attempt_index: e.id
+                        }
+                    );
+                    o.insert(e.id);
+                }
+                Entry::Vacant(v) =&gt; {
+                    <span class="comment">// this entry is the first in batch of given region.
+                    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(first_index) = <span class="self">self</span>.engine.first_index(ns_id) {
+                        <span class="comment">// ensure the first in batch does not override compacted entry.
+                        </span><span class="macro">ensure!</span>(
+                            e.id &gt; first_index,
+                            OverrideCompactedEntrySnafu {
+                                namespace: ns_id,
+                                first_index,
+                                attempt_index: e.id,
+                            }
+                        );
                     }
-                );
+                    <span class="comment">// ensure the first in batch does not form a hole in raft-engine.
+                    </span><span class="kw">if let </span><span class="prelude-val">Some</span>(last_index) = <span class="self">self</span>.engine.last_index(ns_id) {
+                        <span class="macro">ensure!</span>(
+                            e.id == last_index + <span class="number">1</span>,
+                            DiscontinuousLogIndexSnafu {
+                                region_id: ns_id,
+                                last_index,
+                                attempt_index: e.id
+                            }
+                        );
+                    }
+                    v.insert(e.id);
+                }
             }
+            batch
+                .add_entries::&lt;MessageType&gt;(ns_id, <span class="kw-2">&amp;</span>[e])
+                .context(AddEntryLogBatchSnafu)<span class="question-mark">?</span>;
         }
-        <span class="prelude-val">Ok</span>(())
+
+        <span class="prelude-val">Ok</span>((batch, entry_ids))
     }
 }
 
@@ -848,11 +931,22 @@
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(first_index) = <span class="self">self</span>.engine.first_index(namespace_id) {
             <span class="macro">ensure!</span>(
-                entry_id &gt;= first_index,
-                error::OverrideCompactedEntrySnafu {
+                entry_id &gt; first_index,
+                OverrideCompactedEntrySnafu {
                     namespace: namespace_id,
                     first_index,
                     attempt_index: entry_id,
+                }
+            );
+        }
+
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(last_index) = <span class="self">self</span>.engine.last_index(namespace_id) {
+            <span class="macro">ensure!</span>(
+                entry_id == last_index + <span class="number">1</span>,
+                DiscontinuousLogIndexSnafu {
+                    region_id: namespace_id,
+                    last_index,
+                    attempt_index: entry_id
                 }
             );
         }
@@ -874,23 +968,7 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(AppendBatchResponse::default());
         }
 
-        <span class="comment">// Records the last entry id for each region's entries.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>last_entry_ids: HashMap&lt;NamespaceId, EntryId&gt; =
-            HashMap::with_capacity(entries.len());
-        <span class="kw">let </span><span class="kw-2">mut </span>batch = LogBatch::with_capacity(entries.len());
-
-        <span class="kw">for </span>e <span class="kw">in </span>entries {
-            <span class="self">self</span>.check_entry(<span class="kw-2">&amp;</span>e)<span class="question-mark">?</span>;
-            <span class="comment">// For raft-engine log store, the namespace id is the region id.
-            </span><span class="kw">let </span>ns_id = e.namespace_id;
-            last_entry_ids
-                .entry(ns_id)
-                .and_modify(|x| <span class="kw-2">*</span>x = (<span class="kw-2">*</span>x).max(e.id))
-                .or_insert(e.id);
-            batch
-                .add_entries::&lt;MessageType&gt;(ns_id, <span class="kw-2">&amp;</span>[e])
-                .context(AddEntryLogBatchSnafu)<span class="question-mark">?</span>;
-        }
+        <span class="kw">let </span>(<span class="kw-2">mut </span>batch, last_entry_ids) = <span class="self">self</span>.entries_to_batch(entries)<span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>sync = <span class="self">self</span>.config.sync_write;
 

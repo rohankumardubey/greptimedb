@@ -104,6 +104,7 @@
 <a href="#103" id="103">103</a>
 <a href="#104" id="104">104</a>
 <a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -184,6 +185,7 @@
             region_id,
             flushed_entry_id,
             <span class="kw-2">&amp;</span>region.version_control,
+            <span class="self">self</span>.config.allow_stale_entries,
         )
         .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="macro">info!</span>(

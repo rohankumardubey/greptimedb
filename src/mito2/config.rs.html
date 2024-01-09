@@ -186,6 +186,9 @@
 <a href="#185" id="185">185</a>
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -275,6 +278,8 @@
     </span><span class="kw">pub </span>scan_parallelism: usize,
     <span class="doccomment">/// Capacity of the channel to send data from parallel scan tasks to the main task (default 32).
     </span><span class="kw">pub </span>parallel_scan_channel_size: usize,
+    <span class="doccomment">/// Whether to allow stale entries read during replay.
+    </span><span class="kw">pub </span>allow_stale_entries: bool,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>MitoConfig {
@@ -298,6 +303,7 @@
             sst_write_buffer_size: ReadableSize::mb(<span class="number">8</span>),
             scan_parallelism: divide_num_cpus(<span class="number">4</span>),
             parallel_scan_channel_size: DEFAULT_SCAN_CHANNEL_SIZE,
+            allow_stale_entries: <span class="bool-val">false</span>,
         }
     }
 }

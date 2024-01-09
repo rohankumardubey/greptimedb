@@ -414,6 +414,29 @@
 <a href="#413" id="413">413</a>
 <a href="#414" id="414">414</a>
 <a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -448,7 +471,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::access_layer::AccessLayer;
 <span class="kw">use </span><span class="kw">crate</span>::cache::CacheManagerRef;
 <span class="kw">use </span><span class="kw">crate</span>::config::MitoConfig;
-<span class="kw">use </span><span class="kw">crate</span>::error::{EmptyRegionDirSnafu, ObjectStoreNotFoundSnafu, RegionCorruptedSnafu, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::error::{
+    EmptyRegionDirSnafu, ObjectStoreNotFoundSnafu, RegionCorruptedSnafu, <span class="prelude-ty">Result</span>, StaleLogEntrySnafu,
+};
 <span class="kw">use </span><span class="kw">crate</span>::manifest::manager::{RegionManifestManager, RegionManifestOptions};
 <span class="kw">use </span><span class="kw">crate</span>::manifest::storage::manifest_compress_type;
 <span class="kw">use </span><span class="kw">crate</span>::memtable::MemtableBuilderRef;
@@ -683,6 +708,7 @@
                 region_id,
                 flushed_entry_id,
                 <span class="kw-2">&amp;</span>version_control,
+                config.allow_stale_entries,
             )
             .<span class="kw">await</span><span class="question-mark">?</span>;
         } <span class="kw">else </span>{
@@ -791,6 +817,7 @@
     region_id: RegionId,
     flushed_entry_id: EntryId,
     version_control: <span class="kw-2">&amp;</span>VersionControlRef,
+    allow_stale_entries: bool,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;EntryId&gt; {
     <span class="kw">let </span><span class="kw-2">mut </span>rows_replayed = <span class="number">0</span>;
     <span class="comment">// Last entry id should start from flushed entry id since there might be no
@@ -799,10 +826,23 @@
     <span class="kw">let </span><span class="kw-2">mut </span>region_write_ctx = RegionWriteCtx::new(region_id, version_control, wal_options.clone());
 
     <span class="kw">let </span>replay_from_entry_id = flushed_entry_id + <span class="number">1</span>;
+    <span class="kw">let </span><span class="kw-2">mut </span>stale_entry_found = <span class="bool-val">false</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>wal_stream = wal.scan(region_id, replay_from_entry_id, wal_options)<span class="question-mark">?</span>;
     <span class="kw">while let </span><span class="prelude-val">Some</span>(res) = wal_stream.next().<span class="kw">await </span>{
         <span class="kw">let </span>(entry_id, entry) = res<span class="question-mark">?</span>;
-        <span class="macro">debug_assert!</span>(entry_id &gt; flushed_entry_id);
+        <span class="kw">if </span>entry_id &lt;= flushed_entry_id {
+            stale_entry_found = <span class="bool-val">true</span>;
+            <span class="macro">warn!</span>(<span class="string">"Stale WAL entries read during replay, region id: {}, flushed entry id: {}, entry id read: {}"</span>, region_id, flushed_entry_id, entry_id);
+            <span class="macro">ensure!</span>(
+                allow_stale_entries,
+                StaleLogEntrySnafu {
+                    region_id,
+                    flushed_entry_id,
+                    unexpected_entry_id: entry_id,
+                }
+            );
+        }
+
         last_entry_id = last_entry_id.max(entry_id);
         <span class="kw">for </span>mutation <span class="kw">in </span>entry.mutations {
             rows_replayed += mutation
@@ -817,6 +857,12 @@
     <span class="comment">// set next_entry_id and write to memtable.
     </span>region_write_ctx.set_next_entry_id(last_entry_id + <span class="number">1</span>);
     region_write_ctx.write_memtable();
+
+    <span class="kw">if </span>allow_stale_entries &amp;&amp; stale_entry_found {
+        wal.obsolete(region_id, flushed_entry_id, wal_options)
+            .<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="macro">info!</span>(<span class="string">"Force obsolete WAL entries, region id: {}, flushed entry id: {}, last entry id read: {}"</span>, region_id, flushed_entry_id, last_entry_id);
+    }
 
     <span class="macro">info!</span>(
         <span class="string">"Replay WAL for region: {}, rows recovered: {}, last entry id: {}"</span>,
