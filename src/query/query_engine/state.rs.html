@@ -381,9 +381,9 @@
         <span class="self">self</span>.table_mutation_handler.as_ref()
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>disallow_cross_schema_query(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>disallow_cross_catalog_query(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.plugins
-            .map::&lt;QueryOptions, <span class="kw">_</span>, <span class="kw">_</span>&gt;(|x| x.disallow_cross_schema_query)
+            .map::&lt;QueryOptions, <span class="kw">_</span>, <span class="kw">_</span>&gt;(|x| x.disallow_cross_catalog_query)
             .unwrap_or(<span class="bool-val">false</span>)
     }
 

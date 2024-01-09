@@ -616,8 +616,6 @@
 <a href="#615" id="615">615</a>
 <a href="#616" id="616">616</a>
 <a href="#617" id="617">617</a>
-<a href="#618" id="618">618</a>
-<a href="#619" id="619">619</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1062,7 +1060,7 @@
 ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
     <span class="kw">let </span>need_validate = plugins
         .get::&lt;QueryOptions&gt;()
-        .map(|opts| opts.disallow_cross_schema_query)
+        .map(|opts| opts.disallow_cross_catalog_query)
         .unwrap_or_default();
 
     <span class="kw">if </span>!need_validate {
@@ -1140,7 +1138,7 @@
         <span class="kw">let </span>query_ctx = QueryContext::arc();
         <span class="kw">let </span>plugins: Plugins = Plugins::new();
         plugins.insert(QueryOptions {
-            disallow_cross_schema_query: <span class="bool-val">true</span>,
+            disallow_cross_catalog_query: <span class="bool-val">true</span>,
         });
 
         <span class="kw">let </span>sql = <span class="string">r#"
@@ -1176,8 +1174,6 @@
             }
 
             <span class="kw">let </span>wrong = <span class="macro">vec!</span>[
-                (<span class="string">""</span>, <span class="string">"wrongschema."</span>),
-                (<span class="string">"greptime."</span>, <span class="string">"wrongschema."</span>),
                 (<span class="string">"wrongcatalog."</span>, <span class="string">"public."</span>),
                 (<span class="string">"wrongcatalog."</span>, <span class="string">"wrongschema."</span>),
             ];
@@ -1227,10 +1223,10 @@
         <span class="kw">let </span>stmt = parse_stmt(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
         check_permission(plugins.clone(), <span class="kw-2">&amp;</span>stmt[<span class="number">0</span>], <span class="kw-2">&amp;</span>query_ctx).unwrap();
 
-        <span class="kw">let </span>sql = <span class="string">"SHOW TABLES FROM wrongschema"</span>;
+        <span class="kw">let </span>sql = <span class="string">"SHOW TABLES FROM private"</span>;
         <span class="kw">let </span>stmt = parse_stmt(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
         <span class="kw">let </span>re = check_permission(plugins.clone(), <span class="kw-2">&amp;</span>stmt[<span class="number">0</span>], <span class="kw-2">&amp;</span>query_ctx);
-        <span class="macro">assert!</span>(re.is_err());
+        <span class="macro">assert!</span>(re.is_ok());
 
         <span class="comment">// test describe table
         </span><span class="kw">let </span>sql = <span class="string">"DESC TABLE {catalog}{schema}demo;"</span>;
