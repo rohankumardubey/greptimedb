@@ -301,6 +301,23 @@
 <a href="#300" id="300">300</a>
 <a href="#301" id="301">301</a>
 <a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -319,6 +336,7 @@
 <span class="kw">mod </span>key_column_usage;
 <span class="kw">mod </span>memory_table;
 <span class="kw">mod </span>predicate;
+<span class="kw">mod </span>runtime_metrics;
 <span class="kw">mod </span>schemata;
 <span class="kw">mod </span>table_names;
 <span class="kw">mod </span>tables;
@@ -326,7 +344,7 @@
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::sync::{Arc, Weak};
 
-<span class="kw">use </span>common_catalog::consts::{<span class="self">self</span>, INFORMATION_SCHEMA_NAME};
+<span class="kw">use </span>common_catalog::consts::{<span class="self">self</span>, DEFAULT_CATALOG_NAME, INFORMATION_SCHEMA_NAME};
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_recordbatch::{RecordBatchStreamWrapper, SendableRecordBatchStream};
 <span class="kw">use </span>datatypes::schema::SchemaRef;
@@ -349,6 +367,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::error::Result;
 <span class="kw">use </span><span class="kw">crate</span>::information_schema::key_column_usage::InformationSchemaKeyColumnUsage;
 <span class="kw">use </span><span class="kw">crate</span>::information_schema::memory_table::{get_schema_columns, MemoryTable};
+<span class="kw">use </span><span class="kw">crate</span>::information_schema::runtime_metrics::InformationSchemaMetrics;
 <span class="kw">use </span><span class="kw">crate</span>::information_schema::schemata::InformationSchemaSchemata;
 <span class="kw">use </span><span class="kw">crate</span>::information_schema::tables::InformationSchemaTables;
 <span class="kw">use </span><span class="kw">crate</span>::CatalogManager;
@@ -359,7 +378,6 @@
         ENGINES,
         COLUMN_PRIVILEGES,
         COLUMN_STATISTICS,
-        BUILD_INFO,
         CHARACTER_SETS,
         COLLATIONS,
         COLLATION_CHARACTER_SET_APPLICABILITY,
@@ -445,6 +463,21 @@
 
     <span class="kw">fn </span>build_tables(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">let </span><span class="kw-2">mut </span>tables = HashMap::new();
+
+        <span class="comment">// Carefully consider the tables that may expose sensitive cluster configurations,
+        // authentication details, and other critical information.
+        // Only put these tables under `greptime` catalog to prevent info leak.
+        </span><span class="kw">if </span><span class="self">self</span>.catalog_name == DEFAULT_CATALOG_NAME {
+            tables.insert(
+                RUNTIME_METRICS.to_string(),
+                <span class="self">self</span>.build_table(RUNTIME_METRICS).unwrap(),
+            );
+            tables.insert(
+                BUILD_INFO.to_string(),
+                <span class="self">self</span>.build_table(BUILD_INFO).unwrap(),
+            );
+        }
+
         tables.insert(TABLES.to_string(), <span class="self">self</span>.build_table(TABLES).unwrap());
         tables.insert(SCHEMATA.to_string(), <span class="self">self</span>.build_table(SCHEMATA).unwrap());
         tables.insert(COLUMNS.to_string(), <span class="self">self</span>.build_table(COLUMNS).unwrap());
@@ -512,6 +545,7 @@
                 <span class="self">self</span>.catalog_name.clone(),
                 <span class="self">self</span>.catalog_manager.clone(),
             )) <span class="kw">as _</span>),
+            RUNTIME_METRICS =&gt; <span class="prelude-val">Some</span>(Arc::new(InformationSchemaMetrics::new())),
             <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
         }
     }
