@@ -605,7 +605,7 @@
 
 <span class="kw">impl </span>DatanodeOptions {
     <span class="kw">pub fn </span>env_list_keys() -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str]&gt; {
-        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="string">"meta_client.metasrv_addrs"</span>])
+        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="string">"meta_client.metasrv_addrs"</span>, <span class="string">"wal.broker_endpoints"</span>])
     }
 
     <span class="kw">pub fn </span>to_toml_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {

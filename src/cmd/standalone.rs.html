@@ -748,6 +748,12 @@
 <a href="#747" id="747">747</a>
 <a href="#748" id="748">748</a>
 <a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -866,6 +872,12 @@
     <span class="doccomment">/// Options for different store engines.
     </span><span class="kw">pub </span>region_engine: Vec&lt;RegionEngineConfig&gt;,
     <span class="kw">pub </span>export_metrics: ExportMetricsOption,
+}
+
+<span class="kw">impl </span>StandaloneOptions {
+    <span class="kw">pub fn </span>env_list_keys() -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="lifetime">'static </span>[<span class="kw-2">&amp;</span><span class="lifetime">'static </span>str]&gt; {
+        <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>[<span class="string">"wal.broker_endpoints"</span>])
+    }
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>StandaloneOptions {
@@ -1017,7 +1029,7 @@
         <span class="kw">let </span>opts: StandaloneOptions = Options::load_layered_options(
             <span class="self">self</span>.config_file.as_deref(),
             <span class="self">self</span>.env_prefix.as_ref(),
-            <span class="prelude-val">None</span>,
+            StandaloneOptions::env_list_keys(),
         )<span class="question-mark">?</span>;
 
         <span class="self">self</span>.convert_options(cli_options, opts)
