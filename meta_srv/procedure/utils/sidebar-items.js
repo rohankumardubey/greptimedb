@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["region_lock_key"],"mod":["mock"]};
+window.SIDEBAR_ITEMS = {"mod":["mock"]};

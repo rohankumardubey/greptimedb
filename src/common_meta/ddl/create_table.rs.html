@@ -516,6 +516,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>, TableRouteNotFoundSnafu};
 <span class="kw">use </span><span class="kw">crate</span>::key::table_name::TableNameKey;
 <span class="kw">use </span><span class="kw">crate</span>::key::table_route::TableRouteValue;
+<span class="kw">use </span><span class="kw">crate</span>::lock_key::TableNameLock;
 <span class="kw">use </span><span class="kw">crate</span>::metrics;
 <span class="kw">use </span><span class="kw">crate</span>::region_keeper::OperatingRegionGuard;
 <span class="kw">use </span><span class="kw">crate</span>::rpc::ddl::CreateTableTask;
@@ -818,13 +819,12 @@
 
     <span class="kw">fn </span>lock_key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LockKey {
         <span class="kw">let </span>table_ref = <span class="kw-2">&amp;</span><span class="self">self</span>.creator.data.table_ref();
-        <span class="kw">let </span>key = common_catalog::format_full_table_name(
+
+        LockKey::single(TableNameLock::new(
             table_ref.catalog,
             table_ref.schema,
             table_ref.table,
-        );
-
-        LockKey::single_exclusive(key)
+        ))
     }
 }
 

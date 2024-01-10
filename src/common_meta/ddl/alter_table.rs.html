@@ -561,7 +561,7 @@
 <span class="kw">use </span>common_grpc_expr::alter_expr_to_request;
 <span class="kw">use </span>common_procedure::error::{FromJsonSnafu, <span class="prelude-ty">Result </span><span class="kw">as </span>ProcedureResult, ToJsonSnafu};
 <span class="kw">use </span>common_procedure::{
-    Context <span class="kw">as </span>ProcedureContext, Error <span class="kw">as </span>ProcedureError, LockKey, Procedure, Status,
+    Context <span class="kw">as </span>ProcedureContext, Error <span class="kw">as </span>ProcedureError, LockKey, Procedure, Status, StringKey,
 };
 <span class="kw">use </span>common_telemetry::tracing_context::TracingContext;
 <span class="kw">use </span>common_telemetry::{debug, info};
@@ -581,6 +581,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::key::table_info::TableInfoValue;
 <span class="kw">use </span><span class="kw">crate</span>::key::table_name::TableNameKey;
 <span class="kw">use </span><span class="kw">crate</span>::key::DeserializedValueWithBytes;
+<span class="kw">use </span><span class="kw">crate</span>::lock_key::{CatalogLock, SchemaLock, TableLock, TableNameLock};
 <span class="kw">use </span><span class="kw">crate</span>::metrics;
 <span class="kw">use </span><span class="kw">crate</span>::rpc::ddl::AlterTableTask;
 <span class="kw">use </span><span class="kw">crate</span>::rpc::router::{find_leader_regions, find_leaders};
@@ -600,7 +601,7 @@
         cluster_id: u64,
         task: AlterTableTask,
         table_info_value: DeserializedValueWithBytes&lt;TableInfoValue&gt;,
-        physical_table_name: <span class="prelude-ty">Option</span>&lt;TableName&gt;,
+        physical_table_info: <span class="prelude-ty">Option</span>&lt;(TableId, TableName)&gt;,
         context: DdlContext,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>alter_kind = task
@@ -623,7 +624,7 @@
             data: AlterTableData::new(
                 task,
                 table_info_value,
-                physical_table_name,
+                physical_table_info,
                 cluster_id,
                 next_column_id,
             ),
@@ -872,32 +873,31 @@
         <span class="prelude-val">Ok</span>(Status::Done)
     }
 
-    <span class="kw">fn </span>lock_key_inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;String&gt; {
+    <span class="kw">fn </span>lock_key_inner(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;StringKey&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>lock_key = <span class="macro">vec!</span>[];
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(physical_table_name) = <span class="self">self</span>.data.physical_table_name() {
-            <span class="kw">let </span>physical_table_key = common_catalog::format_full_table_name(
-                <span class="kw-2">&amp;</span>physical_table_name.catalog_name,
-                <span class="kw-2">&amp;</span>physical_table_name.schema_name,
-                <span class="kw-2">&amp;</span>physical_table_name.table_name,
+        <span class="kw">if let </span><span class="prelude-val">Some</span>((physical_table_id, physical_table_name)) = <span class="self">self</span>.data.physical_table_info() {
+            lock_key.push(CatalogLock::Read(<span class="kw-2">&amp;</span>physical_table_name.catalog_name).into());
+            lock_key.push(
+                SchemaLock::read(
+                    <span class="kw-2">&amp;</span>physical_table_name.catalog_name,
+                    <span class="kw-2">&amp;</span>physical_table_name.schema_name,
+                )
+                .into(),
             );
-            lock_key.push(physical_table_key);
+            lock_key.push(TableLock::Read(<span class="kw-2">*</span>physical_table_id).into())
         }
 
         <span class="kw">let </span>table_ref = <span class="self">self</span>.data.table_ref();
-        <span class="kw">let </span>table_key = common_catalog::format_full_table_name(
-            table_ref.catalog,
-            table_ref.schema,
-            table_ref.table,
-        );
-        lock_key.push(table_key);
+        <span class="kw">let </span>table_id = <span class="self">self</span>.data.table_id();
+        lock_key.push(CatalogLock::Read(table_ref.catalog).into());
+        lock_key.push(SchemaLock::read(table_ref.catalog, table_ref.schema).into());
+        lock_key.push(TableLock::Write(table_id).into());
 
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(Kind::RenameTable(RenameTable { new_table_name })) = <span class="self">self</span>.alter_kind() {
-            lock_key.push(common_catalog::format_full_table_name(
-                table_ref.catalog,
-                table_ref.schema,
-                new_table_name,
-            ))
+            lock_key.push(
+                TableNameLock::new(table_ref.catalog, table_ref.schema, new_table_name).into(),
+            )
         }
 
         lock_key
@@ -943,7 +943,7 @@
     <span class="kw">fn </span>lock_key(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; LockKey {
         <span class="kw">let </span>key = <span class="self">self</span>.lock_key_inner();
 
-        LockKey::new_exclusive(key)
+        LockKey::new(key)
     }
 }
 
@@ -960,13 +960,13 @@
 
 <span class="attr">#[derive(Debug, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>AlterTableData {
+    cluster_id: u64,
     state: AlterTableState,
     task: AlterTableTask,
     <span class="doccomment">/// Table info value before alteration.
     </span>table_info_value: DeserializedValueWithBytes&lt;TableInfoValue&gt;,
     <span class="doccomment">/// Physical table name, if the table to alter is a logical table.
-    </span>physical_table_name: <span class="prelude-ty">Option</span>&lt;TableName&gt;,
-    cluster_id: u64,
+    </span>physical_table_info: <span class="prelude-ty">Option</span>&lt;(TableId, TableName)&gt;,
     <span class="doccomment">/// Next column id of the table if the task adds columns to the table.
     </span>next_column_id: <span class="prelude-ty">Option</span>&lt;ColumnId&gt;,
 }
@@ -975,7 +975,7 @@
     <span class="kw">pub fn </span>new(
         task: AlterTableTask,
         table_info_value: DeserializedValueWithBytes&lt;TableInfoValue&gt;,
-        physical_table_name: <span class="prelude-ty">Option</span>&lt;TableName&gt;,
+        physical_table_info: <span class="prelude-ty">Option</span>&lt;(TableId, TableName)&gt;,
         cluster_id: u64,
         next_column_id: <span class="prelude-ty">Option</span>&lt;ColumnId&gt;,
     ) -&gt; <span class="self">Self </span>{
@@ -983,7 +983,7 @@
             state: AlterTableState::Prepare,
             task,
             table_info_value,
-            physical_table_name,
+            physical_table_info,
             cluster_id,
             next_column_id,
         }
@@ -1001,8 +1001,8 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.table_info_value.table_info
     }
 
-    <span class="kw">fn </span>physical_table_name(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>TableName&gt; {
-        <span class="self">self</span>.physical_table_name.as_ref()
+    <span class="kw">fn </span>physical_table_info(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>(TableId, TableName)&gt; {
+        <span class="self">self</span>.physical_table_info.as_ref()
     }
 }
 
