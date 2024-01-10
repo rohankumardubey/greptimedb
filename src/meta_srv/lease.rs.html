@@ -93,6 +93,14 @@
 <a href="#92" id="92">92</a>
 <a href="#93" id="93">93</a>
 <a href="#94" id="94">94</a>
+<a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -109,6 +117,7 @@
 
 </span><span class="kw">use </span>std::collections::HashMap;
 
+<span class="kw">use </span>common_meta::kv_backend::KvBackend;
 <span class="kw">use </span>common_meta::peer::Peer;
 <span class="kw">use </span>common_meta::{util, ClusterId};
 <span class="kw">use </span>common_time::util <span class="kw">as </span>time_util;
@@ -134,7 +143,8 @@
         cluster_id,
         node_id: datanode_id,
     };
-    <span class="kw">let </span><span class="prelude-val">Some</span>(kv) = meta_peer_client.get(lease_key.clone().try_into()<span class="question-mark">?</span>).<span class="kw">await</span><span class="question-mark">? </span><span class="kw">else </span>{
+    <span class="kw">let </span>lease_key_bytes: Vec&lt;u8&gt; = lease_key.clone().try_into()<span class="question-mark">?</span>;
+    <span class="kw">let </span><span class="prelude-val">Some</span>(kv) = meta_peer_client.get(<span class="kw-2">&amp;</span>lease_key_bytes).<span class="kw">await</span><span class="question-mark">? </span><span class="kw">else </span>{
         <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
     };
     <span class="kw">let </span>lease_value: LeaseValue = kv.value.try_into()<span class="question-mark">?</span>;
@@ -169,7 +179,13 @@
     <span class="kw">let </span>key = get_lease_prefix(cluster_id);
     <span class="kw">let </span>range_end = util::get_prefix_end_key(<span class="kw-2">&amp;</span>key);
 
-    <span class="kw">let </span>kvs = meta_peer_client.range(key, range_end, <span class="bool-val">false</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">let </span>range_req = common_meta::rpc::store::RangeRequest {
+        key,
+        range_end,
+        keys_only: <span class="bool-val">false</span>,
+        ..Default::default()
+    };
+    <span class="kw">let </span>kvs = meta_peer_client.range(range_req).<span class="kw">await</span><span class="question-mark">?</span>.kvs;
     <span class="kw">let </span><span class="kw-2">mut </span>lease_kvs = HashMap::new();
     <span class="kw">for </span>kv <span class="kw">in </span>kvs {
         <span class="kw">let </span>lease_key: LeaseKey = kv.key.try_into()<span class="question-mark">?</span>;
