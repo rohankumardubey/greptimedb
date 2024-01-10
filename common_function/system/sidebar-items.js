@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["build"],"struct":["SystemFunction"]};
+window.SIDEBAR_ITEMS = {"mod":["build","version"],"struct":["SystemFunction"]};

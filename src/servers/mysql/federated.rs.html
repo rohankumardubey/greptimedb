@@ -454,28 +454,6 @@
 <a href="#453" id="453">453</a>
 <a href="#454" id="454">454</a>
 <a href="#455" id="455">455</a>
-<a href="#456" id="456">456</a>
-<a href="#457" id="457">457</a>
-<a href="#458" id="458">458</a>
-<a href="#459" id="459">459</a>
-<a href="#460" id="460">460</a>
-<a href="#461" id="461">461</a>
-<a href="#462" id="462">462</a>
-<a href="#463" id="463">463</a>
-<a href="#464" id="464">464</a>
-<a href="#465" id="465">465</a>
-<a href="#466" id="466">466</a>
-<a href="#467" id="467">467</a>
-<a href="#468" id="468">468</a>
-<a href="#469" id="469">469</a>
-<a href="#470" id="470">470</a>
-<a href="#471" id="471">471</a>
-<a href="#472" id="472">472</a>
-<a href="#473" id="473">473</a>
-<a href="#474" id="474">474</a>
-<a href="#475" id="475">475</a>
-<a href="#476" id="476">476</a>
-<a href="#477" id="477">477</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -494,7 +472,6 @@
 //! Inspired by Databend's "[mysql_federated.rs](https://github.com/datafuselabs/databend/blob/ac706bf65845e6895141c96c0a10bad6fdc2d367/src/query/service/src/servers/mysql/mysql_federated.rs)".
 
 </span><span class="kw">use </span>std::collections::HashMap;
-<span class="kw">use </span>std::env;
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>common_query::Output;
@@ -520,8 +497,6 @@
 <span class="kw">static </span>SHOW_VARIABLES_PATTERN: Lazy&lt;Regex&gt; =
     Lazy::new(|| Regex::new(<span class="string">"(?i)^(SHOW VARIABLES(.*))"</span>).unwrap());
 
-<span class="kw">static </span>SELECT_VERSION_PATTERN: Lazy&lt;Regex&gt; =
-    Lazy::new(|| Regex::new(<span class="string">r"(?i)^(SELECT VERSION\(\s*\))"</span>).unwrap());
 <span class="kw">static </span>SELECT_DATABASE_PATTERN: Lazy&lt;Regex&gt; =
     Lazy::new(|| Regex::new(<span class="string">r"(?i)^(SELECT DATABASE\(\s*\))"</span>).unwrap());
 
@@ -761,9 +736,7 @@
         <span class="kw">return </span><span class="prelude-val">Some</span>(Output::RecordBatches(RecordBatches::empty()));
     }
 
-    <span class="kw">let </span>recordbatches = <span class="kw">if </span>SELECT_VERSION_PATTERN.is_match(query) {
-        <span class="prelude-val">Some</span>(select_function(<span class="string">"version()"</span>, <span class="kw-2">&amp;</span>get_version()))
-    } <span class="kw">else if </span>SELECT_DATABASE_PATTERN.is_match(query) {
+    <span class="kw">let </span>recordbatches = <span class="kw">if </span>SELECT_DATABASE_PATTERN.is_match(query) {
         <span class="kw">let </span>schema = query_ctx.current_schema();
         <span class="prelude-val">Some</span>(select_function(<span class="string">"database()"</span>, schema))
     } <span class="kw">else if </span>SELECT_TIME_DIFF_FUNC_PATTERN.is_match(query) {
@@ -799,10 +772,6 @@
         </span>.or_else(|| check_others(query, query_ctx))
 }
 
-<span class="comment">// get GreptimeDB's version.
-</span><span class="kw">fn </span>get_version() -&gt; String {
-    <span class="macro">format!</span>(<span class="string">"{}-greptime"</span>, <span class="macro">env!</span>(<span class="string">"CARGO_PKG_VERSION"</span>))
-}
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
 
@@ -832,19 +801,6 @@
                 }
                 <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
             }
-        }
-
-        <span class="kw">let </span>query = <span class="string">"select version()"</span>;
-        <span class="kw">let </span>version = env::var(<span class="string">"CARGO_PKG_VERSION"</span>).unwrap_or_else(|<span class="kw">_</span>| <span class="string">"unknown"</span>.to_string());
-        <span class="kw">let </span>output = check(query, QueryContext::arc(), session.clone());
-        <span class="kw">match </span>output.unwrap() {
-            Output::RecordBatches(r) =&gt; {
-                <span class="macro">assert!</span>(<span class="kw-2">&amp;</span>r
-                    .pretty_print()
-                    .unwrap()
-                    .contains(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"{version}-greptime"</span>)));
-            }
-            <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
         }
 
         <span class="kw">let </span>query = <span class="string">"SELECT @@version_comment LIMIT 1"</span>;

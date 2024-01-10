@@ -28,6 +28,9 @@
 <a href="#27" id="27">27</a>
 <a href="#28" id="28">28</a>
 <a href="#29" id="29">29</a>
+<a href="#30" id="30">30</a>
+<a href="#31" id="31">31</a>
+<a href="#32" id="32">32</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,10 +46,12 @@
 // limitations under the License.
 
 </span><span class="kw">pub mod </span>build;
+<span class="kw">pub mod </span>version;
 
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>build::BuildFunction;
+<span class="kw">use </span>version::VersionFunction;
 
 <span class="kw">use </span><span class="kw">crate</span>::function_registry::FunctionRegistry;
 
@@ -55,6 +60,7 @@
 <span class="kw">impl </span>SystemFunction {
     <span class="kw">pub fn </span>register(registry: <span class="kw-2">&amp;</span>FunctionRegistry) {
         registry.register(Arc::new(BuildFunction));
+        registry.register(Arc::new(VersionFunction));
     }
 }
 </code></pre></div></section></main></body></html>
