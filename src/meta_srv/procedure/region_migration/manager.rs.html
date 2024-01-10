@@ -473,6 +473,24 @@
 <a href="#472" id="472">472</a>
 <a href="#473" id="473">473</a>
 <a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
+<a href="#478" id="478">478</a>
+<a href="#479" id="479">479</a>
+<a href="#480" id="480">480</a>
+<a href="#481" id="481">481</a>
+<a href="#482" id="482">482</a>
+<a href="#483" id="483">483</a>
+<a href="#484" id="484">484</a>
+<a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -491,6 +509,7 @@
 <span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::fmt::Display;
 <span class="kw">use </span>std::sync::{Arc, RwLock};
+<span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>common_meta::key::table_route::TableRouteValue;
 <span class="kw">use </span>common_meta::peer::Peer;
@@ -536,15 +555,23 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) region_id: RegionId,
     <span class="kw">pub</span>(<span class="kw">crate</span>) from_peer: Peer,
     <span class="kw">pub</span>(<span class="kw">crate</span>) to_peer: Peer,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) replay_timeout: Duration,
 }
 
 <span class="kw">impl </span>RegionMigrationProcedureTask {
-    <span class="kw">pub fn </span>new(cluster_id: ClusterId, region_id: RegionId, from_peer: Peer, to_peer: Peer) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(
+        cluster_id: ClusterId,
+        region_id: RegionId,
+        from_peer: Peer,
+        to_peer: Peer,
+        replay_timeout: Duration,
+    ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             cluster_id,
             region_id,
             from_peer,
             to_peer,
+            replay_timeout,
         }
     }
 }
@@ -566,6 +593,7 @@
             region_id,
             from_peer,
             to_peer,
+            replay_timeout,
         }: RegionMigrationProcedureTask,
     ) -&gt; <span class="self">Self </span>{
         PersistentContext {
@@ -573,6 +601,7 @@
             from_peer,
             to_peer,
             region_id,
+            replay_timeout,
         }
     }
 }
@@ -794,6 +823,7 @@
             region_id,
             from_peer: Peer::empty(<span class="number">2</span>),
             to_peer: Peer::empty(<span class="number">1</span>),
+            replay_timeout: Duration::from_millis(<span class="number">1000</span>),
         };
         <span class="comment">// Inserts one
         </span>manager
@@ -817,6 +847,7 @@
             region_id,
             from_peer: Peer::empty(<span class="number">1</span>),
             to_peer: Peer::empty(<span class="number">1</span>),
+            replay_timeout: Duration::from_millis(<span class="number">1000</span>),
         };
 
         <span class="kw">let </span>err = manager.submit_procedure(task).<span class="kw">await</span>.unwrap_err();
@@ -834,6 +865,7 @@
             region_id,
             from_peer: Peer::empty(<span class="number">1</span>),
             to_peer: Peer::empty(<span class="number">2</span>),
+            replay_timeout: Duration::from_millis(<span class="number">1000</span>),
         };
 
         <span class="kw">let </span>err = manager.submit_procedure(task).<span class="kw">await</span>.unwrap_err();
@@ -851,6 +883,7 @@
             region_id,
             from_peer: Peer::empty(<span class="number">1</span>),
             to_peer: Peer::empty(<span class="number">2</span>),
+            replay_timeout: Duration::from_millis(<span class="number">1000</span>),
         };
 
         <span class="kw">let </span>table_info = new_test_table_info(<span class="number">1024</span>, <span class="macro">vec!</span>[<span class="number">1</span>]).into();
@@ -878,6 +911,7 @@
             region_id,
             from_peer: Peer::empty(<span class="number">1</span>),
             to_peer: Peer::empty(<span class="number">2</span>),
+            replay_timeout: Duration::from_millis(<span class="number">1000</span>),
         };
 
         <span class="kw">let </span>table_info = new_test_table_info(<span class="number">1024</span>, <span class="macro">vec!</span>[<span class="number">1</span>]).into();
@@ -909,6 +943,7 @@
             region_id,
             from_peer: Peer::empty(<span class="number">1</span>),
             to_peer: Peer::empty(<span class="number">2</span>),
+            replay_timeout: Duration::from_millis(<span class="number">1000</span>),
         };
 
         <span class="kw">let </span>table_info = new_test_table_info(<span class="number">1024</span>, <span class="macro">vec!</span>[<span class="number">1</span>]).into();
@@ -935,6 +970,7 @@
             region_id,
             from_peer: Peer::empty(<span class="number">1</span>),
             to_peer: Peer::empty(<span class="number">2</span>),
+            replay_timeout: Duration::from_millis(<span class="number">1000</span>),
         };
 
         <span class="kw">let </span>err = manager
