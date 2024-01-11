@@ -342,6 +342,9 @@
 <a href="#341" id="341">341</a>
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -359,6 +362,7 @@
 </span><span class="kw">mod </span>alter;
 <span class="kw">mod </span>close;
 <span class="kw">mod </span>create;
+<span class="kw">mod </span>drop;
 <span class="kw">mod </span>open;
 <span class="kw">mod </span>put;
 <span class="kw">mod </span>read;
@@ -427,12 +431,14 @@
 /// | Operations | Logical Region | Physical Region |
 /// | ---------- | -------------- | --------------- |
 /// |   Create   |       ✅        |        ✅        |
-/// |    Drop    |       ✅        |        ❌        |
+/// |    Drop    |       ✅        |        ❓*       |
 /// |   Write    |       ✅        |        ❌        |
 /// |    Read    |       ✅        |        ✅        |
 /// |   Close    |       ✅        |        ✅        |
 /// |    Open    |       ✅        |        ✅        |
 /// |   Alter    |       ✅        |        ❌        |
+///
+/// *: Physical region can be dropped only when all related logical regions are dropped.
 ///
 /// ## Internal Columns
 ///
@@ -467,7 +473,7 @@
             RegionRequest::Put(put) =&gt; <span class="self">self</span>.inner.put_region(region_id, put).<span class="kw">await</span>,
             RegionRequest::Delete(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
             RegionRequest::Create(create) =&gt; <span class="self">self</span>.inner.create_region(region_id, create).<span class="kw">await</span>,
-            RegionRequest::Drop(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
+            RegionRequest::Drop(drop) =&gt; <span class="self">self</span>.inner.drop_region(region_id, drop).<span class="kw">await</span>,
             RegionRequest::Open(open) =&gt; <span class="self">self</span>.inner.open_region(region_id, open).<span class="kw">await</span>,
             RegionRequest::Close(close) =&gt; <span class="self">self</span>.inner.close_region(region_id, close).<span class="kw">await</span>,
             RegionRequest::Alter(alter) =&gt; <span class="self">self</span>.inner.alter_region(region_id, alter).<span class="kw">await</span>,

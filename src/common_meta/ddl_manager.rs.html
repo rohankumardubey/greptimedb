@@ -556,6 +556,12 @@
 <a href="#555" id="555">555</a>
 <a href="#556" id="556">556</a>
 <a href="#557" id="557">557</a>
+<a href="#558" id="558">558</a>
+<a href="#559" id="559">559</a>
+<a href="#560" id="560">560</a>
+<a href="#561" id="561">561</a>
+<a href="#562" id="562">562</a>
+<a href="#563" id="563">563</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -947,15 +953,21 @@
     <span class="kw">let </span>table_metadata_manager = <span class="kw-2">&amp;</span>ddl_manager.table_metadata_manager();
     <span class="kw">let </span>table_ref = drop_table_task.table_ref();
 
-    <span class="kw">let </span>(table_info_value, table_route_value) =
-        table_metadata_manager.get_full_table_info(table_id).<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">let </span>table_info_value = table_metadata_manager
+        .table_info_manager()
+        .get(table_id)
+        .<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">let </span>(<span class="kw">_</span>, table_route_value) = table_metadata_manager
+        .table_route_manager()
+        .get_physical_table_route(table_id)
+        .<span class="kw">await</span><span class="question-mark">?</span>;
 
     <span class="kw">let </span>table_info_value = table_info_value.with_context(|| error::TableInfoNotFoundSnafu {
         table_name: table_ref.to_string(),
     })<span class="question-mark">?</span>;
 
     <span class="kw">let </span>table_route_value =
-        table_route_value.context(error::TableRouteNotFoundSnafu { table_id })<span class="question-mark">?</span>;
+        DeserializedValueWithBytes::from_inner(TableRouteValue::Physical(table_route_value));
 
     <span class="kw">let </span>id = ddl_manager
         .submit_drop_table_task(

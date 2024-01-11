@@ -552,6 +552,8 @@
 <a href="#551" id="551">551</a>
 <a href="#552" id="552">552</a>
 <a href="#553" id="553">553</a>
+<a href="#554" id="554">554</a>
+<a href="#555" id="555">555</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -627,8 +629,7 @@
         <span class="kw">let </span>(data_region_id, metadata_region_id) = <span class="self">Self</span>::transform_region_id(region_id);
 
         <span class="comment">// create metadata region
-        </span><span class="kw">let </span>create_metadata_region_request =
-            <span class="self">self</span>.create_request_for_metadata_region(<span class="kw-2">&amp;</span>request.region_dir);
+        </span><span class="kw">let </span>create_metadata_region_request = <span class="self">self</span>.create_request_for_metadata_region(<span class="kw-2">&amp;</span>request);
         <span class="self">self</span>.mito
             .handle_request(
                 metadata_region_id,
@@ -841,7 +842,10 @@
     <span class="doccomment">/// Build [RegionCreateRequest] for metadata region
     ///
     /// This method will append [METADATA_REGION_SUBDIR] to the given `region_dir`.
-    </span><span class="kw">pub fn </span>create_request_for_metadata_region(<span class="kw-2">&amp;</span><span class="self">self</span>, region_dir: <span class="kw-2">&amp;</span>str) -&gt; RegionCreateRequest {
+    </span><span class="kw">pub fn </span>create_request_for_metadata_region(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        request: <span class="kw-2">&amp;</span>RegionCreateRequest,
+    ) -&gt; RegionCreateRequest {
         <span class="comment">// ts TIME INDEX DEFAULT 0
         </span><span class="kw">let </span>timestamp_column_metadata = ColumnMetadata {
             column_id: METADATA_SCHEMA_TIMESTAMP_COLUMN_INDEX <span class="kw">as _</span>,
@@ -878,7 +882,7 @@
         };
 
         <span class="comment">// concat region dir
-        </span><span class="kw">let </span>metadata_region_dir = join_dir(region_dir, METADATA_REGION_SUBDIR);
+        </span><span class="kw">let </span>metadata_region_dir = join_dir(<span class="kw-2">&amp;</span>request.region_dir, METADATA_REGION_SUBDIR);
 
         RegionCreateRequest {
             engine: MITO_ENGINE_NAME.to_string(),
@@ -888,7 +892,7 @@
                 value_column_metadata,
             ],
             primary_key: <span class="macro">vec!</span>[METADATA_SCHEMA_KEY_COLUMN_INDEX <span class="kw">as _</span>],
-            options: HashMap::new(),
+            options: request.options.clone(),
             region_dir: metadata_region_dir,
         }
     }

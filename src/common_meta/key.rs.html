@@ -1329,6 +1329,7 @@
 <a href="#1328" id="1328">1328</a>
 <a href="#1329" id="1329">1329</a>
 <a href="#1330" id="1330">1330</a>
+<a href="#1331" id="1331">1331</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1685,7 +1686,8 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.kv_backend
     }
 
-    <span class="kw">pub async fn </span>get_full_table_info(
+    <span class="comment">// TODO(ruihang): deprecate this
+    </span><span class="kw">pub async fn </span>get_full_table_info(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         table_id: TableId,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;(
