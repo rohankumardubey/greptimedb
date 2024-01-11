@@ -653,13 +653,13 @@
             .<span class="kw">await
             </span>.context(error::TableMetadataManagerSnafu)
         {
-            <span class="macro">debug_assert!</span>(ctx.remove_table_route_value());
+            ctx.remove_table_route_value();
             <span class="kw">return </span>error::RetryLaterSnafu {
                     reason: <span class="macro">format!</span>(<span class="string">"Failed to update the table route during the upgrading candidate region, error: {err}"</span>)
                 }.fail();
         };
 
-        <span class="macro">debug_assert!</span>(ctx.remove_table_route_value());
+        ctx.remove_table_route_value();
         <span class="comment">// Consumes the guard.
         </span>ctx.volatile_ctx.opening_region_guard.take();
 
