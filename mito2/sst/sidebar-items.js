@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["file","file_purger","index","location","parquet","version"]};
+window.SIDEBAR_ITEMS = {"constant":["DEFAULT_WRITE_BUFFER_SIZE"],"mod":["file","file_purger","index","location","parquet","version"]};

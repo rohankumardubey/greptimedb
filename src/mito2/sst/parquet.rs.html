@@ -265,19 +265,6 @@
 <a href="#264" id="264">264</a>
 <a href="#265" id="265">265</a>
 <a href="#266" id="266">266</a>
-<a href="#267" id="267">267</a>
-<a href="#268" id="268">268</a>
-<a href="#269" id="269">269</a>
-<a href="#270" id="270">270</a>
-<a href="#271" id="271">271</a>
-<a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
-<a href="#274" id="274">274</a>
-<a href="#275" id="275">275</a>
-<a href="#276" id="276">276</a>
-<a href="#277" id="277">277</a>
-<a href="#278" id="278">278</a>
-<a href="#279" id="279">279</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -307,11 +294,12 @@
 <span class="kw">use </span>common_base::readable_size::ReadableSize;
 <span class="kw">use </span>parquet::file::metadata::ParquetMetaData;
 
+<span class="kw">use </span><span class="kw">super</span>::DEFAULT_WRITE_BUFFER_SIZE;
 <span class="kw">use </span><span class="kw">crate</span>::sst::file::FileTimeRange;
 
 <span class="doccomment">/// Key of metadata in parquet SST.
 </span><span class="kw">pub const </span>PARQUET_METADATA_KEY: <span class="kw-2">&amp;</span>str = <span class="string">"greptime:metadata"</span>;
-<span class="kw">const </span>DEFAULT_WRITE_BUFFER_SIZE: ReadableSize = ReadableSize::mb(<span class="number">8</span>);
+
 <span class="doccomment">/// Default batch size to read parquet files.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>DEFAULT_READ_BATCH_SIZE: usize = <span class="number">1024</span>;
 <span class="doccomment">/// Default row group size for parquet files.
@@ -351,32 +339,18 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::sync::Arc;
 
-    <span class="kw">use </span>api::v1::OpType;
     <span class="kw">use </span>common_time::Timestamp;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::cache::{CacheManager, PageKey};
-    <span class="kw">use </span><span class="kw">crate</span>::read::Batch;
     <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::reader::ParquetReaderBuilder;
     <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::writer::ParquetWriter;
     <span class="kw">use </span><span class="kw">crate</span>::test_util::sst_util::{
-        new_primary_key, new_source, sst_file_handle, sst_region_metadata,
+        new_batch_by_range, new_source, sst_file_handle, sst_region_metadata,
     };
-    <span class="kw">use </span><span class="kw">crate</span>::test_util::{check_reader_result, new_batch_builder, TestEnv};
+    <span class="kw">use </span><span class="kw">crate</span>::test_util::{check_reader_result, TestEnv};
 
     <span class="kw">const </span>FILE_DIR: <span class="kw-2">&amp;</span>str = <span class="string">"/"</span>;
-
-    <span class="kw">fn </span>new_batch_by_range(tags: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>str], start: usize, end: usize) -&gt; Batch {
-        <span class="macro">assert!</span>(end &gt; start);
-        <span class="kw">let </span>pk = new_primary_key(tags);
-        <span class="kw">let </span>timestamps: Vec&lt;<span class="kw">_</span>&gt; = (start..end).map(|v| v <span class="kw">as </span>i64).collect();
-        <span class="kw">let </span>sequences = <span class="macro">vec!</span>[<span class="number">1000</span>; end - start];
-        <span class="kw">let </span>op_types = <span class="macro">vec!</span>[OpType::Put; end - start];
-        <span class="kw">let </span>field: Vec&lt;<span class="kw">_</span>&gt; = (start..end).map(|v| v <span class="kw">as </span>u64).collect();
-        new_batch_builder(<span class="kw-2">&amp;</span>pk, <span class="kw-2">&amp;</span>timestamps, <span class="kw-2">&amp;</span>sequences, <span class="kw-2">&amp;</span>op_types, <span class="number">2</span>, <span class="kw-2">&amp;</span>field)
-            .build()
-            .unwrap()
-    }
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_write_read() {
