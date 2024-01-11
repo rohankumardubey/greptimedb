@@ -94,6 +94,10 @@
 <a href="#93" id="93">93</a>
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
+<a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -107,6 +111,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+</span><span class="attr">#![allow(clippy::print_stdout)]
 
 </span><span class="kw">use </span>std::path::PathBuf;
 
@@ -152,9 +158,10 @@
     </span><span class="attr">#[clap(short, long, default_value = <span class="string">"raft_engine"</span>)]
     </span>wal: Wal,
 
-    <span class="doccomment">/// The kafka wal broker endpoints.
-    </span><span class="attr">#[clap(short, long, default_value = <span class="string">"127.0.0.1:9092"</span>)]
-    </span>kafka_wal_broker_endpoints: String,
+    <span class="doccomment">/// The kafka wal broker endpoints. This config will suppress sqlness runner
+    /// from starting a kafka cluster, and use the given endpoint as kafka backend.
+    </span><span class="attr">#[clap(short, long)]
+    </span>kafka_wal_broker_endpoints: <span class="prelude-ty">Option</span>&lt;String&gt;,
 }
 
 <span class="attr">#[tokio::main]
@@ -178,11 +185,12 @@
     <span class="kw">let </span>wal = <span class="kw">match </span>args.wal {
         Wal::RaftEngine =&gt; WalConfig::RaftEngine,
         Wal::Kafka =&gt; WalConfig::Kafka {
+            needs_kafka_cluster: args.kafka_wal_broker_endpoints.is_none(),
             broker_endpoints: args
                 .kafka_wal_broker_endpoints
-                .split(<span class="string">','</span>)
-                .map(|s| s.trim().to_string())
-                .collect(),
+                .map(|s| s.split(<span class="string">','</span>).map(|s| s.to_string()).collect())
+                <span class="comment">// otherwise default to the same port in `kafka-cluster.yml`
+                </span>.unwrap_or(<span class="macro">vec!</span>[<span class="string">"127.0.0.1:9092"</span>.to_string()]),
         },
     };
 
