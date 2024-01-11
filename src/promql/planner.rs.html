@@ -2671,6 +2671,12 @@
 <a href="#2670" id="2670">2670</a>
 <a href="#2671" id="2671">2671</a>
 <a href="#2672" id="2672">2672</a>
+<a href="#2673" id="2673">2673</a>
+<a href="#2674" id="2674">2674</a>
+<a href="#2675" id="2675">2675</a>
+<a href="#2676" id="2676">2676</a>
+<a href="#2677" id="2677">2677</a>
+<a href="#2678" id="2678">2678</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -2964,13 +2970,13 @@
                     </span>(<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; {
                         <span class="kw">let </span>left_input = <span class="self">self</span>.prom_expr_to_plan(<span class="kw-2">*</span>lhs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
                         <span class="kw">let </span>left_field_columns = <span class="self">self</span>.ctx.field_columns.clone();
-                        <span class="kw">let </span>left_table_ref: OwnedTableReference =
+                        <span class="kw">let </span><span class="kw-2">mut </span>left_table_ref: OwnedTableReference =
                             <span class="self">self</span>.ctx.table_name.clone().unwrap_or_default().into();
                         <span class="kw">let </span>left_context = <span class="self">self</span>.ctx.clone();
 
                         <span class="kw">let </span>right_input = <span class="self">self</span>.prom_expr_to_plan(<span class="kw-2">*</span>rhs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
                         <span class="kw">let </span>right_field_columns = <span class="self">self</span>.ctx.field_columns.clone();
-                        <span class="kw">let </span>right_table_ref: OwnedTableReference =
+                        <span class="kw">let </span><span class="kw-2">mut </span>right_table_ref: OwnedTableReference =
                             <span class="self">self</span>.ctx.table_name.clone().unwrap_or_default().into();
                         <span class="kw">let </span>right_context = <span class="self">self</span>.ctx.clone();
 
@@ -2989,7 +2995,13 @@
                         }
 
                         <span class="comment">// normal join
-                        </span><span class="kw">let </span><span class="kw-2">mut </span>field_columns =
+                        </span><span class="kw">if </span>left_table_ref == right_table_ref {
+                            <span class="comment">// rename table references to avoid ambiguity
+                            </span>left_table_ref = OwnedTableReference::bare(<span class="string">"lhs"</span>);
+                            right_table_ref = OwnedTableReference::bare(<span class="string">"rhs"</span>);
+                            <span class="self">self</span>.ctx.table_name = <span class="prelude-val">Some</span>(<span class="string">"lhs"</span>.to_string());
+                        }
+                        <span class="kw">let </span><span class="kw-2">mut </span>field_columns =
                             left_field_columns.iter().zip(right_field_columns.iter());
                         <span class="kw">let </span>join_plan = <span class="self">self</span>.join_on_non_field_columns(
                             left_input,
@@ -4520,7 +4532,7 @@
             .zip(<span class="self">self</span>.ctx.field_columns.iter())
             .map(|(expr, name)| <span class="prelude-val">Ok</span>(DfExpr::Alias(Alias::new(expr, name.to_string()))));
 
-        <span class="comment">// chain non-value columns (unchanged) and value columns (applied computation then alias)
+        <span class="comment">// chain non-field columns (unchanged) and field columns (applied computation then alias)
         </span><span class="kw">let </span>project_fields = non_field_columns_iter
             .chain(field_columns_iter)
             .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;&gt;()<span class="question-mark">?</span>;
@@ -5052,16 +5064,16 @@
             </span>.unwrap();
 
         <span class="kw">let  </span>expected = String::from(
-            <span class="string">"Projection: some_metric.tag_0, some_metric.timestamp, some_metric.field_0 + some_metric.field_0 AS some_metric.field_0 + some_metric.field_0 [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), some_metric.field_0 + some_metric.field_0:Float64;N]\
-            \n  Inner Join: some_metric.tag_0 = some_metric.tag_0, some_metric.timestamp = some_metric.timestamp [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n    SubqueryAlias: some_metric [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            <span class="string">"Projection: lhs.tag_0, lhs.timestamp, lhs.field_0 + rhs.field_0 AS lhs.field_0 + rhs.field_0 [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), lhs.field_0 + rhs.field_0:Float64;N]\
+            \n  Inner Join: lhs.tag_0 = rhs.tag_0, lhs.timestamp = rhs.timestamp [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N, tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n    SubqueryAlias: lhs [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n      PromInstantManipulate: range=[0..100000000], lookback=[1000], interval=[5000], time index=[timestamp] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n        PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [false] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n          PromSeriesDivide: tags=[\"tag_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n            Sort: some_metric.tag_0 DESC NULLS LAST, some_metric.timestamp DESC NULLS LAST [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n              Filter: some_metric.tag_0 = Utf8(\"foo\") [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n                TableScan: some_metric, unsupported_filters=[tag_0 = Utf8(\"foo\"), timestamp &gt;= TimestampMillisecond(-1000, None), timestamp &lt;= TimestampMillisecond(100001000, None)] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
-            \n    SubqueryAlias: some_metric [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
+            \n    SubqueryAlias: rhs [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n      PromInstantManipulate: range=[0..100000000], lookback=[1000], interval=[5000], time index=[timestamp] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n        PromSeriesNormalize: offset=[0], time index=[timestamp], filter NaN: [false] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
             \n          PromSeriesDivide: tags=[\"tag_0\"] [tag_0:Utf8, timestamp:Timestamp(Millisecond, None), field_0:Float64;N]\
