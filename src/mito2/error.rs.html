@@ -630,6 +630,14 @@
 <a href="#629" id="629">629</a>
 <a href="#630" id="630">630</a>
 <a href="#631" id="631">631</a>
+<a href="#632" id="632">632</a>
+<a href="#633" id="633">633</a>
+<a href="#634" id="634">634</a>
+<a href="#635" id="635">635</a>
+<a href="#636" id="636">636</a>
+<a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -953,6 +961,14 @@
         location: Location,
     },
 
+    <span class="attr">#[snafu(display(<span class="string">"Failed to delete index file, file id: {}"</span>, file_id))]
+    </span>DeleteIndex {
+        file_id: FileId,
+        <span class="attr">#[snafu(source)]
+        </span>error: object_store::Error,
+        location: Location,
+    },
+
     <span class="attr">#[snafu(display(<span class="string">"Failed to flush region {}"</span>, region_id))]
     </span>FlushRegion {
         region_id: RegionId,
@@ -1228,7 +1244,7 @@
             InvalidSender { .. } =&gt; StatusCode::InvalidArguments,
             InvalidSchedulerState { .. } =&gt; StatusCode::InvalidArguments,
             StopScheduler { .. } =&gt; StatusCode::Internal,
-            DeleteSst { .. } =&gt; StatusCode::StorageUnavailable,
+            DeleteSst { .. } | DeleteIndex { .. } =&gt; StatusCode::StorageUnavailable,
             FlushRegion { source, .. } =&gt; source.status_code(),
             RegionDropped { .. } =&gt; StatusCode::Cancelled,
             RegionClosed { .. } =&gt; StatusCode::Cancelled,

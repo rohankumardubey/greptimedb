@@ -757,6 +757,12 @@
 <a href="#756" id="756">756</a>
 <a href="#757" id="757">757</a>
 <a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -778,6 +784,7 @@
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>common_telemetry::{error, info};
+<span class="kw">use </span>smallvec::SmallVec;
 <span class="kw">use </span>snafu::ResultExt;
 <span class="kw">use </span>store_api::storage::RegionId;
 <span class="kw">use </span>strum::IntoStaticStr;
@@ -798,7 +805,7 @@
     SenderWriteRequest, WorkerRequest,
 };
 <span class="kw">use </span><span class="kw">crate</span>::schedule::scheduler::{Job, SchedulerRef};
-<span class="kw">use </span><span class="kw">crate</span>::sst::file::{FileId, FileMeta};
+<span class="kw">use </span><span class="kw">crate</span>::sst::file::{FileId, FileMeta, IndexType};
 <span class="kw">use </span><span class="kw">crate</span>::sst::file_purger::FilePurgerRef;
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::WriteOptions;
 <span class="kw">use </span><span class="kw">crate</span>::worker::WorkerListener;
@@ -1098,6 +1105,11 @@
                 time_range: sst_info.time_range,
                 level: <span class="number">0</span>,
                 file_size: sst_info.file_size,
+                available_indexes: sst_info
+                    .inverted_index_available
+                    .then(|| SmallVec::from_iter([IndexType::InvertedIndex]))
+                    .unwrap_or_default(),
+                index_file_size: sst_info.index_file_size,
             };
             file_metas.push(file_meta);
         }

@@ -805,6 +805,10 @@
 <a href="#804" id="804">804</a>
 <a href="#805" id="805">805</a>
 <a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
+<a href="#808" id="808">808</a>
+<a href="#809" id="809">809</a>
+<a href="#810" id="810">810</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -833,7 +837,8 @@
 //!
 //! We stores fields in the same order as [RegionMetadata::field_columns()](store_api::metadata::RegionMetadata::field_columns()).
 
-</span><span class="kw">use </span>std::collections::{HashMap, VecDeque};
+</span><span class="kw">use </span>std::borrow::Borrow;
+<span class="kw">use </span>std::collections::{HashMap, VecDeque};
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>api::v1::SemanticType;
@@ -1068,7 +1073,7 @@
     <span class="doccomment">/// Returns min values of specific column in row groups.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>min_values(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        row_groups: <span class="kw-2">&amp;</span>[RowGroupMetaData],
+        row_groups: <span class="kw-2">&amp;</span>[<span class="kw">impl </span>Borrow&lt;RowGroupMetaData&gt;],
         column_id: ColumnId,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;ArrayRef&gt; {
         <span class="kw">let </span>column = <span class="self">self</span>.metadata.column_by_id(column_id)<span class="question-mark">?</span>;
@@ -1088,7 +1093,7 @@
     <span class="doccomment">/// Returns max values of specific column in row groups.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>max_values(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        row_groups: <span class="kw-2">&amp;</span>[RowGroupMetaData],
+        row_groups: <span class="kw-2">&amp;</span>[<span class="kw">impl </span>Borrow&lt;RowGroupMetaData&gt;],
         column_id: ColumnId,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;ArrayRef&gt; {
         <span class="kw">let </span>column = <span class="self">self</span>.metadata.column_by_id(column_id)<span class="question-mark">?</span>;
@@ -1108,7 +1113,7 @@
     <span class="doccomment">/// Returns null counts of specific column in row groups.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>null_counts(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        row_groups: <span class="kw-2">&amp;</span>[RowGroupMetaData],
+        row_groups: <span class="kw-2">&amp;</span>[<span class="kw">impl </span>Borrow&lt;RowGroupMetaData&gt;],
         column_id: ColumnId,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;ArrayRef&gt; {
         <span class="kw">let </span>column = <span class="self">self</span>.metadata.column_by_id(column_id)<span class="question-mark">?</span>;
@@ -1152,7 +1157,7 @@
     <span class="doccomment">/// Returns min/max values of specific tag.
     </span><span class="kw">fn </span>tag_values(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        row_groups: <span class="kw-2">&amp;</span>[RowGroupMetaData],
+        row_groups: <span class="kw-2">&amp;</span>[<span class="kw">impl </span>Borrow&lt;RowGroupMetaData&gt;],
         column: <span class="kw-2">&amp;</span>ColumnMetadata,
         is_min: bool,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;ArrayRef&gt; {
@@ -1170,7 +1175,10 @@
         <span class="kw">let </span>converter =
             McmpRowCodec::new(<span class="macro">vec!</span>[SortField::new(column.column_schema.data_type.clone())]);
         <span class="kw">let </span>values = row_groups.iter().map(|meta| {
-            <span class="kw">let </span>stats = meta.column(<span class="self">self</span>.primary_key_position()).statistics()<span class="question-mark">?</span>;
+            <span class="kw">let </span>stats = meta
+                .borrow()
+                .column(<span class="self">self</span>.primary_key_position())
+                .statistics()<span class="question-mark">?</span>;
             <span class="kw">if </span>!stats.has_min_max_set() {
                 <span class="kw">return </span><span class="prelude-val">None</span>;
             }
@@ -1207,7 +1215,7 @@
 
     <span class="doccomment">/// Returns min/max values of specific non-tag columns.
     </span><span class="kw">fn </span>column_values(
-        row_groups: <span class="kw-2">&amp;</span>[RowGroupMetaData],
+        row_groups: <span class="kw-2">&amp;</span>[<span class="kw">impl </span>Borrow&lt;RowGroupMetaData&gt;],
         column: <span class="kw-2">&amp;</span>ColumnMetadata,
         column_index: usize,
         is_min: bool,
@@ -1221,7 +1229,7 @@
         <span class="kw">let </span>scalar_values = row_groups
             .iter()
             .map(|meta| {
-                <span class="kw">let </span>stats = meta.column(column_index).statistics()<span class="question-mark">?</span>;
+                <span class="kw">let </span>stats = meta.borrow().column(column_index).statistics()<span class="question-mark">?</span>;
                 <span class="kw">if </span>!stats.has_min_max_set() {
                     <span class="kw">return </span><span class="prelude-val">None</span>;
                 }
@@ -1270,11 +1278,11 @@
 
     <span class="doccomment">/// Returns null counts of specific non-tag columns.
     </span><span class="kw">fn </span>column_null_counts(
-        row_groups: <span class="kw-2">&amp;</span>[RowGroupMetaData],
+        row_groups: <span class="kw-2">&amp;</span>[<span class="kw">impl </span>Borrow&lt;RowGroupMetaData&gt;],
         column_index: usize,
     ) -&gt; <span class="prelude-ty">Option</span>&lt;ArrayRef&gt; {
         <span class="kw">let </span>values = row_groups.iter().map(|meta| {
-            <span class="kw">let </span>col = meta.column(column_index);
+            <span class="kw">let </span>col = meta.borrow().column(column_index);
             <span class="kw">let </span>stat = col.statistics()<span class="question-mark">?</span>;
             <span class="prelude-val">Some</span>(stat.null_count())
         });

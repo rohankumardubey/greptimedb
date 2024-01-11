@@ -164,6 +164,20 @@
 <a href="#163" id="163">163</a>
 <a href="#164" id="164">164</a>
 <a href="#165" id="165">165</a>
+<a href="#166" id="166">166</a>
+<a href="#167" id="167">167</a>
+<a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -188,9 +202,9 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::cache::write_cache::SstUploadRequest;
 <span class="kw">use </span><span class="kw">crate</span>::cache::CacheManagerRef;
-<span class="kw">use </span><span class="kw">crate</span>::error::{CleanDirSnafu, DeleteSstSnafu, OpenDalSnafu, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::error::{CleanDirSnafu, DeleteIndexSnafu, DeleteSstSnafu, OpenDalSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::read::Source;
-<span class="kw">use </span><span class="kw">crate</span>::sst::file::{FileHandle, FileId};
+<span class="kw">use </span><span class="kw">crate</span>::sst::file::{FileHandle, FileId, FileMeta};
 <span class="kw">use </span><span class="kw">crate</span>::sst::location;
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::reader::ParquetReaderBuilder;
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::writer::ParquetWriter;
@@ -232,13 +246,27 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>.object_store
     }
 
-    <span class="doccomment">/// Deletes a SST file with given file id.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>delete_sst(<span class="kw-2">&amp;</span><span class="self">self</span>, file_id: FileId) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="kw">let </span>path = location::sst_file_path(<span class="kw-2">&amp;</span><span class="self">self</span>.region_dir, file_id);
+    <span class="doccomment">/// Deletes a SST file (and its index file if it has one) with given file id.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>delete_sst(<span class="kw-2">&amp;</span><span class="self">self</span>, file_meta: <span class="kw-2">&amp;</span>FileMeta) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
+        <span class="kw">let </span>path = location::sst_file_path(<span class="kw-2">&amp;</span><span class="self">self</span>.region_dir, file_meta.file_id);
         <span class="self">self</span>.object_store
             .delete(<span class="kw-2">&amp;</span>path)
             .<span class="kw">await
-            </span>.context(DeleteSstSnafu { file_id })
+            </span>.context(DeleteSstSnafu {
+                file_id: file_meta.file_id,
+            })<span class="question-mark">?</span>;
+
+        <span class="kw">if </span>file_meta.inverted_index_available() {
+            <span class="kw">let </span>path = location::index_file_path(<span class="kw-2">&amp;</span><span class="self">self</span>.region_dir, file_meta.file_id);
+            <span class="self">self</span>.object_store
+                .delete(<span class="kw-2">&amp;</span>path)
+                .<span class="kw">await
+                </span>.context(DeleteIndexSnafu {
+                    file_id: file_meta.file_id,
+                })<span class="question-mark">?</span>;
+        }
+
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Returns a reader builder for specific `file`.

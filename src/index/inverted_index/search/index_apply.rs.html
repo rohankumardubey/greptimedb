@@ -92,7 +92,7 @@
 /// avoiding repeated compilation of fixed predicates such as regex patterns.
 </span><span class="attr">#[mockall::automock]
 #[async_trait]
-</span><span class="kw">pub trait </span>IndexApplier {
+</span><span class="kw">pub trait </span>IndexApplier: Send + Sync {
     <span class="doccomment">/// Applies the predefined predicates to the data read by the given index reader, returning
     /// a list of relevant indices (e.g., post IDs, group IDs, row IDs).
     </span><span class="kw">async fn </span>apply&lt;<span class="lifetime">'a</span>&gt;(

@@ -176,6 +176,8 @@
 <a href="#175" id="175">175</a>
 <a href="#176" id="176">176</a>
 <a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -302,6 +304,8 @@
             file_size,
             num_rows: stats.num_rows,
             file_metadata: <span class="prelude-val">Some</span>(Arc::new(parquet_metadata)),
+            inverted_index_available: <span class="bool-val">false</span>,
+            index_file_size: <span class="number">0</span>,
         }))
     }
 

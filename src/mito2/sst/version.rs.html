@@ -155,6 +155,9 @@
 <a href="#154" id="154">154</a>
 <a href="#155" id="155">155</a>
 <a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -249,7 +252,10 @@
                 level_meta
                     .files
                     .values()
-                    .map(|file_handle| file_handle.meta().file_size)
+                    .map(|file_handle| {
+                        <span class="kw">let </span>meta = file_handle.meta();
+                        meta.file_size + meta.index_file_size
+                    })
                     .sum::&lt;u64&gt;()
             })
             .sum()

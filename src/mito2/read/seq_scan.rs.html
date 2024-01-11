@@ -331,6 +331,17 @@
 <a href="#330" id="330">330</a>
 <a href="#331" id="331">331</a>
 <a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -372,6 +383,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::read::scan_region::ScanParallism;
 <span class="kw">use </span><span class="kw">crate</span>::read::{BatchReader, BoxedBatchReader, BoxedBatchStream, Source};
 <span class="kw">use </span><span class="kw">crate</span>::sst::file::FileHandle;
+<span class="kw">use </span><span class="kw">crate</span>::sst::index::applier::SstIndexApplierRef;
 
 <span class="doccomment">/// Scans a region and returns rows in a sorted sequence.
 ///
@@ -395,6 +407,8 @@
     </span>ignore_file_not_found: bool,
     <span class="doccomment">/// Parallelism to scan data.
     </span>parallelism: ScanParallism,
+    <span class="doccomment">/// Index applier.
+    </span>index_applier: <span class="prelude-ty">Option</span>&lt;SstIndexApplierRef&gt;,
 }
 
 <span class="kw">impl </span>SeqScan {
@@ -411,6 +425,7 @@
             cache_manager: <span class="prelude-val">None</span>,
             ignore_file_not_found: <span class="bool-val">false</span>,
             parallelism: ScanParallism::default(),
+            index_applier: <span class="prelude-val">None</span>,
         }
     }
 
@@ -460,6 +475,13 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_parallelism(<span class="kw-2">mut </span><span class="self">self</span>, parallelism: ScanParallism) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.parallelism = parallelism;
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Sets index applier.
+    </span><span class="attr">#[must_use]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_index_applier(<span class="kw-2">mut </span><span class="self">self</span>, index_applier: <span class="prelude-ty">Option</span>&lt;SstIndexApplierRef&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.index_applier = index_applier;
         <span class="self">self
     </span>}
 
