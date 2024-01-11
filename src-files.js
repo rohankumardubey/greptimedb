@@ -23,7 +23,7 @@ var srcIndex = new Map(JSON.parse('[\
 ["common_recordbatch",["",[],["adapter.rs","error.rs","lib.rs","recordbatch.rs","util.rs"]]],\
 ["common_runtime",["",[],["error.rs","global.rs","lib.rs","metrics.rs","repeated_task.rs","runtime.rs"]]],\
 ["common_telemetry",["",[],["lib.rs","logging.rs","macros.rs","metric.rs","panic_hook.rs","tracing_context.rs"]]],\
-["common_test_util",["",[],["lib.rs","ports.rs","temp_dir.rs"]]],\
+["common_test_util",["",[],["lib.rs","ports.rs","recordbatch.rs","temp_dir.rs"]]],\
 ["common_time",["",[],["date.rs","datetime.rs","duration.rs","error.rs","interval.rs","lib.rs","range.rs","time.rs","timestamp.rs","timestamp_millis.rs","timezone.rs","util.rs"]]],\
 ["common_version",["",[],["lib.rs"]]],\
 ["datanode",["",[["heartbeat",[["handler",[],["close_region.rs","downgrade_region.rs","open_region.rs","upgrade_region.rs"]]],["handler.rs","task_tracker.rs"]],["store",[],["azblob.rs","fs.rs","gcs.rs","oss.rs","s3.rs"]]],["alive_keeper.rs","config.rs","datanode.rs","error.rs","event_listener.rs","greptimedb_telemetry.rs","heartbeat.rs","lib.rs","metrics.rs","region_server.rs","store.rs"]]],\

@@ -754,6 +754,11 @@
 <a href="#753" id="753">753</a>
 <a href="#754" id="754">754</a>
 <a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -796,6 +801,7 @@
 <span class="kw">use </span>frontend::frontend::FrontendOptions;
 <span class="kw">use </span>frontend::instance::builder::FrontendBuilder;
 <span class="kw">use </span>frontend::instance::{FrontendInstance, Instance <span class="kw">as </span>FeInstance, StandaloneDatanodeManager};
+<span class="kw">use </span>frontend::server::Services;
 <span class="kw">use </span>frontend::service_config::{
     GrpcOptions, InfluxdbOptions, MysqlOptions, OpentsdbOptions, PostgresOptions, PromStoreOptions,
 };
@@ -1187,13 +1193,17 @@
         .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">let </span><span class="kw-2">mut </span>frontend = FrontendBuilder::new(kv_backend, datanode_manager, ddl_task_executor)
-            .with_plugin(fe_plugins)
+            .with_plugin(fe_plugins.clone())
             .try_build()
             .<span class="kw">await
             </span>.context(StartFrontendSnafu)<span class="question-mark">?</span>;
 
+        <span class="kw">let </span>servers = Services::new(fe_plugins)
+            .build(opts.clone(), Arc::new(frontend.clone()))
+            .<span class="kw">await
+            </span>.context(StartFrontendSnafu)<span class="question-mark">?</span>;
         frontend
-            .build_servers(opts)
+            .build_servers(opts, servers)
             .<span class="kw">await
             </span>.context(StartFrontendSnafu)<span class="question-mark">?</span>;
 
