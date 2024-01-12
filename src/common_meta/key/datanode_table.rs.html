@@ -419,6 +419,7 @@
 <a href="#418" id="418">418</a>
 <a href="#419" id="419">419</a>
 <a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -599,15 +600,6 @@
         <span class="kw">let </span>txns = distribution
             .into_iter()
             .map(|(datanode_id, regions)| {
-                <span class="kw">let </span>filtered_region_wal_options = regions
-                    .iter()
-                    .filter_map(|region_number| {
-                        region_wal_options
-                            .get(region_number)
-                            .map(|wal_options| (<span class="kw-2">*</span>region_number, wal_options.clone()))
-                    })
-                    .collect();
-
                 <span class="kw">let </span>key = DatanodeTableKey::new(datanode_id, table_id);
                 <span class="kw">let </span>val = DatanodeTableValue::new(
                     table_id,
@@ -616,7 +608,9 @@
                         engine: engine.to_string(),
                         region_storage_path: region_storage_path.to_string(),
                         region_options: region_options.clone(),
-                        region_wal_options: filtered_region_wal_options,
+                        <span class="comment">// FIXME(weny): Before we store all region wal options into table metadata or somewhere,
+                        // We must store all region wal options.
+                        </span>region_wal_options: region_wal_options.clone(),
                     },
                 );
 
@@ -664,7 +658,15 @@
             <span class="kw">if </span>need_update {
                 <span class="kw">let </span>key = DatanodeTableKey::new(datanode, table_id);
                 <span class="kw">let </span>raw_key = key.as_raw_key();
-                <span class="kw">let </span>val = DatanodeTableValue::new(table_id, regions, region_info.clone())
+                <span class="comment">// FIXME(weny): add unit tests.
+                </span><span class="kw">let </span><span class="kw-2">mut </span>new_region_info = region_info.clone();
+                <span class="kw">if </span>need_update_options {
+                    new_region_info.region_options = new_region_options.clone();
+                }
+                <span class="kw">if </span>need_update_wal_options {
+                    new_region_info.region_wal_options = new_region_wal_options.clone();
+                }
+                <span class="kw">let </span>val = DatanodeTableValue::new(table_id, regions, new_region_info)
                     .try_as_raw_value()<span class="question-mark">?</span>;
                 opts.push(TxnOp::Put(raw_key, val));
             }
