@@ -577,7 +577,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::cache_invalidator::Context;
 <span class="kw">use </span><span class="kw">crate</span>::ddl::utils::handle_operate_region_error;
 <span class="kw">use </span><span class="kw">crate</span>::ddl::DdlContext;
-<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, ConvertAlterTableRequestSnafu, InvalidProtoMsgSnafu, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, ConvertAlterTableRequestSnafu, Error, InvalidProtoMsgSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::key::table_info::TableInfoValue;
 <span class="kw">use </span><span class="kw">crate</span>::key::table_name::TableNameKey;
 <span class="kw">use </span><span class="kw">crate</span>::key::DeserializedValueWithBytes;
@@ -911,8 +911,8 @@
     }
 
     <span class="kw">async fn </span>execute(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _ctx: <span class="kw-2">&amp;</span>ProcedureContext) -&gt; ProcedureResult&lt;Status&gt; {
-        <span class="kw">let </span>error_handler = |e| {
-            <span class="kw">if </span><span class="macro">matches!</span>(e, error::Error::RetryLater { .. }) {
+        <span class="kw">let </span>error_handler = |e: Error| {
+            <span class="kw">if </span>e.is_retry_later() {
                 ProcedureError::retry_later(e)
             } <span class="kw">else </span>{
                 ProcedureError::external(e)

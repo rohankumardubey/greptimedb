@@ -1030,6 +1030,7 @@
 <a href="#1029" id="1029">1029</a>
 <a href="#1030" id="1030">1030</a>
 <a href="#1031" id="1031">1031</a>
+<a href="#1032" id="1032">1032</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1062,6 +1063,7 @@
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>api::v1::meta::MailboxMessage;
+<span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_meta::instruction::Instruction;
 <span class="kw">use </span>common_meta::key::datanode_table::{DatanodeTableKey, DatanodeTableValue};
 <span class="kw">use </span>common_meta::key::table_info::TableInfoValue;
@@ -1077,12 +1079,12 @@
 <span class="kw">use </span>common_procedure::{Context <span class="kw">as </span>ProcedureContext, LockKey, Procedure, Status, StringKey};
 <span class="kw">pub use </span>manager::RegionMigrationProcedureTask;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>snafu::{location, Location, OptionExt, ResultExt};
+<span class="kw">use </span>snafu::{OptionExt, ResultExt};
 <span class="kw">use </span>store_api::storage::RegionId;
 <span class="kw">use </span>tokio::time::Instant;
 
 <span class="kw">use </span><span class="self">self</span>::migration_start::RegionMigrationStart;
-<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, Error, <span class="prelude-ty">Result</span>};
+<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::service::mailbox::{BroadcastChannel, MailboxRef};
 
 <span class="doccomment">/// It's shared in each step and available even after recovering.
@@ -1252,9 +1254,9 @@
                 .get(table_id)
                 .<span class="kw">await
                 </span>.context(error::TableMetadataManagerSnafu)
-                .map_err(|e| error::Error::RetryLater {
-                    reason: e.to_string(),
-                    location: <span class="macro">location!</span>(),
+                .map_err(BoxedError::new)
+                .context(error::RetryLaterWithSourceSnafu {
+                    reason: <span class="macro">format!</span>(<span class="string">"Failed to get TableRoute: {table_id}"</span>),
                 })<span class="question-mark">?
                 </span>.context(error::TableRouteNotFoundSnafu { table_id })<span class="question-mark">?</span>;
 
@@ -1288,9 +1290,9 @@
                 .get(table_id)
                 .<span class="kw">await
                 </span>.context(error::TableMetadataManagerSnafu)
-                .map_err(|e| error::Error::RetryLater {
-                    reason: e.to_string(),
-                    location: <span class="macro">location!</span>(),
+                .map_err(BoxedError::new)
+                .context(error::RetryLaterWithSourceSnafu {
+                    reason: <span class="macro">format!</span>(<span class="string">"Failed to get TableInfo: {table_id}"</span>),
                 })<span class="question-mark">?
                 </span>.context(error::TableInfoNotFoundSnafu { table_id })<span class="question-mark">?</span>;
 
@@ -1321,9 +1323,9 @@
                 })
                 .<span class="kw">await
                 </span>.context(error::TableMetadataManagerSnafu)
-                .map_err(|e| error::Error::RetryLater {
-                    reason: e.to_string(),
-                    location: <span class="macro">location!</span>(),
+                .map_err(BoxedError::new)
+                .context(error::RetryLaterWithSourceSnafu {
+                    reason: <span class="macro">format!</span>(<span class="string">"Failed to get DatanodeTable: ({datanode_id},{table_id})"</span>),
                 })<span class="question-mark">?
                 </span>.context(error::DatanodeTableNotFoundSnafu {
                     table_id,
@@ -1444,7 +1446,7 @@
         <span class="kw">let </span>state = <span class="kw-2">&amp;mut </span><span class="self">self</span>.state;
 
         <span class="kw">let </span>(next, status) = state.next(<span class="kw-2">&amp;mut </span><span class="self">self</span>.context).<span class="kw">await</span>.map_err(|e| {
-            <span class="kw">if </span><span class="macro">matches!</span>(e, Error::RetryLater { .. }) {
+            <span class="kw">if </span>e.is_retryable() {
                 ProcedureError::retry_later(e)
             } <span class="kw">else </span>{
                 ProcedureError::external(e)

@@ -880,7 +880,7 @@
 
         <span class="macro">assert_matches!</span>(err, Error::RetryLater { .. });
         <span class="macro">assert!</span>(err.is_retryable());
-        <span class="macro">assert!</span>(err.to_string().contains(<span class="string">"test mocked"</span>));
+        <span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">"{err:?}"</span>).contains(<span class="string">"test mocked"</span>), <span class="string">"err: {err:?}"</span>,);
     }
 
     <span class="attr">#[tokio::test]

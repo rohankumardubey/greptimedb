@@ -255,7 +255,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>snafu::ResultExt;
+</span><span class="kw">use </span>common_error::ext::BoxedError;
+<span class="kw">use </span>snafu::ResultExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::procedure::region_migration::update_metadata::UpdateMetadata;
@@ -288,9 +289,9 @@
             </span>.context(error::TableMetadataManagerSnafu)
         {
             ctx.remove_table_route_value();
-            <span class="kw">return </span>error::RetryLaterSnafu {
-                reason: <span class="macro">format!</span>(<span class="string">"Failed to update the table route during the rollback downgraded leader region, error: {err}"</span>)
-            }.fail();
+            <span class="kw">return </span><span class="prelude-val">Err</span>(BoxedError::new(err)).context(error::RetryLaterWithSourceSnafu {
+                reason: <span class="macro">format!</span>(<span class="string">"Failed to update the table route during the rollback downgraded leader region: {region_id}"</span>),
+            });
         }
 
         ctx.remove_table_route_value();
@@ -400,9 +401,8 @@
             .<span class="kw">await
             </span>.unwrap_err();
         <span class="macro">assert!</span>(ctx.volatile_ctx.table_route.is_none());
-        <span class="macro">assert_matches!</span>(err, Error::RetryLater { .. });
         <span class="macro">assert!</span>(err.is_retryable());
-        <span class="macro">assert!</span>(err.to_string().contains(<span class="string">"Failed to update the table route"</span>));
+        <span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">"{err:?}"</span>).contains(<span class="string">"Failed to update the table route"</span>));
 
         state.rollback_downgraded_region(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap();
 

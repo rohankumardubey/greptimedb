@@ -86,7 +86,7 @@
 }
 
 <span class="kw">pub fn </span>handle_retry_error(e: Error) -&gt; ProcedureError {
-    <span class="kw">if </span><span class="macro">matches!</span>(e, error::Error::RetryLater { .. }) {
+    <span class="kw">if </span>e.is_retry_later() {
         ProcedureError::retry_later(e)
     } <span class="kw">else </span>{
         ProcedureError::external(e)

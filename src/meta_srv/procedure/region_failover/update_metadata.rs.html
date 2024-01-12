@@ -493,7 +493,6 @@
 <a href="#492" id="492">492</a>
 <a href="#493" id="493">493</a>
 <a href="#494" id="494">494</a>
-<a href="#495" id="495">495</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -511,6 +510,7 @@
 </span><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_meta::key::datanode_table::RegionInfo;
 <span class="kw">use </span>common_meta::key::table_route::TableRouteKey;
 <span class="kw">use </span>common_meta::peer::Peer;
@@ -523,7 +523,7 @@
 
 <span class="kw">use </span><span class="kw">super</span>::invalidate_cache::InvalidateCache;
 <span class="kw">use super</span>::{RegionFailoverContext, State};
-<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>, RetryLaterSnafu, TableRouteNotFoundSnafu};
+<span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>, TableRouteNotFoundSnafu};
 <span class="kw">use </span><span class="kw">crate</span>::lock::keys::table_metadata_lock_key;
 <span class="kw">use </span><span class="kw">crate</span>::lock::Opts;
 
@@ -668,14 +668,12 @@
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Box&lt;<span class="kw">dyn </span>State&gt;&gt; {
         <span class="self">self</span>.update_metadata(ctx, failed_region)
             .<span class="kw">await
-            </span>.map_err(|e| {
-                RetryLaterSnafu {
-                    reason: <span class="macro">format!</span>(
-                        <span class="string">"Failed to update metadata for failed region: {}, error: {}"</span>,
-                        failed_region, e
-                    ),
-                }
-                .build()
+            </span>.map_err(BoxedError::new)
+            .context(error::RetryLaterWithSourceSnafu {
+                reason: <span class="macro">format!</span>(
+                    <span class="string">"Failed to update metadata for failed region: {}"</span>,
+                    failed_region
+                ),
             })<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(Box::new(InvalidateCache))
     }

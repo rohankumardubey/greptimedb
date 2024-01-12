@@ -482,8 +482,6 @@
 <a href="#481" id="481">481</a>
 <a href="#482" id="482">482</a>
 <a href="#483" id="483">483</a>
-<a href="#484" id="484">484</a>
-<a href="#485" id="485">485</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -498,7 +496,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>common_meta::key::datanode_table::RegionInfo;
+</span><span class="kw">use </span>common_error::ext::BoxedError;
+<span class="kw">use </span>common_meta::key::datanode_table::RegionInfo;
 <span class="kw">use </span>common_meta::rpc::router::{region_distribution, RegionRoute};
 <span class="kw">use </span>common_telemetry::{info, warn};
 <span class="kw">use </span>snafu::{ensure, OptionExt, ResultExt};
@@ -654,9 +653,9 @@
             </span>.context(error::TableMetadataManagerSnafu)
         {
             ctx.remove_table_route_value();
-            <span class="kw">return </span>error::RetryLaterSnafu {
-                    reason: <span class="macro">format!</span>(<span class="string">"Failed to update the table route during the upgrading candidate region, error: {err}"</span>)
-                }.fail();
+            <span class="kw">return </span><span class="prelude-val">Err</span>(BoxedError::new(err)).context(error::RetryLaterWithSourceSnafu {
+                reason: <span class="macro">format!</span>(<span class="string">"Failed to update the table route during the upgrading candidate region: {region_id}"</span>),
+            });
         };
 
         ctx.remove_table_route_value();
@@ -840,15 +839,12 @@
             .register(<span class="number">2</span>, RegionId::new(table_id, <span class="number">1</span>))
             .unwrap();
         ctx.volatile_ctx.opening_region_guard = <span class="prelude-val">Some</span>(guard);
-
         <span class="kw">let </span>err = state.upgrade_candidate_region(<span class="kw-2">&amp;mut </span>ctx).<span class="kw">await</span>.unwrap_err();
 
         <span class="macro">assert!</span>(ctx.volatile_ctx.table_route.is_none());
         <span class="macro">assert!</span>(ctx.volatile_ctx.opening_region_guard.is_some());
-        <span class="macro">assert_matches!</span>(err, Error::RetryLater { .. });
-
         <span class="macro">assert!</span>(err.is_retryable());
-        <span class="macro">assert!</span>(err.to_string().contains(<span class="string">"Failed to update the table route"</span>));
+        <span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">"{err:?}"</span>).contains(<span class="string">"Failed to update the table route"</span>));
     }
 
     <span class="attr">#[tokio::test]

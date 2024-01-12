@@ -874,7 +874,7 @@
 
         <span class="macro">assert_matches!</span>(err, Error::RetryLater { .. });
         <span class="macro">assert!</span>(err.is_retryable());
-        <span class="macro">assert!</span>(err.to_string().contains(<span class="string">"test mocked"</span>));
+        <span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">"{err:?}"</span>).contains(<span class="string">"test mocked"</span>));
     }
 
     <span class="attr">#[tokio::test]
@@ -936,7 +936,7 @@
 
         <span class="macro">assert_matches!</span>(err, Error::RetryLater { .. });
         <span class="macro">assert!</span>(err.is_retryable());
-        <span class="macro">assert!</span>(err.to_string().contains(<span class="string">"still replaying the wal"</span>));
+        <span class="macro">assert!</span>(<span class="macro">format!</span>(<span class="string">"{err:?}"</span>).contains(<span class="string">"still replaying the wal"</span>));
 
         <span class="comment">// Sets the `require_ready` to false.
         </span>state.require_ready = <span class="bool-val">false</span>;

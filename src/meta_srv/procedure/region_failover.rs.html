@@ -795,6 +795,7 @@
 <a href="#794" id="794">794</a>
 <a href="#795" id="795">795</a>
 <a href="#796" id="796">796</a>
+<a href="#797" id="797">797</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -841,7 +842,7 @@
 <span class="kw">use </span>store_api::storage::{RegionId, RegionNumber};
 <span class="kw">use </span>table::metadata::TableId;
 
-<span class="kw">use </span><span class="kw">crate</span>::error::{Error, RegisterProcedureLoaderSnafu, <span class="prelude-ty">Result</span>, TableMetadataManagerSnafu};
+<span class="kw">use </span><span class="kw">crate</span>::error::{RegisterProcedureLoaderSnafu, <span class="prelude-ty">Result</span>, TableMetadataManagerSnafu};
 <span class="kw">use </span><span class="kw">crate</span>::lock::DistLockRef;
 <span class="kw">use </span><span class="kw">crate</span>::metasrv::{SelectorContext, SelectorRef};
 <span class="kw">use </span><span class="kw">crate</span>::service::mailbox::MailboxRef;
@@ -1154,7 +1155,7 @@
             .next(<span class="kw-2">&amp;</span><span class="self">self</span>.context, <span class="kw-2">&amp;</span><span class="self">self</span>.node.failed_region)
             .<span class="kw">await
             </span>.map_err(|e| {
-                <span class="kw">if </span><span class="macro">matches!</span>(e, Error::RetryLater { .. }) {
+                <span class="kw">if </span>e.is_retryable() {
                     ProcedureError::retry_later(e)
                 } <span class="kw">else </span>{
                     ProcedureError::external(e)
@@ -1577,7 +1578,8 @@
 
         <span class="kw">let </span>result = procedure.execute(<span class="kw-2">&amp;</span>ctx).<span class="kw">await</span>;
         <span class="macro">assert!</span>(result.is_err());
-        <span class="macro">assert!</span>(result.unwrap_err().is_retry_later());
+        <span class="kw">let </span>err = result.unwrap_err();
+        <span class="macro">assert!</span>(err.is_retry_later(), <span class="string">"err: {:?}"</span>, err);
         <span class="macro">assert_eq!</span>(
             <span class="string">r#"{"region_failover_state":"RegionFailoverStart","failover_candidate":null}"#</span>,
             serde_json::to_string(<span class="kw-2">&amp;</span>procedure.node.state).unwrap()
