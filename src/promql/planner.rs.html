@@ -2677,6 +2677,59 @@
 <a href="#2676" id="2676">2676</a>
 <a href="#2677" id="2677">2677</a>
 <a href="#2678" id="2678">2678</a>
+<a href="#2679" id="2679">2679</a>
+<a href="#2680" id="2680">2680</a>
+<a href="#2681" id="2681">2681</a>
+<a href="#2682" id="2682">2682</a>
+<a href="#2683" id="2683">2683</a>
+<a href="#2684" id="2684">2684</a>
+<a href="#2685" id="2685">2685</a>
+<a href="#2686" id="2686">2686</a>
+<a href="#2687" id="2687">2687</a>
+<a href="#2688" id="2688">2688</a>
+<a href="#2689" id="2689">2689</a>
+<a href="#2690" id="2690">2690</a>
+<a href="#2691" id="2691">2691</a>
+<a href="#2692" id="2692">2692</a>
+<a href="#2693" id="2693">2693</a>
+<a href="#2694" id="2694">2694</a>
+<a href="#2695" id="2695">2695</a>
+<a href="#2696" id="2696">2696</a>
+<a href="#2697" id="2697">2697</a>
+<a href="#2698" id="2698">2698</a>
+<a href="#2699" id="2699">2699</a>
+<a href="#2700" id="2700">2700</a>
+<a href="#2701" id="2701">2701</a>
+<a href="#2702" id="2702">2702</a>
+<a href="#2703" id="2703">2703</a>
+<a href="#2704" id="2704">2704</a>
+<a href="#2705" id="2705">2705</a>
+<a href="#2706" id="2706">2706</a>
+<a href="#2707" id="2707">2707</a>
+<a href="#2708" id="2708">2708</a>
+<a href="#2709" id="2709">2709</a>
+<a href="#2710" id="2710">2710</a>
+<a href="#2711" id="2711">2711</a>
+<a href="#2712" id="2712">2712</a>
+<a href="#2713" id="2713">2713</a>
+<a href="#2714" id="2714">2714</a>
+<a href="#2715" id="2715">2715</a>
+<a href="#2716" id="2716">2716</a>
+<a href="#2717" id="2717">2717</a>
+<a href="#2718" id="2718">2718</a>
+<a href="#2719" id="2719">2719</a>
+<a href="#2720" id="2720">2720</a>
+<a href="#2721" id="2721">2721</a>
+<a href="#2722" id="2722">2722</a>
+<a href="#2723" id="2723">2723</a>
+<a href="#2724" id="2724">2724</a>
+<a href="#2725" id="2725">2725</a>
+<a href="#2726" id="2726">2726</a>
+<a href="#2727" id="2727">2727</a>
+<a href="#2728" id="2728">2728</a>
+<a href="#2729" id="2729">2729</a>
+<a href="#2730" id="2730">2730</a>
+<a href="#2731" id="2731">2731</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -2725,10 +2778,11 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     CatalogSnafu, ColumnNotFoundSnafu, CombineTableColumnMismatchSnafu, DataFusionPlanningSnafu,
-    ExpectRangeSelectorSnafu, FunctionInvalidArgumentSnafu, MultipleMetricMatchersSnafu,
-    MultipleVectorSnafu, NoMetricMatcherSnafu, <span class="prelude-ty">Result</span>, TableNameNotFoundSnafu,
-    TimeIndexNotFoundSnafu, UnexpectedPlanExprSnafu, UnexpectedTokenSnafu, UnknownTableSnafu,
-    UnsupportedExprSnafu, UnsupportedVectorMatchSnafu, ValueNotFoundSnafu, ZeroRangeSelectorSnafu,
+    ExpectRangeSelectorSnafu, FunctionInvalidArgumentSnafu, MultiFieldsNotSupportedSnafu,
+    MultipleMetricMatchersSnafu, MultipleVectorSnafu, NoMetricMatcherSnafu, <span class="prelude-ty">Result</span>,
+    TableNameNotFoundSnafu, TimeIndexNotFoundSnafu, UnexpectedPlanExprSnafu, UnexpectedTokenSnafu,
+    UnknownTableSnafu, UnsupportedExprSnafu, UnsupportedVectorMatchSnafu, ValueNotFoundSnafu,
+    ZeroRangeSelectorSnafu,
 };
 <span class="kw">use </span><span class="kw">crate</span>::extension_plan::{
     build_special_time_expr, EmptyMetric, HistogramFold, InstantManipulate, Millisecond,
@@ -4226,7 +4280,7 @@
     </span><span class="kw">fn </span>set_op_on_non_field_columns(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         left: LogicalPlan,
-        right: LogicalPlan,
+        <span class="kw-2">mut </span>right: LogicalPlan,
         left_context: PromPlannerContext,
         right_context: PromPlannerContext,
         op: TokenType,
@@ -4298,11 +4352,36 @@
                 }
             )
         };
+        <span class="kw">let </span>left_time_index = left_context.time_index_column.clone().unwrap();
+        <span class="kw">let </span>right_time_index = right_context.time_index_column.clone().unwrap();
         <span class="kw">let </span>join_keys = left_tag_col_set
             .iter()
             .cloned()
-            .chain([<span class="self">self</span>.ctx.time_index_column.clone().unwrap()])
+            .chain([left_time_index.clone()])
             .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="self">self</span>.ctx.time_index_column = <span class="prelude-val">Some</span>(left_time_index.clone());
+
+        <span class="comment">// alias right time index column if necessary
+        </span><span class="kw">if </span>left_context.time_index_column != right_context.time_index_column {
+            <span class="kw">let </span>right_project_exprs = right
+                .schema()
+                .fields()
+                .iter()
+                .map(|field| {
+                    <span class="kw">if </span>field.name() == <span class="kw-2">&amp;</span>right_time_index {
+                        DfExpr::Column(Column::from_name(<span class="kw-2">&amp;</span>right_time_index)).alias(<span class="kw-2">&amp;</span>left_time_index)
+                    } <span class="kw">else </span>{
+                        DfExpr::Column(Column::from_name(field.name()))
+                    }
+                })
+                .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+
+            right = LogicalPlanBuilder::from(right)
+                .project(right_project_exprs)
+                .context(DataFusionPlanningSnafu)<span class="question-mark">?
+                </span>.build()
+                .context(DataFusionPlanningSnafu)<span class="question-mark">?</span>;
+        }
 
         <span class="comment">// Generate join plan.
         // All set operations in PromQL are "distinct"
@@ -4354,6 +4433,21 @@
         right_context: PromPlannerContext,
         modifier: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;BinModifier&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;LogicalPlan&gt; {
+        <span class="comment">// checks
+        </span><span class="macro">ensure!</span>(
+            left_context.field_columns.len() == right_context.field_columns.len(),
+            CombineTableColumnMismatchSnafu {
+                left: left_context.field_columns.clone(),
+                right: right_context.field_columns.clone()
+            }
+        );
+        <span class="macro">ensure!</span>(
+            left_context.field_columns.len() == <span class="number">1</span>,
+            MultiFieldsNotSupportedSnafu {
+                operator: <span class="string">"OR operator"
+            </span>}
+        );
+
         <span class="comment">// prepare hash sets
         </span><span class="kw">let </span>all_tags = left_tag_cols_set
             .union(<span class="kw-2">&amp;</span>right_tag_cols_set)
@@ -4391,6 +4485,9 @@
                 .with_context(|| TimeIndexNotFoundSnafu {
                     table: right_qualifier_string.clone(),
                 })<span class="question-mark">?</span>;
+        <span class="comment">// Take the name of first field column. The length is checked above.
+        </span><span class="kw">let </span>left_field_col = left_context.field_columns.first().unwrap();
+        <span class="kw">let </span>right_field_col = right_context.field_columns.first().unwrap();
 
         <span class="comment">// step 0: fill all columns in output schema
         </span><span class="kw">let </span><span class="kw-2">mut </span>all_columns_set = left
@@ -4403,6 +4500,10 @@
         <span class="comment">// remove time index column
         </span>all_columns_set.remove(<span class="kw-2">&amp;</span>left_time_index_column);
         all_columns_set.remove(<span class="kw-2">&amp;</span>right_time_index_column);
+        <span class="comment">// remove field column in the right
+        </span><span class="kw">if </span>left_field_col != right_field_col {
+            all_columns_set.remove(right_field_col);
+        }
         <span class="kw">let </span><span class="kw-2">mut </span>all_columns = all_columns_set.into_iter().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
         <span class="comment">// sort to ensure the generated schema is not volatile
         </span>all_columns.sort_unstable();
@@ -4414,7 +4515,7 @@
             <span class="kw">if </span>tags_not_in_left.contains(col) {
                 DfExpr::Literal(ScalarValue::Utf8(<span class="prelude-val">None</span>)).alias(col.to_string())
             } <span class="kw">else </span>{
-                DfExpr::Column(Column::new(left_qualifier.clone(), col))
+                DfExpr::Column(Column::new(<span class="prelude-val">None</span>::&lt;String&gt;, col))
             }
         });
         <span class="kw">let </span>right_time_index_expr = DfExpr::Column(Column::new(
@@ -4422,11 +4523,16 @@
             right_time_index_column,
         ))
         .alias(left_time_index_column.clone());
-        <span class="kw">let </span>right_proj_exprs_without_time_index = all_columns.iter().skip(<span class="number">1</span>).map(|col| {
-            <span class="kw">if </span>tags_not_in_right.contains(col) {
+        <span class="comment">// `skip（1)` to skip the time index column
+        </span><span class="kw">let </span>right_proj_exprs_without_time_index = all_columns.iter().skip(<span class="number">1</span>).map(|col| {
+            <span class="comment">// expr
+            </span><span class="kw">if </span>col == left_field_col &amp;&amp; left_field_col != right_field_col {
+                <span class="comment">// alias field in right side if necessary to handle different field name
+                </span>DfExpr::Column(Column::new(right_qualifier.clone(), right_field_col))
+            } <span class="kw">else if </span>tags_not_in_right.contains(col) {
                 DfExpr::Literal(ScalarValue::Utf8(<span class="prelude-val">None</span>)).alias(col.to_string())
             } <span class="kw">else </span>{
-                DfExpr::Column(Column::new(right_qualifier.clone(), col))
+                DfExpr::Column(Column::new(<span class="prelude-val">None</span>::&lt;String&gt;, col))
             }
         });
         <span class="kw">let </span>right_proj_exprs = [right_time_index_expr]

@@ -575,6 +575,18 @@
 <a href="#574" id="574">574</a>
 <a href="#575" id="575">575</a>
 <a href="#576" id="576">576</a>
+<a href="#577" id="577">577</a>
+<a href="#578" id="578">578</a>
+<a href="#579" id="579">579</a>
+<a href="#580" id="580">580</a>
+<a href="#581" id="581">581</a>
+<a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
+<a href="#588" id="588">588</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -939,6 +951,7 @@
     ) -&gt; DataFusionResult&lt;<span class="self">Self</span>&gt; {
         <span class="comment">// Collect all batches from the input stream
         </span><span class="kw">let </span>initial = (Vec::new(), <span class="number">0</span>);
+        <span class="kw">let </span>schema = input.schema();
         <span class="kw">let </span>(batches, _num_rows) = input
             .try_fold(initial, |<span class="kw-2">mut </span>acc, batch| <span class="kw">async </span>{
                 <span class="comment">// Update rowcount
@@ -976,7 +989,7 @@
         }
 
         <span class="comment">// Finilize the hash map
-        </span><span class="kw">let </span>batch = interleave_batches(batches, interleave_indices)<span class="question-mark">?</span>;
+        </span><span class="kw">let </span>batch = interleave_batches(schema, batches, interleave_indices)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             hash_map,
@@ -1019,10 +1032,19 @@
 
 <span class="doccomment">/// Utility function to interleave batches. Based on [interleave](datafusion::arrow::compute::interleave)
 </span><span class="kw">fn </span>interleave_batches(
+    schema: SchemaRef,
     batches: Vec&lt;RecordBatch&gt;,
     indices: Vec&lt;(usize, usize)&gt;,
 ) -&gt; DataFusionResult&lt;RecordBatch&gt; {
-    <span class="kw">let </span>schema = batches[<span class="number">0</span>].schema();
+    <span class="kw">if </span>batches.is_empty() {
+        <span class="kw">if </span>indices.is_empty() {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(RecordBatch::new_empty(schema));
+        } <span class="kw">else </span>{
+            <span class="kw">return </span><span class="prelude-val">Err</span>(DataFusionError::Internal(
+                <span class="string">"Cannot interleave empty batches with non-empty indices"</span>.to_string(),
+            ));
+        }
+    }
 
     <span class="comment">// transform batches into arrays
     </span><span class="kw">let </span><span class="kw-2">mut </span>arrays = <span class="macro">vec!</span>[<span class="macro">vec!</span>[]; schema.fields().len()];
@@ -1065,6 +1087,8 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
+    <span class="kw">use </span>std::sync::Arc;
+
     <span class="kw">use </span>datafusion::arrow::array::Int32Array;
     <span class="kw">use </span>datafusion::arrow::datatypes::{DataType, Field, Schema};
 
@@ -1106,7 +1130,7 @@
 
         <span class="kw">let </span>batches = <span class="macro">vec!</span>[batch1, batch2, batch3];
         <span class="kw">let </span>indices = <span class="macro">vec!</span>[(<span class="number">0</span>, <span class="number">0</span>), (<span class="number">1</span>, <span class="number">0</span>), (<span class="number">2</span>, <span class="number">0</span>), (<span class="number">0</span>, <span class="number">1</span>), (<span class="number">1</span>, <span class="number">1</span>), (<span class="number">2</span>, <span class="number">1</span>)];
-        <span class="kw">let </span>result = interleave_batches(batches, indices).unwrap();
+        <span class="kw">let </span>result = interleave_batches(Arc::new(schema.clone()), batches, indices).unwrap();
 
         <span class="kw">let </span>expected = RecordBatch::try_new(
             Arc::new(schema),
