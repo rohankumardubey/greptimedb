@@ -505,7 +505,7 @@
 
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">for </span>((left, op, right), <span class="kw">_</span>) <span class="kw">in </span><span class="kw-2">&amp;</span>cases {
             builder.collect_comparison_expr(left, op, right).unwrap();
@@ -525,7 +525,7 @@
     </span><span class="kw">fn </span>test_collect_comparison_type_mismatch() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>res = builder.collect_comparison_expr(<span class="kw-2">&amp;</span>tag_column(), <span class="kw-2">&amp;</span>Operator::Lt, <span class="kw-2">&amp;</span>int64_lit(<span class="number">10</span>));
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(res, <span class="prelude-val">Err</span>(Error::FieldTypeMismatch { .. })));
@@ -536,7 +536,7 @@
     </span><span class="kw">fn </span>test_collect_comparison_field_column() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         builder
             .collect_comparison_expr(<span class="kw-2">&amp;</span>field_column(), <span class="kw-2">&amp;</span>Operator::Lt, <span class="kw-2">&amp;</span>string_lit(<span class="string">"abc"</span>))
@@ -548,7 +548,7 @@
     </span><span class="kw">fn </span>test_collect_comparison_nonexistent_column() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>res = builder.collect_comparison_expr(
             <span class="kw-2">&amp;</span>nonexistent_column(),

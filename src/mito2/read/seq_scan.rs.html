@@ -342,6 +342,7 @@
 <a href="#341" id="341">341</a>
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -568,6 +569,7 @@
                 .time_range(<span class="self">self</span>.time_range)
                 .projection(<span class="prelude-val">Some</span>(<span class="self">self</span>.mapper.column_ids().to_vec()))
                 .cache(<span class="self">self</span>.cache_manager.clone())
+                .index_applier(<span class="self">self</span>.index_applier.clone())
                 .build()
                 .<span class="kw">await</span>;
             <span class="kw">let </span>reader = <span class="kw">match </span>maybe_reader {

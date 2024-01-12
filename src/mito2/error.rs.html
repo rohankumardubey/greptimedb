@@ -638,6 +638,9 @@
 <a href="#637" id="637">637</a>
 <a href="#638" id="638">638</a>
 <a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -668,6 +671,7 @@
 <span class="kw">use </span>store_api::manifest::ManifestVersion;
 <span class="kw">use </span>store_api::storage::RegionId;
 
+<span class="kw">use </span><span class="kw">crate</span>::cache::file_cache::FileType;
 <span class="kw">use </span><span class="kw">crate</span>::sst::file::FileId;
 <span class="kw">use </span><span class="kw">crate</span>::worker::WorkerId;
 
@@ -1162,13 +1166,15 @@
     },
 
     <span class="attr">#[snafu(display(
-        <span class="string">"Failed to upload sst file, region_id: {}, file_id: {}"</span>,
+        <span class="string">"Failed to upload file, region_id: {}, file_id: {}, file_type: {:?}"</span>,
         region_id,
-        file_id
+        file_id,
+        file_type,
     ))]
-    </span>UploadSst {
+    </span>Upload {
         region_id: RegionId,
         file_id: FileId,
+        file_type: FileType,
         <span class="attr">#[snafu(source)]
         </span>error: std::io::Error,
         location: Location,
@@ -1269,7 +1275,7 @@
             CleanDir { .. } =&gt; StatusCode::Unexpected,
             InvalidConfig { .. } =&gt; StatusCode::InvalidArguments,
             StaleLogEntry { .. } =&gt; StatusCode::Unexpected,
-            UploadSst { .. } =&gt; StatusCode::StorageUnavailable,
+            Upload { .. } =&gt; StatusCode::StorageUnavailable,
         }
     }
 

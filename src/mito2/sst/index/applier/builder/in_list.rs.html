@@ -217,7 +217,7 @@
     </span><span class="kw">fn </span>test_collect_in_list_basic() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>in_list = InList {
             expr: Box::new(tag_column()),
@@ -241,7 +241,7 @@
     </span><span class="kw">fn </span>test_collect_in_list_negated() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>in_list = InList {
             expr: Box::new(tag_column()),
@@ -257,7 +257,7 @@
     </span><span class="kw">fn </span>test_collect_in_list_field_column() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>in_list = InList {
             expr: Box::new(field_column()),
@@ -273,7 +273,7 @@
     </span><span class="kw">fn </span>test_collect_in_list_type_mismatch() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>in_list = InList {
             expr: Box::new(tag_column()),
@@ -290,7 +290,7 @@
     </span><span class="kw">fn </span>test_collect_in_list_nonexistent_column() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>in_list = InList {
             expr: Box::new(nonexistent_column()),

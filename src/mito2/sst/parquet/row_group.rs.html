@@ -417,11 +417,11 @@
 <span class="kw">use </span>parquet::format::PageLocation;
 <span class="kw">use </span>store_api::storage::RegionId;
 
-<span class="kw">use </span><span class="kw">super</span>::helper::fetch_byte_ranges;
-<span class="kw">use </span><span class="kw">crate</span>::cache::file_cache::IndexKey;
+<span class="kw">use </span><span class="kw">crate</span>::cache::file_cache::{FileType, IndexKey};
 <span class="kw">use </span><span class="kw">crate</span>::cache::{CacheManagerRef, PageKey, PageValue};
 <span class="kw">use </span><span class="kw">crate</span>::metrics::READ_STAGE_ELAPSED;
 <span class="kw">use </span><span class="kw">crate</span>::sst::file::FileId;
+<span class="kw">use </span><span class="kw">crate</span>::sst::parquet::helper::fetch_byte_ranges;
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::page_reader::CachedPageReader;
 
 <span class="doccomment">/// An in-memory collection of column chunks
@@ -616,7 +616,7 @@
     <span class="doccomment">/// Try to fetch data from WriteCache,
     /// if not in WriteCache, fetch data from object store directly.
     </span><span class="kw">async fn </span>fetch_bytes(<span class="kw-2">&amp;</span><span class="self">self</span>, ranges: <span class="kw-2">&amp;</span>[Range&lt;u64&gt;]) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Bytes&gt;&gt; {
-        <span class="kw">let </span>key = (<span class="self">self</span>.region_id, <span class="self">self</span>.file_id);
+        <span class="kw">let </span>key = IndexKey::new(<span class="self">self</span>.region_id, <span class="self">self</span>.file_id, FileType::Parquet);
         <span class="kw">match </span><span class="self">self</span>.fetch_ranges_from_write_cache(key, ranges).<span class="kw">await </span>{
             <span class="prelude-val">Some</span>(data) =&gt; <span class="prelude-val">Ok</span>(data),
             <span class="prelude-val">None </span>=&gt; {

@@ -178,6 +178,9 @@
 <a href="#177" id="177">177</a>
 <a href="#178" id="178">178</a>
 <a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -282,7 +285,8 @@
         request: SstWriteRequest,
         write_opts: <span class="kw-2">&amp;</span>WriteOptions,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;SstInfo&gt;&gt; {
-        <span class="kw">let </span>path = location::sst_file_path(<span class="kw-2">&amp;</span><span class="self">self</span>.region_dir, request.file_id);
+        <span class="kw">let </span>file_path = location::sst_file_path(<span class="kw-2">&amp;</span><span class="self">self</span>.region_dir, request.file_id);
+        <span class="kw">let </span>index_file_path = location::index_file_path(<span class="kw-2">&amp;</span><span class="self">self</span>.region_dir, request.file_id);
         <span class="kw">let </span>region_id = request.metadata.region_id;
 
         <span class="kw">let </span>sst_info = <span class="kw">if let </span><span class="prelude-val">Some</span>(write_cache) = request.cache_manager.write_cache() {
@@ -294,7 +298,8 @@
                         metadata: request.metadata,
                         source: request.source,
                         storage: request.storage,
-                        upload_path: path,
+                        upload_path: file_path,
+                        index_upload_path: index_file_path,
                         remote_store: <span class="self">self</span>.object_store.clone(),
                     },
                     write_opts,
@@ -302,7 +307,8 @@
                 .<span class="kw">await</span><span class="question-mark">?
         </span>} <span class="kw">else </span>{
             <span class="comment">// Write cache is disabled.
-            </span><span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(path, request.metadata, <span class="self">self</span>.object_store.clone());
+            </span><span class="kw">let </span><span class="kw-2">mut </span>writer =
+                ParquetWriter::new(file_path, request.metadata, <span class="self">self</span>.object_store.clone());
             writer.write_all(request.source, write_opts).<span class="kw">await</span><span class="question-mark">?
         </span>};
 

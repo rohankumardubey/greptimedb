@@ -36,7 +36,7 @@
 if not in WriteCache, fetch data from object store directly.</p>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.fetch_ranges_from_write_cache" class="method"><a class="src rightside" href="../../../../src/mito2/sst/parquet/row_group.rs.html#249-258">source</a><h4 class="code-header">async fn <a href="#method.fetch_ranges_from_write_cache" class="fn">fetch_ranges_from_write_cache</a>(
     &amp;self,
-    key: (<a class="struct" href="../../../../store_api/storage/descriptors/struct.RegionId.html" title="struct store_api::storage::descriptors::RegionId">RegionId</a>, <a class="struct" href="../../file/struct.FileId.html" title="struct mito2::sst::file::FileId">FileId</a>),
+    key: <a class="struct" href="../../../cache/file_cache/struct.IndexKey.html" title="struct mito2::cache::file_cache::IndexKey">IndexKey</a>,
     ranges: &amp;[<a class="struct" href="https://doc.rust-lang.org/nightly/core/ops/range/struct.Range.html" title="struct core::ops::range::Range">Range</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/nightly/std/primitive.u64.html">u64</a>&gt;]
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;Bytes&gt;&gt;</h4></section></summary><div class="docblock"><p>Fetches data from write cache.
 Returns <code>None</code> if the data is not in the cache.</p>

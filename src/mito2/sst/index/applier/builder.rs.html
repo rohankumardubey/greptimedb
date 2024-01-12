@@ -332,6 +332,14 @@
 <a href="#331" id="331">331</a>
 <a href="#332" id="332">332</a>
 <a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -368,18 +376,22 @@
 <span class="kw">use </span>store_api::metadata::RegionMetadata;
 <span class="kw">use </span>store_api::storage::ColumnId;
 
+<span class="kw">use </span><span class="kw">crate</span>::cache::file_cache::FileCacheRef;
 <span class="kw">use </span><span class="kw">crate</span>::error::{BuildIndexApplierSnafu, ColumnNotFoundSnafu, ConvertValueSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::row_converter::SortField;
 <span class="kw">use </span><span class="kw">crate</span>::sst::index::applier::SstIndexApplier;
 <span class="kw">use </span><span class="kw">crate</span>::sst::index::codec::IndexValueCodec;
 
 <span class="doccomment">/// Constructs an [`SstIndexApplier`] which applies predicates to SST files during scan.
-</span><span class="kw">pub struct </span>SstIndexApplierBuilder&lt;<span class="lifetime">'a</span>&gt; {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>SstIndexApplierBuilder&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Directory of the region, required argument for constructing [`SstIndexApplier`].
     </span>region_dir: String,
 
     <span class="doccomment">/// Object store, required argument for constructing [`SstIndexApplier`].
     </span>object_store: ObjectStore,
+
+    <span class="doccomment">/// File cache, required argument for constructing [`SstIndexApplier`].
+    </span>file_cache: <span class="prelude-ty">Option</span>&lt;FileCacheRef&gt;,
 
     <span class="doccomment">/// Metadata of the region, used to get metadata like column type.
     </span>metadata: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>RegionMetadata,
@@ -393,11 +405,13 @@
     </span><span class="kw">pub fn </span>new(
         region_dir: String,
         object_store: ObjectStore,
+        file_cache: <span class="prelude-ty">Option</span>&lt;FileCacheRef&gt;,
         metadata: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>RegionMetadata,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             region_dir,
             object_store,
+            file_cache,
             metadata,
             output: HashMap::default(),
         }
@@ -422,7 +436,9 @@
         <span class="kw">let </span>applier = PredicatesIndexApplier::try_from(predicates);
         <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(SstIndexApplier::new(
             <span class="self">self</span>.region_dir,
+            <span class="self">self</span>.metadata.region_id,
             <span class="self">self</span>.object_store,
+            <span class="self">self</span>.file_cache,
             Box::new(applier.context(BuildIndexApplierSnafu)<span class="question-mark">?</span>),
         )))
     }
@@ -620,7 +636,7 @@
     </span><span class="kw">fn </span>test_collect_and_basic() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>expr = DfExpr::BinaryExpr(BinaryExpr {
             left: Box::new(DfExpr::BinaryExpr(BinaryExpr {

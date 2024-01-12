@@ -273,6 +273,15 @@
 <a href="#272" id="272">272</a>
 <a href="#273" id="273">273</a>
 <a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -298,6 +307,7 @@
 <span class="kw">use </span>table::predicate::{Predicate, TimeRangePredicateBuilder};
 
 <span class="kw">use </span><span class="kw">crate</span>::access_layer::AccessLayerRef;
+<span class="kw">use </span><span class="kw">crate</span>::cache::file_cache::FileCacheRef;
 <span class="kw">use </span><span class="kw">crate</span>::cache::CacheManagerRef;
 <span class="kw">use </span><span class="kw">crate</span>::error::Result;
 <span class="kw">use </span><span class="kw">crate</span>::read::projection::ProjectionMapper;
@@ -508,9 +518,17 @@
 
     <span class="doccomment">/// Use the latest schema to build the index applier.
     </span><span class="kw">fn </span>build_index_applier(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;SstIndexApplierRef&gt; {
+        <span class="kw">let </span>file_cache = || -&gt; <span class="prelude-ty">Option</span>&lt;FileCacheRef&gt; {
+            <span class="kw">let </span>cache_manager = <span class="self">self</span>.cache_manager.as_ref()<span class="question-mark">?</span>;
+            <span class="kw">let </span>write_cache = cache_manager.write_cache()<span class="question-mark">?</span>;
+            <span class="kw">let </span>file_cache = write_cache.file_cache();
+            <span class="prelude-val">Some</span>(file_cache)
+        }();
+
         SstIndexApplierBuilder::new(
             <span class="self">self</span>.access_layer.region_dir().to_string(),
             <span class="self">self</span>.access_layer.object_store().clone(),
+            file_cache,
             <span class="self">self</span>.version.metadata.as_ref(),
         )
         .build(<span class="kw-2">&amp;</span><span class="self">self</span>.request.filters)

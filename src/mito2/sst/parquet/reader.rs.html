@@ -572,7 +572,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::{DEFAULT_READ_BATCH_SIZE, PARQUET_METADATA_KEY};
 
 <span class="doccomment">/// Parquet SST reader builder.
-</span><span class="kw">pub struct </span>ParquetReaderBuilder {
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ParquetReaderBuilder {
     <span class="doccomment">/// SST directory.
     </span>file_dir: String,
     file_handle: FileHandle,

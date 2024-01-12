@@ -241,7 +241,7 @@
     </span><span class="kw">fn </span>test_collect_between_basic() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>between = Between {
             negated: <span class="bool-val">false</span>,
@@ -275,7 +275,7 @@
     </span><span class="kw">fn </span>test_collect_between_negated() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>between = Between {
             negated: <span class="bool-val">true</span>,
@@ -292,7 +292,7 @@
     </span><span class="kw">fn </span>test_collect_between_field_column() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>between = Between {
             negated: <span class="bool-val">false</span>,
@@ -309,7 +309,7 @@
     </span><span class="kw">fn </span>test_collect_between_type_mismatch() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>between = Between {
             negated: <span class="bool-val">false</span>,
@@ -327,7 +327,7 @@
     </span><span class="kw">fn </span>test_collect_between_nonexistent_column() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>between = Between {
             negated: <span class="bool-val">false</span>,

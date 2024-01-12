@@ -436,7 +436,7 @@
     </span><span class="kw">fn </span>test_collect_eq_basic() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         builder
             .collect_eq(<span class="kw-2">&amp;</span>tag_column(), <span class="kw-2">&amp;</span>string_lit(<span class="string">"foo"</span>))
@@ -465,7 +465,7 @@
     </span><span class="kw">fn </span>test_collect_eq_field_column() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         builder
             .collect_eq(<span class="kw-2">&amp;</span>field_column(), <span class="kw-2">&amp;</span>string_lit(<span class="string">"abc"</span>))
@@ -477,7 +477,7 @@
     </span><span class="kw">fn </span>test_collect_eq_nonexistent_column() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>res = builder.collect_eq(<span class="kw-2">&amp;</span>nonexistent_column(), <span class="kw-2">&amp;</span>string_lit(<span class="string">"abc"</span>));
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(res, <span class="prelude-val">Err</span>(Error::ColumnNotFound { .. })));
@@ -488,7 +488,7 @@
     </span><span class="kw">fn </span>test_collect_eq_type_mismatch() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>res = builder.collect_eq(<span class="kw-2">&amp;</span>tag_column(), <span class="kw-2">&amp;</span>int64_lit(<span class="number">1</span>));
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(res, <span class="prelude-val">Err</span>(Error::FieldTypeMismatch { .. })));
@@ -499,7 +499,7 @@
     </span><span class="kw">fn </span>test_collect_or_eq_list_basic() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>eq_expr = DfExpr::BinaryExpr(BinaryExpr {
             left: Box::new(tag_column()),
@@ -549,7 +549,7 @@
     </span><span class="kw">fn </span>test_collect_or_eq_list_invalid_op() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>eq_expr = DfExpr::BinaryExpr(BinaryExpr {
             left: Box::new(tag_column()),
@@ -578,7 +578,7 @@
     </span><span class="kw">fn </span>test_collect_or_eq_list_multiple_columns() {
         <span class="kw">let </span>metadata = test_region_metadata();
         <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="kw-2">&amp;</span>metadata);
+            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
 
         <span class="kw">let </span>eq_expr = DfExpr::BinaryExpr(BinaryExpr {
             left: Box::new(tag_column()),
