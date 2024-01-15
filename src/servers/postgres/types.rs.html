@@ -978,7 +978,7 @@
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>parameter_to_string(portal: <span class="kw-2">&amp;</span>Portal&lt;SqlPlan&gt;, idx: usize) -&gt; PgWireResult&lt;String&gt; {
     <span class="comment">// the index is managed from portal's parameters count so it's safe to
     // unwrap here.
-    </span><span class="kw">let </span>param_type = portal.statement().parameter_types().get(idx).unwrap();
+    </span><span class="kw">let </span>param_type = portal.statement.parameter_types.get(idx).unwrap();
     <span class="kw">match </span>param_type {
         <span class="kw-2">&amp;</span>Type::VARCHAR | <span class="kw-2">&amp;</span>Type::TEXT =&gt; <span class="prelude-val">Ok</span>(<span class="macro">format!</span>(
             <span class="string">"'{}'"</span>,
@@ -1028,7 +1028,7 @@
 
 <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn </span>invalid_parameter_error(msg: <span class="kw-2">&amp;</span>str, detail: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;) -&gt; PgWireError {
     <span class="kw">let </span><span class="kw-2">mut </span>error_info = ErrorInfo::new(<span class="string">"ERROR"</span>.to_owned(), <span class="string">"22023"</span>.to_owned(), msg.to_owned());
-    error_info.set_detail(detail.map(|s| s.to_owned()));
+    error_info.detail = detail.map(|s| s.to_owned());
     PgWireError::UserError(Box::new(error_info))
 }
 
@@ -1056,7 +1056,7 @@
     <span class="kw">let </span>param_count = portal.parameter_len();
     <span class="kw">let </span><span class="kw-2">mut </span>results = Vec::with_capacity(param_count);
 
-    <span class="kw">let </span>client_param_types = portal.statement().parameter_types();
+    <span class="kw">let </span>client_param_types = <span class="kw-2">&amp;</span>portal.statement.parameter_types;
     <span class="kw">let </span>param_types = plan
         .get_param_types()
         .map_err(|e| PgWireError::ApiError(Box::new(e)))<span class="question-mark">?</span>;
