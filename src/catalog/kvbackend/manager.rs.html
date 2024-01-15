@@ -283,6 +283,10 @@
 <a href="#282" id="282">282</a>
 <a href="#283" id="283">283</a>
 <a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -320,8 +324,8 @@
 <span class="kw">use </span>table::TableRef;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
-    <span class="self">self </span><span class="kw">as </span>catalog_err, ListCatalogsSnafu, ListSchemasSnafu, <span class="prelude-ty">Result </span><span class="kw">as </span>CatalogResult,
-    TableMetadataManagerSnafu,
+    <span class="self">self </span><span class="kw">as </span>catalog_err, ListCatalogsSnafu, ListSchemasSnafu, ListTablesSnafu,
+    <span class="prelude-ty">Result </span><span class="kw">as </span>CatalogResult, TableMetadataManagerSnafu,
 };
 <span class="kw">use </span><span class="kw">crate</span>::information_schema::InformationSchemaProvider;
 <span class="kw">use </span><span class="kw">crate</span>::CatalogManager;
@@ -420,18 +424,22 @@
     }
 
     <span class="kw">async fn </span>table_names(<span class="kw-2">&amp;</span><span class="self">self</span>, catalog: <span class="kw-2">&amp;</span>str, schema: <span class="kw-2">&amp;</span>str) -&gt; CatalogResult&lt;Vec&lt;String&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>tables = <span class="self">self
+        <span class="kw">let </span>stream = <span class="self">self
             </span>.table_metadata_manager
             .table_name_manager()
             .tables(catalog, schema)
+            .<span class="kw">await</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>tables = stream
+            .try_collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
             .<span class="kw">await
-            </span>.context(TableMetadataManagerSnafu)<span class="question-mark">?
+            </span>.map_err(BoxedError::new)
+            .context(ListTablesSnafu { catalog, schema })<span class="question-mark">?
             </span>.into_iter()
             .map(|(k, <span class="kw">_</span>)| k)
-            .collect::&lt;Vec&lt;String&gt;&gt;();
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
         tables.extend_from_slice(<span class="kw-2">&amp;</span><span class="self">self</span>.system_catalog.table_names(schema));
 
-        <span class="prelude-val">Ok</span>(tables)
+        <span class="prelude-val">Ok</span>(tables.into_iter().collect())
     }
 
     <span class="kw">async fn </span>catalog_exists(<span class="kw-2">&amp;</span><span class="self">self</span>, catalog: <span class="kw-2">&amp;</span>str) -&gt; CatalogResult&lt;bool&gt; {
