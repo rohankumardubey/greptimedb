@@ -115,6 +115,32 @@
 <a href="#114" id="114">114</a>
 <a href="#115" id="115">115</a>
 <a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -131,101 +157,127 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>api::v1::greptime_database_server::GreptimeDatabaseServer;
+<span class="kw">use </span>api::v1::prometheus_gateway_server::PrometheusGatewayServer;
+<span class="kw">use </span>api::v1::region::region_server::RegionServer;
+<span class="kw">use </span>arrow_flight::flight_service_server::FlightServiceServer;
 <span class="kw">use </span>auth::UserProviderRef;
 <span class="kw">use </span>common_runtime::Runtime;
+<span class="kw">use </span>opentelemetry_proto::tonic::collector::metrics::v1::metrics_service_server::MetricsServiceServer;
+<span class="kw">use </span>opentelemetry_proto::tonic::collector::trace::v1::trace_service_server::TraceServiceServer;
 <span class="kw">use </span>tokio::sync::Mutex;
+<span class="kw">use </span>tonic::transport::server::RoutesBuilder;
+<span class="kw">use </span>tower::ServiceBuilder;
 
-<span class="kw">use </span><span class="kw">super</span>::flight::FlightCraftRef;
+<span class="kw">use </span><span class="kw">super</span>::flight::{FlightCraftRef, FlightCraftWrapper};
 <span class="kw">use </span><span class="kw">super</span>::region_server::{RegionServerHandlerRef, RegionServerRequestHandler};
 <span class="kw">use super</span>::{GrpcServer, GrpcServerConfig};
+<span class="kw">use </span><span class="kw">crate</span>::grpc::authorize::AuthMiddlewareLayer;
+<span class="kw">use </span><span class="kw">crate</span>::grpc::database::DatabaseService;
 <span class="kw">use </span><span class="kw">crate</span>::grpc::greptime_handler::GreptimeRequestHandler;
+<span class="kw">use </span><span class="kw">crate</span>::grpc::otlp::OtlpService;
+<span class="kw">use </span><span class="kw">crate</span>::grpc::prom_query_gateway::PrometheusGatewayService;
 <span class="kw">use </span><span class="kw">crate</span>::prometheus_handler::PrometheusHandlerRef;
 <span class="kw">use </span><span class="kw">crate</span>::query_handler::OpenTelemetryProtocolHandlerRef;
 
+<span class="macro">macro_rules! </span>add_service {
+    (<span class="macro-nonterminal">$builder</span>: ident, <span class="macro-nonterminal">$service</span>: expr) =&gt; {
+        <span class="macro-nonterminal">$builder</span>.routes_builder.add_service(
+            <span class="macro-nonterminal">$service
+                </span>.max_decoding_message_size(<span class="macro-nonterminal">$builder</span>.config.max_recv_message_size)
+                .max_encoding_message_size(<span class="macro-nonterminal">$builder</span>.config.max_send_message_size),
+        )
+    };
+}
+
 <span class="kw">pub struct </span>GrpcServerBuilder {
-    config: <span class="prelude-ty">Option</span>&lt;GrpcServerConfig&gt;,
-    database_handler: <span class="prelude-ty">Option</span>&lt;GreptimeRequestHandler&gt;,
-    prometheus_handler: <span class="prelude-ty">Option</span>&lt;PrometheusHandlerRef&gt;,
-    flight_handler: <span class="prelude-ty">Option</span>&lt;FlightCraftRef&gt;,
-    region_server_handler: <span class="prelude-ty">Option</span>&lt;RegionServerHandlerRef&gt;,
-    otlp_handler: <span class="prelude-ty">Option</span>&lt;OpenTelemetryProtocolHandlerRef&gt;,
-    user_provider: <span class="prelude-ty">Option</span>&lt;UserProviderRef&gt;,
+    config: GrpcServerConfig,
     runtime: Arc&lt;Runtime&gt;,
+    routes_builder: RoutesBuilder,
 }
 
 <span class="kw">impl </span>GrpcServerBuilder {
-    <span class="kw">pub fn </span>new(runtime: Arc&lt;Runtime&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">pub fn </span>new(config: GrpcServerConfig, runtime: Arc&lt;Runtime&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            config: <span class="prelude-val">None</span>,
-            database_handler: <span class="prelude-val">None</span>,
-            prometheus_handler: <span class="prelude-val">None</span>,
-            flight_handler: <span class="prelude-val">None</span>,
-            region_server_handler: <span class="prelude-val">None</span>,
-            otlp_handler: <span class="prelude-val">None</span>,
-            user_provider: <span class="prelude-val">None</span>,
+            config,
             runtime,
+            routes_builder: RoutesBuilder::default(),
         }
     }
-
-    <span class="kw">pub fn </span>config(<span class="kw-2">mut </span><span class="self">self</span>, config: GrpcServerConfig) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.config = <span class="prelude-val">Some</span>(config);
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>option_config(<span class="kw-2">mut </span><span class="self">self</span>, config: <span class="prelude-ty">Option</span>&lt;GrpcServerConfig&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.config = config;
-        <span class="self">self
-    </span>}
 
     <span class="kw">pub fn </span>runtime(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Arc&lt;Runtime&gt; {
         <span class="kw-2">&amp;</span><span class="self">self</span>.runtime
     }
 
-    <span class="kw">pub fn </span>database_handler(<span class="kw-2">mut </span><span class="self">self</span>, database_handler: GreptimeRequestHandler) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.database_handler = <span class="prelude-val">Some</span>(database_handler);
+    <span class="doccomment">/// Add handler for [DatabaseService] service.
+    </span><span class="kw">pub fn </span>database_handler(<span class="kw-2">mut </span><span class="self">self</span>, database_handler: GreptimeRequestHandler) -&gt; <span class="self">Self </span>{
+        <span class="macro">add_service!</span>(
+            <span class="self">self</span>,
+            GreptimeDatabaseServer::new(DatabaseService::new(database_handler))
+        );
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>prometheus_handler(<span class="kw-2">mut </span><span class="self">self</span>, prometheus_handler: PrometheusHandlerRef) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.prometheus_handler = <span class="prelude-val">Some</span>(prometheus_handler);
+    <span class="doccomment">/// Add handler for Prometheus-compatible PromQL queries ([PrometheusGateway]).
+    </span><span class="kw">pub fn </span>prometheus_handler(
+        <span class="kw-2">mut </span><span class="self">self</span>,
+        prometheus_handler: PrometheusHandlerRef,
+        user_provider: <span class="prelude-ty">Option</span>&lt;UserProviderRef&gt;,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="macro">add_service!</span>(
+            <span class="self">self</span>,
+            PrometheusGatewayServer::new(PrometheusGatewayService::new(
+                prometheus_handler,
+                user_provider,
+            ))
+        );
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>flight_handler(<span class="kw-2">mut </span><span class="self">self</span>, flight_handler: FlightCraftRef) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.flight_handler = <span class="prelude-val">Some</span>(flight_handler);
+    <span class="doccomment">/// Add handler for [FlightService](arrow_flight::flight_service_server::FlightService).
+    </span><span class="kw">pub fn </span>flight_handler(<span class="kw-2">mut </span><span class="self">self</span>, flight_handler: FlightCraftRef) -&gt; <span class="self">Self </span>{
+        <span class="macro">add_service!</span>(
+            <span class="self">self</span>,
+            FlightServiceServer::new(FlightCraftWrapper(flight_handler.clone()))
+        );
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>region_server_handler(<span class="kw-2">mut </span><span class="self">self</span>, region_server_handler: RegionServerHandlerRef) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.region_server_handler = <span class="prelude-val">Some</span>(region_server_handler);
+    <span class="doccomment">/// Add handler for [RegionServer].
+    </span><span class="kw">pub fn </span>region_server_handler(<span class="kw-2">mut </span><span class="self">self</span>, region_server_handler: RegionServerHandlerRef) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>handler = RegionServerRequestHandler::new(region_server_handler, <span class="self">self</span>.runtime.clone());
+        <span class="macro">add_service!</span>(<span class="self">self</span>, RegionServer::new(handler));
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>otlp_handler(<span class="kw-2">mut </span><span class="self">self</span>, otlp_handler: OpenTelemetryProtocolHandlerRef) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.otlp_handler = <span class="prelude-val">Some</span>(otlp_handler);
+    <span class="doccomment">/// Add handler for OpenTelemetry Protocol (OTLP) requests.
+    </span><span class="kw">pub fn </span>otlp_handler(
+        <span class="kw-2">mut </span><span class="self">self</span>,
+        otlp_handler: OpenTelemetryProtocolHandlerRef,
+        user_provider: <span class="prelude-ty">Option</span>&lt;UserProviderRef&gt;,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>trace_server = ServiceBuilder::new()
+            .layer(AuthMiddlewareLayer::with(user_provider.clone()))
+            .service(TraceServiceServer::new(OtlpService::new(
+                otlp_handler.clone(),
+            )));
+        <span class="self">self</span>.routes_builder.add_service(trace_server);
+
+        <span class="kw">let </span>metrics_server = ServiceBuilder::new()
+            .layer(AuthMiddlewareLayer::with(user_provider))
+            .service(MetricsServiceServer::new(OtlpService::new(otlp_handler)));
+        <span class="self">self</span>.routes_builder.add_service(metrics_server);
+
         <span class="self">self
     </span>}
 
-    <span class="kw">pub fn </span>user_provider(<span class="kw-2">mut </span><span class="self">self</span>, user_provider: <span class="prelude-ty">Option</span>&lt;UserProviderRef&gt;) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.user_provider = user_provider;
-        <span class="self">self
-    </span>}
+    <span class="kw">pub fn </span>routes_builder_mut(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>RoutesBuilder {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.routes_builder
+    }
 
     <span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; GrpcServer {
-        <span class="kw">let </span>config = <span class="self">self</span>.config.unwrap_or_default();
-        <span class="kw">let </span>runtime = <span class="self">self</span>.runtime;
-        <span class="kw">let </span>region_server_handler = <span class="self">self
-            </span>.region_server_handler
-            .map(|handler| RegionServerRequestHandler::new(handler, runtime));
-
         GrpcServer {
-            config,
-            prometheus_handler: <span class="self">self</span>.prometheus_handler,
-            flight_handler: <span class="self">self</span>.flight_handler,
-            region_server_handler,
-            database_handler: <span class="self">self</span>.database_handler,
-            otlp_handler: <span class="self">self</span>.otlp_handler,
-            user_provider: <span class="self">self</span>.user_provider,
+            routes: Mutex::new(<span class="prelude-val">Some</span>(<span class="self">self</span>.routes_builder.routes())),
             shutdown_tx: Mutex::new(<span class="prelude-val">None</span>),
             serve_state: Mutex::new(<span class="prelude-val">None</span>),
         }

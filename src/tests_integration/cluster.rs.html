@@ -417,6 +417,9 @@
 <a href="#416" id="416">416</a>
 <a href="#417" id="417">417</a>
 <a href="#418" id="418">418</a>
+<a href="#419" id="419">419</a>
+<a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -437,6 +440,8 @@
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>api::v1::meta::Role;
+<span class="kw">use </span>api::v1::region::region_server::RegionServer;
+<span class="kw">use </span>arrow_flight::flight_service_server::FlightServiceServer;
 <span class="kw">use </span>catalog::kvbackend::{CachedMetaKvBackend, MetaKvBackend};
 <span class="kw">use </span>client::client_manager::DatanodeClients;
 <span class="kw">use </span>client::Client;
@@ -464,7 +469,8 @@
 <span class="kw">use </span>meta_srv::cluster::MetaPeerClientRef;
 <span class="kw">use </span>meta_srv::metasrv::{MetaSrv, MetaSrvOptions, SelectorRef};
 <span class="kw">use </span>meta_srv::mocks::MockInfo;
-<span class="kw">use </span>servers::grpc::builder::GrpcServerBuilder;
+<span class="kw">use </span>servers::grpc::flight::FlightCraftWrapper;
+<span class="kw">use </span>servers::grpc::region_server::RegionServerRequestHandler;
 <span class="kw">use </span>servers::heartbeat_options::HeartbeatOptions;
 <span class="kw">use </span>servers::Mode;
 <span class="kw">use </span>tempfile::TempDir;
@@ -792,15 +798,15 @@
             .unwrap(),
     );
 
-    <span class="kw">let </span>grpc_server = GrpcServerBuilder::new(runtime)
-        .flight_handler(Arc::new(datanode.region_server()))
-        .region_server_handler(Arc::new(datanode.region_server()))
-        .build();
+    <span class="kw">let </span>flight_handler = FlightCraftWrapper(datanode.region_server());
+
+    <span class="kw">let </span>region_server_handler =
+        RegionServerRequestHandler::new(Arc::new(datanode.region_server()), runtime);
 
     <span class="kw">let </span>_handle = tokio::spawn(<span class="kw">async move </span>{
         Server::builder()
-            .add_service(grpc_server.create_flight_service())
-            .add_service(grpc_server.create_region_service())
+            .add_service(FlightServiceServer::new(flight_handler))
+            .add_service(RegionServer::new(region_server_handler))
             .serve_with_incoming(futures::stream::iter(<span class="macro">vec!</span>[<span class="prelude-val">Ok</span>::&lt;<span class="kw">_</span>, std::io::Error&gt;(server)]))
             .<span class="kw">await
     </span>});

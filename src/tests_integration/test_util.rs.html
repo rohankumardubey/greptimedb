@@ -676,8 +676,6 @@
 <a href="#675" id="675">675</a>
 <a href="#676" id="676">676</a>
 <a href="#677" id="677">677</a>
-<a href="#678" id="678">678</a>
-<a href="#679" id="679">679</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1191,12 +1189,10 @@ CREATE TABLE IF NOT EXISTS {table_name} (
     <span class="kw">let </span>flight_handler = Arc::new(greptime_request_handler.clone());
 
     <span class="kw">let </span>fe_grpc_server = Arc::new(
-        GrpcServerBuilder::new(runtime)
-            .option_config(grpc_config)
+        GrpcServerBuilder::new(grpc_config.unwrap_or_default(), runtime)
             .database_handler(greptime_request_handler)
             .flight_handler(flight_handler)
-            .prometheus_handler(fe_instance_ref.clone())
-            .user_provider(user_provider)
+            .prometheus_handler(fe_instance_ref.clone(), user_provider)
             .build(),
     );
 

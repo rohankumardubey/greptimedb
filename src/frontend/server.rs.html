@@ -234,7 +234,6 @@
 <a href="#233" id="233">233</a>
 <a href="#234" id="234">234</a>
 <a href="#235" id="235">235</a>
-<a href="#236" id="236">236</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -297,7 +296,7 @@
             max_send_message_size: opts.max_send_message_size.as_bytes() <span class="kw">as </span>usize,
         };
 
-        <span class="prelude-val">Ok</span>(GrpcServerBuilder::new(grpc_runtime).config(grpc_config))
+        <span class="prelude-val">Ok</span>(GrpcServerBuilder::new(grpc_config, grpc_runtime))
     }
 
     <span class="kw">pub async fn </span>build&lt;T, U&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, opts: T, instance: Arc&lt;U&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;ServerHandlers&gt;
@@ -339,9 +338,8 @@
             );
             <span class="kw">let </span>grpc_server = builder
                 .database_handler(greptime_request_handler.clone())
-                .prometheus_handler(instance.clone())
-                .otlp_handler(instance.clone())
-                .user_provider(user_provider.clone())
+                .prometheus_handler(instance.clone(), user_provider.clone())
+                .otlp_handler(instance.clone(), user_provider.clone())
                 .flight_handler(Arc::new(greptime_request_handler))
                 .build();
 
