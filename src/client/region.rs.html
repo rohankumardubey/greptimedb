@@ -492,7 +492,7 @@
         <span class="kw">let </span>result = check_response_header(<span class="prelude-val">Some</span>(ResponseHeader {
             status: <span class="prelude-val">Some</span>(PbStatus {
                 status_code: StatusCode::Success <span class="kw">as </span>u32,
-                err_msg: <span class="string">""</span>.to_string(),
+                err_msg: String::default(),
             }),
         }));
         <span class="macro">assert!</span>(result.is_ok());
@@ -500,7 +500,7 @@
         <span class="kw">let </span>result = check_response_header(<span class="prelude-val">Some</span>(ResponseHeader {
             status: <span class="prelude-val">Some</span>(PbStatus {
                 status_code: u32::MAX,
-                err_msg: <span class="string">""</span>.to_string(),
+                err_msg: String::default(),
             }),
         }));
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(

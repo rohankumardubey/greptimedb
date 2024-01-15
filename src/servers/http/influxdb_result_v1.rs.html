@@ -280,7 +280,7 @@
 <span class="kw">impl </span>InfluxdbRecordsOutput {
     <span class="kw">pub fn </span>new(columns: Vec&lt;String&gt;, values: Vec&lt;Vec&lt;Value&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            name: <span class="string">""</span>.to_string(),
+            name: String::default(),
             columns,
             values,
         }

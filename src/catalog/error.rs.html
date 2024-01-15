@@ -704,7 +704,7 @@
         <span class="macro">assert_eq!</span>(
             StatusCode::StorageUnavailable,
             Error::SystemCatalog {
-                msg: <span class="string">""</span>.to_string(),
+                msg: String::default(),
                 location: Location::generate(),
             }
             .status_code()

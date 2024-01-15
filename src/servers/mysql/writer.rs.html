@@ -586,7 +586,7 @@
 
         <span class="comment">// TODO(LFC): Currently "table" and "colflags" are not relevant in MySQL server
         //   implementation, will revisit them again in the future.
-        </span>table: <span class="string">""</span>.to_string(),
+        </span>table: String::default(),
         colflags,
     })
 }

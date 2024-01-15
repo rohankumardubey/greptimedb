@@ -442,7 +442,7 @@
         <span class="kw">if let </span><span class="prelude-val">Some</span>(partitions) = <span class="kw-2">&amp;</span><span class="self">self</span>.partitions {
             <span class="macro">format!</span>(<span class="string">"{}\n"</span>, partitions)
         } <span class="kw">else </span>{
-            <span class="string">""</span>.to_string()
+            String::default()
         }
     }
 
@@ -458,7 +458,7 @@
     <span class="attr">#[inline]
     </span><span class="kw">fn </span>format_options(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; String {
         <span class="kw">if </span><span class="self">self</span>.options.is_empty() {
-            <span class="string">""</span>.to_string()
+            String::default()
         } <span class="kw">else </span>{
             <span class="kw">let </span>options: Vec&lt;<span class="kw-2">&amp;</span>SqlOption&gt; = <span class="self">self</span>.options.iter().sorted().collect();
             <span class="kw">let </span>options = <span class="macro">format_list_indent!</span>(options);

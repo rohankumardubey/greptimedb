@@ -142,6 +142,12 @@
 <a href="#141" id="141">141</a>
 <a href="#142" id="142">142</a>
 <a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -205,6 +211,12 @@
 </span><span class="attr">#[derive(Debug, Clone, PartialEq, Eq, Visit, VisitMut)]
 </span><span class="kw">pub struct </span>ShowCreateTable {
     <span class="kw">pub </span>table_name: ObjectName,
+}
+
+<span class="doccomment">/// SQL structure for `SHOW VARIABLES xxx`.
+</span><span class="attr">#[derive(Debug, Clone, PartialEq, Eq, Visit, VisitMut)]
+</span><span class="kw">pub struct </span>ShowVariables {
+    <span class="kw">pub </span>variable: ObjectName,
 }
 
 <span class="attr">#[cfg(test)]

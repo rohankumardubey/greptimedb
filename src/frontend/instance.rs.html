@@ -616,6 +616,8 @@
 <a href="#615" id="615">615</a>
 <a href="#616" id="616">616</a>
 <a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1075,6 +1077,8 @@
         <span class="comment">// show create table and alter are not supported yet
         </span>Statement::ShowCreateTable(<span class="kw">_</span>) | Statement::CreateExternalTable(<span class="kw">_</span>) | Statement::Alter(<span class="kw">_</span>) =&gt; {
         }
+        <span class="comment">// set/show variable now only alter/show variable in session
+        </span>Statement::SetVariables(<span class="kw">_</span>) | Statement::ShowVariables(<span class="kw">_</span>) =&gt; {}
 
         Statement::Insert(insert) =&gt; {
             validate_param(insert.table_name(), query_ctx)<span class="question-mark">?</span>;

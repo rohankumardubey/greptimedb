@@ -1291,14 +1291,14 @@
     </span><span class="kw">fn </span>test_from_proto_location() {
         <span class="kw">let </span>proto_location = v1::AddColumnLocation {
             location_type: LocationType::First <span class="kw">as </span>i32,
-            after_column_name: <span class="string">""</span>.to_string(),
+            after_column_name: String::default(),
         };
         <span class="kw">let </span>location = AddColumnLocation::try_from(proto_location).unwrap();
         <span class="macro">assert_eq!</span>(location, AddColumnLocation::First);
 
         <span class="kw">let </span>proto_location = v1::AddColumnLocation {
             location_type: <span class="number">10</span>,
-            after_column_name: <span class="string">""</span>.to_string(),
+            after_column_name: String::default(),
         };
         AddColumnLocation::try_from(proto_location).unwrap_err();
 
@@ -1352,7 +1352,7 @@
                     }),
                     location: <span class="prelude-val">Some</span>(v1::AddColumnLocation {
                         location_type: LocationType::First <span class="kw">as </span>i32,
-                        after_column_name: <span class="string">""</span>.to_string(),
+                        after_column_name: String::default(),
                     }),
                 }],
             })),

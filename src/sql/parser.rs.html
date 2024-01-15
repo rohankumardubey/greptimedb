@@ -255,6 +255,8 @@
 <a href="#254" id="254">254</a>
 <a href="#255" id="255">255</a>
 <a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -373,6 +375,8 @@
                     Keyword::COPY =&gt; <span class="self">self</span>.parse_copy(),
 
                     Keyword::TRUNCATE =&gt; <span class="self">self</span>.parse_truncate(),
+
+                    Keyword::SET =&gt; <span class="self">self</span>.parse_set_variables(),
 
                     Keyword::NoKeyword
                         <span class="kw">if </span>w.value.to_uppercase() == tql_parser::TQL &amp;&amp; w.quote_style.is_none() =&gt;

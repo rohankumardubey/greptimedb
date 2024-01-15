@@ -132,7 +132,7 @@
         <span class="kw">match </span>value {
             AddColumnLocation::First =&gt; Location {
                 location_type: LocationType::First.into(),
-                after_column_name: <span class="string">""</span>.to_string(),
+                after_column_name: String::default(),
             },
             AddColumnLocation::After { column_name } =&gt; Location {
                 location_type: LocationType::After.into(),

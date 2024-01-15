@@ -342,6 +342,8 @@
 <a href="#341" id="341">341</a>
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -650,7 +652,9 @@
         </span><span class="macro">assert!</span>(ExportMetricsTask::try_new(
             <span class="kw-2">&amp;</span>ExportMetricsOption {
                 enable: <span class="bool-val">true</span>,
-                self_import: <span class="prelude-val">Some</span>(SelfImportOption { db: <span class="string">""</span>.to_string() }),
+                self_import: <span class="prelude-val">Some</span>(SelfImportOption {
+                    db: String::default()
+                }),
                 remote_write: <span class="prelude-val">None</span>,
                 ..Default::default()
             },
@@ -663,7 +667,7 @@
                 enable: <span class="bool-val">true</span>,
                 self_import: <span class="prelude-val">None</span>,
                 remote_write: <span class="prelude-val">Some</span>(RemoteWriteOption {
-                    url: <span class="string">""</span>.to_string(),
+                    url: String::default(),
                     ..Default::default()
                 }),
                 ..Default::default()

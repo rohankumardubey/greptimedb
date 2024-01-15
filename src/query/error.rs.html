@@ -319,6 +319,10 @@
 <a href="#318" id="318">318</a>
 <a href="#319" id="319">319</a>
 <a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -350,6 +354,9 @@
 </span><span class="kw">pub enum </span>Error {
     <span class="attr">#[snafu(display(<span class="string">"Unsupported expr type: {}"</span>, name))]
     </span>UnsupportedExpr { name: String, location: Location },
+
+    <span class="attr">#[snafu(display(<span class="string">"Unsupported show variable: {}"</span>, name))]
+    </span>UnsupportedVariable { name: String, location: Location },
 
     <span class="attr">#[snafu(display(<span class="string">"Operation {} not implemented yet"</span>, operation))]
     </span>Unimplemented {
@@ -595,6 +602,7 @@
             | ConvertSchema { .. }
             | AddSystemTimeOverflow { .. }
             | ColumnSchemaIncompatible { .. }
+            | UnsupportedVariable { .. }
             | ColumnSchemaNoDefault { .. } =&gt; StatusCode::InvalidArguments,
 
             BuildBackend { .. } | ListObjects { .. } =&gt; StatusCode::StorageUnavailable,

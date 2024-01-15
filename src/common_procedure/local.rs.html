@@ -1458,7 +1458,7 @@
 <span class="kw">impl </span>Default <span class="kw">for </span>ManagerConfig {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            parent_path: <span class="string">""</span>.to_string(),
+            parent_path: String::default(),
             max_retry_times: <span class="number">3</span>,
             retry_delay: Duration::from_millis(<span class="number">500</span>),
             remove_outdated_meta_task_interval: Duration::from_secs(<span class="number">60 </span>* <span class="number">10</span>),

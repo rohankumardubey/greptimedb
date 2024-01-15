@@ -958,6 +958,7 @@
 <a href="#957" id="957">957</a>
 <a href="#958" id="958">958</a>
 <a href="#959" id="959">959</a>
+<a href="#960" id="960">960</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -982,6 +983,7 @@
 <span class="kw">pub mod </span>insert;
 <span class="kw">mod </span>option_map;
 <span class="kw">pub mod </span>query;
+<span class="kw">pub mod </span>set_variables;
 <span class="kw">pub mod </span>show;
 <span class="kw">pub mod </span>statement;
 <span class="kw">pub mod </span>tql;
@@ -1465,7 +1467,7 @@
     <span class="kw">match </span>location {
         <span class="prelude-val">Some</span>(AddColumnLocation::First) =&gt; <span class="prelude-val">Some</span>(Location {
             location_type: LocationType::First.into(),
-            after_column_name: <span class="string">""</span>.to_string(),
+            after_column_name: String::default(),
         }),
         <span class="prelude-val">Some</span>(AddColumnLocation::After { column_name }) =&gt; <span class="prelude-val">Some</span>(Location {
             location_type: LocationType::After.into(),

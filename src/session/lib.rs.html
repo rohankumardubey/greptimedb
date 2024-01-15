@@ -169,7 +169,7 @@
             .current_catalog(<span class="self">self</span>.catalog.load().to_string())
             .current_schema(<span class="self">self</span>.schema.load().to_string())
             .sql_dialect(<span class="self">self</span>.conn_info.channel.dialect())
-            .timezone((<span class="kw-2">**</span><span class="self">self</span>.timezone.load()).clone())
+            .timezone(<span class="self">self</span>.timezone())
             .build()
     }
 

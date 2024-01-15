@@ -275,6 +275,7 @@
 <a href="#274" id="274">274</a>
 <a href="#275" id="275">275</a>
 <a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -330,7 +331,8 @@
         <span class="kw">let </span>_timer = <span class="kw">crate</span>::metrics::METRIC_POSTGRES_QUERY_TIMER
             .with_label_values(<span class="kw-2">&amp;</span>[<span class="kw">crate</span>::metrics::METRIC_POSTGRES_SIMPLE_QUERY, db.as_str()])
             .start_timer();
-        <span class="kw">let </span>outputs = <span class="self">self</span>.query_handler.do_query(query, query_ctx).<span class="kw">await</span>;
+        <span class="kw">let </span>outputs = <span class="self">self</span>.query_handler.do_query(query, query_ctx.clone()).<span class="kw">await</span>;
+        query_ctx.update_session(<span class="kw-2">&amp;</span><span class="self">self</span>.session);
 
         <span class="kw">let </span><span class="kw-2">mut </span>results = Vec::with_capacity(outputs.len());
 

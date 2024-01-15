@@ -389,6 +389,34 @@
 <a href="#388" id="388">388</a>
 <a href="#389" id="389">389</a>
 <a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+<a href="#392" id="392">392</a>
+<a href="#393" id="393">393</a>
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
+<a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
+<a href="#407" id="407">407</a>
+<a href="#408" id="408">408</a>
+<a href="#409" id="409">409</a>
+<a href="#410" id="410">410</a>
+<a href="#411" id="411">411</a>
+<a href="#412" id="412">412</a>
+<a href="#413" id="413">413</a>
+<a href="#414" id="414">414</a>
+<a href="#415" id="415">415</a>
+<a href="#416" id="416">416</a>
+<a href="#417" id="417">417</a>
+<a href="#418" id="418">418</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -409,7 +437,9 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, InvalidDatabaseNameSnafu, InvalidTableNameSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::parser::ParserContext;
-<span class="kw">use </span><span class="kw">crate</span>::statements::show::{ShowCreateTable, ShowDatabases, ShowKind, ShowTables};
+<span class="kw">use </span><span class="kw">crate</span>::statements::show::{
+    ShowCreateTable, ShowDatabases, ShowKind, ShowTables, ShowVariables,
+};
 <span class="kw">use </span><span class="kw">crate</span>::statements::statement::Statement;
 
 <span class="doccomment">/// SHOW statement parser implementation
@@ -434,6 +464,16 @@
             } <span class="kw">else </span>{
                 <span class="self">self</span>.unsupported(<span class="self">self</span>.peek_token_as_string())
             }
+        } <span class="kw">else if </span><span class="self">self</span>.consume_token(<span class="string">"VARIABLES"</span>) {
+            <span class="kw">let </span>variable =
+                <span class="self">self</span>.parser
+                    .parse_object_name()
+                    .with_context(|<span class="kw">_</span>| error::UnexpectedSnafu {
+                        sql: <span class="self">self</span>.sql,
+                        expected: <span class="string">"a variable name"</span>,
+                        actual: <span class="self">self</span>.peek_token_as_string(),
+                    })<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(Statement::ShowVariables(ShowVariables { variable }))
         } <span class="kw">else </span>{
             <span class="self">self</span>.unsupported(<span class="self">self</span>.peek_token_as_string())
         }
@@ -568,6 +608,8 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::assert_matches::assert_matches;
+
+    <span class="kw">use </span>sqlparser::ast::{Ident, ObjectName};
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::dialect::GreptimeDbDialect;
@@ -776,6 +818,20 @@
                 database: <span class="prelude-val">Some</span>(<span class="kw">_</span>),
                 full: <span class="bool-val">true
             </span>})
+        );
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">pub fn </span>test_show_variables() {
+        <span class="kw">let </span>sql = <span class="string">"SHOW VARIABLES system_time_zone"</span>;
+        <span class="kw">let </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {});
+        <span class="kw">let </span>stmts = result.unwrap();
+        <span class="macro">assert_eq!</span>(<span class="number">1</span>, stmts.len());
+        <span class="macro">assert_eq!</span>(
+            stmts[<span class="number">0</span>],
+            Statement::ShowVariables(ShowVariables {
+                variable: ObjectName(<span class="macro">vec!</span>[Ident::new(<span class="string">"system_time_zone"</span>)]),
+            })
         );
     }
 }

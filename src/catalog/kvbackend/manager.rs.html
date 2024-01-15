@@ -368,7 +368,7 @@
                 catalog_manager: me.clone(),
                 information_schema_provider: Arc::new(InformationSchemaProvider::new(
                     <span class="comment">// The catalog name is not used in system_catalog, so let it empty
-                    </span><span class="string">""</span>.to_string(),
+                    </span>String::default(),
                     me.clone(),
                 )),
             },

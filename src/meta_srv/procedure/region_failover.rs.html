@@ -1330,7 +1330,7 @@
                 <span class="kw">let </span>nodes = (<span class="number">1</span>..=region_distribution.len())
                     .map(|id| Peer {
                         id: id <span class="kw">as </span>u64,
-                        addr: <span class="string">""</span>.to_string(),
+                        addr: String::default(),
                     })
                     .collect();
                 Arc::new(RandomNodeSelector { nodes })
@@ -1549,7 +1549,7 @@
             peers: Arc::new(Mutex::new(<span class="macro">vec!</span>[
                 <span class="prelude-val">Some</span>(Peer {
                     id: <span class="number">42</span>,
-                    addr: <span class="string">""</span>.to_string(),
+                    addr: String::default(),
                 }),
                 <span class="prelude-val">None</span>,
             ])),
