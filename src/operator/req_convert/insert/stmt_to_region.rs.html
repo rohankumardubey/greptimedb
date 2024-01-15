@@ -221,13 +221,13 @@
 <span class="kw">use </span>sqlparser::ast::{ObjectName, Value <span class="kw">as </span>SqlValue};
 <span class="kw">use </span>table::TableRef;
 
-<span class="kw">use </span><span class="kw">super</span>::semantic_type;
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     CatalogSnafu, ColumnDataTypeSnafu, ColumnDefaultValueSnafu, ColumnNoneDefaultValueSnafu,
     ColumnNotFoundSnafu, InvalidSqlSnafu, MissingInsertBodySnafu, ParseSqlSnafu, <span class="prelude-ty">Result</span>,
     TableNotFoundSnafu,
 };
 <span class="kw">use </span><span class="kw">crate</span>::req_convert::common::partitioner::Partitioner;
+<span class="kw">use </span><span class="kw">crate</span>::req_convert::insert::semantic_type;
 
 <span class="kw">const </span>DEFAULT_PLACEHOLDER_VALUE: <span class="kw-2">&amp;</span>str = <span class="string">"default"</span>;
 

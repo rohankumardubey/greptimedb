@@ -314,8 +314,8 @@
 <span class="kw">use </span>common_base::readable_size::ReadableSize;
 <span class="kw">use </span>parquet::file::metadata::ParquetMetaData;
 
-<span class="kw">use </span><span class="kw">super</span>::DEFAULT_WRITE_BUFFER_SIZE;
 <span class="kw">use </span><span class="kw">crate</span>::sst::file::FileTimeRange;
+<span class="kw">use </span><span class="kw">crate</span>::sst::DEFAULT_WRITE_BUFFER_SIZE;
 
 <span class="doccomment">/// Key of metadata in parquet SST.
 </span><span class="kw">pub const </span>PARQUET_METADATA_KEY: <span class="kw-2">&amp;</span>str = <span class="string">"greptime:metadata"</span>;

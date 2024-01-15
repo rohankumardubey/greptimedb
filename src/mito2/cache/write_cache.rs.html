@@ -327,18 +327,6 @@
 <a href="#326" id="326">326</a>
 <a href="#327" id="327">327</a>
 <a href="#328" id="328">328</a>
-<a href="#329" id="329">329</a>
-<a href="#330" id="330">330</a>
-<a href="#331" id="331">331</a>
-<a href="#332" id="332">332</a>
-<a href="#333" id="333">333</a>
-<a href="#334" id="334">334</a>
-<a href="#335" id="335">335</a>
-<a href="#336" id="336">336</a>
-<a href="#337" id="337">337</a>
-<a href="#338" id="338">338</a>
-<a href="#339" id="339">339</a>
-<a href="#340" id="340">340</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -355,27 +343,20 @@
 
 </span><span class="doccomment">//! A write-through cache for remote object stores.
 
-</span><span class="kw">use </span>std::ops::Range;
-<span class="kw">use </span>std::sync::Arc;
+</span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>api::v1::region;
-<span class="kw">use </span>bytes::Bytes;
 <span class="kw">use </span>common_base::readable_size::ReadableSize;
 <span class="kw">use </span>common_telemetry::{debug, info};
 <span class="kw">use </span>object_store::manager::ObjectStoreManagerRef;
 <span class="kw">use </span>object_store::ObjectStore;
 <span class="kw">use </span>snafu::ResultExt;
-<span class="kw">use </span>store_api::metadata::RegionMetadataRef;
-<span class="kw">use </span>store_api::storage::RegionId;
 
 <span class="kw">use </span><span class="kw">crate</span>::access_layer::{new_fs_object_store, SstWriteRequest};
 <span class="kw">use </span><span class="kw">crate</span>::cache::file_cache::{FileCache, FileCacheRef, FileType, IndexKey, IndexValue};
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::metrics::{FLUSH_ELAPSED, UPLOAD_BYTES_TOTAL};
-<span class="kw">use </span><span class="kw">crate</span>::read::Source;
-<span class="kw">use </span><span class="kw">crate</span>::sst::file::FileId;
 <span class="kw">use </span><span class="kw">crate</span>::sst::index::intermediate::IntermediateManager;
-<span class="kw">use </span><span class="kw">crate</span>::sst::index::{Indexer, IndexerBuilder};
+<span class="kw">use </span><span class="kw">crate</span>::sst::index::IndexerBuilder;
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::writer::ParquetWriter;
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::{SstInfo, WriteOptions};
 <span class="kw">use </span><span class="kw">crate</span>::sst::DEFAULT_WRITE_BUFFER_SIZE;
@@ -387,6 +368,8 @@
     <span class="doccomment">/// Local file cache.
     </span>file_cache: FileCacheRef,
     <span class="doccomment">/// Object store manager.
+    </span><span class="attr">#[allow(unused)]
+    </span><span class="doccomment">/// TODO: Remove unused after implementing async write cache
     </span>object_store_manager: ObjectStoreManagerRef,
     <span class="doccomment">/// Intermediate manager for inverted index.
     </span>intermediate_manager: IntermediateManager,
@@ -572,24 +555,17 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>api::v1::OpType;
+
     <span class="kw">use </span>common_base::readable_size::ReadableSize;
     <span class="kw">use </span>common_test_util::temp_dir::create_temp_dir;
-    <span class="kw">use </span>object_store::manager::ObjectStoreManager;
-    <span class="kw">use </span>object_store::services::Fs;
     <span class="kw">use </span>object_store::util::join_dir;
-    <span class="kw">use </span>object_store::ObjectStore;
-    <span class="kw">use </span>store_api::storage::RegionId;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::cache::file_cache::{<span class="self">self</span>, FileCache};
     <span class="kw">use </span><span class="kw">crate</span>::cache::test_util::new_fs_store;
     <span class="kw">use </span><span class="kw">crate</span>::sst::file::FileId;
     <span class="kw">use </span><span class="kw">crate</span>::sst::location::{index_file_path, sst_file_path};
-    <span class="kw">use </span><span class="kw">crate</span>::test_util::sst_util::{
-        new_batch_by_range, new_source, sst_file_handle, sst_region_metadata,
-    };
-    <span class="kw">use </span><span class="kw">crate</span>::test_util::{build_rows, new_batch_builder, CreateRequestBuilder, TestEnv};
+    <span class="kw">use </span><span class="kw">crate</span>::test_util::sst_util::{new_batch_by_range, new_source, sst_region_metadata};
+    <span class="kw">use </span><span class="kw">crate</span>::test_util::TestEnv;
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_write_and_upload_sst() {
@@ -637,7 +613,7 @@
             cache_manager: Default::default(),
         };
 
-        <span class="kw">let </span>request = SstUploadRequest {
+        <span class="kw">let </span>upload_request = SstUploadRequest {
             upload_path: upload_path.clone(),
             index_upload_path: index_upload_path.clone(),
             remote_store: mock_store.clone(),
@@ -649,8 +625,8 @@
         };
 
         <span class="comment">// Write to cache and upload sst to mock remote store
-        </span><span class="kw">let </span>sst_info = write_cache
-            .write_and_upload_sst(write_request, request, <span class="kw-2">&amp;</span>write_opts)
+        </span>write_cache
+            .write_and_upload_sst(write_request, upload_request, <span class="kw-2">&amp;</span>write_opts)
             .<span class="kw">await
             </span>.unwrap()
             .unwrap();
