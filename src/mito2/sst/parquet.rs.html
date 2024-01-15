@@ -269,6 +269,22 @@
 <a href="#268" id="268">268</a>
 <a href="#269" id="269">269</a>
 <a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -351,6 +367,7 @@
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::cache::{CacheManager, PageKey};
+    <span class="kw">use </span><span class="kw">crate</span>::sst::index::Indexer;
     <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::reader::ParquetReaderBuilder;
     <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::writer::ParquetWriter;
     <span class="kw">use </span><span class="kw">crate</span>::test_util::sst_util::{
@@ -378,7 +395,12 @@
             ..Default::default()
         };
 
-        <span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(file_path, metadata, object_store.clone());
+        <span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(
+            file_path,
+            metadata,
+            object_store.clone(),
+            Indexer::default(),
+        );
         <span class="kw">let </span>info = writer
             .write_all(source, <span class="kw-2">&amp;</span>write_opts)
             .<span class="kw">await
@@ -427,7 +449,12 @@
             ..Default::default()
         };
         <span class="comment">// Prepare data.
-        </span><span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(file_path, metadata.clone(), object_store.clone());
+        </span><span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(
+            file_path,
+            metadata.clone(),
+            object_store.clone(),
+            Indexer::default(),
+        );
         writer
             .write_all(source, <span class="kw-2">&amp;</span>write_opts)
             .<span class="kw">await
@@ -496,7 +523,12 @@
 
         <span class="comment">// write the sst file and get sst info
         // sst info contains the parquet metadata, which is converted from FileMetaData
-        </span><span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(file_path, metadata.clone(), object_store.clone());
+        </span><span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(
+            file_path,
+            metadata.clone(),
+            object_store.clone(),
+            Indexer::default(),
+        );
         <span class="kw">let </span>sst_info = writer
             .write_all(source, <span class="kw-2">&amp;</span>write_opts)
             .<span class="kw">await

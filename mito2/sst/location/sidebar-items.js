@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["index_file_path","sst_file_path"],"struct":["IntermediateLocation"]};
+window.SIDEBAR_ITEMS = {"fn":["index_file_path","sst_file_path"]};

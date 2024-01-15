@@ -81,7 +81,7 @@
 
 <span class="doccomment">/// `InvertedIndexCreator` provides functionality to construct an inverted index
 </span><span class="attr">#[async_trait]
-</span><span class="kw">pub trait </span>InvertedIndexCreator {
+</span><span class="kw">pub trait </span>InvertedIndexCreator: Send {
     <span class="doccomment">/// Adds a value to the named index. A `None` value represents an absence of data (null)
     ///
     /// - `index_name`: Identifier for the index being built

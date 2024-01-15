@@ -327,6 +327,7 @@
 <a href="#326" id="326">326</a>
 <a href="#327" id="327">327</a>
 <a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -613,7 +614,8 @@
     }
 }
 
-<span class="attr">#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
+<span class="attr">#[allow(clippy::large_enum_variant)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 </span><span class="kw">pub enum </span>RegionEngineConfig {
     <span class="attr">#[serde(rename = <span class="string">"mito"</span>)]
     </span>Mito(MitoConfig),

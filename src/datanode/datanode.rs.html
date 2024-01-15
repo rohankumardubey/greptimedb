@@ -592,12 +592,6 @@
 <a href="#591" id="591">591</a>
 <a href="#592" id="592">592</a>
 <a href="#593" id="593">593</a>
-<a href="#594" id="594">594</a>
-<a href="#595" id="595">595</a>
-<a href="#596" id="596">596</a>
-<a href="#597" id="597">597</a>
-<a href="#598" id="598">598</a>
-<a href="#599" id="599">599</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -641,7 +635,7 @@
 <span class="kw">use </span>mito2::config::MitoConfig;
 <span class="kw">use </span>mito2::engine::MitoEngine;
 <span class="kw">use </span>object_store::manager::{ObjectStoreManager, ObjectStoreManagerRef};
-<span class="kw">use </span>object_store::util::{join_dir, normalize_dir};
+<span class="kw">use </span>object_store::util::normalize_dir;
 <span class="kw">use </span>query::QueryEngineFactory;
 <span class="kw">use </span>servers::export_metrics::ExportMetricsTask;
 <span class="kw">use </span>servers::server::{start_server, ServerHandlers};
@@ -974,19 +968,11 @@
     </span><span class="kw">async fn </span>build_mito_engine(
         opts: <span class="kw-2">&amp;</span>DatanodeOptions,
         object_store_manager: ObjectStoreManagerRef,
-        <span class="kw-2">mut </span>config: MitoConfig,
+        config: MitoConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MitoEngine&gt; {
-        <span class="comment">// Sets write cache path if it is empty.
-        </span><span class="kw">if </span>config.experimental_write_cache_path.is_empty() {
-            config.experimental_write_cache_path = join_dir(<span class="kw-2">&amp;</span>opts.storage.data_home, <span class="string">"write_cache"</span>);
-            <span class="macro">info!</span>(
-                <span class="string">"Sets write cache path to {}"</span>,
-                config.experimental_write_cache_path
-            );
-        }
-
         <span class="kw">let </span>mito_engine = <span class="kw">match </span><span class="kw-2">&amp;</span>opts.wal {
             WalConfig::RaftEngine(raft_engine_config) =&gt; MitoEngine::new(
+                <span class="kw-2">&amp;</span>opts.storage.data_home,
                 config,
                 <span class="self">Self</span>::build_raft_engine_log_store(<span class="kw-2">&amp;</span>opts.storage.data_home, raft_engine_config)
                     .<span class="kw">await</span><span class="question-mark">?</span>,
@@ -994,7 +980,9 @@
             )
             .<span class="kw">await
             </span>.context(BuildMitoEngineSnafu)<span class="question-mark">?</span>,
+
             WalConfig::Kafka(kafka_config) =&gt; MitoEngine::new(
+                <span class="kw-2">&amp;</span>opts.storage.data_home,
                 config,
                 <span class="self">Self</span>::build_kafka_log_store(kafka_config).<span class="kw">await</span><span class="question-mark">?</span>,
                 object_store_manager,

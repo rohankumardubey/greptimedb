@@ -729,6 +729,28 @@
 <a href="#728" id="728">728</a>
 <a href="#729" id="729">729</a>
 <a href="#730" id="730">730</a>
+<a href="#731" id="731">731</a>
+<a href="#732" id="732">732</a>
+<a href="#733" id="733">733</a>
+<a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -786,6 +808,7 @@
     BackgroundNotify, DdlRequest, SenderDdlRequest, SenderWriteRequest, WorkerRequest,
 };
 <span class="kw">use </span><span class="kw">crate</span>::schedule::scheduler::{LocalScheduler, SchedulerRef};
+<span class="kw">use </span><span class="kw">crate</span>::sst::index::intermediate::IntermediateManager;
 <span class="kw">use </span><span class="kw">crate</span>::wal::Wal;
 
 <span class="doccomment">/// Identifier for a worker.
@@ -851,8 +874,15 @@
         <span class="kw">let </span>write_buffer_manager = Arc::new(WriteBufferManagerImpl::new(
             config.global_write_buffer_size.as_bytes() <span class="kw">as </span>usize,
         ));
+        <span class="kw">let </span>intermediate_manager =
+            IntermediateManager::init_fs(<span class="kw-2">&amp;</span>config.inverted_index.intermediate_path).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>scheduler = Arc::new(LocalScheduler::new(config.max_background_jobs));
-        <span class="kw">let </span>write_cache = write_cache_from_config(<span class="kw-2">&amp;</span>config, object_store_manager.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>write_cache = write_cache_from_config(
+            <span class="kw-2">&amp;</span>config,
+            object_store_manager.clone(),
+            intermediate_manager.clone(),
+        )
+        .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>cache_manager = Arc::new(
             CacheManager::builder()
                 .sst_meta_cache_size(config.sst_meta_cache_size.as_bytes())
@@ -873,6 +903,7 @@
                     scheduler: scheduler.clone(),
                     listener: WorkerListener::default(),
                     cache_manager: cache_manager.clone(),
+                    intermediate_manager: intermediate_manager.clone(),
                 }
                 .start()
             })
@@ -953,7 +984,14 @@
             ))
         });
         <span class="kw">let </span>scheduler = Arc::new(LocalScheduler::new(config.max_background_jobs));
-        <span class="kw">let </span>write_cache = write_cache_from_config(<span class="kw-2">&amp;</span>config, object_store_manager.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>intermediate_manager =
+            IntermediateManager::init_fs(<span class="kw-2">&amp;</span>config.inverted_index.intermediate_path).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>write_cache = write_cache_from_config(
+            <span class="kw-2">&amp;</span>config,
+            object_store_manager.clone(),
+            intermediate_manager.clone(),
+        )
+        .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>cache_manager = Arc::new(
             CacheManager::builder()
                 .sst_meta_cache_size(config.sst_meta_cache_size.as_bytes())
@@ -962,7 +1000,6 @@
                 .write_cache(write_cache)
                 .build(),
         );
-
         <span class="kw">let </span>workers = (<span class="number">0</span>..config.num_workers)
             .map(|id| {
                 WorkerStarter {
@@ -974,6 +1011,7 @@
                     scheduler: scheduler.clone(),
                     listener: WorkerListener::new(listener.clone()),
                     cache_manager: cache_manager.clone(),
+                    intermediate_manager: intermediate_manager.clone(),
                 }
                 .start()
             })
@@ -994,6 +1032,7 @@
 <span class="kw">async fn </span>write_cache_from_config(
     config: <span class="kw-2">&amp;</span>MitoConfig,
     object_store_manager: ObjectStoreManagerRef,
+    intermediate_manager: IntermediateManager,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;WriteCacheRef&gt;&gt; {
     <span class="kw">if </span>!config.enable_experimental_write_cache {
         <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
@@ -1006,6 +1045,7 @@
         <span class="kw-2">&amp;</span>config.experimental_write_cache_path,
         object_store_manager,
         config.experimental_write_cache_size,
+        intermediate_manager,
     )
     .<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(Arc::new(cache)))
@@ -1021,6 +1061,7 @@
     scheduler: SchedulerRef,
     listener: WorkerListener,
     cache_manager: CacheManagerRef,
+    intermediate_manager: IntermediateManager,
 }
 
 <span class="kw">impl</span>&lt;S: LogStore&gt; WorkerStarter&lt;S&gt; {
@@ -1054,6 +1095,7 @@
             stalled_requests: StalledRequests::default(),
             listener: <span class="self">self</span>.listener,
             cache_manager: <span class="self">self</span>.cache_manager,
+            intermediate_manager: <span class="self">self</span>.intermediate_manager,
         };
         <span class="kw">let </span>handle = common_runtime::spawn_write(<span class="kw">async move </span>{
             worker_thread.run().<span class="kw">await</span>;
@@ -1210,6 +1252,8 @@
     </span>listener: WorkerListener,
     <span class="doccomment">/// Cache.
     </span>cache_manager: CacheManagerRef,
+    <span class="doccomment">/// Intermediate manager for inverted index.
+    </span>intermediate_manager: IntermediateManager,
 }
 
 <span class="kw">impl</span>&lt;S: LogStore&gt; RegionWorkerLoop&lt;S&gt; {

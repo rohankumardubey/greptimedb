@@ -292,6 +292,53 @@
 <a href="#291" id="291">291</a>
 <a href="#292" id="292">292</a>
 <a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -321,12 +368,14 @@
 <span class="kw">use </span>store_api::metadata::RegionMetadataRef;
 <span class="kw">use </span>store_api::storage::RegionId;
 
-<span class="kw">use </span><span class="kw">crate</span>::access_layer::new_fs_object_store;
+<span class="kw">use </span><span class="kw">crate</span>::access_layer::{new_fs_object_store, SstWriteRequest};
 <span class="kw">use </span><span class="kw">crate</span>::cache::file_cache::{FileCache, FileCacheRef, FileType, IndexKey, IndexValue};
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::metrics::{FLUSH_ELAPSED, UPLOAD_BYTES_TOTAL};
 <span class="kw">use </span><span class="kw">crate</span>::read::Source;
 <span class="kw">use </span><span class="kw">crate</span>::sst::file::FileId;
+<span class="kw">use </span><span class="kw">crate</span>::sst::index::intermediate::IntermediateManager;
+<span class="kw">use </span><span class="kw">crate</span>::sst::index::{Indexer, IndexerBuilder};
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::writer::ParquetWriter;
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::{SstInfo, WriteOptions};
 <span class="kw">use </span><span class="kw">crate</span>::sst::DEFAULT_WRITE_BUFFER_SIZE;
@@ -339,6 +388,8 @@
     </span>file_cache: FileCacheRef,
     <span class="doccomment">/// Object store manager.
     </span>object_store_manager: ObjectStoreManagerRef,
+    <span class="doccomment">/// Intermediate manager for inverted index.
+    </span>intermediate_manager: IntermediateManager,
 }
 
 <span class="kw">pub type </span>WriteCacheRef = Arc&lt;WriteCache&gt;;
@@ -350,6 +401,7 @@
         local_store: ObjectStore,
         object_store_manager: ObjectStoreManagerRef,
         cache_capacity: ReadableSize,
+        intermediate_manager: IntermediateManager,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>file_cache = FileCache::new(local_store, cache_capacity);
         file_cache.recover().<span class="kw">await</span><span class="question-mark">?</span>;
@@ -357,6 +409,7 @@
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             file_cache: Arc::new(file_cache),
             object_store_manager,
+            intermediate_manager,
         })
     }
 
@@ -365,11 +418,18 @@
         cache_dir: <span class="kw-2">&amp;</span>str,
         object_store_manager: ObjectStoreManagerRef,
         cache_capacity: ReadableSize,
+        intermediate_manager: IntermediateManager,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="macro">info!</span>(<span class="string">"Init write cache on {cache_dir}, capacity: {cache_capacity}"</span>);
 
         <span class="kw">let </span>local_store = new_fs_object_store(cache_dir).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">Self</span>::new(local_store, object_store_manager, cache_capacity).<span class="kw">await
+        <span class="self">Self</span>::new(
+            local_store,
+            object_store_manager,
+            cache_capacity,
+            intermediate_manager,
+        )
+        .<span class="kw">await
     </span>}
 
     <span class="doccomment">/// Returns the file cache of the write cache.
@@ -378,27 +438,42 @@
     }
 
     <span class="doccomment">/// Writes SST to the cache and then uploads it to the remote object store.
-    </span><span class="kw">pub async fn </span>write_and_upload_sst(
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>write_and_upload_sst(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        request: SstUploadRequest,
+        write_request: SstWriteRequest,
+        upload_request: SstUploadRequest,
         write_opts: <span class="kw-2">&amp;</span>WriteOptions,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;SstInfo&gt;&gt; {
         <span class="kw">let </span>timer = FLUSH_ELAPSED
             .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"write_sst"</span>])
             .start_timer();
 
-        <span class="kw">let </span>region_id = request.metadata.region_id;
-        <span class="kw">let </span>file_id = request.file_id;
+        <span class="kw">let </span>region_id = write_request.metadata.region_id;
+        <span class="kw">let </span>file_id = write_request.file_id;
         <span class="kw">let </span>parquet_key = IndexKey::new(region_id, file_id, FileType::Parquet);
+        <span class="kw">let </span>puffin_key = IndexKey::new(region_id, file_id, FileType::Puffin);
+
+        <span class="kw">let </span>indexer = IndexerBuilder {
+            create_inverted_index: write_request.create_inverted_index,
+            mem_threshold_index_create: write_request.mem_threshold_index_create,
+            file_id,
+            file_path: <span class="self">self</span>.file_cache.cache_file_path(puffin_key),
+            metadata: <span class="kw-2">&amp;</span>write_request.metadata,
+            row_group_size: write_opts.row_group_size,
+            object_store: <span class="self">self</span>.file_cache.local_store(),
+            intermediate_manager: <span class="self">self</span>.intermediate_manager.clone(),
+        }
+        .build();
 
         <span class="comment">// Write to FileCache.
         </span><span class="kw">let </span><span class="kw-2">mut </span>writer = ParquetWriter::new(
             <span class="self">self</span>.file_cache.cache_file_path(parquet_key),
-            request.metadata,
+            write_request.metadata,
             <span class="self">self</span>.file_cache.local_store(),
+            indexer,
         );
 
-        <span class="kw">let </span>sst_info = writer.write_all(request.source, write_opts).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>sst_info = writer.write_all(write_request.source, write_opts).<span class="kw">await</span><span class="question-mark">?</span>;
 
         timer.stop_and_record();
 
@@ -408,13 +483,13 @@
             </span><span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         };
 
-        <span class="kw">let </span>parquet_path = <span class="kw-2">&amp;</span>request.upload_path;
-        <span class="kw">let </span>remote_store = <span class="kw-2">&amp;</span>request.remote_store;
+        <span class="kw">let </span>parquet_path = <span class="kw-2">&amp;</span>upload_request.upload_path;
+        <span class="kw">let </span>remote_store = <span class="kw-2">&amp;</span>upload_request.remote_store;
         <span class="self">self</span>.upload(parquet_key, parquet_path, remote_store).<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="kw">if </span>sst_info.inverted_index_available {
             <span class="kw">let </span>puffin_key = IndexKey::new(region_id, file_id, FileType::Puffin);
-            <span class="kw">let </span>puffin_path = <span class="kw-2">&amp;</span>request.index_upload_path;
+            <span class="kw">let </span>puffin_path = <span class="kw-2">&amp;</span>upload_request.index_upload_path;
             <span class="self">self</span>.upload(puffin_key, puffin_path, remote_store).<span class="kw">await</span><span class="question-mark">?</span>;
         }
 
@@ -487,10 +562,6 @@
 
 <span class="doccomment">/// Request to write and upload a SST.
 </span><span class="kw">pub struct </span>SstUploadRequest {
-    <span class="kw">pub </span>file_id: FileId,
-    <span class="kw">pub </span>metadata: RegionMetadataRef,
-    <span class="kw">pub </span>source: Source,
-    <span class="kw">pub </span>storage: <span class="prelude-ty">Option</span>&lt;String&gt;,
     <span class="doccomment">/// Path to upload the file.
     </span><span class="kw">pub </span>upload_path: String,
     <span class="doccomment">/// Path to upload the index file.
@@ -506,6 +577,7 @@
     <span class="kw">use </span>common_test_util::temp_dir::create_temp_dir;
     <span class="kw">use </span>object_store::manager::ObjectStoreManager;
     <span class="kw">use </span>object_store::services::Fs;
+    <span class="kw">use </span>object_store::util::join_dir;
     <span class="kw">use </span>object_store::ObjectStore;
     <span class="kw">use </span>store_api::storage::RegionId;
 
@@ -524,10 +596,14 @@
         <span class="comment">// TODO(QuenKar): maybe find a way to create some object server for testing,
         // and now just use local file system to mock.
         </span><span class="kw">let </span><span class="kw-2">mut </span>env = TestEnv::new();
+        <span class="kw">let </span>data_home = env.data_home().display().to_string();
         <span class="kw">let </span>mock_store = env.init_object_store_manager();
         <span class="kw">let </span>file_id = FileId::random();
         <span class="kw">let </span>upload_path = sst_file_path(<span class="string">"test"</span>, file_id);
         <span class="kw">let </span>index_upload_path = index_file_path(<span class="string">"test"</span>, file_id);
+        <span class="kw">let </span>intm_mgr = IntermediateManager::init_fs(join_dir(<span class="kw-2">&amp;</span>data_home, <span class="string">"intm"</span>))
+            .<span class="kw">await
+            </span>.unwrap();
 
         <span class="comment">// Create WriteCache
         </span><span class="kw">let </span>local_dir = create_temp_dir(<span class="string">""</span>);
@@ -537,6 +613,7 @@
             local_store.clone(),
             object_store_manager,
             ReadableSize::mb(<span class="number">10</span>),
+            intm_mgr,
         )
         .<span class="kw">await
         </span>.unwrap();
@@ -550,13 +627,19 @@
             new_batch_by_range(<span class="kw-2">&amp;</span>[<span class="string">"b"</span>, <span class="string">"h"</span>], <span class="number">100</span>, <span class="number">200</span>),
         ]);
 
-        <span class="kw">let </span>request = SstUploadRequest {
+        <span class="kw">let </span>write_request = SstWriteRequest {
             file_id,
             metadata,
             source,
             storage: <span class="prelude-val">None</span>,
+            create_inverted_index: <span class="bool-val">true</span>,
+            mem_threshold_index_create: <span class="prelude-val">None</span>,
+            cache_manager: Default::default(),
+        };
+
+        <span class="kw">let </span>request = SstUploadRequest {
             upload_path: upload_path.clone(),
-            index_upload_path,
+            index_upload_path: index_upload_path.clone(),
             remote_store: mock_store.clone(),
         };
 
@@ -567,7 +650,7 @@
 
         <span class="comment">// Write to cache and upload sst to mock remote store
         </span><span class="kw">let </span>sst_info = write_cache
-            .write_and_upload_sst(request, <span class="kw-2">&amp;</span>write_opts)
+            .write_and_upload_sst(write_request, request, <span class="kw-2">&amp;</span>write_opts)
             .<span class="kw">await
             </span>.unwrap()
             .unwrap();
@@ -583,6 +666,17 @@
             .<span class="kw">await
             </span>.unwrap();
         <span class="macro">assert_eq!</span>(remote_data, cache_data);
+
+        <span class="comment">// Check write cache contains the index key
+        </span><span class="kw">let </span>index_key = IndexKey::new(region_id, file_id, FileType::Puffin);
+        <span class="macro">assert!</span>(write_cache.file_cache.contains_key(<span class="kw-2">&amp;</span>index_key));
+
+        <span class="kw">let </span>remote_index_data = mock_store.read(<span class="kw-2">&amp;</span>index_upload_path).<span class="kw">await</span>.unwrap();
+        <span class="kw">let </span>cache_index_data = local_store
+            .read(<span class="kw-2">&amp;</span>write_cache.file_cache.cache_file_path(index_key))
+            .<span class="kw">await
+            </span>.unwrap();
+        <span class="macro">assert_eq!</span>(remote_index_data, cache_index_data);
     }
 }
 </code></pre></div></section></main></body></html>

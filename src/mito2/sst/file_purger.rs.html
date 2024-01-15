@@ -196,6 +196,16 @@
 <a href="#195" id="195">195</a>
 <a href="#196" id="196">196</a>
 <a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -295,6 +305,7 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>common_test_util::temp_dir::create_temp_dir;
     <span class="kw">use </span>object_store::services::Fs;
+    <span class="kw">use </span>object_store::util::join_dir;
     <span class="kw">use </span>object_store::ObjectStore;
     <span class="kw">use </span>smallvec::SmallVec;
 
@@ -302,6 +313,7 @@
     <span class="kw">use </span><span class="kw">crate</span>::access_layer::AccessLayer;
     <span class="kw">use </span><span class="kw">crate</span>::schedule::scheduler::{LocalScheduler, Scheduler};
     <span class="kw">use </span><span class="kw">crate</span>::sst::file::{FileHandle, FileId, FileMeta, FileTimeRange, IndexType};
+    <span class="kw">use </span><span class="kw">crate</span>::sst::index::intermediate::IntermediateManager;
     <span class="kw">use </span><span class="kw">crate</span>::sst::location;
 
     <span class="attr">#[tokio::test]
@@ -309,17 +321,21 @@
         common_telemetry::init_default_ut_logging();
 
         <span class="kw">let </span>dir = create_temp_dir(<span class="string">"file-purge"</span>);
+        <span class="kw">let </span>dir_path = dir.path().display().to_string();
         <span class="kw">let </span><span class="kw-2">mut </span>builder = Fs::default();
-        builder.root(dir.path().to_str().unwrap());
-        <span class="kw">let </span>object_store = ObjectStore::new(builder).unwrap().finish();
+        builder.root(<span class="kw-2">&amp;</span>dir_path);
         <span class="kw">let </span>sst_file_id = FileId::random();
         <span class="kw">let </span>sst_dir = <span class="string">"table1"</span>;
         <span class="kw">let </span>path = location::sst_file_path(sst_dir, sst_file_id);
+        <span class="kw">let </span>intm_mgr = IntermediateManager::init_fs(join_dir(<span class="kw-2">&amp;</span>dir_path, <span class="string">"intm"</span>))
+            .<span class="kw">await
+            </span>.unwrap();
 
+        <span class="kw">let </span>object_store = ObjectStore::new(builder).unwrap().finish();
         object_store.write(<span class="kw-2">&amp;</span>path, <span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">4096</span>]).<span class="kw">await</span>.unwrap();
 
         <span class="kw">let </span>scheduler = Arc::new(LocalScheduler::new(<span class="number">3</span>));
-        <span class="kw">let </span>layer = Arc::new(AccessLayer::new(sst_dir, object_store.clone()));
+        <span class="kw">let </span>layer = Arc::new(AccessLayer::new(sst_dir, object_store.clone(), intm_mgr));
 
         <span class="kw">let </span>file_purger = Arc::new(LocalFilePurger::new(scheduler.clone(), layer, <span class="prelude-val">None</span>));
 
@@ -350,13 +366,17 @@
         common_telemetry::init_default_ut_logging();
 
         <span class="kw">let </span>dir = create_temp_dir(<span class="string">"file-purge"</span>);
+        <span class="kw">let </span>dir_path = dir.path().display().to_string();
         <span class="kw">let </span><span class="kw-2">mut </span>builder = Fs::default();
-        builder.root(dir.path().to_str().unwrap());
-        <span class="kw">let </span>object_store = ObjectStore::new(builder).unwrap().finish();
+        builder.root(<span class="kw-2">&amp;</span>dir_path);
         <span class="kw">let </span>sst_file_id = FileId::random();
         <span class="kw">let </span>sst_dir = <span class="string">"table1"</span>;
-
+        <span class="kw">let </span>intm_mgr = IntermediateManager::init_fs(join_dir(<span class="kw-2">&amp;</span>dir_path, <span class="string">"intm"</span>))
+            .<span class="kw">await
+            </span>.unwrap();
         <span class="kw">let </span>path = location::sst_file_path(sst_dir, sst_file_id);
+
+        <span class="kw">let </span>object_store = ObjectStore::new(builder).unwrap().finish();
         object_store.write(<span class="kw-2">&amp;</span>path, <span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">4096</span>]).<span class="kw">await</span>.unwrap();
 
         <span class="kw">let </span>index_path = location::index_file_path(sst_dir, sst_file_id);
@@ -366,7 +386,7 @@
             </span>.unwrap();
 
         <span class="kw">let </span>scheduler = Arc::new(LocalScheduler::new(<span class="number">3</span>));
-        <span class="kw">let </span>layer = Arc::new(AccessLayer::new(sst_dir, object_store.clone()));
+        <span class="kw">let </span>layer = Arc::new(AccessLayer::new(sst_dir, object_store.clone(), intm_mgr));
 
         <span class="kw">let </span>file_purger = Arc::new(LocalFilePurger::new(scheduler.clone(), layer, <span class="prelude-val">None</span>));
 

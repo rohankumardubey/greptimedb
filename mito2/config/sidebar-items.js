@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["DEFAULT_MAX_BG_JOB","DEFAULT_SCAN_CHANNEL_SIZE","MULTIPART_UPLOAD_MINIMUM_SIZE"],"fn":["divide_num_cpus"],"struct":["MitoConfig"]};
+window.SIDEBAR_ITEMS = {"constant":["DEFAULT_MAX_BG_JOB","DEFAULT_SCAN_CHANNEL_SIZE","MULTIPART_UPLOAD_MINIMUM_SIZE"],"enum":["Mode"],"fn":["divide_num_cpus"],"struct":["InvertedIndexConfig","MitoConfig"]};

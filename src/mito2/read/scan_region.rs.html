@@ -282,6 +282,19 @@
 <a href="#281" id="281">281</a>
 <a href="#282" id="282">282</a>
 <a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -406,6 +419,8 @@
     </span>cache_manager: <span class="prelude-ty">Option</span>&lt;CacheManagerRef&gt;,
     <span class="doccomment">/// Parallelism to scan.
     </span>parallelism: ScanParallism,
+    <span class="doccomment">/// Whether to ignore inverted index.
+    </span>ignore_inverted_index: bool,
 }
 
 <span class="kw">impl </span>ScanRegion {
@@ -422,6 +437,7 @@
             request,
             cache_manager,
             parallelism: ScanParallism::default(),
+            ignore_inverted_index: <span class="bool-val">false</span>,
         }
     }
 
@@ -429,6 +445,12 @@
     </span><span class="attr">#[must_use]
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>with_parallelism(<span class="kw-2">mut </span><span class="self">self</span>, parallelism: ScanParallism) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.parallelism = parallelism;
+        <span class="self">self
+    </span>}
+
+    <span class="attr">#[must_use]
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>ignore_inverted_index(<span class="kw-2">mut </span><span class="self">self</span>, ignore: bool) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.ignore_inverted_index = ignore;
         <span class="self">self
     </span>}
 
@@ -518,6 +540,10 @@
 
     <span class="doccomment">/// Use the latest schema to build the index applier.
     </span><span class="kw">fn </span>build_index_applier(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;SstIndexApplierRef&gt; {
+        <span class="kw">if </span><span class="self">self</span>.ignore_inverted_index {
+            <span class="kw">return </span><span class="prelude-val">None</span>;
+        }
+
         <span class="kw">let </span>file_cache = || -&gt; <span class="prelude-ty">Option</span>&lt;FileCacheRef&gt; {
             <span class="kw">let </span>cache_manager = <span class="self">self</span>.cache_manager.as_ref()<span class="question-mark">?</span>;
             <span class="kw">let </span>write_cache = cache_manager.write_cache()<span class="question-mark">?</span>;

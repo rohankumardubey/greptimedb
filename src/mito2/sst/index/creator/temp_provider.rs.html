@@ -171,6 +171,14 @@
 <a href="#170" id="170">170</a>
 <a href="#171" id="171">171</a>
 <a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -200,16 +208,15 @@
     INDEX_INTERMEDIATE_READ_OP_TOTAL, INDEX_INTERMEDIATE_SEEK_OP_TOTAL,
     INDEX_INTERMEDIATE_WRITE_BYTES_TOTAL, INDEX_INTERMEDIATE_WRITE_OP_TOTAL,
 };
-<span class="kw">use </span><span class="kw">crate</span>::sst::index::store::InstrumentedStore;
-<span class="kw">use </span><span class="kw">crate</span>::sst::location::IntermediateLocation;
+<span class="kw">use </span><span class="kw">crate</span>::sst::index::intermediate::{IntermediateLocation, IntermediateManager};
 
 <span class="doccomment">/// `TempFileProvider` implements `ExternalTempFileProvider`.
 /// It uses `InstrumentedStore` to create and read intermediate files.
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>TempFileProvider {
     <span class="doccomment">/// Provides the location of intermediate files.
     </span>location: IntermediateLocation,
-    <span class="doccomment">/// Provides access to files in the object store.
-    </span>store: InstrumentedStore,
+    <span class="doccomment">/// Provides store to access to intermediate files.
+    </span>manager: IntermediateManager,
 }
 
 <span class="attr">#[async_trait]
@@ -221,7 +228,8 @@
     ) -&gt; IndexResult&lt;Box&lt;<span class="kw">dyn </span>AsyncWrite + Unpin + Send&gt;&gt; {
         <span class="kw">let </span>path = <span class="self">self</span>.location.file_path(column_id, file_id);
         <span class="kw">let </span>writer = <span class="self">self
-            </span>.store
+            </span>.manager
+            .store()
             .writer(
                 <span class="kw-2">&amp;</span>path,
                 <span class="kw-2">&amp;</span>INDEX_INTERMEDIATE_WRITE_BYTES_TOTAL,
@@ -240,7 +248,8 @@
     ) -&gt; IndexResult&lt;Vec&lt;Box&lt;<span class="kw">dyn </span>AsyncRead + Unpin + Send&gt;&gt;&gt; {
         <span class="kw">let </span>column_path = <span class="self">self</span>.location.column_path(column_id);
         <span class="kw">let </span>entries = <span class="self">self
-            </span>.store
+            </span>.manager
+            .store()
             .list(<span class="kw-2">&amp;</span>column_path)
             .<span class="kw">await
             </span>.map_err(BoxedError::new)
@@ -254,7 +263,8 @@
             }
 
             <span class="kw">let </span>reader = <span class="self">self
-                </span>.store
+                </span>.manager
+                .store()
                 .reader(
                     entry.path(),
                     <span class="kw-2">&amp;</span>INDEX_INTERMEDIATE_READ_BYTES_TOTAL,
@@ -273,30 +283,35 @@
 
 <span class="kw">impl </span>TempFileProvider {
     <span class="doccomment">/// Creates a new `TempFileProvider`.
-    </span><span class="kw">pub fn </span>new(location: IntermediateLocation, store: InstrumentedStore) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ location, store }
+    </span><span class="kw">pub fn </span>new(location: IntermediateLocation, manager: IntermediateManager) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ location, manager }
     }
 
     <span class="doccomment">/// Removes all intermediate files.
     </span><span class="kw">pub async fn </span>cleanup(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-        <span class="self">self</span>.store.remove_all(<span class="self">self</span>.location.root_path()).<span class="kw">await
+        <span class="self">self</span>.manager
+            .store()
+            .remove_all(<span class="self">self</span>.location.root_path())
+            .<span class="kw">await
     </span>}
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>common_test_util::temp_dir;
     <span class="kw">use </span>futures::{AsyncReadExt, AsyncWriteExt};
-    <span class="kw">use </span>object_store::services::Memory;
-    <span class="kw">use </span>object_store::ObjectStore;
+    <span class="kw">use </span>store_api::storage::RegionId;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::sst::file::FileId;
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_temp_file_provider_basic() {
-        <span class="kw">let </span>location = IntermediateLocation::new(<span class="string">"region_dir"</span>, <span class="kw-2">&amp;</span>FileId::random());
-        <span class="kw">let </span>object_store = ObjectStore::new(Memory::default()).unwrap().finish();
-        <span class="kw">let </span>store = InstrumentedStore::new(object_store);
+        <span class="kw">let </span>temp_dir = temp_dir::create_temp_dir(<span class="string">"intermediate"</span>);
+        <span class="kw">let </span>path = temp_dir.path().display().to_string();
+
+        <span class="kw">let </span>location = IntermediateLocation::new(<span class="kw-2">&amp;</span>RegionId::new(<span class="number">0</span>, <span class="number">0</span>), <span class="kw-2">&amp;</span>FileId::random());
+        <span class="kw">let </span>store = IntermediateManager::init_fs(path).<span class="kw">await</span>.unwrap();
         <span class="kw">let </span>provider = TempFileProvider::new(location.clone(), store);
 
         <span class="kw">let </span>column_name = <span class="string">"tag0"</span>;
@@ -336,7 +351,8 @@
         provider.cleanup().<span class="kw">await</span>.unwrap();
 
         <span class="macro">assert!</span>(provider
-            .store
+            .manager
+            .store()
             .list(location.root_path())
             .<span class="kw">await
             </span>.unwrap()

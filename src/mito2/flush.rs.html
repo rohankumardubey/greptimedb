@@ -763,6 +763,14 @@
 <a href="#762" id="762">762</a>
 <a href="#763" id="763">763</a>
 <a href="#764" id="764">764</a>
+<a href="#765" id="765">765</a>
+<a href="#766" id="766">766</a>
+<a href="#767" id="767">767</a>
+<a href="#768" id="768">768</a>
+<a href="#769" id="769">769</a>
+<a href="#770" id="770">770</a>
+<a href="#771" id="771">771</a>
+<a href="#772" id="772">772</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1080,6 +1088,12 @@
             <span class="kw">let </span>file_id = FileId::random();
             <span class="kw">let </span>iter = mem.iter(<span class="prelude-val">None</span>, <span class="prelude-val">None</span>);
             <span class="kw">let </span>source = Source::Iter(iter);
+            <span class="kw">let </span>create_inverted_index = <span class="self">self</span>.engine_config.inverted_index.create_on_flush.auto();
+            <span class="kw">let </span>mem_threshold_index_create = <span class="self">self
+                </span>.engine_config
+                .inverted_index
+                .mem_threshold_on_create
+                .map(|m| m.as_bytes() <span class="kw">as _</span>);
 
             <span class="comment">// Flush to level 0.
             </span><span class="kw">let </span>write_request = SstWriteRequest {
@@ -1088,6 +1102,8 @@
                 source,
                 cache_manager: <span class="self">self</span>.cache_manager.clone(),
                 storage: version.options.storage.clone(),
+                create_inverted_index,
+                mem_threshold_index_create,
             };
             <span class="kw">let </span><span class="prelude-val">Some</span>(sst_info) = <span class="self">self
                 </span>.access_layer
@@ -1497,7 +1513,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_schedule_empty() {
-        <span class="kw">let </span>env = SchedulerEnv::new();
+        <span class="kw">let </span>env = SchedulerEnv::new().<span class="kw">await</span>;
         <span class="kw">let </span>(tx, _rx) = mpsc::channel(<span class="number">4</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>scheduler = env.mock_flush_scheduler();
         <span class="kw">let </span>builder = VersionControlBuilder::new();

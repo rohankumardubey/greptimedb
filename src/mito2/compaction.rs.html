@@ -527,8 +527,6 @@
 <a href="#526" id="526">526</a>
 <a href="#527" id="527">527</a>
 <a href="#528" id="528">528</a>
-<a href="#529" id="529">529</a>
-<a href="#530" id="530">530</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -552,7 +550,6 @@
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::time::Instant;
 
-<span class="kw">use </span>common_base::readable_size::ReadableSize;
 <span class="kw">use </span>common_telemetry::{debug, error};
 <span class="kw">pub use </span>picker::CompactionPickerRef;
 <span class="kw">use </span>snafu::ResultExt;
@@ -575,6 +572,7 @@
 
 <span class="doccomment">/// Region compaction request.
 </span><span class="kw">pub struct </span>CompactionRequest {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) engine_config: Arc&lt;MitoConfig&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) current_version: VersionRef,
     <span class="kw">pub</span>(<span class="kw">crate</span>) access_layer: AccessLayerRef,
     <span class="doccomment">/// Sender to send notification to the region worker.
@@ -584,8 +582,6 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) file_purger: FilePurgerRef,
     <span class="doccomment">/// Start time of compaction task.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) start_time: Instant,
-    <span class="doccomment">/// Buffering threshold while writing SST files.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) sst_write_buffer_size: ReadableSize,
     <span class="kw">pub</span>(<span class="kw">crate</span>) cache_manager: CacheManagerRef,
 }
 
@@ -862,13 +858,13 @@
         <span class="kw">let </span>current_version = <span class="self">self</span>.version_control.current().version;
         <span class="kw">let </span>start_time = Instant::now();
         <span class="kw">let </span><span class="kw-2">mut </span>req = CompactionRequest {
+            engine_config,
             current_version,
             access_layer: <span class="self">self</span>.access_layer.clone(),
             request_sender: request_sender.clone(),
             waiters: Vec::new(),
             file_purger: <span class="self">self</span>.file_purger.clone(),
             start_time,
-            sst_write_buffer_size: engine_config.sst_write_buffer_size,
             cache_manager,
         };
 
@@ -894,7 +890,7 @@
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_schedule_empty() {
-        <span class="kw">let </span>env = SchedulerEnv::new();
+        <span class="kw">let </span>env = SchedulerEnv::new().<span class="kw">await</span>;
         <span class="kw">let </span>(tx, _rx) = mpsc::channel(<span class="number">4</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>scheduler = env.mock_compaction_scheduler(tx);
         <span class="kw">let </span><span class="kw-2">mut </span>builder = VersionControlBuilder::new();
@@ -963,7 +959,7 @@
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_schedule_on_finished() {
         <span class="kw">let </span>job_scheduler = Arc::new(VecScheduler::default());
-        <span class="kw">let </span>env = SchedulerEnv::new().scheduler(job_scheduler.clone());
+        <span class="kw">let </span>env = SchedulerEnv::new().<span class="kw">await</span>.scheduler(job_scheduler.clone());
         <span class="kw">let </span>(tx, _rx) = mpsc::channel(<span class="number">4</span>);
         <span class="kw">let </span><span class="kw-2">mut </span>scheduler = env.mock_compaction_scheduler(tx);
         <span class="kw">let </span><span class="kw-2">mut </span>builder = VersionControlBuilder::new();

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["INDEX_BLOB_TYPE","MIN_MEMORY_USAGE_THRESHOLD","PIPE_BUFFER_SIZE_FOR_SENDING_BLOB"],"mod":["applier","codec","creator","store"]};
+window.SIDEBAR_ITEMS = {"constant":["INDEX_BLOB_TYPE","MIN_MEMORY_USAGE_THRESHOLD","PIPE_BUFFER_SIZE_FOR_SENDING_BLOB"],"mod":["applier","codec","creator","intermediate","store"],"struct":["Indexer","IndexerBuilder"]};
