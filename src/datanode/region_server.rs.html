@@ -1196,6 +1196,16 @@
 <a href="#1195" id="1195">1195</a>
 <a href="#1196" id="1196">1196</a>
 <a href="#1197" id="1197">1197</a>
+<a href="#1198" id="1198">1198</a>
+<a href="#1199" id="1199">1199</a>
+<a href="#1200" id="1200">1200</a>
+<a href="#1201" id="1201">1201</a>
+<a href="#1202" id="1202">1202</a>
+<a href="#1203" id="1203">1203</a>
+<a href="#1204" id="1204">1204</a>
+<a href="#1205" id="1205">1205</a>
+<a href="#1206" id="1206">1206</a>
+<a href="#1207" id="1207">1207</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1309,6 +1319,16 @@
 
     <span class="kw">pub fn </span>register_engine(<span class="kw-2">&amp;mut </span><span class="self">self</span>, engine: RegionEngineRef) {
         <span class="self">self</span>.inner.register_engine(engine);
+    }
+
+    <span class="doccomment">/// Finds the region's engine by its id. If the region is not ready, returns `None`.
+    </span><span class="kw">pub fn </span>find_engine(<span class="kw-2">&amp;</span><span class="self">self</span>, region_id: RegionId) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;RegionEngineRef&gt;&gt; {
+        <span class="self">self</span>.inner
+            .get_engine(region_id, <span class="kw-2">&amp;</span>RegionChange::None)
+            .map(|x| <span class="kw">match </span>x {
+                CurrentEngine::Engine(engine) =&gt; <span class="prelude-val">Some</span>(engine),
+                CurrentEngine::EarlyReturn(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+            })
     }
 
     <span class="kw">pub async fn </span>handle_request(
