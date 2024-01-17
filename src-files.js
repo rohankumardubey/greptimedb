@@ -6,7 +6,7 @@ var srcIndex = new Map(JSON.parse('[\
 ["cmd",["",[["cli",[["bench",[],["metadata.rs"]]],["bench.rs","cmd.rs","export.rs","helper.rs","repl.rs","upgrade.rs"]]],["cli.rs","datanode.rs","error.rs","frontend.rs","lib.rs","metasrv.rs","options.rs","standalone.rs"]]],\
 ["common_base",["",[],["bit_vec.rs","buffer.rs","bytes.rs","lib.rs","readable_size.rs"]]],\
 ["common_catalog",["",[],["consts.rs","error.rs","lib.rs"]]],\
-["common_config",["",[["wal",[],["kafka.rs","raft_engine.rs"]]],["lib.rs","wal.rs"]]],\
+["common_config",["",[["wal",[],["kafka.rs","raft_engine.rs"]]],["lib.rs","utils.rs","wal.rs"]]],\
 ["common_datasource",["",[["file_format",[],["csv.rs","json.rs","orc.rs","parquet.rs"]],["object_store",[],["fs.rs","s3.rs"]]],["buffered_writer.rs","compression.rs","error.rs","file_format.rs","lib.rs","lister.rs","object_store.rs","share_buffer.rs","util.rs"]]],\
 ["common_decimal",["",[],["decimal128.rs","error.rs","lib.rs"]]],\
 ["common_error",["",[],["ext.rs","format.rs","lib.rs","mock.rs","status_code.rs"]]],\

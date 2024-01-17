@@ -265,6 +265,32 @@
 <a href="#264" id="264">264</a>
 <a href="#265" id="265">265</a>
 <a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -281,7 +307,8 @@
 
 </span><span class="doccomment">//! Configurations.
 
-</span><span class="kw">use </span>std::time::Duration;
+</span><span class="kw">use </span>std::cmp;
+<span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>common_base::readable_size::ReadableSize;
 <span class="kw">use </span>common_telemetry::warn;
@@ -290,6 +317,7 @@
 <span class="kw">use </span>serde_with::{serde_as, NoneAsEmptyString};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::Result;
+<span class="kw">use </span><span class="kw">crate</span>::sst::DEFAULT_WRITE_BUFFER_SIZE;
 
 <span class="doccomment">/// Default max running background job.
 </span><span class="kw">const </span>DEFAULT_MAX_BG_JOB: usize = <span class="number">4</span>;
@@ -326,17 +354,17 @@
     </span><span class="doccomment">/// Interval to auto flush a region if it has not flushed yet (default 30 min).
     </span><span class="attr">#[serde(with = <span class="string">"humantime_serde"</span>)]
     </span><span class="kw">pub </span>auto_flush_interval: Duration,
-    <span class="doccomment">/// Global write buffer size threshold to trigger flush (default 1G).
+    <span class="doccomment">/// Global write buffer size threshold to trigger flush.
     </span><span class="kw">pub </span>global_write_buffer_size: ReadableSize,
-    <span class="doccomment">/// Global write buffer size threshold to reject write requests (default 2G).
+    <span class="doccomment">/// Global write buffer size threshold to reject write requests.
     </span><span class="kw">pub </span>global_write_buffer_reject_size: ReadableSize,
 
     <span class="comment">// Cache configs:
-    </span><span class="doccomment">/// Cache size for SST metadata (default 128MB). Setting it to 0 to disable the cache.
+    </span><span class="doccomment">/// Cache size for SST metadata. Setting it to 0 to disable the cache.
     </span><span class="kw">pub </span>sst_meta_cache_size: ReadableSize,
-    <span class="doccomment">/// Cache size for vectors and arrow arrays (default 512MB). Setting it to 0 to disable the cache.
+    <span class="doccomment">/// Cache size for vectors and arrow arrays. Setting it to 0 to disable the cache.
     </span><span class="kw">pub </span>vector_cache_size: ReadableSize,
-    <span class="doccomment">/// Cache size for pages of SST row groups (default 512MB). Setting it to 0 to disable the cache.
+    <span class="doccomment">/// Cache size for pages of SST row groups. Setting it to 0 to disable the cache.
     </span><span class="kw">pub </span>page_cache_size: ReadableSize,
     <span class="doccomment">/// Whether to enable the experimental write cache.
     </span><span class="kw">pub </span>enable_experimental_write_cache: bool,
@@ -364,7 +392,7 @@
 
 <span class="kw">impl </span>Default <span class="kw">for </span>MitoConfig {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
-        MitoConfig {
+        <span class="kw">let </span><span class="kw-2">mut </span>mito_config = MitoConfig {
             num_workers: divide_num_cpus(<span class="number">2</span>),
             worker_channel_size: <span class="number">128</span>,
             worker_request_batch_size: <span class="number">64</span>,
@@ -380,12 +408,19 @@
             enable_experimental_write_cache: <span class="bool-val">false</span>,
             experimental_write_cache_path: String::new(),
             experimental_write_cache_size: ReadableSize::mb(<span class="number">512</span>),
-            sst_write_buffer_size: ReadableSize::mb(<span class="number">8</span>),
+            sst_write_buffer_size: DEFAULT_WRITE_BUFFER_SIZE,
             scan_parallelism: divide_num_cpus(<span class="number">4</span>),
             parallel_scan_channel_size: DEFAULT_SCAN_CHANNEL_SIZE,
             allow_stale_entries: <span class="bool-val">false</span>,
             inverted_index: InvertedIndexConfig::default(),
+        };
+
+        <span class="comment">// Adjust buffer and cache size according to system memory if we can.
+        </span><span class="kw">if let </span><span class="prelude-val">Some</span>(sys_memory) = common_config::utils::get_sys_total_memory() {
+            mito_config.adjust_buffer_and_cache_size(sys_memory);
         }
+
+        mito_config
     }
 }
 
@@ -447,6 +482,23 @@
         <span class="self">self</span>.inverted_index.sanitize(data_home)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(())
+    }
+
+    <span class="kw">fn </span>adjust_buffer_and_cache_size(<span class="kw-2">&amp;mut </span><span class="self">self</span>, sys_memory: ReadableSize) {
+        <span class="comment">// Use 1/64 of OS memory as global write buffer size, it shouldn't be greater than 1G in default mode.
+        </span><span class="kw">let </span>global_write_buffer_size = cmp::min(sys_memory / <span class="number">64</span>, ReadableSize::gb(<span class="number">1</span>));
+        <span class="comment">// Use 2x of global write buffer size as global write buffer reject size.
+        </span><span class="kw">let </span>global_write_buffer_reject_size = global_write_buffer_size * <span class="number">2</span>;
+        <span class="comment">// Use 1/256 of OS memory size as SST meta cache size, it shouldn't be greater than 128MB in default mode.
+        </span><span class="kw">let </span>sst_meta_cache_size = cmp::min(sys_memory / <span class="number">256</span>, ReadableSize::mb(<span class="number">128</span>));
+        <span class="comment">// Use 1/128 of OS memory size as mem cache size, it shouldn't be greater than 512MB in default mode.
+        </span><span class="kw">let </span>mem_cache_size = cmp::min(sys_memory / <span class="number">128</span>, ReadableSize::mb(<span class="number">512</span>));
+
+        <span class="self">self</span>.global_write_buffer_size = global_write_buffer_size;
+        <span class="self">self</span>.global_write_buffer_reject_size = global_write_buffer_reject_size;
+        <span class="self">self</span>.sst_meta_cache_size = sst_meta_cache_size;
+        <span class="self">self</span>.vector_cache_size = mem_cache_size;
+        <span class="self">self</span>.page_cache_size = mem_cache_size;
     }
 
     <span class="doccomment">/// Enable experimental write cache.
@@ -526,7 +578,7 @@
 <span class="doccomment">/// Divide cpu num by a non-zero `divisor` and returns at least 1.
 </span><span class="kw">fn </span>divide_num_cpus(divisor: usize) -&gt; usize {
     <span class="macro">debug_assert!</span>(divisor &gt; <span class="number">0</span>);
-    <span class="kw">let </span>cores = num_cpus::get();
+    <span class="kw">let </span>cores = common_config::utils::get_cpus();
     <span class="macro">debug_assert!</span>(cores &gt; <span class="number">0</span>);
 
     (cores + divisor - <span class="number">1</span>) / divisor
