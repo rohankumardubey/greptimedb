@@ -156,7 +156,7 @@
             schema: ArcSwap::new(Arc::new(DEFAULT_SCHEMA_NAME.into())),
             user_info: ArcSwap::new(Arc::new(auth::userinfo_by_name(<span class="prelude-val">None</span>))),
             conn_info: ConnInfo::new(addr, channel),
-            timezone: ArcSwap::new(Arc::new(get_timezone(<span class="prelude-val">None</span>))),
+            timezone: ArcSwap::new(Arc::new(get_timezone(<span class="prelude-val">None</span>).clone())),
         }
     }
 

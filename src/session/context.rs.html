@@ -328,7 +328,7 @@
             current_schema: schema.to_string(),
             current_user: Default::default(),
             <span class="comment">// for request send to datanode, all timestamp have converted to UTC, so timezone is not important
-            </span>timezone: ArcSwap::new(Arc::new(get_timezone(<span class="prelude-val">None</span>))),
+            </span>timezone: ArcSwap::new(Arc::new(get_timezone(<span class="prelude-val">None</span>).clone())),
             sql_dialect: Box::new(GreptimeDbDialect {}),
         }
     }
@@ -382,8 +382,8 @@
         build_db_string(catalog, schema)
     }
 
-    <span class="kw">pub fn </span>timezone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Timezone {
-        <span class="self">self</span>.timezone.load().as_ref().clone()
+    <span class="kw">pub fn </span>timezone(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;Timezone&gt; {
+        <span class="self">self</span>.timezone.load().clone()
     }
 
     <span class="kw">pub fn </span>current_user(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;UserInfoRef&gt; {
@@ -402,8 +402,8 @@
     /// We need persist these change in `Session`.
     </span><span class="kw">pub fn </span>update_session(<span class="kw-2">&amp;</span><span class="self">self</span>, session: <span class="kw-2">&amp;</span>SessionRef) {
         <span class="kw">let </span>tz = <span class="self">self</span>.timezone();
-        <span class="kw">if </span>session.timezone() != tz {
-            session.set_timezone(tz)
+        <span class="kw">if </span>session.timezone() != <span class="kw-2">*</span>tz {
+            session.set_timezone(tz.as_ref().clone())
         }
     }
 }
@@ -422,7 +422,7 @@
                 .unwrap_or_else(|| ArcSwap::new(Arc::new(<span class="prelude-val">None</span>))),
             timezone: <span class="self">self
                 </span>.timezone
-                .unwrap_or(ArcSwap::new(Arc::new(get_timezone(<span class="prelude-val">None</span>)))),
+                .unwrap_or(ArcSwap::new(Arc::new(get_timezone(<span class="prelude-val">None</span>).clone()))),
             sql_dialect: <span class="self">self
                 </span>.sql_dialect
                 .unwrap_or_else(|| Box::new(GreptimeDbDialect {})),

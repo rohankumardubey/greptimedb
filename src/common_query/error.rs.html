@@ -215,6 +215,13 @@
 <a href="#214" id="214">214</a>
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -380,6 +387,12 @@
         source: DataTypeError,
     },
 
+    <span class="attr">#[snafu(display(<span class="string">"Failed to execute function: {source}"</span>))]
+    </span>Execute {
+        location: Location,
+        source: BoxedError,
+    },
+
     <span class="attr">#[snafu(display(<span class="string">"Invalid function args: {}"</span>, err_msg))]
     </span>InvalidFuncArgs { err_msg: String, location: Location },
 }
@@ -418,6 +431,7 @@
 
             Error::ConvertDfRecordBatchStream { source, .. } =&gt; source.status_code(),
             Error::ExecutePhysicalPlan { source, .. } =&gt; source.status_code(),
+            Error::Execute { source, .. } =&gt; source.status_code(),
         }
     }
 

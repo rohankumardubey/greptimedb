@@ -495,10 +495,10 @@
                     Value::Date(v) =&gt; row_writer.write_col(v.to_chrono_date())<span class="question-mark">?</span>,
                     <span class="comment">// convert datetime and timestamp to timezone of current connection
                     </span>Value::DateTime(v) =&gt; row_writer.write_col(
-                        v.to_chrono_datetime_with_timezone(<span class="prelude-val">Some</span>(query_context.timezone())),
+                        v.to_chrono_datetime_with_timezone(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>query_context.timezone())),
                     )<span class="question-mark">?</span>,
                     Value::Timestamp(v) =&gt; row_writer.write_col(
-                        v.to_chrono_datetime_with_timezone(<span class="prelude-val">Some</span>(query_context.timezone())),
+                        v.to_chrono_datetime_with_timezone(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>query_context.timezone())),
                     )<span class="question-mark">?</span>,
                     Value::Interval(v) =&gt; row_writer.write_col(v.to_iso8601_string())<span class="question-mark">?</span>,
                     Value::Duration(v) =&gt; row_writer.write_col(v.to_std_duration())<span class="question-mark">?</span>,
@@ -511,7 +511,7 @@
                         })
                     }
                     Value::Time(v) =&gt; row_writer
-                        .write_col(v.to_timezone_aware_string(<span class="prelude-val">Some</span>(query_context.timezone())))<span class="question-mark">?</span>,
+                        .write_col(v.to_timezone_aware_string(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>query_context.timezone())))<span class="question-mark">?</span>,
                     Value::Decimal128(v) =&gt; row_writer.write_col(v.to_string())<span class="question-mark">?</span>,
                 }
             }

@@ -187,11 +187,6 @@
 <a href="#186" id="186">186</a>
 <a href="#187" id="187">187</a>
 <a href="#188" id="188">188</a>
-<a href="#189" id="189">189</a>
-<a href="#190" id="190">190</a>
-<a href="#191" id="191">191</a>
-<a href="#192" id="192">192</a>
-<a href="#193" id="193">193</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -237,13 +232,8 @@
 <span class="attr">#[inline(always)]
 </span><span class="doccomment">/// If the `tz=Some(timezone)`, return `timezone` directly,
 /// or return current system timezone.
-</span><span class="kw">pub fn </span>get_timezone(tz: <span class="prelude-ty">Option</span>&lt;Timezone&gt;) -&gt; Timezone {
-    tz.unwrap_or_else(|| {
-        DEFAULT_TIMEZONE
-            .get()
-            .cloned()
-            .unwrap_or(Timezone::Named(Tz::UTC))
-    })
+</span><span class="kw">pub fn </span>get_timezone(tz: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Timezone&gt;) -&gt; <span class="kw-2">&amp;</span>Timezone {
+    tz.unwrap_or_else(|| DEFAULT_TIMEZONE.get().unwrap_or(<span class="kw-2">&amp;</span>Timezone::Named(Tz::UTC)))
 }
 
 <span class="attr">#[inline(always)]
