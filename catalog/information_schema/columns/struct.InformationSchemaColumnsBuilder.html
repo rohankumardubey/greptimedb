@@ -19,7 +19,7 @@
     catalog_manager: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/sync/struct.Weak.html" title="struct alloc::sync::Weak">Weak</a>&lt;dyn <a class="trait" href="../../trait.CatalogManager.html" title="trait catalog::CatalogManager">CatalogManager</a>&gt;
 ) -&gt; Self</h4></section><details class="toggle method-toggle" open><summary><section id="method.make_columns" class="method"><a class="src rightside" href="../../../src/catalog/information_schema/columns.rs.html#171-215">source</a><h4 class="code-header">async fn <a href="#method.make_columns" class="fn">make_columns</a>(
     &amp;mut self,
-    request: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="struct" href="../../../store_api/storage/requests/struct.ScanRequest.html" title="struct store_api::storage::requests::ScanRequest">ScanRequest</a>&gt;
+    request: <a class="enum" href="https://doc.rust-lang.org/nightly/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;ScanRequest&gt;
 ) -&gt; <a class="type" href="../../error/type.Result.html" title="type catalog::error::Result">Result</a>&lt;RecordBatch&gt;</h4></section></summary><div class="docblock"><p>Construct the <code>information_schema.columns</code> virtual table</p>
 </div></details><section id="method.add_column" class="method"><a class="src rightside" href="../../../src/catalog/information_schema/columns.rs.html#217-261">source</a><h4 class="code-header">fn <a href="#method.add_column" class="fn">add_column</a>(
     &amp;mut self,

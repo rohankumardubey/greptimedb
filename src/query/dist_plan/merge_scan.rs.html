@@ -342,6 +342,23 @@
 <a href="#341" id="341">341</a>
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -363,16 +380,17 @@
 <span class="kw">use </span>arrow_schema::{Schema <span class="kw">as </span>ArrowSchema, SchemaRef <span class="kw">as </span>ArrowSchemaRef};
 <span class="kw">use </span>async_stream::stream;
 <span class="kw">use </span>common_base::bytes::Bytes;
+<span class="kw">use </span>common_catalog::parse_catalog_and_schema_from_db_string;
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_meta::table_name::TableName;
 <span class="kw">use </span>common_query::physical_plan::TaskContext;
-<span class="kw">use </span>common_recordbatch::adapter::DfRecordBatchStreamAdapter;
+<span class="kw">use </span>common_recordbatch::adapter::{DfRecordBatchStreamAdapter, RecordBatchMetrics};
 <span class="kw">use </span>common_recordbatch::error::ExternalSnafu;
 <span class="kw">use </span>common_recordbatch::{
     DfSendableRecordBatchStream, RecordBatch, RecordBatchStreamWrapper, SendableRecordBatchStream,
 };
-<span class="kw">use </span>common_telemetry::tracing;
 <span class="kw">use </span>common_telemetry::tracing_context::TracingContext;
+<span class="kw">use </span>common_telemetry::{tracing, warn};
 <span class="kw">use </span>datafusion::physical_plan::metrics::{
     Count, ExecutionPlanMetricsSet, MetricBuilder, MetricsSet, Time,
 };
@@ -383,6 +401,7 @@
 <span class="kw">use </span>datatypes::schema::{Schema, SchemaRef};
 <span class="kw">use </span>futures_util::StreamExt;
 <span class="kw">use </span>greptime_proto::v1::region::{QueryRequest, RegionRequestHeader};
+<span class="kw">use </span>meter_macros::read_meter;
 <span class="kw">use </span>snafu::ResultExt;
 <span class="kw">use </span>store_api::storage::RegionId;
 <span class="kw">use </span>tokio::time::Instant;
@@ -557,6 +576,20 @@
                     <span class="comment">// reset poll timer
                     </span>poll_timer = Instant::now();
                 }
+                <span class="kw">if let </span><span class="prelude-val">Some</span>(metrics) = stream
+                    .metrics()
+                    .and_then(|m| serde_json::from_str::&lt;RecordBatchMetrics&gt;(<span class="kw-2">&amp;</span>m).ok())
+                {
+                    <span class="kw">let </span>(c, s) = parse_catalog_and_schema_from_db_string(<span class="kw-2">&amp;</span>dbname);
+                    <span class="macro">read_meter!</span>(
+                        c,
+                        s,
+                        metrics.elapsed_compute <span class="kw">as </span>u64,
+                        metrics.memory_usage <span class="kw">as </span>u64,
+                        <span class="number">0
+                    </span>);
+                }
+
                 METRIC_MERGE_SCAN_POLL_ELAPSED.observe(poll_duration.as_secs_f64());
             }
         }));
@@ -565,6 +598,7 @@
             schema: <span class="self">self</span>.schema.clone(),
             stream,
             output_ordering: <span class="prelude-val">None</span>,
+            metrics: Default::default(),
         }))
     }
 

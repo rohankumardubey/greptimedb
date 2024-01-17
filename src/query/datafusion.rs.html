@@ -733,6 +733,7 @@
 <a href="#732" id="732">732</a>
 <a href="#733" id="733">733</a>
 <a href="#734" id="734">734</a>
+<a href="#735" id="735">735</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1145,9 +1146,9 @@
                 .map_err(BoxedError::new)
                 .context(QueryExecutionSnafu))<span class="question-mark">?</span>,
             <span class="kw">_ </span>=&gt; {
+                <span class="kw">let </span>df_plan = Arc::new(DfPhysicalPlanAdapter(plan.clone()));
                 <span class="comment">// merge into a single partition
-                </span><span class="kw">let </span>plan =
-                    CoalescePartitionsExec::new(Arc::new(DfPhysicalPlanAdapter(plan.clone())));
+                </span><span class="kw">let </span>plan = CoalescePartitionsExec::new(df_plan.clone());
                 <span class="comment">// CoalescePartitionsExec must produce a single partition
                 </span><span class="macro">assert_eq!</span>(<span class="number">1</span>, plan.output_partitioning().partition_count());
                 <span class="kw">let </span>df_stream = plan
@@ -1155,10 +1156,11 @@
                     .context(error::DatafusionSnafu)
                     .map_err(BoxedError::new)
                     .context(QueryExecutionSnafu)<span class="question-mark">?</span>;
-                <span class="kw">let </span>stream = RecordBatchStreamAdapter::try_new(df_stream)
+                <span class="kw">let </span><span class="kw-2">mut </span>stream = RecordBatchStreamAdapter::try_new(df_stream)
                     .context(error::ConvertDfRecordBatchStreamSnafu)
                     .map_err(BoxedError::new)
                     .context(QueryExecutionSnafu)<span class="question-mark">?</span>;
+                stream.set_metrics2(df_plan);
                 <span class="prelude-val">Ok</span>(Box::pin(stream))
             }
         }

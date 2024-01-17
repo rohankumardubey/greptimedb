@@ -375,6 +375,12 @@
 <a href="#374" id="374">374</a>
 <a href="#375" id="375">375</a>
 <a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -686,30 +692,36 @@
                 );
                 <span class="prelude-val">Ok</span>(Output::AffectedRows(rows))
             }
-            FlightMessage::Recordbatch(<span class="kw">_</span>) =&gt; IllegalFlightMessagesSnafu {
-                reason: <span class="string">"The first flight message cannot be a RecordBatch message"</span>,
+            FlightMessage::Recordbatch(<span class="kw">_</span>) | FlightMessage::Metrics(<span class="kw">_</span>) =&gt; {
+                IllegalFlightMessagesSnafu {
+                    reason: <span class="string">"The first flight message cannot be a RecordBatch or Metrics message"</span>,
+                }
+                .fail()
             }
-            .fail(),
             FlightMessage::Schema(schema) =&gt; {
                 <span class="kw">let </span>stream = Box::pin(<span class="macro">stream!</span>({
                     <span class="kw">while let </span><span class="prelude-val">Some</span>(flight_message) = flight_message_stream.next().<span class="kw">await </span>{
                         <span class="kw">let </span>flight_message = flight_message
                             .map_err(BoxedError::new)
                             .context(ExternalSnafu)<span class="question-mark">?</span>;
-                        <span class="kw">let </span>FlightMessage::Recordbatch(record_batch) = flight_message <span class="kw">else </span>{
-                            <span class="kw">yield </span>IllegalFlightMessagesSnafu {reason: <span class="string">"A Schema message must be succeeded exclusively by a set of RecordBatch messages"</span>}
+                        <span class="kw">match </span>flight_message {
+                            FlightMessage::Recordbatch(record_batch) =&gt; <span class="kw">yield </span><span class="prelude-val">Ok</span>(record_batch),
+                            FlightMessage::Metrics(<span class="kw">_</span>) =&gt; {}
+                            FlightMessage::AffectedRows(<span class="kw">_</span>) | FlightMessage::Schema(<span class="kw">_</span>) =&gt; {
+                                <span class="kw">yield </span>IllegalFlightMessagesSnafu {reason: <span class="macro">format!</span>(<span class="string">"A Schema message must be succeeded exclusively by a set of RecordBatch messages, flight_message: {:?}"</span>, flight_message)}
                                         .fail()
                                         .map_err(BoxedError::new)
                                         .context(ExternalSnafu);
-                            <span class="kw">break</span>;
-                        };
-                        <span class="kw">yield </span><span class="prelude-val">Ok</span>(record_batch);
+                                <span class="kw">break</span>;
+                            }
+                        }
                     }
                 }));
                 <span class="kw">let </span>record_batch_stream = RecordBatchStreamWrapper {
                     schema,
                     stream,
                     output_ordering: <span class="prelude-val">None</span>,
+                    metrics: Default::default(),
                 };
                 <span class="prelude-val">Ok</span>(Output::Stream(Box::pin(record_batch_stream)))
             }

@@ -331,6 +331,17 @@
 <a href="#330" id="330">330</a>
 <a href="#331" id="331">331</a>
 <a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -353,6 +364,7 @@
 <span class="kw">use </span>std::pin::Pin;
 <span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>arc_swap::ArcSwapOption;
 <span class="kw">use </span>datafusion::physical_plan::memory::MemoryStream;
 <span class="kw">pub use </span>datafusion::physical_plan::SendableRecordBatchStream <span class="kw">as </span>DfSendableRecordBatchStream;
 <span class="kw">use </span>datatypes::arrow::compute::SortOptions;
@@ -370,6 +382,10 @@
     <span class="kw">fn </span>schema(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; SchemaRef;
 
     <span class="kw">fn </span>output_ordering(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[OrderOption]&gt; {
+        <span class="prelude-val">None
+    </span>}
+
+    <span class="kw">fn </span>metrics(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
         <span class="prelude-val">None
     </span>}
 }
@@ -539,6 +555,7 @@
     <span class="kw">pub </span>schema: SchemaRef,
     <span class="kw">pub </span>stream: S,
     <span class="kw">pub </span>output_ordering: <span class="prelude-ty">Option</span>&lt;Vec&lt;OrderOption&gt;&gt;,
+    <span class="kw">pub </span>metrics: Arc&lt;ArcSwapOption&lt;String&gt;&gt;,
 }
 
 <span class="kw">impl</span>&lt;S&gt; RecordBatchStreamWrapper&lt;S&gt; {
@@ -548,6 +565,7 @@
             schema,
             stream,
             output_ordering: <span class="prelude-val">None</span>,
+            metrics: Default::default(),
         }
     }
 }
@@ -561,6 +579,10 @@
 
     <span class="kw">fn </span>output_ordering(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>[OrderOption]&gt; {
         <span class="self">self</span>.output_ordering.as_deref()
+    }
+
+    <span class="kw">fn </span>metrics(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
+        <span class="self">self</span>.metrics.load().as_ref().map(|s| s.as_ref().clone())
     }
 }
 

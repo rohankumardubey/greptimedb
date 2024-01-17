@@ -260,6 +260,20 @@
 <a href="#259" id="259">259</a>
 <a href="#260" id="260">260</a>
 <a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -274,8 +288,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>api::v1::region::{QueryRequest, RegionRequest, RegionResponse};
+</span><span class="kw">use </span>std::sync::Arc;
+
+<span class="kw">use </span>api::v1::region::{QueryRequest, RegionRequest, RegionResponse};
 <span class="kw">use </span>api::v1::ResponseHeader;
+<span class="kw">use </span>arc_swap::ArcSwapOption;
 <span class="kw">use </span>arrow_flight::Ticket;
 <span class="kw">use </span>async_stream::stream;
 <span class="kw">use </span>async_trait::async_trait;
@@ -381,27 +398,38 @@
             .fail();
         };
 
+        <span class="kw">let </span>metrics_str = Arc::new(ArcSwapOption::from(<span class="prelude-val">None</span>));
+        <span class="kw">let </span>ref_str = metrics_str.clone();
+
         <span class="kw">let </span>stream = Box::pin(<span class="macro">stream!</span>({
             <span class="kw">while let </span><span class="prelude-val">Some</span>(flight_message) = flight_message_stream.next().<span class="kw">await </span>{
                 <span class="kw">let </span>flight_message = flight_message
                     .map_err(BoxedError::new)
                     .context(ExternalSnafu)<span class="question-mark">?</span>;
-                <span class="kw">let </span>FlightMessage::Recordbatch(record_batch) = flight_message <span class="kw">else </span>{
-                    <span class="kw">yield </span>IllegalFlightMessagesSnafu {
+
+                <span class="kw">match </span>flight_message {
+                    FlightMessage::Recordbatch(record_batch) =&gt; <span class="kw">yield </span><span class="prelude-val">Ok</span>(record_batch),
+                    FlightMessage::Metrics(s) =&gt; {
+                        ref_str.swap(<span class="prelude-val">Some</span>(Arc::new(s)));
+                        <span class="kw">break</span>;
+                    }
+                    <span class="kw">_ </span>=&gt; {
+                        <span class="kw">yield </span>IllegalFlightMessagesSnafu {
                             reason: <span class="string">"A Schema message must be succeeded exclusively by a set of RecordBatch messages"
                         </span>}
                         .fail()
                         .map_err(BoxedError::new)
                         .context(ExternalSnafu);
-                    <span class="kw">break</span>;
-                };
-                <span class="kw">yield </span><span class="prelude-val">Ok</span>(record_batch);
+                        <span class="kw">break</span>;
+                    }
+                }
             }
         }));
         <span class="kw">let </span>record_batch_stream = RecordBatchStreamWrapper {
             schema,
             stream,
             output_ordering: <span class="prelude-val">None</span>,
+            metrics: metrics_str,
         };
         <span class="prelude-val">Ok</span>(Box::pin(record_batch_stream))
     }
