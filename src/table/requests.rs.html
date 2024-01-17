@@ -447,10 +447,10 @@
 <span class="kw">use </span>store_api::metric_engine_consts::{LOGICAL_TABLE_METADATA_KEY, PHYSICAL_TABLE_METADATA_KEY};
 <span class="kw">use </span>store_api::storage::RegionNumber;
 
-<span class="kw">use </span><span class="kw">crate</span>::engine::TableReference;
 <span class="kw">use </span><span class="kw">crate</span>::error;
 <span class="kw">use </span><span class="kw">crate</span>::error::ParseTableOptionSnafu;
 <span class="kw">use </span><span class="kw">crate</span>::metadata::{TableId, TableVersion};
+<span class="kw">use </span><span class="kw">crate</span>::table_reference::TableReference;
 
 <span class="kw">pub const </span>FILE_TABLE_META_KEY: <span class="kw-2">&amp;</span>str = <span class="string">"__private.file_table_meta"</span>;
 <span class="kw">pub const </span>FILE_TABLE_LOCATION_KEY: <span class="kw-2">&amp;</span>str = <span class="string">"location"</span>;

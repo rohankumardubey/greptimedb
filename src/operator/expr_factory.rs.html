@@ -473,8 +473,8 @@
 <span class="kw">use </span>sql::statements::create::{CreateExternalTable, CreateTable, TIME_INDEX};
 <span class="kw">use </span>sql::statements::{column_def_to_schema, sql_column_def_to_grpc_column_def};
 <span class="kw">use </span>sql::util::to_lowercase_options_map;
-<span class="kw">use </span>table::engine::TableReference;
 <span class="kw">use </span>table::requests::{TableOptions, FILE_TABLE_META_KEY};
+<span class="kw">use </span>table::table_reference::TableReference;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     BuildCreateExprOnInsertionSnafu, ColumnDataTypeSnafu, ConvertColumnDefaultConstraintSnafu,

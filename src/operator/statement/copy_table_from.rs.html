@@ -659,8 +659,8 @@
 <span class="kw">use </span>regex::Regex;
 <span class="kw">use </span>session::context::QueryContextRef;
 <span class="kw">use </span>snafu::ResultExt;
-<span class="kw">use </span>table::engine::TableReference;
 <span class="kw">use </span>table::requests::{CopyTableRequest, InsertRequest};
+<span class="kw">use </span>table::table_reference::TableReference;
 <span class="kw">use </span>tokio::io::BufReader;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, IntoVectorsSnafu, <span class="prelude-ty">Result</span>};

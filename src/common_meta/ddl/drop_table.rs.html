@@ -364,8 +364,8 @@
 <span class="kw">use </span>snafu::{ensure, OptionExt, ResultExt};
 <span class="kw">use </span>store_api::storage::RegionId;
 <span class="kw">use </span>strum::AsRefStr;
-<span class="kw">use </span>table::engine::TableReference;
 <span class="kw">use </span>table::metadata::{RawTableInfo, TableId};
+<span class="kw">use </span>table::table_reference::TableReference;
 
 <span class="kw">use </span><span class="kw">super</span>::utils::handle_retry_error;
 <span class="kw">use </span><span class="kw">crate</span>::cache_invalidator::Context;

@@ -182,9 +182,9 @@
 <span class="kw">use </span>query::plan::LogicalPlan;
 <span class="kw">use </span>session::context::QueryContextRef;
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
-<span class="kw">use </span>table::engine::TableReference;
 <span class="kw">use </span>table::requests::CopyTableRequest;
 <span class="kw">use </span>table::table::adapter::DfTableProviderAdapter;
+<span class="kw">use </span>table::table_reference::TableReference;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, BuildDfLogicalPlanSnafu, ExecLogicalPlanSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::statement::StatementExecutor;

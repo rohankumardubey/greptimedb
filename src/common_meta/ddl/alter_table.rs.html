@@ -570,9 +570,9 @@
 <span class="kw">use </span>snafu::{ensure, OptionExt, ResultExt};
 <span class="kw">use </span>store_api::storage::{ColumnId, RegionId};
 <span class="kw">use </span>strum::AsRefStr;
-<span class="kw">use </span>table::engine::TableReference;
 <span class="kw">use </span>table::metadata::{RawTableInfo, TableId, TableInfo};
 <span class="kw">use </span>table::requests::AlterKind;
+<span class="kw">use </span>table::table_reference::TableReference;
 
 <span class="kw">use </span><span class="kw">crate</span>::cache_invalidator::Context;
 <span class="kw">use </span><span class="kw">crate</span>::ddl::utils::handle_operate_region_error;

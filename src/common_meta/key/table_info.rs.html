@@ -354,8 +354,8 @@
 </span><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>serde::{Deserialize, Serialize};
-<span class="kw">use </span>table::engine::TableReference;
 <span class="kw">use </span>table::metadata::{RawTableInfo, TableId};
+<span class="kw">use </span>table::table_reference::TableReference;
 
 <span class="kw">use super</span>::{DeserializedValueWithBytes, TableMetaValue, TABLE_INFO_KEY_PREFIX};
 <span class="kw">use </span><span class="kw">crate</span>::error::Result;

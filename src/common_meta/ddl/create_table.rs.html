@@ -508,8 +508,8 @@
 <span class="kw">use </span>store_api::metric_engine_consts::LOGICAL_TABLE_METADATA_KEY;
 <span class="kw">use </span>store_api::storage::{RegionId, RegionNumber};
 <span class="kw">use </span>strum::AsRefStr;
-<span class="kw">use </span>table::engine::TableReference;
 <span class="kw">use </span>table::metadata::{RawTableInfo, TableId};
+<span class="kw">use </span>table::table_reference::TableReference;
 
 <span class="kw">use </span><span class="kw">crate</span>::ddl::utils::{handle_operate_region_error, handle_retry_error, region_storage_path};
 <span class="kw">use </span><span class="kw">crate</span>::ddl::DdlContext;
