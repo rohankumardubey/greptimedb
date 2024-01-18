@@ -347,12 +347,12 @@
 </span><span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>common_base::readable_size::ReadableSize;
-<span class="kw">use </span>common_config::WalConfig;
 <span class="kw">use </span>common_grpc::channel_manager::{
     DEFAULT_MAX_GRPC_RECV_MESSAGE_SIZE, DEFAULT_MAX_GRPC_SEND_MESSAGE_SIZE,
 };
 <span class="kw">pub use </span>common_procedure::options::ProcedureConfig;
 <span class="kw">use </span>common_telemetry::logging::LoggingOptions;
+<span class="kw">use </span>common_wal::config::DatanodeWalConfig;
 <span class="kw">use </span>file_engine::config::EngineConfig <span class="kw">as </span>FileEngineConfig;
 <span class="kw">use </span>meta_client::MetaClientOptions;
 <span class="kw">use </span>mito2::config::MitoConfig;
@@ -567,7 +567,7 @@
     <span class="kw">pub </span>heartbeat: HeartbeatOptions,
     <span class="kw">pub </span>http: HttpOptions,
     <span class="kw">pub </span>meta_client: <span class="prelude-ty">Option</span>&lt;MetaClientOptions&gt;,
-    <span class="kw">pub </span>wal: WalConfig,
+    <span class="kw">pub </span>wal: DatanodeWalConfig,
     <span class="kw">pub </span>storage: StorageConfig,
     <span class="doccomment">/// Options for different store engines.
     </span><span class="kw">pub </span>region_engine: Vec&lt;RegionEngineConfig&gt;,
@@ -590,7 +590,7 @@
             rpc_max_send_message_size: DEFAULT_MAX_GRPC_SEND_MESSAGE_SIZE,
             http: HttpOptions::default(),
             meta_client: <span class="prelude-val">None</span>,
-            wal: WalConfig::default(),
+            wal: DatanodeWalConfig::default(),
             storage: StorageConfig::default(),
             region_engine: <span class="macro">vec!</span>[
                 RegionEngineConfig::Mito(MitoConfig::default()),

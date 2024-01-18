@@ -255,7 +255,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::rpc::ddl::CreateTableTask;
 <span class="kw">use </span><span class="kw">crate</span>::rpc::router::{Region, RegionRoute};
 <span class="kw">use </span><span class="kw">crate</span>::sequence::SequenceRef;
-<span class="kw">use </span><span class="kw">crate</span>::wal::{allocate_region_wal_options, WalOptionsAllocatorRef};
+<span class="kw">use </span><span class="kw">crate</span>::wal_options_allocator::{allocate_region_wal_options, WalOptionsAllocatorRef};
 
 <span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>TableMetadataAllocator {

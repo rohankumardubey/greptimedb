@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["WalConfig"],"fn":["prepare_wal_option"],"mod":["kafka","options_allocator"]};

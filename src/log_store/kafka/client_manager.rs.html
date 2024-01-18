@@ -243,7 +243,7 @@
 </span><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>common_config::wal::KafkaConfig;
+<span class="kw">use </span>common_wal::config::kafka::DatanodeKafkaConfig;
 <span class="kw">use </span>rskafka::client::partition::{PartitionClient, UnknownTopicHandling};
 <span class="kw">use </span>rskafka::client::producer::aggregator::RecordAggregator;
 <span class="kw">use </span>rskafka::client::producer::{BatchProducer, BatchProducerBuilder};
@@ -273,7 +273,7 @@
 
 <span class="kw">impl </span>Client {
     <span class="doccomment">/// Creates a Client from the raw client.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(raw_client: Arc&lt;PartitionClient&gt;, config: <span class="kw-2">&amp;</span>KafkaConfig) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(raw_client: Arc&lt;PartitionClient&gt;, config: <span class="kw-2">&amp;</span>DatanodeKafkaConfig) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>record_aggregator = RecordAggregator::new(config.max_batch_size.as_bytes() <span class="kw">as </span>usize);
         <span class="kw">let </span>batch_producer = BatchProducerBuilder::new(raw_client.clone())
             .with_compression(config.compression)
@@ -290,7 +290,7 @@
 <span class="doccomment">/// Manages client construction and accesses.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>ClientManager {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) config: KafkaConfig,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) config: DatanodeKafkaConfig,
     <span class="doccomment">/// Top-level client in kafka. All clients are constructed by this client.
     </span>client_factory: RsKafkaClient,
     <span class="doccomment">/// A pool maintaining a collection of clients.
@@ -300,7 +300,7 @@
 
 <span class="kw">impl </span>ClientManager {
     <span class="doccomment">/// Tries to create a ClientManager.
-    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>try_new(config: <span class="kw-2">&amp;</span>KafkaConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">async fn </span>try_new(config: <span class="kw-2">&amp;</span>DatanodeKafkaConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="comment">// Sets backoff config for the top-level kafka client and all clients constructed by it.
         </span><span class="kw">let </span>backoff_config = BackoffConfig {
             init_backoff: config.backoff.init,
@@ -364,7 +364,7 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>common_meta::wal::kafka::test_util::run_test_with_kafka_wal;
+    <span class="kw">use </span>common_wal::test_util::run_test_with_kafka_wal;
     <span class="kw">use </span>tokio::sync::Barrier;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
@@ -383,7 +383,7 @@
         )
         .<span class="kw">await</span>;
 
-        <span class="kw">let </span>config = KafkaConfig {
+        <span class="kw">let </span>config = DatanodeKafkaConfig {
             broker_endpoints,
             ..Default::default()
         };

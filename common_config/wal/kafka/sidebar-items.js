@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["TopicSelectorType"],"mod":["kafka_backoff"],"struct":["KafkaBackoffConfig","KafkaConfig","KafkaOptions","StandaloneKafkaConfig"]};

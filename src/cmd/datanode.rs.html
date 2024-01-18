@@ -553,8 +553,8 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>catalog::kvbackend::MetaKvBackend;
 <span class="kw">use </span>clap::Parser;
-<span class="kw">use </span>common_config::WalConfig;
 <span class="kw">use </span>common_telemetry::{info, logging};
+<span class="kw">use </span>common_wal::config::DatanodeWalConfig;
 <span class="kw">use </span>datanode::config::DatanodeOptions;
 <span class="kw">use </span>datanode::datanode::{Datanode, DatanodeBuilder};
 <span class="kw">use </span>datanode::service::DatanodeServiceBuilder;
@@ -709,7 +709,7 @@
 
         <span class="comment">// `wal_dir` only affects raft-engine config.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(wal_dir) = <span class="kw-2">&amp;</span><span class="self">self</span>.wal_dir
-            &amp;&amp; <span class="kw">let </span>WalConfig::RaftEngine(raft_engine_config) = <span class="kw-2">&amp;mut </span>opts.wal
+            &amp;&amp; <span class="kw">let </span>DatanodeWalConfig::RaftEngine(raft_engine_config) = <span class="kw-2">&amp;mut </span>opts.wal
         {
             <span class="kw">if </span>raft_engine_config
                 .dir
@@ -851,7 +851,7 @@
         <span class="macro">assert_eq!</span>(<span class="string">"127.0.0.1:3001"</span>.to_string(), options.rpc_addr);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Some</span>(<span class="number">42</span>), options.node_id);
 
-        <span class="kw">let </span>WalConfig::RaftEngine(raft_engine_config) = options.wal <span class="kw">else </span>{
+        <span class="kw">let </span>DatanodeWalConfig::RaftEngine(raft_engine_config) = options.wal <span class="kw">else </span>{
             <span class="macro">unreachable!</span>()
         };
         <span class="macro">assert_eq!</span>(<span class="string">"/other/wal"</span>, raft_engine_config.dir.unwrap());
@@ -1039,7 +1039,7 @@
                 };
 
                 <span class="comment">// Should be read from env, env &gt; default values.
-                </span><span class="kw">let </span>WalConfig::RaftEngine(raft_engine_config) = opts.wal <span class="kw">else </span>{
+                </span><span class="kw">let </span>DatanodeWalConfig::RaftEngine(raft_engine_config) = opts.wal <span class="kw">else </span>{
                     <span class="macro">unreachable!</span>()
                 };
                 <span class="macro">assert_eq!</span>(raft_engine_config.read_batch_size, <span class="number">100</span>);

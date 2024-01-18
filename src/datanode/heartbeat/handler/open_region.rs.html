@@ -68,7 +68,7 @@
 
 </span><span class="kw">use </span>common_error::ext::ErrorExt;
 <span class="kw">use </span>common_meta::instruction::{InstructionReply, OpenRegion, SimpleReply};
-<span class="kw">use </span>common_meta::wal::prepare_wal_option;
+<span class="kw">use </span>common_meta::wal_options_allocator::prepare_wal_options;
 <span class="kw">use </span>futures_util::future::BoxFuture;
 <span class="kw">use </span>store_api::path_utils::region_dir;
 <span class="kw">use </span>store_api::region_request::{RegionOpenRequest, RegionRequest};
@@ -88,7 +88,7 @@
     ) -&gt; BoxFuture&lt;<span class="lifetime">'static</span>, InstructionReply&gt; {
         Box::pin(<span class="kw">async move </span>{
             <span class="kw">let </span>region_id = <span class="self">Self</span>::region_ident_to_region_id(<span class="kw-2">&amp;</span>region_ident);
-            prepare_wal_option(<span class="kw-2">&amp;mut </span>region_options, region_id, <span class="kw-2">&amp;</span>region_wal_options);
+            prepare_wal_options(<span class="kw-2">&amp;mut </span>region_options, region_id, <span class="kw-2">&amp;</span>region_wal_options);
             <span class="kw">let </span>request = RegionRequest::Open(RegionOpenRequest {
                 engine: region_ident.engine,
                 region_dir: region_dir(<span class="kw-2">&amp;</span>region_storage_path, region_id),

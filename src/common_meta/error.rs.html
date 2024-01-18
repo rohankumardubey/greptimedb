@@ -473,10 +473,10 @@
 
 </span><span class="kw">use </span>std::str::Utf8Error;
 
-<span class="kw">use </span>common_config::wal::WalOptions;
 <span class="kw">use </span>common_error::ext::{BoxedError, ErrorExt};
 <span class="kw">use </span>common_error::status_code::StatusCode;
 <span class="kw">use </span>common_macro::stack_trace_debug;
+<span class="kw">use </span>common_wal::options::WalOptions;
 <span class="kw">use </span>serde_json::error::Error <span class="kw">as </span>JsonError;
 <span class="kw">use </span>snafu::{Location, Snafu};
 <span class="kw">use </span>store_api::storage::{RegionId, RegionNumber};

@@ -865,12 +865,12 @@
     <span class="kw">use </span>std::sync::Arc;
 
     <span class="kw">use </span>common_base::readable_size::ReadableSize;
-    <span class="kw">use </span>common_config::wal::KafkaConfig;
+    <span class="kw">use </span>common_wal::config::kafka::DatanodeKafkaConfig;
+    <span class="kw">use </span>common_wal::test_util::run_test_with_kafka_wal;
     <span class="kw">use </span>uuid::Uuid;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::kafka::client_manager::ClientManager;
-    <span class="kw">use </span><span class="kw">crate</span>::kafka::util::test_util::run_test_with_kafka_wal;
 
     <span class="comment">// Implements some utility methods for testing.
     </span><span class="kw">impl </span>Default <span class="kw">for </span>Record {
@@ -1125,7 +1125,7 @@
                 };
                 <span class="kw">let </span>entry = new_test_entry([<span class="string">b'1'</span>; <span class="number">2000000</span>], <span class="number">0</span>, ns.clone());
                 <span class="kw">let </span>producer = RecordProducer::new(ns.clone()).with_entries(<span class="macro">vec!</span>[entry]);
-                <span class="kw">let </span>config = KafkaConfig {
+                <span class="kw">let </span>config = DatanodeKafkaConfig {
                     broker_endpoints,
                     max_batch_size: ReadableSize::mb(<span class="number">1</span>),
                     ..Default::default()

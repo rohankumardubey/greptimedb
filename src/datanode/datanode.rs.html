@@ -614,16 +614,17 @@
 
 <span class="kw">use </span>catalog::memory::MemoryCatalogManager;
 <span class="kw">use </span>common_base::Plugins;
-<span class="kw">use </span>common_config::wal::{KafkaConfig, RaftEngineConfig};
-<span class="kw">use </span>common_config::WalConfig;
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_greptimedb_telemetry::GreptimeDBTelemetryTask;
 <span class="kw">use </span>common_meta::key::datanode_table::{DatanodeTableManager, DatanodeTableValue};
 <span class="kw">use </span>common_meta::kv_backend::KvBackendRef;
-<span class="kw">use </span>common_meta::wal::prepare_wal_option;
+<span class="kw">use </span>common_meta::wal_options_allocator::prepare_wal_options;
 <span class="kw">pub use </span>common_procedure::options::ProcedureConfig;
 <span class="kw">use </span>common_runtime::Runtime;
 <span class="kw">use </span>common_telemetry::{error, info, warn};
+<span class="kw">use </span>common_wal::config::kafka::DatanodeKafkaConfig;
+<span class="kw">use </span>common_wal::config::raft_engine::RaftEngineConfig;
+<span class="kw">use </span>common_wal::config::DatanodeWalConfig;
 <span class="kw">use </span>file_engine::engine::FileRegionEngine;
 <span class="kw">use </span>futures::future;
 <span class="kw">use </span>futures_util::future::try_join_all;
@@ -971,7 +972,7 @@
         config: MitoConfig,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;MitoEngine&gt; {
         <span class="kw">let </span>mito_engine = <span class="kw">match </span><span class="kw-2">&amp;</span>opts.wal {
-            WalConfig::RaftEngine(raft_engine_config) =&gt; MitoEngine::new(
+            DatanodeWalConfig::RaftEngine(raft_engine_config) =&gt; MitoEngine::new(
                 <span class="kw-2">&amp;</span>opts.storage.data_home,
                 config,
                 <span class="self">Self</span>::build_raft_engine_log_store(<span class="kw-2">&amp;</span>opts.storage.data_home, raft_engine_config)
@@ -980,8 +981,7 @@
             )
             .<span class="kw">await
             </span>.context(BuildMitoEngineSnafu)<span class="question-mark">?</span>,
-
-            WalConfig::Kafka(kafka_config) =&gt; MitoEngine::new(
+            DatanodeWalConfig::Kafka(kafka_config) =&gt; MitoEngine::new(
                 <span class="kw-2">&amp;</span>opts.storage.data_home,
                 config,
                 <span class="self">Self</span>::build_kafka_log_store(kafka_config).<span class="kw">await</span><span class="question-mark">?</span>,
@@ -1021,7 +1021,7 @@
     }
 
     <span class="doccomment">/// Builds [KafkaLogStore].
-    </span><span class="kw">async fn </span>build_kafka_log_store(config: <span class="kw-2">&amp;</span>KafkaConfig) -&gt; <span class="prelude-ty">Result</span>&lt;Arc&lt;KafkaLogStore&gt;&gt; {
+    </span><span class="kw">async fn </span>build_kafka_log_store(config: <span class="kw-2">&amp;</span>DatanodeKafkaConfig) -&gt; <span class="prelude-ty">Result</span>&lt;Arc&lt;KafkaLogStore&gt;&gt; {
         KafkaLogStore::try_new(config)
             .<span class="kw">await
             </span>.map_err(Box::new)
@@ -1056,7 +1056,7 @@
         <span class="kw">for </span>region_number <span class="kw">in </span>table_value.regions {
             <span class="comment">// Augments region options with wal options if a wal options is provided.
             </span><span class="kw">let </span><span class="kw-2">mut </span>region_options = table_value.region_info.region_options.clone();
-            prepare_wal_option(
+            prepare_wal_options(
                 <span class="kw-2">&amp;mut </span>region_options,
                 RegionId::new(table_value.table_id, region_number),
                 <span class="kw-2">&amp;</span>table_value.region_info.region_wal_options,

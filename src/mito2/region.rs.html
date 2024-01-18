@@ -283,9 +283,9 @@
 <span class="kw">use </span>std::sync::atomic::{AtomicBool, AtomicI64, Ordering};
 <span class="kw">use </span>std::sync::{Arc, RwLock};
 
-<span class="kw">use </span>common_config::wal::WalOptions;
 <span class="kw">use </span>common_telemetry::info;
 <span class="kw">use </span>common_time::util::current_time_millis;
+<span class="kw">use </span>common_wal::options::WalOptions;
 <span class="kw">use </span>snafu::{ensure, OptionExt};
 <span class="kw">use </span>store_api::metadata::RegionMetadataRef;
 <span class="kw">use </span>store_api::storage::RegionId;

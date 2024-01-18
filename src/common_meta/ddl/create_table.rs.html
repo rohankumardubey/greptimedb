@@ -523,7 +523,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::rpc::router::{
     find_leader_regions, find_leaders, operating_leader_regions, RegionRoute,
 };
-<span class="kw">use </span><span class="kw">crate</span>::wal::prepare_wal_option;
+<span class="kw">use </span><span class="kw">crate</span>::wal_options_allocator::prepare_wal_options;
 
 <span class="kw">pub struct </span>CreateTableProcedure {
     <span class="kw">pub </span>context: DdlContext,
@@ -930,7 +930,7 @@
         request.region_id = region_id.as_u64();
         request.path = storage_path;
         <span class="comment">// Stores the encoded wal options into the request options.
-        </span>prepare_wal_option(<span class="kw-2">&amp;mut </span>request.options, region_id, region_wal_options);
+        </span>prepare_wal_options(<span class="kw-2">&amp;mut </span>request.options, region_id, region_wal_options);
 
         <span class="kw">if let </span><span class="prelude-val">Some</span>(physical_table_id) = <span class="self">self</span>.physical_table_id {
             <span class="comment">// Logical table has the same region numbers with physical table, and they have a one-to-one mapping.

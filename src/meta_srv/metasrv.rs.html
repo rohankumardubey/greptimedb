@@ -491,12 +491,12 @@
 <span class="kw">use </span>common_meta::kv_backend::{KvBackendRef, ResettableKvBackend, ResettableKvBackendRef};
 <span class="kw">use </span>common_meta::peer::Peer;
 <span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeperRef;
-<span class="kw">use </span>common_meta::wal::options_allocator::WalOptionsAllocatorRef;
-<span class="kw">use </span>common_meta::wal::WalConfig;
+<span class="kw">use </span>common_meta::wal_options_allocator::WalOptionsAllocatorRef;
 <span class="kw">use </span>common_procedure::options::ProcedureConfig;
 <span class="kw">use </span>common_procedure::ProcedureManagerRef;
 <span class="kw">use </span>common_telemetry::logging::LoggingOptions;
 <span class="kw">use </span>common_telemetry::{error, info, warn};
+<span class="kw">use </span>common_wal::config::MetaSrvWalConfig;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>servers::export_metrics::ExportMetricsOption;
 <span class="kw">use </span>servers::http::HttpOptions;
@@ -539,7 +539,7 @@
     <span class="kw">pub </span>datanode: DatanodeOptions,
     <span class="kw">pub </span>enable_telemetry: bool,
     <span class="kw">pub </span>data_home: String,
-    <span class="kw">pub </span>wal: WalConfig,
+    <span class="kw">pub </span>wal: MetaSrvWalConfig,
     <span class="kw">pub </span>export_metrics: ExportMetricsOption,
     <span class="kw">pub </span>store_key_prefix: String,
 }
@@ -572,7 +572,7 @@
             datanode: DatanodeOptions::default(),
             enable_telemetry: <span class="bool-val">true</span>,
             data_home: METASRV_HOME.to_string(),
-            wal: WalConfig::default(),
+            wal: MetaSrvWalConfig::default(),
             export_metrics: ExportMetricsOption::default(),
             store_key_prefix: String::new(),
         }

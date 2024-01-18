@@ -419,7 +419,6 @@
 <a href="#418" id="418">418</a>
 <a href="#419" id="419">419</a>
 <a href="#420" id="420">420</a>
-<a href="#421" id="421">421</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -446,7 +445,6 @@
 <span class="kw">use </span>client::client_manager::DatanodeClients;
 <span class="kw">use </span>client::Client;
 <span class="kw">use </span>common_base::Plugins;
-<span class="kw">use </span>common_config::WalConfig;
 <span class="kw">use </span>common_grpc::channel_manager::{ChannelConfig, ChannelManager};
 <span class="kw">use </span>common_meta::heartbeat::handler::parse_mailbox_message::ParseMailboxMessageHandler;
 <span class="kw">use </span>common_meta::heartbeat::handler::HandlerGroupExecutor;
@@ -455,10 +453,10 @@
 <span class="kw">use </span>common_meta::kv_backend::memory::MemoryKvBackend;
 <span class="kw">use </span>common_meta::kv_backend::KvBackendRef;
 <span class="kw">use </span>common_meta::peer::Peer;
-<span class="kw">use </span>common_meta::wal::WalConfig <span class="kw">as </span>MetaWalConfig;
 <span class="kw">use </span>common_meta::DatanodeId;
 <span class="kw">use </span>common_runtime::Builder <span class="kw">as </span>RuntimeBuilder;
 <span class="kw">use </span>common_test_util::temp_dir::create_temp_dir;
+<span class="kw">use </span>common_wal::config::{DatanodeWalConfig, MetaSrvWalConfig};
 <span class="kw">use </span>datanode::config::{DatanodeOptions, ObjectStoreConfig};
 <span class="kw">use </span>datanode::datanode::{Datanode, DatanodeBuilder, ProcedureConfig};
 <span class="kw">use </span>frontend::heartbeat::handler::invalidate_table_cache::InvalidateTableCacheHandler;
@@ -499,8 +497,8 @@
     store_config: <span class="prelude-ty">Option</span>&lt;ObjectStoreConfig&gt;,
     store_providers: <span class="prelude-ty">Option</span>&lt;Vec&lt;StorageType&gt;&gt;,
     datanodes: <span class="prelude-ty">Option</span>&lt;u32&gt;,
-    wal_config: WalConfig,
-    meta_wal_config: MetaWalConfig,
+    wal_config: DatanodeWalConfig,
+    meta_wal_config: MetaSrvWalConfig,
     shared_home_dir: <span class="prelude-ty">Option</span>&lt;Arc&lt;TempDir&gt;&gt;,
     meta_selector: <span class="prelude-ty">Option</span>&lt;SelectorRef&gt;,
 }
@@ -528,8 +526,8 @@
             store_config: <span class="prelude-val">None</span>,
             store_providers: <span class="prelude-val">None</span>,
             datanodes: <span class="prelude-val">None</span>,
-            wal_config: WalConfig::default(),
-            meta_wal_config: MetaWalConfig::default(),
+            wal_config: DatanodeWalConfig::default(),
+            meta_wal_config: MetaSrvWalConfig::default(),
             shared_home_dir: <span class="prelude-val">None</span>,
             meta_selector: <span class="prelude-val">None</span>,
         }
@@ -554,13 +552,13 @@
     </span>}
 
     <span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>with_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_config: WalConfig) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>with_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_config: DatanodeWalConfig) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.wal_config = wal_config;
         <span class="self">self
     </span>}
 
     <span class="attr">#[must_use]
-    </span><span class="kw">pub fn </span>with_meta_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_meta: MetaWalConfig) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>with_meta_wal_config(<span class="kw-2">mut </span><span class="self">self</span>, wal_meta: MetaSrvWalConfig) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.meta_wal_config = wal_meta;
         <span class="self">self
     </span>}

@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["run_test_with_kafka_wal"]};

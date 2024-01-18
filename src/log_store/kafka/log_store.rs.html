@@ -488,6 +488,7 @@
 <a href="#487" id="487">487</a>
 <a href="#488" id="488">488</a>
 <a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -505,8 +506,9 @@
 </span><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>common_config::wal::{KafkaConfig, WalOptions};
 <span class="kw">use </span>common_telemetry::{debug, warn};
+<span class="kw">use </span>common_wal::config::kafka::DatanodeKafkaConfig;
+<span class="kw">use </span>common_wal::options::WalOptions;
 <span class="kw">use </span>futures_util::StreamExt;
 <span class="kw">use </span>rskafka::client::consumer::{StartOffset, StreamConsumerBuilder};
 <span class="kw">use </span>rskafka::client::partition::OffsetAt;
@@ -525,14 +527,14 @@
 <span class="doccomment">/// A log store backed by Kafka.
 </span><span class="attr">#[derive(Debug)]
 </span><span class="kw">pub struct </span>KafkaLogStore {
-    config: KafkaConfig,
+    config: DatanodeKafkaConfig,
     <span class="doccomment">/// Manages kafka clients through which the log store contact the Kafka cluster.
     </span>client_manager: ClientManagerRef,
 }
 
 <span class="kw">impl </span>KafkaLogStore {
     <span class="doccomment">/// Tries to create a Kafka log store.
-    </span><span class="kw">pub async fn </span>try_new(config: <span class="kw-2">&amp;</span>KafkaConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+    </span><span class="kw">pub async fn </span>try_new(config: <span class="kw-2">&amp;</span>DatanodeKafkaConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             client_manager: Arc::new(ClientManager::try_new(config).<span class="kw">await</span><span class="question-mark">?</span>),
             config: config.clone(),
@@ -805,7 +807,7 @@
         )
         .<span class="kw">await</span>;
 
-        <span class="kw">let </span>config = KafkaConfig {
+        <span class="kw">let </span>config = DatanodeKafkaConfig {
             broker_endpoints,
             max_batch_size: ReadableSize::kb(<span class="number">32</span>),
             ..Default::default()

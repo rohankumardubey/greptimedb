@@ -779,7 +779,6 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>clap::Parser;
 <span class="kw">use </span>common_catalog::consts::MIN_USER_TABLE_ID;
-<span class="kw">use </span>common_config::wal::StandaloneWalConfig;
 <span class="kw">use </span>common_config::{metadata_store_dir, KvBackendConfig};
 <span class="kw">use </span>common_meta::cache_invalidator::DummyCacheInvalidator;
 <span class="kw">use </span>common_meta::datanode_manager::DatanodeManagerRef;
@@ -790,11 +789,12 @@
 <span class="kw">use </span>common_meta::kv_backend::KvBackendRef;
 <span class="kw">use </span>common_meta::region_keeper::MemoryRegionKeeper;
 <span class="kw">use </span>common_meta::sequence::SequenceBuilder;
-<span class="kw">use </span>common_meta::wal::{WalOptionsAllocator, WalOptionsAllocatorRef};
+<span class="kw">use </span>common_meta::wal_options_allocator::{WalOptionsAllocator, WalOptionsAllocatorRef};
 <span class="kw">use </span>common_procedure::ProcedureManagerRef;
 <span class="kw">use </span>common_telemetry::info;
 <span class="kw">use </span>common_telemetry::logging::LoggingOptions;
 <span class="kw">use </span>common_time::timezone::set_default_timezone;
+<span class="kw">use </span>common_wal::config::StandaloneWalConfig;
 <span class="kw">use </span>datanode::config::{DatanodeOptions, ProcedureConfig, RegionEngineConfig, StorageConfig};
 <span class="kw">use </span>datanode::datanode::{Datanode, DatanodeBuilder};
 <span class="kw">use </span>file_engine::config::EngineConfig <span class="kw">as </span>FileEngineConfig;
@@ -1258,8 +1258,8 @@
 
     <span class="kw">use </span>auth::{Identity, Password, UserProviderRef};
     <span class="kw">use </span>common_base::readable_size::ReadableSize;
-    <span class="kw">use </span>common_config::WalConfig;
     <span class="kw">use </span>common_test_util::temp_dir::create_named_temp_file;
+    <span class="kw">use </span>common_wal::config::DatanodeWalConfig;
     <span class="kw">use </span>datanode::config::{FileConfig, GcsConfig};
     <span class="kw">use </span>servers::Mode;
 
@@ -1366,7 +1366,7 @@
         <span class="macro">assert_eq!</span>(<span class="prelude-val">None</span>, fe_opts.mysql.reject_no_database);
         <span class="macro">assert!</span>(fe_opts.influxdb.enable);
 
-        <span class="kw">let </span>WalConfig::RaftEngine(raft_engine_config) = dn_opts.wal <span class="kw">else </span>{
+        <span class="kw">let </span>DatanodeWalConfig::RaftEngine(raft_engine_config) = dn_opts.wal <span class="kw">else </span>{
             <span class="macro">unreachable!</span>()
         };
         <span class="macro">assert_eq!</span>(<span class="string">"/tmp/greptimedb/test/wal"</span>, raft_engine_config.dir.unwrap());
