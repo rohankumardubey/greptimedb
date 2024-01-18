@@ -691,6 +691,11 @@
 <a href="#690" id="690">690</a>
 <a href="#691" id="691">691</a>
 <a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
+<a href="#697" id="697">697</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -739,6 +744,11 @@
     /// Returns error when failed to convert exprs.
     </span><span class="kw">pub fn </span>new(exprs: Vec&lt;Expr&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ exprs }
+    }
+
+    <span class="doccomment">/// Returns the logical exprs.
+    </span><span class="kw">pub fn </span>exprs(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[Expr] {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.exprs
     }
 
     <span class="doccomment">/// Builds physical exprs according to provided schema.

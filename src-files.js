@@ -20,7 +20,7 @@ var srcIndex = new Map(JSON.parse('[\
 ["common_procedure",["",[["local",[],["runner.rs","rwlock.rs"]],["store",[],["state_store.rs"]]],["error.rs","lib.rs","local.rs","options.rs","procedure.rs","store.rs","watcher.rs"]]],\
 ["common_procedure_test",["",[],["lib.rs"]]],\
 ["common_query",["",[["logical_plan",[],["accumulator.rs","expr.rs","udaf.rs","udf.rs"]]],["columnar_value.rs","error.rs","function.rs","lib.rs","logical_plan.rs","physical_plan.rs","prelude.rs","signature.rs"]]],\
-["common_recordbatch",["",[],["adapter.rs","error.rs","lib.rs","recordbatch.rs","util.rs"]]],\
+["common_recordbatch",["",[],["adapter.rs","error.rs","filter.rs","lib.rs","recordbatch.rs","util.rs"]]],\
 ["common_runtime",["",[],["error.rs","global.rs","lib.rs","metrics.rs","repeated_task.rs","runtime.rs"]]],\
 ["common_telemetry",["",[],["lib.rs","logging.rs","macros.rs","metric.rs","panic_hook.rs","tracing_context.rs"]]],\
 ["common_test_util",["",[],["lib.rs","ports.rs","recordbatch.rs","temp_dir.rs"]]],\

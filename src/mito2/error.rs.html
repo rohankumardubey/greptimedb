@@ -641,6 +641,13 @@
 <a href="#640" id="640">640</a>
 <a href="#641" id="641">641</a>
 <a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1179,6 +1186,12 @@
         </span>error: std::io::Error,
         location: Location,
     },
+
+    <span class="attr">#[snafu(display(<span class="string">"Failed to filter record batch"</span>))]
+    </span>FilterRecordBatch {
+        source: common_recordbatch::error::Error,
+        location: Location,
+    },
 }
 
 <span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T, E = Error&gt; = std::result::Result&lt;T, E&gt;;
@@ -1275,6 +1288,7 @@
             CleanDir { .. } =&gt; StatusCode::Unexpected,
             InvalidConfig { .. } =&gt; StatusCode::InvalidArguments,
             StaleLogEntry { .. } =&gt; StatusCode::Unexpected,
+            FilterRecordBatch { source, .. } =&gt; source.status_code(),
             Upload { .. } =&gt; StatusCode::StorageUnavailable,
         }
     }
