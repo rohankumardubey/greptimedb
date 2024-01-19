@@ -966,8 +966,8 @@
         location: Location,
     },
 
-    <span class="attr">#[snafu(display(<span class="string">"Failed to read parquet file"</span>))]
-    </span>ReadParquet {
+    <span class="attr">#[snafu(display(<span class="string">"Failed to read parquet file metadata"</span>))]
+    </span>ReadParquetMetadata {
         <span class="attr">#[snafu(source)]
         </span>error: parquet::errors::ParquetError,
         location: Location,
@@ -1202,9 +1202,9 @@
 
             Error::UnrecognizedTableOption { .. } =&gt; StatusCode::InvalidArguments,
 
-            Error::ReadObject { .. } | Error::ReadParquet { .. } | Error::ReadOrc { .. } =&gt; {
-                StatusCode::StorageUnavailable
-            }
+            Error::ReadObject { .. }
+            | Error::ReadParquetMetadata { .. }
+            | Error::ReadOrc { .. } =&gt; StatusCode::StorageUnavailable,
 
             Error::ListObjects { source, .. }
             | Error::ParseUrl { source, .. }
