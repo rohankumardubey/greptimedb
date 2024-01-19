@@ -77,6 +77,9 @@
 <a href="#76" id="76">76</a>
 <a href="#77" id="77">77</a>
 <a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
+<a href="#80" id="80">80</a>
+<a href="#81" id="81">81</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -128,12 +131,14 @@
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::dialect::GreptimeDbDialect;
+    <span class="kw">use </span><span class="kw">crate</span>::parser::ParseOptions;
 
     <span class="attr">#[test]
     </span><span class="kw">pub fn </span>test_set_timezone() {
         <span class="comment">// mysql style
         </span><span class="kw">let </span>sql = <span class="string">"SET time_zone = 'UTC'"</span>;
-        <span class="kw">let </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {});
+        <span class="kw">let </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default());
         <span class="kw">let </span><span class="kw-2">mut </span>stmts = result.unwrap();
         <span class="macro">assert_eq!</span>(
             stmts.pop().unwrap(),
@@ -144,7 +149,8 @@
         );
         <span class="comment">// postgresql style
         </span><span class="kw">let </span>sql = <span class="string">"SET TIMEZONE TO 'UTC'"</span>;
-        <span class="kw">let </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {});
+        <span class="kw">let </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default());
         <span class="kw">let </span><span class="kw-2">mut </span>stmts = result.unwrap();
         <span class="macro">assert_eq!</span>(
             stmts.pop().unwrap(),

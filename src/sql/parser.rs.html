@@ -257,6 +257,18 @@
 <a href="#256" id="256">256</a>
 <a href="#257" id="257">257</a>
 <a href="#258" id="258">258</a>
+<a href="#259" id="259">259</a>
+<a href="#260" id="260">260</a>
+<a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -284,6 +296,10 @@
 <span class="kw">use </span><span class="kw">crate</span>::statements::statement::Statement;
 <span class="kw">use </span><span class="kw">crate</span>::statements::transform_statements;
 
+<span class="doccomment">/// SQL Parser options.
+</span><span class="attr">#[derive(Clone, Debug, Default)]
+</span><span class="kw">pub struct </span>ParseOptions {}
+
 <span class="doccomment">/// GrepTime SQL parser context, a simple wrapper for Datafusion SQL parser.
 </span><span class="kw">pub struct </span>ParserContext&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) parser: Parser&lt;<span class="lifetime">'a</span>&gt;,
@@ -292,7 +308,11 @@
 
 <span class="kw">impl</span>&lt;<span class="lifetime">'a</span>&gt; ParserContext&lt;<span class="lifetime">'a</span>&gt; {
     <span class="doccomment">/// Parses SQL with given dialect
-    </span><span class="kw">pub fn </span>create_with_dialect(sql: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str, dialect: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Dialect) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Statement&gt;&gt; {
+    </span><span class="kw">pub fn </span>create_with_dialect(
+        sql: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
+        dialect: <span class="kw-2">&amp;</span><span class="kw">dyn </span>Dialect,
+        _opts: ParseOptions,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Statement&gt;&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>stmts: Vec&lt;Statement&gt; = Vec::new();
 
         <span class="kw">let </span>parser = Parser::new(dialect)
@@ -466,10 +486,14 @@
     <span class="kw">use </span><span class="kw">crate</span>::statements::sql_data_type_to_concrete_data_type;
 
     <span class="kw">fn </span>test_timestamp_precision(sql: <span class="kw-2">&amp;</span>str, expected_type: ConcreteDataType) {
-        <span class="kw">match </span>ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {})
-            .unwrap()
-            .pop()
-            .unwrap()
+        <span class="kw">match </span>ParserContext::create_with_dialect(
+            sql,
+            <span class="kw-2">&amp;</span>GreptimeDbDialect {},
+            ParseOptions::default(),
+        )
+        .unwrap()
+        .pop()
+        .unwrap()
         {
             Statement::CreateTable(CreateTable { columns, .. }) =&gt; {
                 <span class="kw">let </span>ts_col = columns.first().unwrap();

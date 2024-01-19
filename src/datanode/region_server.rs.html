@@ -1206,6 +1206,7 @@
 <a href="#1205" id="1205">1205</a>
 <a href="#1206" id="1206">1206</a>
 <a href="#1207" id="1207">1207</a>
+<a href="#1208" id="1208">1208</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1804,7 +1805,8 @@
         } = request;
         <span class="kw">let </span>region_id = RegionId::from_u64(region_id);
 
-        <span class="kw">let </span>ctx: QueryContextRef = header
+        <span class="comment">// Build query context from gRPC header
+        </span><span class="kw">let </span>ctx: QueryContextRef = header
             .as_ref()
             .map(|h| Arc::new(h.into()))
             .unwrap_or_else(|| QueryContextBuilder::default().build());

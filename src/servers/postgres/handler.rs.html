@@ -273,6 +273,7 @@
 <a href="#272" id="272">272</a>
 <a href="#273" id="273">273</a>
 <a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -305,7 +306,7 @@
 <span class="kw">use </span>query::query_engine::DescribeResult;
 <span class="kw">use </span>session::Session;
 <span class="kw">use </span>sql::dialect::PostgreSqlDialect;
-<span class="kw">use </span>sql::parser::ParserContext;
+<span class="kw">use </span>sql::parser::{ParseOptions, ParserContext};
 
 <span class="kw">use </span><span class="kw">super</span>::types::<span class="kw-2">*</span>;
 <span class="kw">use </span><span class="kw">super</span>::PostgresServerHandler;
@@ -425,8 +426,9 @@
     <span class="kw">async fn </span>parse_sql(<span class="kw-2">&amp;</span><span class="self">self</span>, sql: <span class="kw-2">&amp;</span>str, _types: <span class="kw-2">&amp;</span>[Type]) -&gt; PgWireResult&lt;<span class="self">Self</span>::Statement&gt; {
         <span class="kw">crate</span>::metrics::METRIC_POSTGRES_PREPARED_COUNT.inc();
         <span class="kw">let </span>query_ctx = <span class="self">self</span>.session.new_query_context();
-        <span class="kw">let </span><span class="kw-2">mut </span>stmts = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>PostgreSqlDialect {})
-            .map_err(|e| PgWireError::ApiError(Box::new(e)))<span class="question-mark">?</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>stmts =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>PostgreSqlDialect {}, ParseOptions::default())
+                .map_err(|e| PgWireError::ApiError(Box::new(e)))<span class="question-mark">?</span>;
         <span class="kw">if </span>stmts.len() != <span class="number">1 </span>{
             <span class="prelude-val">Err</span>(PgWireError::UserError(Box::new(ErrorInfo::new(
                 <span class="string">"ERROR"</span>.to_owned(),

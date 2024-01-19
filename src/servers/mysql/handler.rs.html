@@ -490,6 +490,7 @@
 <a href="#489" id="489">489</a>
 <a href="#490" id="490">490</a>
 <a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -531,7 +532,7 @@
 <span class="kw">use </span>session::{Session, SessionRef};
 <span class="kw">use </span>snafu::{ensure, ResultExt};
 <span class="kw">use </span>sql::dialect::MySqlDialect;
-<span class="kw">use </span>sql::parser::ParserContext;
+<span class="kw">use </span>sql::parser::{ParseOptions, ParserContext};
 <span class="kw">use </span>sql::statements::statement::Statement;
 <span class="kw">use </span>tokio::io::AsyncWrite;
 
@@ -937,7 +938,8 @@
 }
 
 <span class="kw">async fn </span>validate_query(query: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;Statement&gt; {
-    <span class="kw">let </span>statement = ParserContext::create_with_dialect(query, <span class="kw-2">&amp;</span>MySqlDialect {});
+    <span class="kw">let </span>statement =
+        ParserContext::create_with_dialect(query, <span class="kw-2">&amp;</span>MySqlDialect {}, ParseOptions::default());
     <span class="kw">let </span><span class="kw-2">mut </span>statement = statement.map_err(|e| {
         InvalidPrepareStatementSnafu {
             err_msg: e.output_msg(),

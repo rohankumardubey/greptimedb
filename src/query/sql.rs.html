@@ -1330,7 +1330,7 @@
             variable: ObjectName(<span class="macro">vec!</span>[Ident::new(variable)]),
         };
         <span class="kw">let </span>ctx = QueryContextBuilder::default()
-            .timezone(Timezone::from_tz_string(tz).unwrap())
+            .timezone(Arc::new(Timezone::from_tz_string(tz).unwrap()))
             .build();
         <span class="kw">match </span>show_variable(stmt, ctx) {
             <span class="prelude-val">Ok</span>(Output::RecordBatches(record)) =&gt; {

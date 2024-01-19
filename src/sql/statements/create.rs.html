@@ -344,6 +344,19 @@
 <a href="#343" id="343">343</a>
 <a href="#344" id="344">344</a>
 <a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -568,7 +581,7 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span><span class="kw">crate</span>::dialect::GreptimeDbDialect;
     <span class="kw">use </span><span class="kw">crate</span>::error::Error::InvalidTableOption;
-    <span class="kw">use </span><span class="kw">crate</span>::parser::ParserContext;
+    <span class="kw">use </span><span class="kw">crate</span>::parser::{ParseOptions, ParserContext};
     <span class="kw">use </span><span class="kw">crate</span>::statements::statement::Statement;
 
     <span class="attr">#[test]
@@ -589,7 +602,9 @@
                        engine=mito
                        with(regions=1, ttl='7d', storage='File');
          "</span>;
-        <span class="kw">let </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
+        <span class="kw">let </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default())
+                .unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, result.len());
 
         <span class="kw">match </span><span class="kw-2">&amp;</span>result[<span class="number">0</span>] {
@@ -619,8 +634,12 @@ WITH(
                     <span class="kw-2">&amp;</span>new_sql
                 );
 
-                <span class="kw">let </span>new_result =
-                    ParserContext::create_with_dialect(<span class="kw-2">&amp;</span>new_sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
+                <span class="kw">let </span>new_result = ParserContext::create_with_dialect(
+                    <span class="kw-2">&amp;</span>new_sql,
+                    <span class="kw-2">&amp;</span>GreptimeDbDialect {},
+                    ParseOptions::default(),
+                )
+                .unwrap();
                 <span class="macro">assert_eq!</span>(result, new_result);
             }
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
@@ -638,7 +657,9 @@ WITH(
             PRIMARY KEY(ts, host)
             );
         "</span>;
-        <span class="kw">let </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
+        <span class="kw">let </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default())
+                .unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, result.len());
 
         <span class="kw">match </span><span class="kw-2">&amp;</span>result[<span class="number">0</span>] {
@@ -659,8 +680,12 @@ ENGINE=mito
                     <span class="kw-2">&amp;</span>new_sql
                 );
 
-                <span class="kw">let </span>new_result =
-                    ParserContext::create_with_dialect(<span class="kw-2">&amp;</span>new_sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
+                <span class="kw">let </span>new_result = ParserContext::create_with_dialect(
+                    <span class="kw-2">&amp;</span>new_sql,
+                    <span class="kw-2">&amp;</span>GreptimeDbDialect {},
+                    ParseOptions::default(),
+                )
+                .unwrap();
                 <span class="macro">assert_eq!</span>(result, new_result);
             }
             <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),
@@ -685,7 +710,8 @@ ENGINE=mito
       engine=mito
       with(regions=1, ttl='7d', hello='world');
 "</span>;
-        <span class="kw">let </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {});
+        <span class="kw">let </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default());
         <span class="macro">assert!</span>(<span class="macro">matches!</span>(result, <span class="prelude-val">Err</span>(InvalidTableOption { .. })))
     }
 }

@@ -112,7 +112,7 @@
                     step: eval.step,
                     query: eval.query,
                 };
-                QueryLanguageParser::parse_promql(<span class="kw-2">&amp;</span>promql).context(ParseQuerySnafu)<span class="question-mark">?
+                QueryLanguageParser::parse_promql(<span class="kw-2">&amp;</span>promql, <span class="kw-2">&amp;</span>query_ctx).context(ParseQuerySnafu)<span class="question-mark">?
             </span>}
             Tql::Explain(explain) =&gt; {
                 <span class="kw">let </span>promql = PromQuery {
@@ -120,7 +120,7 @@
                     ..PromQuery::default()
                 };
                 <span class="kw">let </span>params = HashMap::from([(<span class="string">"name"</span>.to_string(), EXPLAIN_NODE_NAME.to_string())]);
-                QueryLanguageParser::parse_promql(<span class="kw-2">&amp;</span>promql)
+                QueryLanguageParser::parse_promql(<span class="kw-2">&amp;</span>promql, <span class="kw-2">&amp;</span>query_ctx)
                     .context(ParseQuerySnafu)<span class="question-mark">?
                     </span>.post_process(params)
                     .unwrap()
@@ -133,7 +133,7 @@
                     query: tql_analyze.query,
                 };
                 <span class="kw">let </span>params = HashMap::from([(<span class="string">"name"</span>.to_string(), ANALYZE_NODE_NAME.to_string())]);
-                QueryLanguageParser::parse_promql(<span class="kw-2">&amp;</span>promql)
+                QueryLanguageParser::parse_promql(<span class="kw-2">&amp;</span>promql, <span class="kw-2">&amp;</span>query_ctx)
                     .context(ParseQuerySnafu)<span class="question-mark">?
                     </span>.post_process(params)
                     .unwrap()

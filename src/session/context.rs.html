@@ -303,8 +303,8 @@
 }
 
 <span class="kw">impl </span>QueryContextBuilder {
-    <span class="kw">pub fn </span>timezone(<span class="kw-2">mut </span><span class="self">self</span>, tz: Timezone) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.timezone = <span class="prelude-val">Some</span>(ArcSwap::new(Arc::new(tz)));
+    <span class="kw">pub fn </span>timezone(<span class="kw-2">mut </span><span class="self">self</span>, tz: Arc&lt;Timezone&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.timezone = <span class="prelude-val">Some</span>(ArcSwap::new(tz));
         <span class="self">self
     </span>}
 }
@@ -402,7 +402,7 @@
     /// We need persist these change in `Session`.
     </span><span class="kw">pub fn </span>update_session(<span class="kw-2">&amp;</span><span class="self">self</span>, session: <span class="kw-2">&amp;</span>SessionRef) {
         <span class="kw">let </span>tz = <span class="self">self</span>.timezone();
-        <span class="kw">if </span>session.timezone() != <span class="kw-2">*</span>tz {
+        <span class="kw">if </span><span class="kw-2">*</span>session.timezone() != <span class="kw-2">*</span>tz {
             session.set_timezone(tz.as_ref().clone())
         }
     }

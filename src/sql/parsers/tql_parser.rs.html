@@ -293,6 +293,25 @@
 <a href="#292" id="292">292</a>
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -463,11 +482,14 @@
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::dialect::GreptimeDbDialect;
+    <span class="kw">use </span><span class="kw">crate</span>::parser::ParseOptions;
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_parse_tql_eval() {
         <span class="kw">let </span>sql = <span class="string">"TQL EVAL (1676887657, 1676887659, '1m') http_requests_total{environment=~'staging|testing|development',method!='GET'} @ 1609746000 offset 5m"</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default())
+                .unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, result.len());
 
         <span class="kw">let </span>statement = result.remove(<span class="number">0</span>);
@@ -483,7 +505,9 @@
 
         <span class="kw">let </span>sql = <span class="string">"TQL EVAL (1676887657.1, 1676887659.5, 30.3) http_requests_total{environment=~'staging|testing|development',method!='GET'} @ 1609746000 offset 5m"</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default())
+                .unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, result.len());
 
         <span class="kw">let </span>statement = result.remove(<span class="number">0</span>);
@@ -499,7 +523,9 @@
 
         <span class="kw">let </span>sql = <span class="string">"TQL EVALUATE (1676887657.1, 1676887659.5, 30.3) http_requests_total{environment=~'staging|testing|development',method!='GET'} @ 1609746000 offset 5m"</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default())
+                .unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, result.len());
 
         <span class="kw">let </span>statement2 = result.remove(<span class="number">0</span>);
@@ -507,7 +533,9 @@
 
         <span class="kw">let </span>sql = <span class="string">"tql eval ('2015-07-01T20:10:30.781Z', '2015-07-01T20:11:00.781Z', '30s') http_requests_total{environment=~'staging|testing|development',method!='GET'} @ 1609746000 offset 5m"</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default())
+                .unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, result.len());
 
         <span class="kw">let </span>statement = result.remove(<span class="number">0</span>);
@@ -526,7 +554,9 @@
     </span><span class="kw">fn </span>test_parse_tql_explain() {
         <span class="kw">let </span>sql = <span class="string">"TQL EXPLAIN http_requests_total{environment=~'staging|testing|development',method!='GET'} @ 1609746000 offset 5m"</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default())
+                .unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, result.len());
 
         <span class="kw">let </span>statement = result.remove(<span class="number">0</span>);
@@ -542,7 +572,9 @@
 
         <span class="kw">let </span>sql = <span class="string">"TQL EXPLAIN (20,100,10) http_requests_total{environment=~'staging|testing|development',method!='GET'} @ 1609746000 offset 5m"</span>;
 
-        <span class="kw">let </span><span class="kw-2">mut </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default())
+                .unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, result.len());
 
         <span class="kw">let </span>statement = result.remove(<span class="number">0</span>);
@@ -560,7 +592,9 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_parse_tql_analyze() {
         <span class="kw">let </span>sql = <span class="string">"TQL ANALYZE (1676887657.1, 1676887659.5, 30.3) http_requests_total{environment=~'staging|testing|development',method!='GET'} @ 1609746000 offset 5m"</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default())
+                .unwrap();
         <span class="macro">assert_eq!</span>(<span class="number">1</span>, result.len());
         <span class="kw">let </span>statement = result.remove(<span class="number">0</span>);
         <span class="kw">match </span>statement {
@@ -578,12 +612,16 @@
     </span><span class="kw">fn </span>test_parse_tql_error() {
         <span class="comment">// Invalid duration
         </span><span class="kw">let </span>sql = <span class="string">"TQL EVAL (1676887657, 1676887659, 1m) http_requests_total{environment=~'staging|testing|development',method!='GET'} @ 1609746000 offset 5m"</span>;
-        <span class="kw">let </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap_err();
+        <span class="kw">let </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default())
+                .unwrap_err();
         <span class="macro">assert!</span>(result.output_msg().contains(<span class="string">"Expected ), found: m"</span>));
 
         <span class="comment">// missing end
         </span><span class="kw">let </span>sql = <span class="string">"TQL EVAL (1676887657, '1m') http_requests_total{environment=~'staging|testing|development',method!='GET'} @ 1609746000 offset 5m"</span>;
-        <span class="kw">let </span>result = ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}).unwrap_err();
+        <span class="kw">let </span>result =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default())
+                .unwrap_err();
         <span class="macro">assert!</span>(result.output_msg().contains(<span class="string">"Expected ,, found: )"</span>));
     }
 }

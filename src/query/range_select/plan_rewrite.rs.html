@@ -1288,7 +1288,7 @@
     }
 
     <span class="kw">async fn </span>do_query(sql: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw">crate</span>::plan::LogicalPlan&gt; {
-        <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(sql).unwrap();
+        <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(sql, <span class="kw-2">&amp;</span>QueryContext::arc()).unwrap();
         <span class="kw">let </span>engine = create_test_engine().<span class="kw">await</span>;
         engine.planner().plan(stmt, QueryContext::arc()).<span class="kw">await
     </span>}

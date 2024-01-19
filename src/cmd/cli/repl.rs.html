@@ -422,10 +422,10 @@
         <span class="kw">let </span>start = Instant::now();
 
         <span class="kw">let </span>output = <span class="kw">if let </span><span class="prelude-val">Some</span>(query_engine) = <span class="kw-2">&amp;</span><span class="self">self</span>.query_engine {
-            <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(<span class="kw-2">&amp;</span>sql)
-                .with_context(|<span class="kw">_</span>| ParseSqlSnafu { sql: sql.clone() })<span class="question-mark">?</span>;
-
             <span class="kw">let </span>query_ctx = QueryContext::with(<span class="self">self</span>.database.catalog(), <span class="self">self</span>.database.schema());
+
+            <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(<span class="kw-2">&amp;</span>sql, <span class="kw-2">&amp;</span>query_ctx)
+                .with_context(|<span class="kw">_</span>| ParseSqlSnafu { sql: sql.clone() })<span class="question-mark">?</span>;
 
             <span class="kw">let </span>plan = query_engine
                 .planner()

@@ -734,6 +734,7 @@
 <a href="#733" id="733">733</a>
 <a href="#734" id="734">734</a>
 <a href="#735" id="735">735</a>
+<a href="#736" id="736">736</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1255,7 +1256,7 @@
     <span class="kw">use </span>datatypes::vectors::{Helper, StringVectorBuilder, UInt32Vector, UInt64Vector, VectorRef};
     <span class="kw">use </span>session::context::QueryContext;
     <span class="kw">use </span>sql::dialect::GreptimeDbDialect;
-    <span class="kw">use </span>sql::parser::ParserContext;
+    <span class="kw">use </span>sql::parser::{ParseOptions, ParserContext};
     <span class="kw">use </span>sql::statements::show::{ShowKind, ShowTables};
     <span class="kw">use </span>sql::statements::statement::Statement;
     <span class="kw">use </span>table::table::numbers::{NumbersTable, NUMBERS_TABLE_NAME};
@@ -1283,7 +1284,7 @@
         <span class="kw">let </span>engine = create_test_engine().<span class="kw">await</span>;
         <span class="kw">let </span>sql = <span class="string">"select sum(number) from numbers limit 20"</span>;
 
-        <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(sql).unwrap();
+        <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(sql, <span class="kw-2">&amp;</span>QueryContext::arc()).unwrap();
         <span class="kw">let </span>plan = engine
             .planner()
             .plan(stmt, QueryContext::arc())
@@ -1305,7 +1306,7 @@
         <span class="kw">let </span>engine = create_test_engine().<span class="kw">await</span>;
         <span class="kw">let </span>sql = <span class="string">"select sum(number) from numbers limit 20"</span>;
 
-        <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(sql).unwrap();
+        <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(sql, <span class="kw-2">&amp;</span>QueryContext::arc()).unwrap();
         <span class="kw">let </span>plan = engine
             .planner()
             .plan(stmt, QueryContext::arc())
@@ -1379,7 +1380,7 @@
         <span class="kw">let </span>engine = create_test_engine().<span class="kw">await</span>;
         <span class="kw">let </span>sql = <span class="string">"select sum(number) from numbers limit 20"</span>;
 
-        <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(sql).unwrap();
+        <span class="kw">let </span>stmt = QueryLanguageParser::parse_sql(sql, <span class="kw-2">&amp;</span>QueryContext::arc()).unwrap();
 
         <span class="kw">let </span>plan = engine
             .planner()
@@ -1445,6 +1446,7 @@
         <span class="kw">let </span>statement = ParserContext::create_with_dialect(
             <span class="string">"SHOW TABLES WHERE \"Tables\"='monitor'"</span>,
             <span class="kw-2">&amp;</span>GreptimeDbDialect {},
+            ParseOptions::default(),
         )
         .unwrap()[<span class="number">0</span>]
             .clone();
