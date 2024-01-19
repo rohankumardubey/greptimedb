@@ -783,6 +783,10 @@
 <a href="#782" id="782">782</a>
 <a href="#783" id="783">783</a>
 <a href="#784" id="784">784</a>
+<a href="#785" id="785">785</a>
+<a href="#786" id="786">786</a>
+<a href="#787" id="787">787</a>
+<a href="#788" id="788">788</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -908,7 +912,9 @@
             config.global_write_buffer_size.as_bytes() <span class="kw">as </span>usize,
         ));
         <span class="kw">let </span>intermediate_manager =
-            IntermediateManager::init_fs(<span class="kw-2">&amp;</span>config.inverted_index.intermediate_path).<span class="kw">await</span><span class="question-mark">?</span>;
+            IntermediateManager::init_fs(<span class="kw-2">&amp;</span>config.inverted_index.intermediate_path)
+                .<span class="kw">await</span><span class="question-mark">?
+                </span>.with_buffer_size(<span class="prelude-val">Some</span>(config.inverted_index.write_buffer_size.as_bytes() <span class="kw">as _</span>));
         <span class="kw">let </span>scheduler = Arc::new(LocalScheduler::new(config.max_background_jobs));
         <span class="kw">let </span>write_cache = write_cache_from_config(
             <span class="kw-2">&amp;</span>config,
@@ -1018,7 +1024,9 @@
         });
         <span class="kw">let </span>scheduler = Arc::new(LocalScheduler::new(config.max_background_jobs));
         <span class="kw">let </span>intermediate_manager =
-            IntermediateManager::init_fs(<span class="kw-2">&amp;</span>config.inverted_index.intermediate_path).<span class="kw">await</span><span class="question-mark">?</span>;
+            IntermediateManager::init_fs(<span class="kw-2">&amp;</span>config.inverted_index.intermediate_path)
+                .<span class="kw">await</span><span class="question-mark">?
+                </span>.with_buffer_size(<span class="prelude-val">Some</span>(config.inverted_index.write_buffer_size.as_bytes() <span class="kw">as _</span>));
         <span class="kw">let </span>write_cache = write_cache_from_config(
             <span class="kw-2">&amp;</span>config,
             object_store_manager.clone(),

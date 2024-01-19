@@ -213,6 +213,9 @@
 <a href="#212" id="212">212</a>
 <a href="#213" id="213">213</a>
 <a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -350,6 +353,7 @@
             </span><span class="kw">let </span>indexer = IndexerBuilder {
                 create_inverted_index: request.create_inverted_index,
                 mem_threshold_index_create: request.mem_threshold_index_create,
+                write_buffer_size: request.index_write_buffer_size,
                 file_id,
                 file_path: index_file_path,
                 metadata: <span class="kw-2">&amp;</span>request.metadata,
@@ -398,6 +402,8 @@
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) create_inverted_index: bool,
     <span class="doccomment">/// The threshold of memory size to create inverted index.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) mem_threshold_index_create: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    <span class="doccomment">/// The size of write buffer for index.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) index_write_buffer_size: <span class="prelude-ty">Option</span>&lt;usize&gt;,
 }
 
 <span class="doccomment">/// Creates a fs object store with atomic write dir.

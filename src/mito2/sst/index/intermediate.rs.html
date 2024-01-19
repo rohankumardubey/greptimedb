@@ -152,6 +152,12 @@
 <a href="#151" id="151">151</a>
 <a href="#152" id="152">152</a>
 <a href="#153" id="153">153</a>
+<a href="#154" id="154">154</a>
+<a href="#155" id="155">155</a>
+<a href="#156" id="156">156</a>
+<a href="#157" id="157">157</a>
+<a href="#158" id="158">158</a>
+<a href="#159" id="159">159</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -198,6 +204,12 @@
 
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{ store })
     }
+
+    <span class="doccomment">/// Set the write buffer size for the store.
+    </span><span class="kw">pub fn </span>with_buffer_size(<span class="kw-2">mut </span><span class="self">self</span>, write_buffer_size: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.store = <span class="self">self</span>.store.with_write_buffer_size(write_buffer_size);
+        <span class="self">self
+    </span>}
 
     <span class="doccomment">/// Returns the store to access to intermediate files.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>store(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>InstrumentedStore {

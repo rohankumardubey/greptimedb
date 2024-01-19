@@ -303,6 +303,33 @@
 <a href="#302" id="302">302</a>
 <a href="#303" id="303">303</a>
 <a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
+<a href="#327" id="327">327</a>
+<a href="#328" id="328">328</a>
+<a href="#329" id="329">329</a>
+<a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -357,10 +384,17 @@
     </span><span class="kw">pub async fn </span>update(<span class="kw-2">&amp;mut </span><span class="self">self</span>, batch: <span class="kw-2">&amp;</span>Batch) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(creator) = <span class="self">self</span>.inner.as_mut() {
             <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = creator.update(batch).<span class="kw">await </span>{
-                <span class="macro">warn!</span>(
-                    err; <span class="string">"Failed to update index, skip creating index, region_id: {}, file_id: {}"</span>,
-                    <span class="self">self</span>.region_id, <span class="self">self</span>.file_id,
-                );
+                <span class="kw">if </span><span class="macro">cfg!</span>(any(test, feature = <span class="string">"test"</span>)) {
+                    <span class="macro">panic!</span>(
+                        <span class="string">"Failed to update index, region_id: {}, file_id: {}, err: {}"</span>,
+                        <span class="self">self</span>.region_id, <span class="self">self</span>.file_id, err
+                    );
+                } <span class="kw">else </span>{
+                    <span class="macro">warn!</span>(
+                        err; <span class="string">"Failed to update index, skip creating index, region_id: {}, file_id: {}"</span>,
+                        <span class="self">self</span>.region_id, <span class="self">self</span>.file_id,
+                    );
+                }
 
                 <span class="comment">// Skip index creation if error occurs.
                 </span><span class="self">self</span>.inner = <span class="prelude-val">None</span>;
@@ -381,10 +415,17 @@
                     <span class="kw">return </span><span class="prelude-val">Some</span>(byte_count);
                 }
                 <span class="prelude-val">Err</span>(err) =&gt; {
-                    <span class="macro">warn!</span>(
-                        err; <span class="string">"Failed to create index, region_id: {}, file_id: {}"</span>,
-                        <span class="self">self</span>.region_id, <span class="self">self</span>.file_id,
-                    );
+                    <span class="kw">if </span><span class="macro">cfg!</span>(any(test, feature = <span class="string">"test"</span>)) {
+                        <span class="macro">panic!</span>(
+                            <span class="string">"Failed to create index, region_id: {}, file_id: {}, err: {}"</span>,
+                            <span class="self">self</span>.region_id, <span class="self">self</span>.file_id, err
+                        );
+                    } <span class="kw">else </span>{
+                        <span class="macro">warn!</span>(
+                            err; <span class="string">"Failed to create index, region_id: {}, file_id: {}"</span>,
+                            <span class="self">self</span>.region_id, <span class="self">self</span>.file_id,
+                        );
+                    }
                 }
             }
         }
@@ -396,10 +437,17 @@
     </span><span class="kw">pub async fn </span>abort(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>creator) = <span class="self">self</span>.inner.take() {
             <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = creator.abort().<span class="kw">await </span>{
-                <span class="macro">warn!</span>(
-                    err; <span class="string">"Failed to abort index, region_id: {}, file_id: {}"</span>,
-                    <span class="self">self</span>.region_id, <span class="self">self</span>.file_id,
-                );
+                <span class="kw">if </span><span class="macro">cfg!</span>(any(test, feature = <span class="string">"test"</span>)) {
+                    <span class="macro">panic!</span>(
+                        <span class="string">"Failed to abort index, region_id: {}, file_id: {}, err: {}"</span>,
+                        <span class="self">self</span>.region_id, <span class="self">self</span>.file_id, err
+                    );
+                } <span class="kw">else </span>{
+                    <span class="macro">warn!</span>(
+                        err; <span class="string">"Failed to abort index, region_id: {}, file_id: {}"</span>,
+                        <span class="self">self</span>.region_id, <span class="self">self</span>.file_id,
+                    );
+                }
             }
         }
     }
@@ -408,6 +456,7 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>IndexerBuilder&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub</span>(<span class="kw">crate</span>) create_inverted_index: bool,
     <span class="kw">pub</span>(<span class="kw">crate</span>) mem_threshold_index_create: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) write_buffer_size: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     <span class="kw">pub</span>(<span class="kw">crate</span>) file_id: FileId,
     <span class="kw">pub</span>(<span class="kw">crate</span>) file_path: String,
     <span class="kw">pub</span>(<span class="kw">crate</span>) metadata: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>RegionMetadataRef,
@@ -452,7 +501,8 @@
             <span class="self">self</span>.intermediate_manager,
             <span class="self">self</span>.mem_threshold_index_create,
             row_group_size,
-        );
+        )
+        .with_buffer_size(<span class="self">self</span>.write_buffer_size);
 
         Indexer {
             file_id: <span class="self">self</span>.file_id,
@@ -541,6 +591,7 @@
         <span class="kw">let </span>indexer = IndexerBuilder {
             create_inverted_index: <span class="bool-val">true</span>,
             mem_threshold_index_create: <span class="prelude-val">Some</span>(<span class="number">1024</span>),
+            write_buffer_size: <span class="prelude-val">None</span>,
             file_id: FileId::random(),
             file_path: <span class="string">"test"</span>.to_string(),
             metadata: <span class="kw-2">&amp;</span>metadata,
@@ -559,6 +610,7 @@
         <span class="kw">let </span>indexer = IndexerBuilder {
             create_inverted_index: <span class="bool-val">false</span>,
             mem_threshold_index_create: <span class="prelude-val">Some</span>(<span class="number">1024</span>),
+            write_buffer_size: <span class="prelude-val">None</span>,
             file_id: FileId::random(),
             file_path: <span class="string">"test"</span>.to_string(),
             metadata: <span class="kw-2">&amp;</span>metadata,
@@ -577,6 +629,7 @@
         <span class="kw">let </span>indexer = IndexerBuilder {
             create_inverted_index: <span class="bool-val">true</span>,
             mem_threshold_index_create: <span class="prelude-val">Some</span>(<span class="number">1024</span>),
+            write_buffer_size: <span class="prelude-val">None</span>,
             file_id: FileId::random(),
             file_path: <span class="string">"test"</span>.to_string(),
             metadata: <span class="kw-2">&amp;</span>metadata,
@@ -595,6 +648,7 @@
         <span class="kw">let </span>indexer = IndexerBuilder {
             create_inverted_index: <span class="bool-val">true</span>,
             mem_threshold_index_create: <span class="prelude-val">Some</span>(<span class="number">1024</span>),
+            write_buffer_size: <span class="prelude-val">None</span>,
             file_id: FileId::random(),
             file_path: <span class="string">"test"</span>.to_string(),
             metadata: <span class="kw-2">&amp;</span>metadata,

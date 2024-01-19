@@ -274,6 +274,25 @@
 <a href="#273" id="273">273</a>
 <a href="#274" id="274">274</a>
 <a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -306,13 +325,24 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>InstrumentedStore {
     <span class="doccomment">/// The underlying object store.
     </span>object_store: ObjectStore,
+    <span class="doccomment">/// The size of the write buffer.
+    </span>write_buffer_size: <span class="prelude-ty">Option</span>&lt;usize&gt;,
 }
 
 <span class="kw">impl </span>InstrumentedStore {
     <span class="doccomment">/// Create a new `InstrumentedStore`.
     </span><span class="kw">pub fn </span>new(object_store: ObjectStore) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{ object_store }
+        <span class="self">Self </span>{
+            object_store,
+            write_buffer_size: <span class="prelude-val">None</span>,
+        }
     }
+
+    <span class="doccomment">/// Set the size of the write buffer.
+    </span><span class="kw">pub fn </span>with_write_buffer_size(<span class="kw-2">mut </span><span class="self">self</span>, write_buffer_size: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.write_buffer_size = write_buffer_size.filter(|<span class="kw-2">&amp;</span>size| size &gt; <span class="number">0</span>);
+        <span class="self">self
+    </span>}
 
     <span class="doccomment">/// Returns an [`InstrumentedAsyncRead`] for the given path.
     /// Metrics like the number of bytes read, read and seek operations
@@ -343,7 +373,15 @@
         write_count: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>IntCounter,
         flush_count: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>IntCounter,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;InstrumentedAsyncWrite&lt;<span class="lifetime">'a</span>, object_store::Writer&gt;&gt; {
-        <span class="kw">let </span>writer = <span class="self">self</span>.object_store.writer(path).<span class="kw">await</span>.context(OpenDalSnafu)<span class="question-mark">?</span>;
+        <span class="kw">let </span>writer = <span class="kw">match </span><span class="self">self</span>.write_buffer_size {
+            <span class="prelude-val">Some</span>(size) =&gt; <span class="self">self
+                </span>.object_store
+                .writer_with(path)
+                .buffer(size)
+                .<span class="kw">await
+                </span>.context(OpenDalSnafu)<span class="question-mark">?</span>,
+            <span class="prelude-val">None </span>=&gt; <span class="self">self</span>.object_store.writer(path).<span class="kw">await</span>.context(OpenDalSnafu)<span class="question-mark">?</span>,
+        };
         <span class="prelude-val">Ok</span>(InstrumentedAsyncWrite::new(
             writer,
             write_byte_count,

@@ -291,6 +291,9 @@
 <a href="#290" id="290">290</a>
 <a href="#291" id="291">291</a>
 <a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -545,6 +548,8 @@
     </span><span class="kw">pub </span>create_on_compaction: Mode,
     <span class="doccomment">/// Whether to apply the index on query: automatically or never.
     </span><span class="kw">pub </span>apply_on_query: Mode,
+    <span class="doccomment">/// Write buffer size for creating the index.
+    </span><span class="kw">pub </span>write_buffer_size: ReadableSize,
     <span class="doccomment">/// Memory threshold for performing an external sort during index creation.
     /// `None` means all sorting will happen in memory.
     </span><span class="attr">#[serde_as(<span class="kw">as </span>= <span class="string">"NoneAsEmptyString"</span>)]
@@ -559,6 +564,7 @@
             create_on_flush: Mode::Auto,
             create_on_compaction: Mode::Auto,
             apply_on_query: Mode::Auto,
+            write_buffer_size: ReadableSize::mb(<span class="number">8</span>),
             mem_threshold_on_create: <span class="prelude-val">Some</span>(ReadableSize::mb(<span class="number">64</span>)),
             intermediate_path: String::new(),
         }
