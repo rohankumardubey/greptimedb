@@ -38,5 +38,6 @@
 "sql":[["impl ErrorCompat for <a class=\"enum\" href=\"sql/error/enum.Error.html\" title=\"enum sql::error::Error\">Error</a>"]],
 "store_api":[["impl ErrorCompat for <a class=\"enum\" href=\"store_api/metadata/enum.MetadataError.html\" title=\"enum store_api::metadata::MetadataError\">MetadataError</a>"]],
 "substrait":[["impl ErrorCompat for <a class=\"enum\" href=\"substrait/error/enum.Error.html\" title=\"enum substrait::error::Error\">Error</a>"]],
-"table":[["impl ErrorCompat for <a class=\"enum\" href=\"table/error/enum.Error.html\" title=\"enum table::error::Error\">Error</a>"]]
+"table":[["impl ErrorCompat for <a class=\"enum\" href=\"table/error/enum.Error.html\" title=\"enum table::error::Error\">Error</a>"]],
+"tests_fuzz":[["impl ErrorCompat for <a class=\"enum\" href=\"tests_fuzz/error/enum.Error.html\" title=\"enum tests_fuzz::error::Error\">Error</a>"]]
 };if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -252,7 +252,7 @@
     MaxValue,
 }
 
-<span class="attr">#[derive(Debug)]
+<span class="attr">#[derive(Debug, Clone, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>PartitionDef {
     partition_columns: Vec&lt;String&gt;,
     partition_bounds: Vec&lt;PartitionBound&gt;,

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["ColumnBuilderError"],"fn":["droppable_columns","generate_random_value"],"mod":["alter_expr","create_expr"],"struct":["Column","ColumnBuilder","DATA_TYPES","PARTIBLE_DATA_TYPES","PartibleColumn","TS_DATA_TYPES","TsColumn"]};
