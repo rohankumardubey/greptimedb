@@ -7,7 +7,7 @@
 <p>This layer will retry failed operations when <a href="../struct.Error.html#method.is_temporary" title="method object_store::Error::is_temporary"><code>Error::is_temporary</code></a>
 returns true. If operation still failed, this layer will set error to
 <code>Persistent</code> which means error has been retried.</p>
-<p><code>write</code> and <code>blocking_write</code> don’t support retry so far, visit <a href="https://github.com/apache/incubator-opendal/issues/1223">this issue</a> for more details.</p>
+<p><code>write</code> and <code>blocking_write</code> don’t support retry so far, visit <a href="https://github.com/apache/opendal/issues/1223">this issue</a> for more details.</p>
 <h2 id="examples"><a href="#examples">Examples</a></h2>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>anyhow::Result;
 <span class="kw">use </span>opendal::layers::RetryLayer;
