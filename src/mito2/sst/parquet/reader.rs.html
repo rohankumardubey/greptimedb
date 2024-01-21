@@ -662,12 +662,6 @@
 <a href="#661" id="661">661</a>
 <a href="#662" id="662">662</a>
 <a href="#663" id="663">663</a>
-<a href="#664" id="664">664</a>
-<a href="#665" id="665">665</a>
-<a href="#666" id="666">666</a>
-<a href="#667" id="667">667</a>
-<a href="#668" id="668">668</a>
-<a href="#669" id="669">669</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -699,7 +693,6 @@
 <span class="kw">use </span>datatypes::arrow::record_batch::RecordBatch;
 <span class="kw">use </span>object_store::ObjectStore;
 <span class="kw">use </span>parquet::arrow::arrow_reader::ParquetRecordBatchReader;
-<span class="kw">use </span>parquet::arrow::async_reader::AsyncFileReader;
 <span class="kw">use </span>parquet::arrow::{parquet_to_arrow_field_levels, FieldLevels, ProjectionMask};
 <span class="kw">use </span>parquet::file::metadata::ParquetMetaData;
 <span class="kw">use </span>parquet::format::KeyValue;
@@ -707,12 +700,11 @@
 <span class="kw">use </span>store_api::metadata::{RegionMetadata, RegionMetadataRef};
 <span class="kw">use </span>store_api::storage::ColumnId;
 <span class="kw">use </span>table::predicate::Predicate;
-<span class="kw">use </span>tokio::io::BufReader;
 
 <span class="kw">use </span><span class="kw">crate</span>::cache::CacheManagerRef;
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     ArrowReaderSnafu, FieldTypeMismatchSnafu, FilterRecordBatchSnafu, InvalidMetadataSnafu,
-    InvalidParquetSnafu, OpenDalSnafu, ReadParquetSnafu, <span class="prelude-ty">Result</span>,
+    InvalidParquetSnafu, ReadParquetSnafu, <span class="prelude-ty">Result</span>,
 };
 <span class="kw">use </span><span class="kw">crate</span>::metrics::{
     PRECISE_FILTER_ROWS_TOTAL, READ_ROWS_TOTAL, READ_ROW_GROUPS_TOTAL, READ_STAGE_ELAPSED,
@@ -722,6 +714,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::sst::file::FileHandle;
 <span class="kw">use </span><span class="kw">crate</span>::sst::index::applier::SstIndexApplierRef;
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::format::ReadFormat;
+<span class="kw">use </span><span class="kw">crate</span>::sst::parquet::metadata::MetadataLoader;
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::row_group::InMemoryRowGroup;
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::stats::RowGroupPruningStats;
 <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::{DEFAULT_READ_BATCH_SIZE, PARQUET_METADATA_KEY};
@@ -806,15 +799,9 @@
         <span class="kw">let </span>start = Instant::now();
 
         <span class="kw">let </span>file_path = <span class="self">self</span>.file_handle.file_path(<span class="kw-2">&amp;</span><span class="self">self</span>.file_dir);
-        <span class="comment">// Now we create a reader to read the whole file.
-        </span><span class="kw">let </span>reader = <span class="self">self
-            </span>.object_store
-            .reader(<span class="kw-2">&amp;</span>file_path)
-            .<span class="kw">await
-            </span>.context(OpenDalSnafu)<span class="question-mark">?</span>;
-        <span class="kw">let </span><span class="kw-2">mut </span>reader = BufReader::new(reader);
+        <span class="kw">let </span>file_size = <span class="self">self</span>.file_handle.meta().file_size;
         <span class="comment">// Loads parquet metadata of the file.
-        </span><span class="kw">let </span>parquet_meta = <span class="self">self</span>.read_parquet_metadata(<span class="kw-2">&amp;mut </span>reader, <span class="kw-2">&amp;</span>file_path).<span class="kw">await</span><span class="question-mark">?</span>;
+        </span><span class="kw">let </span>parquet_meta = <span class="self">self</span>.read_parquet_metadata(<span class="kw-2">&amp;</span>file_path, file_size).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="comment">// Decodes region metadata.
         </span><span class="kw">let </span>key_value_meta = parquet_meta.file_metadata().key_value_metadata();
         <span class="kw">let </span>region_meta = <span class="self">Self</span>::get_region_metadata(<span class="kw-2">&amp;</span>file_path, key_value_meta)<span class="question-mark">?</span>;
@@ -917,8 +904,8 @@
     <span class="doccomment">/// Reads parquet metadata of specific file.
     </span><span class="kw">async fn </span>read_parquet_metadata(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        reader: <span class="kw-2">&amp;mut </span><span class="kw">impl </span>AsyncFileReader,
         file_path: <span class="kw-2">&amp;</span>str,
+        file_size: u64,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Arc&lt;ParquetMetaData&gt;&gt; {
         <span class="comment">// Tries to get from global cache.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(metadata) = <span class="self">self</span>.cache_manager.as_ref().and_then(|cache| {
@@ -927,11 +914,12 @@
             <span class="kw">return </span><span class="prelude-val">Ok</span>(metadata);
         }
 
-        <span class="comment">// Cache miss, get from the reader.
-        </span><span class="kw">let </span>metadata = reader
-            .get_metadata()
-            .<span class="kw">await
-            </span>.context(ReadParquetSnafu { path: file_path })<span class="question-mark">?</span>;
+        <span class="comment">// TODO(QuenKar): should also check write cache to get parquet metadata.
+
+        // Cache miss, load metadata directly.
+        </span><span class="kw">let </span>metadata_loader = MetadataLoader::new(<span class="self">self</span>.object_store.clone(), file_path, file_size);
+        <span class="kw">let </span>metadata = metadata_loader.load().<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>metadata = Arc::new(metadata);
         <span class="comment">// Cache the metadata.
         </span><span class="kw">if let </span><span class="prelude-val">Some</span>(cache) = <span class="kw-2">&amp;</span><span class="self">self</span>.cache_manager {
             cache.put_parquet_meta_data(
