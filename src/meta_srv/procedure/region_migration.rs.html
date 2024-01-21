@@ -1544,7 +1544,7 @@
             <span class="kw">let </span>pc = <span class="kw-2">&amp;mut </span>ctx.persistent_ctx;
 
             <span class="kw">if </span>pc.cluster_id == <span class="number">2 </span>{
-                <span class="prelude-val">Ok</span>((Box::new(RegionMigrationEnd), Status::Done))
+                <span class="prelude-val">Ok</span>((Box::new(RegionMigrationEnd), Status::done()))
             } <span class="kw">else </span>{
                 pc.cluster_id += <span class="number">1</span>;
                 <span class="prelude-val">Ok</span>((Box::new(MockState), Status::executing(<span class="bool-val">false</span>)))
@@ -1573,7 +1573,7 @@
         <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">3 </span>{
             status = <span class="prelude-val">Some</span>(procedure.execute(<span class="kw-2">&amp;</span>ctx).<span class="kw">await</span>.unwrap());
         }
-        <span class="macro">assert_matches!</span>(status.unwrap(), Status::Done);
+        <span class="macro">assert!</span>(status.unwrap().is_done());
 
         <span class="kw">let </span>ctx = TestingEnv::procedure_context();
         <span class="kw">let </span><span class="kw-2">mut </span>procedure = new_mock_procedure(<span class="kw-2">&amp;</span>env);
@@ -1590,7 +1590,7 @@
             status = <span class="prelude-val">Some</span>(procedure.execute(<span class="kw-2">&amp;</span>ctx).<span class="kw">await</span>.unwrap());
         }
         <span class="macro">assert_eq!</span>(procedure.context.persistent_ctx.cluster_id, <span class="number">2</span>);
-        <span class="macro">assert_matches!</span>(status.unwrap(), Status::Done);
+        <span class="macro">assert!</span>(status.unwrap().is_done());
     }
 
     <span class="attr">#[tokio::test]

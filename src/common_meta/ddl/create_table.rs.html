@@ -598,7 +598,7 @@
                 }
             );
 
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(Status::Done);
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Status::done());
         }
 
         <span class="self">self</span>.creator.data.state = CreateTableState::DatanodeCreateRegions;
@@ -788,7 +788,7 @@
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="macro">info!</span>(<span class="string">"Created table metadata for table {table_id}"</span>);
 
-        <span class="prelude-val">Ok</span>(Status::Done)
+        <span class="prelude-val">Ok</span>(Status::done())
     }
 }
 

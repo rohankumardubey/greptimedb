@@ -397,14 +397,14 @@
         <span class="kw">let </span>from_peer = <span class="kw-2">&amp;</span>ctx.persistent_ctx.from_peer;
 
         <span class="kw">if </span><span class="self">self</span>.has_migrated(<span class="kw-2">&amp;</span>region_route, to_peer)<span class="question-mark">? </span>{
-            <span class="prelude-val">Ok</span>((Box::new(RegionMigrationEnd), Status::Done))
+            <span class="prelude-val">Ok</span>((Box::new(RegionMigrationEnd), Status::done()))
         } <span class="kw">else if </span><span class="self">self</span>.invalid_leader_peer(<span class="kw-2">&amp;</span>region_route, from_peer)<span class="question-mark">? </span>{
             <span class="prelude-val">Ok</span>((
                 Box::new(RegionMigrationAbort::new(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
                     <span class="string">"Invalid region leader peer: {from_peer:?}, expected: {:?}"</span>,
                     region_route.leader_peer.as_ref().unwrap(),
                 ))),
-                Status::Done,
+                Status::done(),
             ))
         } <span class="kw">else if </span><span class="self">self</span>.check_candidate_region_on_peer(<span class="kw-2">&amp;</span>region_route, to_peer) {
             <span class="prelude-val">Ok</span>((Box::new(UpdateMetadata::Downgrade), Status::executing(<span class="bool-val">true</span>)))
