@@ -2730,6 +2730,7 @@
 <a href="#2729" id="2729">2729</a>
 <a href="#2730" id="2730">2730</a>
 <a href="#2731" id="2731">2731</a>
+<a href="#2732" id="2732">2732</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -3289,6 +3290,7 @@
         name: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;String&gt;,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Matchers&gt; {
         <span class="self">self</span>.ctx.reset();
+
         <span class="kw">let </span>metric_name;
         <span class="kw">if let </span><span class="prelude-val">Some</span>(name) = name.clone() {
             metric_name = <span class="prelude-val">Some</span>(name);
@@ -3313,7 +3315,7 @@
                     .field_column_matcher
                     .get_or_insert_default()
                     .push(matcher.clone());
-            } <span class="kw">else </span>{
+            } <span class="kw">else if </span>matcher.name != METRIC_NAME {
                 <span class="kw">let _ </span>= matchers.insert(matcher.clone());
             }
         }
