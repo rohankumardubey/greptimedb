@@ -341,6 +341,16 @@
 <a href="#340" id="340">340</a>
 <a href="#341" id="341">341</a>
 <a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -373,6 +383,7 @@
 <span class="kw">use </span>common_meta::table_name::TableName;
 <span class="kw">use </span>futures_util::stream::BoxStream;
 <span class="kw">use </span>futures_util::{StreamExt, TryStreamExt};
+<span class="kw">use </span>moka::sync::Cache;
 <span class="kw">use </span>partition::manager::{PartitionRuleManager, PartitionRuleManagerRef};
 <span class="kw">use </span>snafu::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>table::dist_table::DistTable;
@@ -427,6 +438,8 @@
     </span>}
 }
 
+<span class="kw">const </span>DEFAULT_CACHED_CATALOG: u64 = <span class="number">128</span>;
+
 <span class="kw">impl </span>KvBackendCatalogManager {
     <span class="kw">pub fn </span>new(backend: KvBackendRef, cache_invalidator: CacheInvalidatorRef) -&gt; Arc&lt;<span class="self">Self</span>&gt; {
         Arc::new_cyclic(|me| <span class="self">Self </span>{
@@ -435,6 +448,7 @@
             cache_invalidator,
             system_catalog: SystemCatalog {
                 catalog_manager: me.clone(),
+                catalog_cache: Cache::new(DEFAULT_CACHED_CATALOG),
                 information_schema_provider: Arc::new(InformationSchemaProvider::new(
                     <span class="comment">// The catalog name is not used in system_catalog, so let it empty
                     </span>String::default(),
@@ -639,6 +653,7 @@
 </span><span class="attr">#[derive(Clone)]
 </span><span class="kw">struct </span>SystemCatalog {
     catalog_manager: Weak&lt;KvBackendCatalogManager&gt;,
+    catalog_cache: Cache&lt;String, Arc&lt;InformationSchemaProvider&gt;&gt;,
     information_schema_provider: Arc&lt;InformationSchemaProvider&gt;,
 }
 
@@ -674,7 +689,12 @@
     <span class="kw">fn </span>table(<span class="kw-2">&amp;</span><span class="self">self</span>, catalog: <span class="kw-2">&amp;</span>str, schema: <span class="kw-2">&amp;</span>str, table_name: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;TableRef&gt; {
         <span class="kw">if </span>schema == INFORMATION_SCHEMA_NAME {
             <span class="kw">let </span>information_schema_provider =
-                InformationSchemaProvider::new(catalog.to_string(), <span class="self">self</span>.catalog_manager.clone());
+                <span class="self">self</span>.catalog_cache.get_with_by_ref(catalog, <span class="kw">move </span>|| {
+                    Arc::new(InformationSchemaProvider::new(
+                        catalog.to_string(),
+                        <span class="self">self</span>.catalog_manager.clone(),
+                    ))
+                });
             information_schema_provider.table(table_name)
         } <span class="kw">else if </span>schema == DEFAULT_SCHEMA_NAME &amp;&amp; table_name == NUMBERS_TABLE_NAME {
             <span class="prelude-val">Some</span>(NumbersTable::table(NUMBERS_TABLE_ID))

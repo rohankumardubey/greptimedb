@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["make_table"],"struct":["KvBackendCatalogManager","SystemCatalog"]};
+window.SIDEBAR_ITEMS = {"constant":["DEFAULT_CACHED_CATALOG"],"fn":["make_table"],"struct":["KvBackendCatalogManager","SystemCatalog"]};
