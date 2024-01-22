@@ -148,6 +148,8 @@
 <a href="#147" id="147">147</a>
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -261,15 +263,17 @@
         <span class="kw">let </span>table_provider = Arc::new(DfTableProviderAdapter::new(table));
         <span class="kw">let </span>table_source = Arc::new(DefaultTableSource::new(table_provider));
 
-        <span class="kw">let </span>plan = LogicalPlanBuilder::scan_with_filters(
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = LogicalPlanBuilder::scan_with_filters(
             df_table_ref.to_owned_reference(),
             table_source,
             <span class="prelude-val">None</span>,
-            filters,
+            filters.clone(),
         )
-        .context(BuildDfLogicalPlanSnafu)<span class="question-mark">?
-        </span>.build()
         .context(BuildDfLogicalPlanSnafu)<span class="question-mark">?</span>;
+        <span class="kw">for </span>f <span class="kw">in </span>filters {
+            builder = builder.filter(f).context(BuildDfLogicalPlanSnafu)<span class="question-mark">?</span>;
+        }
+        <span class="kw">let </span>plan = builder.build().context(BuildDfLogicalPlanSnafu)<span class="question-mark">?</span>;
 
         <span class="kw">let </span>output = <span class="self">self
             </span>.query_engine

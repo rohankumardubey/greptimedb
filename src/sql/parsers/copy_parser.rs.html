@@ -421,6 +421,26 @@
 <a href="#420" id="420">420</a>
 <a href="#421" id="421">421</a>
 <a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -438,13 +458,12 @@
 </span><span class="kw">use </span>std::collections::HashMap;
 
 <span class="kw">use </span>snafu::ResultExt;
-<span class="kw">use </span>sqlparser::ast::ObjectName;
 <span class="kw">use </span>sqlparser::keywords::Keyword;
 <span class="kw">use </span>sqlparser::tokenizer::Token::Word;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::parser::ParserContext;
-<span class="kw">use </span><span class="kw">crate</span>::statements::copy::{CopyDatabaseArgument, CopyTable, CopyTableArgument};
+<span class="kw">use </span><span class="kw">crate</span>::statements::copy::{CopyDatabase, CopyDatabaseArgument, CopyTable, CopyTableArgument};
 <span class="kw">use </span><span class="kw">crate</span>::statements::statement::Statement;
 <span class="kw">use </span><span class="kw">crate</span>::util::parse_option_string;
 
@@ -470,7 +489,7 @@
         <span class="prelude-val">Ok</span>(Statement::Copy(copy))
     }
 
-    <span class="kw">fn </span>parser_copy_database(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CopyDatabaseArgument&gt; {
+    <span class="kw">fn </span>parser_copy_database(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CopyDatabase&gt; {
         <span class="kw">let </span>database_name =
             <span class="self">self</span>.parser
                 .parse_object_name()
@@ -480,17 +499,29 @@
                     actual: <span class="self">self</span>.peek_token_as_string(),
                 })<span class="question-mark">?</span>;
 
-        <span class="self">self</span>.parser
-            .expect_keyword(Keyword::TO)
-            .context(error::SyntaxSnafu)<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>(with, connection, location) = <span class="self">self</span>.parse_copy_to()<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(CopyDatabaseArgument {
-            database_name,
-            with: with.into(),
-            connection: connection.into(),
-            location,
-        })
+        <span class="kw">let </span>req = <span class="kw">if </span><span class="self">self</span>.parser.parse_keyword(Keyword::TO) {
+            <span class="kw">let </span>(with, connection, location) = <span class="self">self</span>.parse_copy_parameters()<span class="question-mark">?</span>;
+            <span class="kw">let </span>argument = CopyDatabaseArgument {
+                database_name,
+                with: with.into(),
+                connection: connection.into(),
+                location,
+            };
+            CopyDatabase::To(argument)
+        } <span class="kw">else </span>{
+            <span class="self">self</span>.parser
+                .expect_keyword(Keyword::FROM)
+                .context(error::SyntaxSnafu)<span class="question-mark">?</span>;
+            <span class="kw">let </span>(with, connection, location) = <span class="self">self</span>.parse_copy_parameters()<span class="question-mark">?</span>;
+            <span class="kw">let </span>argument = CopyDatabaseArgument {
+                database_name,
+                with: with.into(),
+                connection: connection.into(),
+                location,
+            };
+            CopyDatabase::From(argument)
+        };
+        <span class="prelude-val">Ok</span>(req)
     }
 
     <span class="kw">fn </span>parse_copy_table(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CopyTable&gt; {
@@ -505,7 +536,7 @@
         <span class="kw">let </span>table_name = <span class="self">Self</span>::canonicalize_object_name(raw_table_name);
 
         <span class="kw">if </span><span class="self">self</span>.parser.parse_keyword(Keyword::TO) {
-            <span class="kw">let </span>(with, connection, location) = <span class="self">self</span>.parse_copy_to()<span class="question-mark">?</span>;
+            <span class="kw">let </span>(with, connection, location) = <span class="self">self</span>.parse_copy_parameters()<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(CopyTable::To(CopyTableArgument {
                 table_name,
                 with: with.into(),
@@ -516,52 +547,17 @@
             <span class="self">self</span>.parser
                 .expect_keyword(Keyword::FROM)
                 .context(error::SyntaxSnafu)<span class="question-mark">?</span>;
-            <span class="prelude-val">Ok</span>(CopyTable::From(<span class="self">self</span>.parse_copy_table_from(table_name)<span class="question-mark">?</span>))
+            <span class="kw">let </span>(with, connection, location) = <span class="self">self</span>.parse_copy_parameters()<span class="question-mark">?</span>;
+            <span class="prelude-val">Ok</span>(CopyTable::From(CopyTableArgument {
+                table_name,
+                with: with.into(),
+                connection: connection.into(),
+                location,
+            }))
         }
     }
 
-    <span class="kw">fn </span>parse_copy_table_from(<span class="kw-2">&amp;mut </span><span class="self">self</span>, table_name: ObjectName) -&gt; <span class="prelude-ty">Result</span>&lt;CopyTableArgument&gt; {
-        <span class="kw">let </span>location =
-            <span class="self">self</span>.parser
-                .parse_literal_string()
-                .with_context(|<span class="kw">_</span>| error::UnexpectedSnafu {
-                    sql: <span class="self">self</span>.sql,
-                    expected: <span class="string">"a uri"</span>,
-                    actual: <span class="self">self</span>.peek_token_as_string(),
-                })<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>options = <span class="self">self
-            </span>.parser
-            .parse_options(Keyword::WITH)
-            .context(error::SyntaxSnafu)<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>with = options
-            .into_iter()
-            .filter_map(|option| {
-                parse_option_string(option.value).map(|v| (option.name.value.to_lowercase(), v))
-            })
-            .collect();
-
-        <span class="kw">let </span>connection_options = <span class="self">self
-            </span>.parser
-            .parse_options(Keyword::CONNECTION)
-            .context(error::SyntaxSnafu)<span class="question-mark">?</span>;
-
-        <span class="kw">let </span>connection = connection_options
-            .into_iter()
-            .filter_map(|option| {
-                parse_option_string(option.value).map(|v| (option.name.value.to_lowercase(), v))
-            })
-            .collect();
-        <span class="prelude-val">Ok</span>(CopyTableArgument {
-            table_name,
-            with,
-            connection,
-            location,
-        })
-    }
-
-    <span class="kw">fn </span>parse_copy_to(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(With, Connection, String)&gt; {
+    <span class="kw">fn </span>parse_copy_parameters(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(With, Connection, String)&gt; {
         <span class="kw">let </span>location =
             <span class="self">self</span>.parser
                 .parse_literal_string()
@@ -604,7 +600,7 @@
     <span class="kw">use </span>std::assert_matches::assert_matches;
     <span class="kw">use </span>std::collections::HashMap;
 
-    <span class="kw">use </span>sqlparser::ast::Ident;
+    <span class="kw">use </span>sqlparser::ast::{Ident, ObjectName};
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::dialect::GreptimeDbDialect;
@@ -821,6 +817,50 @@
         <span class="kw">let </span>Copy(<span class="kw">crate</span>::statements::copy::Copy::CopyDatabase(stmt)) = stmt <span class="kw">else </span>{
             <span class="macro">unreachable!</span>()
         };
+
+        <span class="kw">let </span>CopyDatabase::To(stmt) = stmt <span class="kw">else </span>{
+            <span class="macro">unreachable!</span>()
+        };
+
+        <span class="macro">assert_eq!</span>(
+            ObjectName(<span class="macro">vec!</span>[Ident::new(<span class="string">"catalog0"</span>), Ident::new(<span class="string">"schema0"</span>)]),
+            stmt.database_name
+        );
+        <span class="macro">assert_eq!</span>(
+            [(<span class="string">"format"</span>.to_string(), <span class="string">"parquet"</span>.to_string())]
+                .into_iter()
+                .collect::&lt;HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;(),
+            stmt.with.map
+        );
+
+        <span class="macro">assert_eq!</span>(
+            [
+                (<span class="string">"foo"</span>.to_string(), <span class="string">"Bar"</span>.to_string()),
+                (<span class="string">"one"</span>.to_string(), <span class="string">"two"</span>.to_string())
+            ]
+            .into_iter()
+            .collect::&lt;HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;(),
+            stmt.connection.map
+        );
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_copy_database_from() {
+        <span class="kw">let </span>sql = <span class="string">"COPY DATABASE catalog0.schema0 FROM '/a/b/c/' WITH (FORMAT = 'parquet') CONNECTION (FOO='Bar', ONE='two')"</span>;
+        <span class="kw">let </span>stmt =
+            ParserContext::create_with_dialect(sql, <span class="kw-2">&amp;</span>GreptimeDbDialect {}, ParseOptions::default())
+                .unwrap()
+                .pop()
+                .unwrap();
+
+        <span class="kw">let </span>Copy(<span class="kw">crate</span>::statements::copy::Copy::CopyDatabase(stmt)) = stmt <span class="kw">else </span>{
+            <span class="macro">unreachable!</span>()
+        };
+
+        <span class="kw">let </span>CopyDatabase::From(stmt) = stmt <span class="kw">else </span>{
+            <span class="macro">unreachable!</span>()
+        };
+
         <span class="macro">assert_eq!</span>(
             ObjectName(<span class="macro">vec!</span>[Ident::new(<span class="string">"catalog0"</span>), Ident::new(<span class="string">"schema0"</span>)]),
             stmt.database_name

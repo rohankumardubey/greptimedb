@@ -613,6 +613,11 @@
 <a href="#612" id="612">612</a>
 <a href="#613" id="613">613</a>
 <a href="#614" id="614">614</a>
+<a href="#615" id="615">615</a>
+<a href="#616" id="616">616</a>
+<a href="#617" id="617">617</a>
+<a href="#618" id="618">618</a>
+<a href="#619" id="619">619</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1033,6 +1038,9 @@
         location: Location,
     },
 
+    <span class="attr">#[snafu(display(<span class="string">"Invalid COPY DATABASE location, must end with '/': {}"</span>, value))]
+    </span>InvalidCopyDatabasePath { value: String, location: Location },
+
     <span class="attr">#[snafu(display(<span class="string">"Table metadata manager error"</span>))]
     </span>TableMetadataManager {
         source: common_meta::error::Error,
@@ -1211,7 +1219,9 @@
             | Error::BuildBackend { source, .. } =&gt; source.status_code(),
 
             Error::ExecuteDdl { source, .. } =&gt; source.status_code(),
-            Error::InvalidCopyParameter { .. } =&gt; StatusCode::InvalidArguments,
+            Error::InvalidCopyParameter { .. } | Error::InvalidCopyDatabasePath { .. } =&gt; {
+                StatusCode::InvalidArguments
+            }
 
             Error::ReadRecordBatch { source, .. } | Error::BuildColumnVectors { source, .. } =&gt; {
                 source.status_code()

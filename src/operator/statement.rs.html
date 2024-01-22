@@ -366,6 +366,20 @@
 <a href="#365" id="365">365</a>
 <a href="#366" id="366">366</a>
 <a href="#367" id="367">367</a>
+<a href="#368" id="368">368</a>
+<a href="#369" id="369">369</a>
+<a href="#370" id="370">370</a>
+<a href="#371" id="371">371</a>
+<a href="#372" id="372">372</a>
+<a href="#373" id="373">373</a>
+<a href="#374" id="374">374</a>
+<a href="#375" id="375">375</a>
+<a href="#376" id="376">376</a>
+<a href="#377" id="377">377</a>
+<a href="#378" id="378">378</a>
+<a href="#379" id="379">379</a>
+<a href="#380" id="380">380</a>
+<a href="#381" id="381">381</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -380,7 +394,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">mod </span>backup;
+</span><span class="kw">mod </span>copy_database;
 <span class="kw">mod </span>copy_table_from;
 <span class="kw">mod </span>copy_table_to;
 <span class="kw">mod </span>ddl;
@@ -409,7 +423,7 @@
 <span class="kw">use </span>query::QueryEngineRef;
 <span class="kw">use </span>session::context::QueryContextRef;
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
-<span class="kw">use </span>sql::statements::copy::{CopyDatabaseArgument, CopyTable, CopyTableArgument};
+<span class="kw">use </span>sql::statements::copy::{CopyDatabase, CopyDatabaseArgument, CopyTable, CopyTableArgument};
 <span class="kw">use </span>sql::statements::statement::Statement;
 <span class="kw">use </span>sql::statements::OptionMap;
 <span class="kw">use </span>sql::util::format_raw_object_name;
@@ -423,7 +437,7 @@
     PlanStatementSnafu, <span class="prelude-ty">Result</span>, TableNotFoundSnafu,
 };
 <span class="kw">use </span><span class="kw">crate</span>::insert::InserterRef;
-<span class="kw">use </span><span class="kw">crate</span>::statement::backup::{COPY_DATABASE_TIME_END_KEY, COPY_DATABASE_TIME_START_KEY};
+<span class="kw">use </span><span class="kw">crate</span>::statement::copy_database::{COPY_DATABASE_TIME_END_KEY, COPY_DATABASE_TIME_START_KEY};
 <span class="kw">use </span><span class="kw">crate</span>::table::table_idents_to_full_name;
 
 <span class="attr">#[derive(Clone)]
@@ -499,10 +513,24 @@
                 }
             }
 
-            Statement::Copy(sql::statements::copy::Copy::CopyDatabase(arg)) =&gt; {
-                <span class="self">self</span>.copy_database(to_copy_database_request(arg, <span class="kw-2">&amp;</span>query_ctx)<span class="question-mark">?</span>)
-                    .<span class="kw">await
-            </span>}
+            Statement::Copy(sql::statements::copy::Copy::CopyDatabase(copy_database)) =&gt; {
+                <span class="kw">match </span>copy_database {
+                    CopyDatabase::To(arg) =&gt; {
+                        <span class="self">self</span>.copy_database_to(
+                            to_copy_database_request(arg, <span class="kw-2">&amp;</span>query_ctx)<span class="question-mark">?</span>,
+                            query_ctx.clone(),
+                        )
+                        .<span class="kw">await
+                    </span>}
+                    CopyDatabase::From(arg) =&gt; {
+                        <span class="self">self</span>.copy_database_from(
+                            to_copy_database_request(arg, <span class="kw-2">&amp;</span>query_ctx)<span class="question-mark">?</span>,
+                            query_ctx,
+                        )
+                        .<span class="kw">await
+                    </span>}
+                }
+            }
 
             Statement::CreateTable(stmt) =&gt; {
                 <span class="kw">let _ </span>= <span class="self">self</span>.create_table(stmt, query_ctx).<span class="kw">await</span><span class="question-mark">?</span>;
