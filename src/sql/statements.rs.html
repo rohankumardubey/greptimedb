@@ -1035,7 +1035,7 @@
     <span class="kw">match </span>data_type {
         ConcreteDataType::String(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(Value::String(s.into())),
         ConcreteDataType::Date(<span class="kw">_</span>) =&gt; {
-            <span class="kw">if let </span><span class="prelude-val">Ok</span>(date) = common_time::date::Date::from_str(<span class="kw-2">&amp;</span>s) {
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(date) = common_time::date::Date::from_str_utc(<span class="kw-2">&amp;</span>s) {
                 <span class="prelude-val">Ok</span>(Value::Date(date))
             } <span class="kw">else </span>{
                 ParseSqlValueSnafu {
@@ -1045,7 +1045,7 @@
             }
         }
         ConcreteDataType::DateTime(<span class="kw">_</span>) =&gt; {
-            <span class="kw">if let </span><span class="prelude-val">Ok</span>(datetime) = common_time::datetime::DateTime::from_str(<span class="kw-2">&amp;</span>s) {
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(datetime) = common_time::datetime::DateTime::from_str_system(<span class="kw-2">&amp;</span>s) {
                 <span class="prelude-val">Ok</span>(Value::DateTime(datetime))
             } <span class="kw">else </span>{
                 ParseSqlValueSnafu {
@@ -1055,7 +1055,7 @@
             }
         }
         ConcreteDataType::Timestamp(t) =&gt; {
-            <span class="kw">if let </span><span class="prelude-val">Ok</span>(ts) = Timestamp::from_str(<span class="kw-2">&amp;</span>s) {
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(ts) = Timestamp::from_str_utc(<span class="kw-2">&amp;</span>s) {
                 <span class="prelude-val">Ok</span>(Value::Timestamp(ts.convert_to(t.unit()).context(
                     TimestampOverflowSnafu {
                         timestamp: ts,

@@ -53,6 +53,25 @@
 <a href="#52" id="52">52</a>
 <a href="#53" id="53">53</a>
 <a href="#54" id="54">54</a>
+<a href="#55" id="55">55</a>
+<a href="#56" id="56">56</a>
+<a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
+<a href="#61" id="61">61</a>
+<a href="#62" id="62">62</a>
+<a href="#63" id="63">63</a>
+<a href="#64" id="64">64</a>
+<a href="#65" id="65">65</a>
+<a href="#66" id="66">66</a>
+<a href="#67" id="67">67</a>
+<a href="#68" id="68">68</a>
+<a href="#69" id="69">69</a>
+<a href="#70" id="70">70</a>
+<a href="#71" id="71">71</a>
+<a href="#72" id="72">72</a>
+<a href="#73" id="73">73</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -105,6 +124,25 @@
             state.window_functions().clone(),
             state.runtime_env().clone(),
         ))
+    }
+
+    <span class="doccomment">/// Mock an engine context for unit tests.
+    </span><span class="attr">#[cfg(any(test, feature = <span class="string">"test"</span>))]
+    </span><span class="kw">pub fn </span>mock() -&gt; <span class="self">Self </span>{
+        <span class="kw">use </span>common_base::Plugins;
+        <span class="kw">use </span>session::context::QueryContext;
+
+        <span class="kw">use </span><span class="kw">crate</span>::query_engine::QueryEngineState;
+
+        <span class="kw">let </span>state = Arc::new(QueryEngineState::new(
+            catalog::memory::new_memory_catalog_manager().unwrap(),
+            <span class="prelude-val">None</span>,
+            <span class="prelude-val">None</span>,
+            <span class="bool-val">false</span>,
+            Plugins::default(),
+        ));
+
+        QueryEngineContext::new(state.session_state(), QueryContext::arc())
     }
 }
 </code></pre></div></section></main></body></html>

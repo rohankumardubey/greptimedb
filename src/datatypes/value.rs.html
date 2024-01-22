@@ -2357,6 +2357,9 @@
 <a href="#2356" id="2356">2356</a>
 <a href="#2357" id="2357">2357</a>
 <a href="#2358" id="2358">2358</a>
+<a href="#2359" id="2359">2359</a>
+<a href="#2360" id="2360">2360</a>
+<a href="#2361" id="2361">2361</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -2373,7 +2376,6 @@
 
 </span><span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Display, Formatter};
-<span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>arrow::datatypes::{DataType <span class="kw">as </span>ArrowDataType, Field};
@@ -2385,7 +2387,7 @@
 <span class="kw">use </span>common_time::interval::IntervalUnit;
 <span class="kw">use </span>common_time::time::Time;
 <span class="kw">use </span>common_time::timestamp::{TimeUnit, Timestamp};
-<span class="kw">use </span>common_time::{Duration, Interval};
+<span class="kw">use </span>common_time::{Duration, Interval, Timezone};
 <span class="kw">use </span>datafusion_common::ScalarValue;
 <span class="kw">pub use </span>ordered_float::OrderedFloat;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
@@ -2787,11 +2789,15 @@
     }
 }
 
-<span class="doccomment">/// Convert [ScalarValue] to [Timestamp].
+<span class="doccomment">/// Convert [`ScalarValue`] to [`Timestamp`].
+/// If it's `ScalarValue::Utf8`, try to parse it with the given timezone.
 /// Return `None` if given scalar value cannot be converted to a valid timestamp.
-</span><span class="kw">pub fn </span>scalar_value_to_timestamp(scalar: <span class="kw-2">&amp;</span>ScalarValue) -&gt; <span class="prelude-ty">Option</span>&lt;Timestamp&gt; {
+</span><span class="kw">pub fn </span>scalar_value_to_timestamp(
+    scalar: <span class="kw-2">&amp;</span>ScalarValue,
+    timezone: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Timezone&gt;,
+) -&gt; <span class="prelude-ty">Option</span>&lt;Timestamp&gt; {
     <span class="kw">match </span>scalar {
-        ScalarValue::Utf8(<span class="prelude-val">Some</span>(s)) =&gt; <span class="kw">match </span>Timestamp::from_str(s) {
+        ScalarValue::Utf8(<span class="prelude-val">Some</span>(s)) =&gt; <span class="kw">match </span>Timestamp::from_str(s, timezone) {
             <span class="prelude-val">Ok</span>(t) =&gt; <span class="prelude-val">Some</span>(t),
             <span class="prelude-val">Err</span>(e) =&gt; {
                 <span class="macro">logging::error!</span>(e;<span class="string">"Failed to convert string literal {s} to timestamp"</span>);

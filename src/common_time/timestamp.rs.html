@@ -1291,6 +1291,16 @@
 <a href="#1290" id="1290">1290</a>
 <a href="#1291" id="1291">1291</a>
 <a href="#1292" id="1292">1292</a>
+<a href="#1293" id="1293">1293</a>
+<a href="#1294" id="1294">1294</a>
+<a href="#1295" id="1295">1295</a>
+<a href="#1296" id="1296">1296</a>
+<a href="#1297" id="1297">1297</a>
+<a href="#1298" id="1298">1298</a>
+<a href="#1299" id="1299">1299</a>
+<a href="#1300" id="1300">1300</a>
+<a href="#1301" id="1301">1301</a>
+<a href="#1302" id="1302">1302</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1309,21 +1319,19 @@
 <span class="kw">use </span>std::cmp::Ordering;
 <span class="kw">use </span>std::fmt::{Display, Formatter, Write};
 <span class="kw">use </span>std::hash::{Hash, Hasher};
-<span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>std::time::Duration;
 
 <span class="kw">use </span>arrow::datatypes::TimeUnit <span class="kw">as </span>ArrowTimeUnit;
 <span class="kw">use </span>chrono::{
-    DateTime, Days, Months, NaiveDate, NaiveDateTime, NaiveTime, TimeZone <span class="kw">as </span>ChronoTimeZone, Utc,
+    DateTime, Days, LocalResult, Months, NaiveDate, NaiveDateTime, NaiveTime,
+    TimeZone <span class="kw">as </span>ChronoTimeZone, Utc,
 };
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
 
-<span class="kw">use </span><span class="kw">crate</span>::error::{
-    ArithmeticOverflowSnafu, Error, ParseTimestampSnafu, <span class="prelude-ty">Result</span>, TimestampOverflowSnafu,
-};
+<span class="kw">use </span><span class="kw">crate</span>::error::{ArithmeticOverflowSnafu, ParseTimestampSnafu, <span class="prelude-ty">Result</span>, TimestampOverflowSnafu};
 <span class="kw">use </span><span class="kw">crate</span>::timezone::{get_timezone, Timezone};
-<span class="kw">use </span><span class="kw">crate</span>::util::div_ceil;
+<span class="kw">use </span><span class="kw">crate</span>::util::{datetime_to_utc, div_ceil};
 <span class="kw">use crate</span>::{error, Interval};
 
 <span class="doccomment">/// Timestamp represents the value of units(seconds/milliseconds/microseconds/nanoseconds) elapsed
@@ -1665,10 +1673,12 @@
     <span class="kw">pub fn </span>from_chrono_date(date: NaiveDate) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         Timestamp::from_chrono_datetime(date.and_time(NaiveTime::default()))
     }
-}
 
-<span class="kw">impl </span>FromStr <span class="kw">for </span>Timestamp {
-    <span class="kw">type </span><span class="prelude-val">Err </span>= Error;
+    <span class="doccomment">/// Accepts a string in RFC3339 / ISO8601 standard format and some variants and converts it to a nanosecond precision timestamp.
+    /// It no timezone specified in string, it cast to nanosecond epoch timestamp in UTC.
+    </span><span class="kw">pub fn </span>from_str_utc(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+        <span class="self">Self</span>::from_str(s, <span class="prelude-val">None</span>)
+    }
 
     <span class="doccomment">/// Accepts a string in RFC3339 / ISO8601 standard format and some variants and converts it to a nanosecond precision timestamp.
     /// This code is copied from [arrow-datafusion](https://github.com/apache/arrow-datafusion/blob/arrow2/datafusion-physical-expr/src/arrow_temporal_util.rs#L71)
@@ -1676,13 +1686,13 @@
     /// Supported format:
     /// - `2022-09-20T14:16:43.012345Z` (Zulu timezone)
     /// - `2022-09-20T14:16:43.012345+08:00` (Explicit offset)
-    /// - `2022-09-20T14:16:43.012345` (Zulu timezone, with T)
+    /// - `2022-09-20T14:16:43.012345` (The given timezone, with T)
     /// - `2022-09-20T14:16:43` (Zulu timezone, no fractional seconds, with T)
     /// - `2022-09-20 14:16:43.012345Z` (Zulu timezone, without T)
-    /// - `2022-09-20 14:16:43` (Zulu timezone, without T)
-    /// - `2022-09-20 14:16:43.012345` (Zulu timezone, without T)
+    /// - `2022-09-20 14:16:43` (The given timezone, without T)
+    /// - `2022-09-20 14:16:43.012345` (The given timezone, without T)
     </span><span class="attr">#[allow(deprecated)]
-    </span><span class="kw">fn </span>from_str(s: <span class="kw-2">&amp;</span>str) -&gt; std::result::Result&lt;<span class="self">Self</span>, <span class="self">Self</span>::Err&gt; {
+    </span><span class="kw">pub fn </span>from_str(s: <span class="kw-2">&amp;</span>str, timezone: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Timezone&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="comment">// RFC3339 timestamp (with a T)
         </span><span class="kw">let </span>s = s.trim();
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(ts) = DateTime::parse_from_rfc3339(s) {
@@ -1699,19 +1709,19 @@
         }
 
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(ts) = NaiveDateTime::parse_from_str(s, <span class="string">"%Y-%m-%dT%H:%M:%S"</span>) {
-            <span class="kw">return </span>naive_datetime_to_timestamp(s, ts);
+            <span class="kw">return </span>naive_datetime_to_timestamp(s, ts, timezone);
         }
 
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(ts) = NaiveDateTime::parse_from_str(s, <span class="string">"%Y-%m-%dT%H:%M:%S%.f"</span>) {
-            <span class="kw">return </span>naive_datetime_to_timestamp(s, ts);
+            <span class="kw">return </span>naive_datetime_to_timestamp(s, ts, timezone);
         }
 
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(ts) = NaiveDateTime::parse_from_str(s, <span class="string">"%Y-%m-%d %H:%M:%S"</span>) {
-            <span class="kw">return </span>naive_datetime_to_timestamp(s, ts);
+            <span class="kw">return </span>naive_datetime_to_timestamp(s, ts, timezone);
         }
 
         <span class="kw">if let </span><span class="prelude-val">Ok</span>(ts) = NaiveDateTime::parse_from_str(s, <span class="string">"%Y-%m-%d %H:%M:%S%.f"</span>) {
-            <span class="kw">return </span>naive_datetime_to_timestamp(s, ts);
+            <span class="kw">return </span>naive_datetime_to_timestamp(s, ts, timezone);
         }
 
         ParseTimestampSnafu { raw: s }.fail()
@@ -1723,9 +1733,19 @@
 </span><span class="kw">fn </span>naive_datetime_to_timestamp(
     s: <span class="kw-2">&amp;</span>str,
     datetime: NaiveDateTime,
+    timezone: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Timezone&gt;,
 ) -&gt; <span class="kw">crate</span>::error::Result&lt;Timestamp&gt; {
-    Timestamp::from_chrono_datetime(Utc.from_utc_datetime(<span class="kw-2">&amp;</span>datetime).naive_utc())
-        .context(ParseTimestampSnafu { raw: s })
+    <span class="kw">let </span><span class="prelude-val">Some</span>(timezone) = timezone <span class="kw">else </span>{
+        <span class="kw">return </span>Timestamp::from_chrono_datetime(Utc.from_utc_datetime(<span class="kw-2">&amp;</span>datetime).naive_utc())
+            .context(ParseTimestampSnafu { raw: s });
+    };
+
+    <span class="kw">match </span>datetime_to_utc(<span class="kw-2">&amp;</span>datetime, timezone) {
+        LocalResult::None =&gt; ParseTimestampSnafu { raw: s }.fail(),
+        LocalResult::Single(utc) | LocalResult::Ambiguous(utc, <span class="kw">_</span>) =&gt; {
+            Timestamp::from_chrono_datetime(utc).context(ParseTimestampSnafu { raw: s })
+        }
+    }
 }
 
 <span class="kw">impl </span>From&lt;i64&gt; <span class="kw">for </span>Timestamp {
@@ -2079,7 +2099,7 @@
     <span class="comment">// Input timestamp string is regarded as local timezone if no timezone is specified,
     // but expected timestamp is in UTC timezone
     </span><span class="kw">fn </span>check_from_str(s: <span class="kw-2">&amp;</span>str, expect: <span class="kw-2">&amp;</span>str) {
-        <span class="kw">let </span>ts = Timestamp::from_str(s).unwrap();
+        <span class="kw">let </span>ts = Timestamp::from_str_utc(s).unwrap();
         <span class="kw">let </span>time = ts.to_chrono_datetime().unwrap();
         <span class="macro">assert_eq!</span>(expect, time.to_string());
     }
@@ -2105,7 +2125,7 @@
     </span><span class="kw">fn </span>test_to_iso8601_string() {
         set_default_timezone(<span class="prelude-val">Some</span>(<span class="string">"Asia/Shanghai"</span>)).unwrap();
         <span class="kw">let </span>datetime_str = <span class="string">"2020-09-08 13:42:29.042+0000"</span>;
-        <span class="kw">let </span>ts = Timestamp::from_str(datetime_str).unwrap();
+        <span class="kw">let </span>ts = Timestamp::from_str_utc(datetime_str).unwrap();
         <span class="macro">assert_eq!</span>(<span class="string">"2020-09-08 21:42:29.042+0800"</span>, ts.to_iso8601_string());
 
         <span class="kw">let </span>ts_millis = <span class="number">1668070237000</span>;
@@ -2372,17 +2392,17 @@
         std::env::set_var(<span class="string">"TZ"</span>, <span class="string">"Asia/Shanghai"</span>);
         <span class="macro">assert_eq!</span>(
             Timestamp::new(<span class="number">28800</span>, TimeUnit::Second),
-            Timestamp::from_str(<span class="string">"1970-01-01 08:00:00.000"</span>).unwrap()
+            Timestamp::from_str_utc(<span class="string">"1970-01-01 08:00:00.000"</span>).unwrap()
         );
 
         <span class="macro">assert_eq!</span>(
             Timestamp::new(<span class="number">28800</span>, TimeUnit::Second),
-            Timestamp::from_str(<span class="string">"1970-01-01 08:00:00"</span>).unwrap()
+            Timestamp::from_str_utc(<span class="string">"1970-01-01 08:00:00"</span>).unwrap()
         );
 
         <span class="macro">assert_eq!</span>(
             Timestamp::new(<span class="number">28800</span>, TimeUnit::Second),
-            Timestamp::from_str(<span class="string">"      1970-01-01        08:00:00    "</span>).unwrap()
+            Timestamp::from_str_utc(<span class="string">"      1970-01-01        08:00:00    "</span>).unwrap()
         );
     }
 
@@ -2579,7 +2599,7 @@
         ];
 
         <span class="kw">for </span>s <span class="kw">in </span>valid_strings {
-            Timestamp::from_str(s).unwrap();
+            Timestamp::from_str_utc(s).unwrap();
         }
     }
 }

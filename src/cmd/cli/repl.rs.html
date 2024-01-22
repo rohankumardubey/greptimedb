@@ -263,6 +263,7 @@
 <a href="#262" id="262">262</a>
 <a href="#263" id="263">263</a>
 <a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -429,12 +430,13 @@
 
             <span class="kw">let </span>plan = query_engine
                 .planner()
-                .plan(stmt, query_ctx)
+                .plan(stmt, query_ctx.clone())
                 .<span class="kw">await
                 </span>.context(PlanStatementSnafu)<span class="question-mark">?</span>;
 
-            <span class="kw">let </span>LogicalPlan::DfPlan(plan) =
-                query_engine.optimize(<span class="kw-2">&amp;</span>plan).context(PlanStatementSnafu)<span class="question-mark">?</span>;
+            <span class="kw">let </span>LogicalPlan::DfPlan(plan) = query_engine
+                .optimize(<span class="kw-2">&amp;</span>query_engine.engine_context(query_ctx), <span class="kw-2">&amp;</span>plan)
+                .context(PlanStatementSnafu)<span class="question-mark">?</span>;
 
             <span class="kw">let </span>plan = DFLogicalSubstraitConvertor {}
                 .encode(<span class="kw-2">&amp;</span>plan)

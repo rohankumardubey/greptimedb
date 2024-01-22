@@ -386,7 +386,7 @@
 
                     <span class="kw">let </span>result = <span class="kw">match </span>(ts, format) {
                         (<span class="prelude-val">Some</span>(ts), <span class="prelude-val">Some</span>(fmt)) =&gt; <span class="prelude-val">Some</span>(
-                            ts.as_formatted_string(<span class="kw-2">&amp;</span>fmt, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>func_ctx.timezone))
+                            ts.as_formatted_string(<span class="kw-2">&amp;</span>fmt, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>func_ctx.query_ctx.timezone()))
                                 .map_err(BoxedError::new)
                                 .context(error::ExecuteSnafu)<span class="question-mark">?</span>,
                         ),
@@ -403,7 +403,7 @@
 
                     <span class="kw">let </span>result = <span class="kw">match </span>(date, format) {
                         (<span class="prelude-val">Some</span>(date), <span class="prelude-val">Some</span>(fmt)) =&gt; date
-                            .as_formatted_string(<span class="kw-2">&amp;</span>fmt, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>func_ctx.timezone))
+                            .as_formatted_string(<span class="kw-2">&amp;</span>fmt, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>func_ctx.query_ctx.timezone()))
                             .map_err(BoxedError::new)
                             .context(error::ExecuteSnafu)<span class="question-mark">?</span>,
                         <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
@@ -419,7 +419,7 @@
 
                     <span class="kw">let </span>result = <span class="kw">match </span>(datetime, format) {
                         (<span class="prelude-val">Some</span>(datetime), <span class="prelude-val">Some</span>(fmt)) =&gt; datetime
-                            .as_formatted_string(<span class="kw-2">&amp;</span>fmt, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>func_ctx.timezone))
+                            .as_formatted_string(<span class="kw-2">&amp;</span>fmt, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>func_ctx.query_ctx.timezone()))
                             .map_err(BoxedError::new)
                             .context(error::ExecuteSnafu)<span class="question-mark">?</span>,
                         <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,

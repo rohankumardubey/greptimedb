@@ -735,6 +735,26 @@
 <a href="#734" id="734">734</a>
 <a href="#735" id="735">735</a>
 <a href="#736" id="736">736</a>
+<a href="#737" id="737">737</a>
+<a href="#738" id="738">738</a>
+<a href="#739" id="739">739</a>
+<a href="#740" id="740">740</a>
+<a href="#741" id="741">741</a>
+<a href="#742" id="742">742</a>
+<a href="#743" id="743">743</a>
+<a href="#744" id="744">744</a>
+<a href="#745" id="745">745</a>
+<a href="#746" id="746">746</a>
+<a href="#747" id="747">747</a>
+<a href="#748" id="748">748</a>
+<a href="#749" id="749">749</a>
+<a href="#750" id="750">750</a>
+<a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -763,7 +783,6 @@
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_function::function::FunctionRef;
 <span class="kw">use </span>common_function::scalars::aggregate::AggregateFunctionMetaRef;
-<span class="kw">use </span>common_function::scalars::udf::create_udf;
 <span class="kw">use </span>common_query::physical_plan::{DfPhysicalPlanAdapter, PhysicalPlan, PhysicalPlanAdapter};
 <span class="kw">use </span>common_query::prelude::ScalarUdf;
 <span class="kw">use </span>common_query::Output;
@@ -821,7 +840,7 @@
         plan: LogicalPlan,
         query_ctx: QueryContextRef,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Output&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>ctx = QueryEngineContext::new(<span class="self">self</span>.state.session_state(), query_ctx.clone());
+        <span class="kw">let </span><span class="kw-2">mut </span>ctx = <span class="self">self</span>.engine_context(query_ctx.clone());
 
         <span class="comment">// `create_physical_plan` will optimize logical plan internally
         </span><span class="kw">let </span>physical_plan = <span class="self">self</span>.create_physical_plan(<span class="kw-2">&amp;mut </span>ctx, <span class="kw-2">&amp;</span>plan).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -979,8 +998,13 @@
         <span class="string">"datafusion"
     </span>}
 
-    <span class="kw">async fn </span>describe(<span class="kw-2">&amp;</span><span class="self">self</span>, plan: LogicalPlan) -&gt; <span class="prelude-ty">Result</span>&lt;DescribeResult&gt; {
-        <span class="kw">let </span>optimised_plan = <span class="self">self</span>.optimize(<span class="kw-2">&amp;</span>plan)<span class="question-mark">?</span>;
+    <span class="kw">async fn </span>describe(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        plan: LogicalPlan,
+        query_ctx: QueryContextRef,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;DescribeResult&gt; {
+        <span class="kw">let </span>ctx = <span class="self">self</span>.engine_context(query_ctx);
+        <span class="kw">let </span>optimised_plan = <span class="self">self</span>.optimize(<span class="kw-2">&amp;</span>ctx, <span class="kw-2">&amp;</span>plan)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(DescribeResult {
             schema: optimised_plan.schema()<span class="question-mark">?</span>,
             logical_plan: optimised_plan,
@@ -996,10 +1020,6 @@
         }
     }
 
-    <span class="kw">fn </span>register_udf(<span class="kw-2">&amp;</span><span class="self">self</span>, udf: ScalarUdf) {
-        <span class="self">self</span>.state.register_udf(udf);
-    }
-
     <span class="doccomment">/// Note in SQL queries, aggregate names are looked up using
     /// lowercase unless the query uses quotes. For example,
     ///
@@ -1011,8 +1031,15 @@
         <span class="self">self</span>.state.register_aggregate_function(func);
     }
 
-    <span class="kw">fn </span>register_function(<span class="kw-2">&amp;</span><span class="self">self</span>, func: FunctionRef) {
-        <span class="self">self</span>.state.register_udf(create_udf(func));
+    <span class="doccomment">/// Register a [`ScalarUdf`].
+    </span><span class="kw">fn </span>register_udf(<span class="kw-2">&amp;</span><span class="self">self</span>, udf: ScalarUdf) {
+        <span class="self">self</span>.state.register_udf(udf);
+    }
+
+    <span class="doccomment">/// Register an UDF function.
+    /// Will override if the function with same name is already registered.
+    </span><span class="kw">fn </span>register_function(<span class="kw-2">&amp;</span><span class="self">self</span>, func: FunctionRef) {
+        <span class="self">self</span>.state.register_function(func);
     }
 
     <span class="kw">fn </span>read_table(<span class="kw-2">&amp;</span><span class="self">self</span>, table: TableRef) -&gt; <span class="prelude-ty">Result</span>&lt;DataFrame&gt; {
@@ -1024,18 +1051,31 @@
                 .context(QueryExecutionSnafu)<span class="question-mark">?</span>,
         ))
     }
+
+    <span class="kw">fn </span>engine_context(<span class="kw-2">&amp;</span><span class="self">self</span>, query_ctx: QueryContextRef) -&gt; QueryEngineContext {
+        QueryEngineContext::new(<span class="self">self</span>.state.session_state(), query_ctx)
+    }
 }
 
 <span class="kw">impl </span>LogicalOptimizer <span class="kw">for </span>DatafusionQueryEngine {
     <span class="attr">#[tracing::instrument(skip_all)]
-    </span><span class="kw">fn </span>optimize(<span class="kw-2">&amp;</span><span class="self">self</span>, plan: <span class="kw-2">&amp;</span>LogicalPlan) -&gt; <span class="prelude-ty">Result</span>&lt;LogicalPlan&gt; {
+    </span><span class="kw">fn </span>optimize(<span class="kw-2">&amp;</span><span class="self">self</span>, context: <span class="kw-2">&amp;</span>QueryEngineContext, plan: <span class="kw-2">&amp;</span>LogicalPlan) -&gt; <span class="prelude-ty">Result</span>&lt;LogicalPlan&gt; {
         <span class="kw">let </span>_timer = metrics::METRIC_OPTIMIZE_LOGICAL_ELAPSED.start_timer();
         <span class="kw">match </span>plan {
             LogicalPlan::DfPlan(df_plan) =&gt; {
-                <span class="kw">let </span>optimized_plan = <span class="self">self
+                <span class="comment">// Optimized by extension rules
+                </span><span class="kw">let </span>optimized_plan = <span class="self">self
+                    </span>.state
+                    .optimize_by_extension_rules(df_plan.clone(), context)
+                    .context(error::DatafusionSnafu)
+                    .map_err(BoxedError::new)
+                    .context(QueryExecutionSnafu)<span class="question-mark">?</span>;
+
+                <span class="comment">// Optimized by datafusion optimizer
+                </span><span class="kw">let </span>optimized_plan = <span class="self">self
                     </span>.state
                     .session_state()
-                    .optimize(df_plan)
+                    .optimize(<span class="kw-2">&amp;</span>optimized_plan)
                     .context(error::DatafusionSnafu)
                     .map_err(BoxedError::new)
                     .context(QueryExecutionSnafu)<span class="question-mark">?</span>;
@@ -1391,7 +1431,7 @@
         <span class="kw">let </span>DescribeResult {
             schema,
             logical_plan,
-        } = engine.describe(plan).<span class="kw">await</span>.unwrap();
+        } = engine.describe(plan, QueryContext::arc()).<span class="kw">await</span>.unwrap();
 
         <span class="macro">assert_eq!</span>(
             schema.column_schemas()[<span class="number">0</span>],

@@ -999,11 +999,11 @@
             <span class="kw">let </span>plan = <span class="self">self
                 </span>.query_engine
                 .planner()
-                .plan(QueryStatement::Sql(stmt), query_ctx)
+                .plan(QueryStatement::Sql(stmt), query_ctx.clone())
                 .<span class="kw">await
                 </span>.context(PlanStatementSnafu)<span class="question-mark">?</span>;
             <span class="self">self</span>.query_engine
-                .describe(plan)
+                .describe(plan, query_ctx)
                 .<span class="kw">await
                 </span>.map(<span class="prelude-val">Some</span>)
                 .context(error::DescribeStatementSnafu)

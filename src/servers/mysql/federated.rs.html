@@ -393,6 +393,7 @@
 <a href="#392" id="392">392</a>
 <a href="#393" id="393">393</a>
 <a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -432,8 +433,8 @@
     Lazy::new(|| Regex::new(<span class="string">"(?i)^(SHOW VARIABLES LIKE 'lower_case_table_names'(.*))"</span>).unwrap());
 <span class="kw">static </span>SHOW_COLLATION_PATTERN: Lazy&lt;Regex&gt; =
     Lazy::new(|| Regex::new(<span class="string">"(?i)^(show collation where(.*))"</span>).unwrap());
-<span class="kw">static </span>SHOW_VARIABLES_PATTERN: Lazy&lt;Regex&gt; =
-    Lazy::new(|| Regex::new(<span class="string">"(?i)^(SHOW VARIABLES(.*))"</span>).unwrap());
+<span class="kw">static </span>SHOW_VARIABLES_LIKE_PATTERN: Lazy&lt;Regex&gt; =
+    Lazy::new(|| Regex::new(<span class="string">"(?i)^(SHOW VARIABLES( LIKE (.*))?)"</span>).unwrap());
 
 <span class="kw">static </span>SELECT_DATABASE_PATTERN: Lazy&lt;Regex&gt; =
     Lazy::new(|| Regex::new(<span class="string">r"(?i)^(SELECT DATABASE\(\s*\))"</span>).unwrap());
@@ -642,7 +643,8 @@
         <span class="prelude-val">Some</span>(show_variables(<span class="string">"sql_mode"</span>, <span class="string">"ONLY_FULL_GROUP_BY STRICT_TRANS_TABLES NO_ZERO_IN_DATE NO_ZERO_DATE ERROR_FOR_DIVISION_BY_ZERO NO_ENGINE_SUBSTITUTION"</span>))
     } <span class="kw">else if </span>SHOW_LOWER_CASE_PATTERN.is_match(query) {
         <span class="prelude-val">Some</span>(show_variables(<span class="string">"lower_case_table_names"</span>, <span class="string">"0"</span>))
-    } <span class="kw">else if </span>SHOW_COLLATION_PATTERN.is_match(query) || SHOW_VARIABLES_PATTERN.is_match(query) {
+    } <span class="kw">else if </span>SHOW_COLLATION_PATTERN.is_match(query) || SHOW_VARIABLES_LIKE_PATTERN.is_match(query)
+    {
         <span class="prelude-val">Some</span>(show_variables(<span class="string">""</span>, <span class="string">""</span>))
     } <span class="kw">else </span>{
         <span class="prelude-val">None

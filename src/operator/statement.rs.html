@@ -380,6 +380,9 @@
 <a href="#379" id="379">379</a>
 <a href="#380" id="380">380</a>
 <a href="#381" id="381">381</a>
+<a href="#382" id="382">382</a>
+<a href="#383" id="383">383</a>
+<a href="#384" id="384">384</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -403,7 +406,6 @@
 <span class="kw">mod </span>show;
 <span class="kw">mod </span>tql;
 
-<span class="kw">use </span>std::str::FromStr;
 <span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>catalog::CatalogManagerRef;
@@ -713,8 +715,8 @@
         .map_err(BoxedError::new)
         .context(ExternalSnafu)<span class="question-mark">?</span>;
 
-    <span class="kw">let </span>start_timestamp = extract_timestamp(<span class="kw-2">&amp;</span>arg.with, COPY_DATABASE_TIME_START_KEY)<span class="question-mark">?</span>;
-    <span class="kw">let </span>end_timestamp = extract_timestamp(<span class="kw-2">&amp;</span>arg.with, COPY_DATABASE_TIME_END_KEY)<span class="question-mark">?</span>;
+    <span class="kw">let </span>start_timestamp = extract_timestamp(<span class="kw-2">&amp;</span>arg.with, COPY_DATABASE_TIME_START_KEY, query_ctx)<span class="question-mark">?</span>;
+    <span class="kw">let </span>end_timestamp = extract_timestamp(<span class="kw-2">&amp;</span>arg.with, COPY_DATABASE_TIME_END_KEY, query_ctx)<span class="question-mark">?</span>;
 
     <span class="kw">let </span>time_range = <span class="kw">match </span>(start_timestamp, end_timestamp) {
         (<span class="prelude-val">Some</span>(start), <span class="prelude-val">Some</span>(end)) =&gt; TimestampRange::new(start, end),
@@ -734,10 +736,14 @@
 }
 
 <span class="doccomment">/// Extracts timestamp from a [HashMap&lt;String, String&gt;] with given key.
-</span><span class="kw">fn </span>extract_timestamp(map: <span class="kw-2">&amp;</span>OptionMap, key: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Timestamp&gt;&gt; {
+</span><span class="kw">fn </span>extract_timestamp(
+    map: <span class="kw-2">&amp;</span>OptionMap,
+    key: <span class="kw-2">&amp;</span>str,
+    query_ctx: <span class="kw-2">&amp;</span>QueryContextRef,
+) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;Timestamp&gt;&gt; {
     map.get(key)
         .map(|v| {
-            Timestamp::from_str(v)
+            Timestamp::from_str(v, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>query_ctx.timezone()))
                 .map_err(|<span class="kw">_</span>| error::InvalidCopyParameterSnafu { key, value: v }.build())
         })
         .transpose()

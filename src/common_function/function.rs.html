@@ -70,20 +70,20 @@
 
 <span class="kw">use </span>common_query::error::Result;
 <span class="kw">use </span>common_query::prelude::Signature;
-<span class="kw">use </span>common_time::timezone::get_timezone;
-<span class="kw">use </span>common_time::Timezone;
 <span class="kw">use </span>datatypes::data_type::ConcreteDataType;
 <span class="kw">use </span>datatypes::vectors::VectorRef;
+<span class="kw">use </span>session::context::{QueryContextBuilder, QueryContextRef};
 
-<span class="attr">#[derive(Clone)]
+<span class="doccomment">/// The function execution context
+</span><span class="attr">#[derive(Clone)]
 </span><span class="kw">pub struct </span>FunctionContext {
-    <span class="kw">pub </span>timezone: Timezone,
+    <span class="kw">pub </span>query_ctx: QueryContextRef,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>FunctionContext {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            timezone: get_timezone(<span class="prelude-val">None</span>).clone(),
+            query_ctx: QueryContextBuilder::default().build(),
         }
     }
 }

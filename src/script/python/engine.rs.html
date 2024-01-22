@@ -563,6 +563,8 @@
 <a href="#562" id="562">562</a>
 <a href="#563" id="563">563</a>
 <a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -715,7 +717,7 @@
 
     <span class="kw">fn </span>eval(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        _func_ctx: common_function::function::FunctionContext,
+        func_ctx: common_function::function::FunctionContext,
         columns: <span class="kw-2">&amp;</span>[datatypes::vectors::VectorRef],
     ) -&gt; common_query::error::Result&lt;datatypes::vectors::VectorRef&gt; {
         <span class="comment">// FIXME(discord9): exec_parsed require a RecordBatch(basically a Vector+Schema), where schema can't pop out from nowhere, right?
@@ -723,15 +725,17 @@
         <span class="kw">let </span>columns = columns.to_vec();
         <span class="kw">let </span>rb = <span class="prelude-val">Some</span>(RecordBatch::new(schema, columns).context(UdfTempRecordBatchSnafu)<span class="question-mark">?</span>);
 
-        <span class="comment">// FIXME(dennis): Create EvalContext from FunctionContext.
-        </span><span class="kw">let </span>res = exec_parsed(<span class="kw-2">&amp;</span><span class="self">self</span>.copr, <span class="kw-2">&amp;</span>rb, <span class="kw-2">&amp;</span>HashMap::new(), <span class="kw-2">&amp;</span>EvalContext::default()).map_err(
-            |err| {
-                PyUdfSnafu {
-                    msg: <span class="macro">format!</span>(<span class="string">"{err:#?}"</span>),
-                }
-                .build()
+        <span class="kw">let </span>res = exec_parsed(
+            <span class="kw-2">&amp;</span><span class="self">self</span>.copr,
+            <span class="kw-2">&amp;</span>rb,
+            <span class="kw-2">&amp;</span>HashMap::new(),
+            <span class="kw-2">&amp;</span>EvalContext {
+                query_ctx: func_ctx.query_ctx.clone(),
             },
-        )<span class="question-mark">?</span>;
+        )
+        .map_err(BoxedError::new)
+        .context(common_query::error::ExecuteSnafu)<span class="question-mark">?</span>;
+
         <span class="kw">let </span>len = res.columns().len();
         <span class="kw">if </span>len == <span class="number">0 </span>{
             <span class="kw">return </span>PyUdfSnafu {
