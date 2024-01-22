@@ -294,6 +294,19 @@
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
 <a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -328,6 +341,13 @@
 <span class="kw">const </span>MULTIPART_UPLOAD_MINIMUM_SIZE: ReadableSize = ReadableSize::mb(<span class="number">5</span>);
 <span class="doccomment">/// Default channel size for parallel scan task.
 </span><span class="kw">const </span>DEFAULT_SCAN_CHANNEL_SIZE: usize = <span class="number">32</span>;
+
+<span class="comment">// Use `1/GLOBAL_WRITE_BUFFER_SIZE_FACTOR` of OS memory as global write buffer size in default mode
+</span><span class="kw">const </span>GLOBAL_WRITE_BUFFER_SIZE_FACTOR: u64 = <span class="number">8</span>;
+<span class="doccomment">/// Use `1/SST_META_CACHE_SIZE_FACTOR` of OS memory size as SST meta cache size in default mode
+</span><span class="kw">const </span>SST_META_CACHE_SIZE_FACTOR: u64 = <span class="number">32</span>;
+<span class="doccomment">/// Use `1/MEM_CACHE_SIZE_FACTOR` of OS memory size as mem cache size in default mode
+</span><span class="kw">const </span>MEM_CACHE_SIZE_FACTOR: u64 = <span class="number">16</span>;
 
 <span class="doccomment">/// Configuration for [MitoEngine](crate::engine::MitoEngine).
 </span><span class="attr">#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -488,14 +508,20 @@
     }
 
     <span class="kw">fn </span>adjust_buffer_and_cache_size(<span class="kw-2">&amp;mut </span><span class="self">self</span>, sys_memory: ReadableSize) {
-        <span class="comment">// Use 1/64 of OS memory as global write buffer size, it shouldn't be greater than 1G in default mode.
-        </span><span class="kw">let </span>global_write_buffer_size = cmp::min(sys_memory / <span class="number">64</span>, ReadableSize::gb(<span class="number">1</span>));
+        <span class="comment">// shouldn't be greater than 1G in default mode.
+        </span><span class="kw">let </span>global_write_buffer_size = cmp::min(
+            sys_memory / GLOBAL_WRITE_BUFFER_SIZE_FACTOR,
+            ReadableSize::gb(<span class="number">1</span>),
+        );
         <span class="comment">// Use 2x of global write buffer size as global write buffer reject size.
         </span><span class="kw">let </span>global_write_buffer_reject_size = global_write_buffer_size * <span class="number">2</span>;
-        <span class="comment">// Use 1/256 of OS memory size as SST meta cache size, it shouldn't be greater than 128MB in default mode.
-        </span><span class="kw">let </span>sst_meta_cache_size = cmp::min(sys_memory / <span class="number">256</span>, ReadableSize::mb(<span class="number">128</span>));
-        <span class="comment">// Use 1/128 of OS memory size as mem cache size, it shouldn't be greater than 512MB in default mode.
-        </span><span class="kw">let </span>mem_cache_size = cmp::min(sys_memory / <span class="number">128</span>, ReadableSize::mb(<span class="number">512</span>));
+        <span class="comment">// shouldn't be greater than 128MB in default mode.
+        </span><span class="kw">let </span>sst_meta_cache_size = cmp::min(
+            sys_memory / SST_META_CACHE_SIZE_FACTOR,
+            ReadableSize::mb(<span class="number">128</span>),
+        );
+        <span class="comment">// shouldn't be greater than 512MB in default mode.
+        </span><span class="kw">let </span>mem_cache_size = cmp::min(sys_memory / MEM_CACHE_SIZE_FACTOR, ReadableSize::mb(<span class="number">512</span>));
 
         <span class="self">self</span>.global_write_buffer_size = global_write_buffer_size;
         <span class="self">self</span>.global_write_buffer_reject_size = global_write_buffer_reject_size;
