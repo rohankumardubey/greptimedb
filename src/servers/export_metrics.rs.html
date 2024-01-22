@@ -602,7 +602,7 @@
             filter.as_ref(),
             Timestamp::current_millis().value(),
         );
-        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = handler.write(request, ctx.clone()).<span class="kw">await </span>{
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = handler.write(request, ctx.clone(), <span class="bool-val">false</span>).<span class="kw">await </span>{
             <span class="macro">error!</span>(<span class="string">"report export metrics by handler failed, error {}"</span>, e);
         }
     }

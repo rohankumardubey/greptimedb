@@ -56,6 +56,9 @@
 <a href="#55" id="55">55</a>
 <a href="#56" id="56">56</a>
 <a href="#57" id="57">57</a>
+<a href="#58" id="58">58</a>
+<a href="#59" id="59">59</a>
+<a href="#60" id="60">60</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,8 +78,11 @@
 <span class="kw">pub const </span>GREPTIME_DB_HEADER_FORMAT: <span class="kw-2">&amp;</span>str = <span class="string">"x-greptime-format"</span>;
 <span class="kw">pub const </span>GREPTIME_DB_HEADER_EXECUTION_TIME: <span class="kw-2">&amp;</span>str = <span class="string">"x-greptime-execution-time"</span>;
 
-<span class="kw">pub static </span>GREPTIME_DB_HEADER_NAME: HeaderName = HeaderName::from_static(<span class="string">"x-greptime-db-name"</span>);
-<span class="kw">pub static </span>GREPTIME_TIMEZONE_HEADER_NAME: HeaderName =
+<span class="doccomment">/// Header key of `db-name`. Example format of the header value is `greptime-public`.
+</span><span class="kw">pub static </span>GREPTIME_DB_HEADER_NAME: HeaderName = HeaderName::from_static(<span class="string">"x-greptime-db-name"</span>);
+<span class="doccomment">/// Header key of query specific timezone.
+/// Example format of the header value is `Asia/Shanghai` or `+08:00`.
+</span><span class="kw">pub static </span>GREPTIME_TIMEZONE_HEADER_NAME: HeaderName =
     HeaderName::from_static(<span class="string">"x-greptime-timezone"</span>);
 
 <span class="kw">pub struct </span>GreptimeDbName(<span class="prelude-ty">Option</span>&lt;String&gt;);

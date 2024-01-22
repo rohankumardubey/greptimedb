@@ -459,6 +459,8 @@
 <a href="#458" id="458">458</a>
 <a href="#459" id="459">459</a>
 <a href="#460" id="460">460</a>
+<a href="#461" id="461">461</a>
+<a href="#462" id="462">462</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -521,12 +523,14 @@
 ) -&gt; std::result::Result&lt;Request&lt;B&gt;, Response&gt; {
     <span class="comment">// 1. prepare
     </span><span class="kw">let </span>(catalog, schema) = extract_catalog_and_schema(<span class="kw-2">&amp;</span>req);
-    <span class="kw">let </span>timezone = extract_timezone(<span class="kw-2">&amp;</span>req);
-    <span class="kw">let </span>query_ctx = QueryContextBuilder::default()
+    <span class="comment">// TODO(ruihang): move this out of auth module
+    </span><span class="kw">let </span>timezone = Arc::new(extract_timezone(<span class="kw-2">&amp;</span>req));
+    <span class="kw">let </span>query_ctx_builder = QueryContextBuilder::default()
         .current_catalog(catalog.to_string())
         .current_schema(schema.to_string())
-        .timezone(Arc::new(timezone))
-        .build();
+        .timezone(timezone);
+
+    <span class="kw">let </span>query_ctx = query_ctx_builder.build();
     <span class="kw">let </span>need_auth = need_auth(<span class="kw-2">&amp;</span>req);
     <span class="kw">let </span>is_influxdb = req.uri().path().contains(<span class="string">"influxdb"</span>);
 
