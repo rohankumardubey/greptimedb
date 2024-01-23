@@ -826,7 +826,7 @@
         <span class="kw">let </span>open_all_regions =
             open_all_regions(region_server.clone(), table_values, !controlled_by_metasrv);
 
-        <span class="kw">if </span><span class="self">self</span>.opts.initialize_region_in_background {
+        <span class="kw">if </span><span class="self">self</span>.opts.init_regions_in_background {
             <span class="comment">// Opens regions in background.
             </span>common_runtime::spawn_bg(<span class="kw">async move </span>{
                 <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = open_all_regions.<span class="kw">await </span>{
