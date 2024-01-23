@@ -57,7 +57,7 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::ir::Column;
 
-<span class="attr">#[derive(Debug, Builder, Clone)]
+<span class="attr">#[derive(Debug, Builder, Clone, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>AlterTableExpr {
     <span class="kw">pub </span>name: String,
     <span class="kw">pub </span>alter_options: AlterTableOperation,

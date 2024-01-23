@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["DEFAULT_ENGINE"],"struct":["CreateTableExprGenerator"]};
+window.SIDEBAR_ITEMS = {"constant":["DEFAULT_ENGINE"],"enum":["CreateTableExprGeneratorBuilderError"],"struct":["CreateTableExprGenerator","CreateTableExprGeneratorBuilder"]};

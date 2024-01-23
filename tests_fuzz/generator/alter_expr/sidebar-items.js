@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["AlterExprAddColumnGenerator","AlterExprDropColumnGenerator","AlterExprRenameGenerator"]};
+window.SIDEBAR_ITEMS = {"enum":["AlterExprAddColumnGeneratorBuilderError","AlterExprDropColumnGeneratorBuilderError","AlterExprRenameGeneratorBuilderError"],"struct":["AlterExprAddColumnGenerator","AlterExprAddColumnGeneratorBuilder","AlterExprDropColumnGenerator","AlterExprDropColumnGeneratorBuilder","AlterExprRenameGenerator","AlterExprRenameGeneratorBuilder"]};

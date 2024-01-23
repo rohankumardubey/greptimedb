@@ -181,6 +181,58 @@
 <a href="#180" id="180">180</a>
 <a href="#181" id="181">181</a>
 <a href="#182" id="182">182</a>
+<a href="#183" id="183">183</a>
+<a href="#184" id="184">184</a>
+<a href="#185" id="185">185</a>
+<a href="#186" id="186">186</a>
+<a href="#187" id="187">187</a>
+<a href="#188" id="188">188</a>
+<a href="#189" id="189">189</a>
+<a href="#190" id="190">190</a>
+<a href="#191" id="191">191</a>
+<a href="#192" id="192">192</a>
+<a href="#193" id="193">193</a>
+<a href="#194" id="194">194</a>
+<a href="#195" id="195">195</a>
+<a href="#196" id="196">196</a>
+<a href="#197" id="197">197</a>
+<a href="#198" id="198">198</a>
+<a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
+<a href="#213" id="213">213</a>
+<a href="#214" id="214">214</a>
+<a href="#215" id="215">215</a>
+<a href="#216" id="216">216</a>
+<a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
+<a href="#219" id="219">219</a>
+<a href="#220" id="220">220</a>
+<a href="#221" id="221">221</a>
+<a href="#222" id="222">222</a>
+<a href="#223" id="223">223</a>
+<a href="#224" id="224">224</a>
+<a href="#225" id="225">225</a>
+<a href="#226" id="226">226</a>
+<a href="#227" id="227">227</a>
+<a href="#228" id="228">228</a>
+<a href="#229" id="229">229</a>
+<a href="#230" id="230">230</a>
+<a href="#231" id="231">231</a>
+<a href="#232" id="232">232</a>
+<a href="#233" id="233">233</a>
+<a href="#234" id="234">234</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -195,7 +247,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>faker_rand::lorem::Word;
+</span><span class="kw">use </span>derive_builder::Builder;
 <span class="kw">use </span>partition::partition::{PartitionBound, PartitionDef};
 <span class="kw">use </span>rand::seq::SliceRandom;
 <span class="kw">use </span>rand::Rng;
@@ -203,61 +255,60 @@
 
 <span class="kw">use </span><span class="kw">super</span>::Generator;
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, Error, <span class="prelude-ty">Result</span>};
-<span class="kw">use </span><span class="kw">crate</span>::ir::create_expr::{ColumnOption, CreateTableExprBuilder};
+<span class="kw">use </span><span class="kw">crate</span>::fake::{random_capitalize_map, MapWordGenerator};
+<span class="kw">use </span><span class="kw">crate</span>::generator::{ColumnOptionGenerator, ConcreteDataTypeGenerator, Random};
+<span class="kw">use </span><span class="kw">crate</span>::ir::create_expr::CreateTableExprBuilder;
 <span class="kw">use </span><span class="kw">crate</span>::ir::{
-    <span class="self">self</span>, generate_random_value, Column, CreateTableExpr, PartibleColumn, TsColumn,
-    PARTIBLE_DATA_TYPES,
+    column_options_generator, generate_columns, generate_random_value,
+    partible_column_options_generator, ts_column_options_generator, ColumnTypeGenerator,
+    CreateTableExpr, PartibleColumnTypeGenerator, TsColumnTypeGenerator,
 };
 
-<span class="kw">pub struct </span>CreateTableExprGenerator {
+<span class="attr">#[derive(Builder)]
+#[builder(default, pattern = <span class="string">"owned"</span>)]
+</span><span class="kw">pub struct </span>CreateTableExprGenerator&lt;R: Rng + <span class="lifetime">'static</span>&gt; {
     columns: usize,
-    engine: String,
+    <span class="attr">#[builder(setter(into))]
+    </span>engine: String,
     partition: usize,
     if_not_exists: bool,
+    <span class="attr">#[builder(setter(into))]
+    </span>name: String,
+    name_generator: Box&lt;<span class="kw">dyn </span>Random&lt;String, R&gt;&gt;,
+    ts_column_type_generator: ConcreteDataTypeGenerator&lt;R&gt;,
+    column_type_generator: ConcreteDataTypeGenerator&lt;R&gt;,
+    partible_column_type_generator: ConcreteDataTypeGenerator&lt;R&gt;,
+    partible_column_options_generator: ColumnOptionGenerator&lt;R&gt;,
+    column_options_generator: ColumnOptionGenerator&lt;R&gt;,
+    ts_column_options_generator: ColumnOptionGenerator&lt;R&gt;,
 }
 
 <span class="kw">const </span>DEFAULT_ENGINE: <span class="kw-2">&amp;</span>str = <span class="string">"mito"</span>;
 
-<span class="kw">impl </span>Default <span class="kw">for </span>CreateTableExprGenerator {
+<span class="kw">impl</span>&lt;R: Rng + <span class="lifetime">'static</span>&gt; Default <span class="kw">for </span>CreateTableExprGenerator&lt;R&gt; {
     <span class="kw">fn </span>default() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             columns: <span class="number">0</span>,
             engine: DEFAULT_ENGINE.to_string(),
             if_not_exists: <span class="bool-val">false</span>,
             partition: <span class="number">0</span>,
+            name: String::new(),
+            name_generator: Box::new(MapWordGenerator::new(Box::new(random_capitalize_map))),
+            ts_column_type_generator: Box::new(TsColumnTypeGenerator),
+            column_type_generator: Box::new(ColumnTypeGenerator),
+            partible_column_type_generator: Box::new(PartibleColumnTypeGenerator),
+            partible_column_options_generator: Box::new(partible_column_options_generator),
+            column_options_generator: Box::new(column_options_generator),
+            ts_column_options_generator: Box::new(ts_column_options_generator),
         }
     }
 }
 
-<span class="kw">impl </span>CreateTableExprGenerator {
-    <span class="doccomment">/// Sets column num.
-    </span><span class="kw">pub fn </span>columns(<span class="kw-2">mut </span><span class="self">self</span>, columns: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.columns = columns;
-        <span class="self">self
-    </span>}
-
-    <span class="doccomment">/// Sets the `if_not_exists`.
-    </span><span class="kw">pub fn </span>create_is_not_exists(<span class="kw-2">mut </span><span class="self">self</span>, v: bool) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.if_not_exists = v;
-        <span class="self">self
-    </span>}
-
-    <span class="doccomment">/// Sets the `engine`.
-    </span><span class="kw">pub fn </span>engine(<span class="kw-2">mut </span><span class="self">self</span>, engine: <span class="kw-2">&amp;</span>str) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.engine = engine.to_string();
-        <span class="self">self
-    </span>}
-
-    <span class="doccomment">/// Sets the partition num.
-    /// If there is no primary key column,
-    /// it appends a primary key atomically.
-    </span><span class="kw">pub fn </span>partitions(<span class="kw-2">mut </span><span class="self">self</span>, partition: usize) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.partition = partition;
-        <span class="self">self
-    </span>}
+<span class="kw">impl</span>&lt;R: Rng + <span class="lifetime">'static</span>&gt; Generator&lt;CreateTableExpr, R&gt; <span class="kw">for </span>CreateTableExprGenerator&lt;R&gt; {
+    <span class="kw">type </span>Error = Error;
 
     <span class="doccomment">/// Generates the [CreateTableExpr].
-    </span><span class="kw">pub fn </span>generate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;CreateTableExpr&gt; {
+    </span><span class="kw">fn </span>generate(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; <span class="prelude-ty">Result</span>&lt;CreateTableExpr&gt; {
         <span class="macro">ensure!</span>(
             <span class="self">self</span>.columns != <span class="number">0</span>,
             error::UnexpectedSnafu {
@@ -266,101 +317,154 @@
         );
 
         <span class="kw">let </span><span class="kw-2">mut </span>builder = CreateTableExprBuilder::default();
-        <span class="kw">let </span><span class="kw-2">mut </span>columns = Vec::with_capacity(<span class="self">self</span>.columns + <span class="number">1</span>);
+        <span class="kw">let </span><span class="kw-2">mut </span>columns = Vec::with_capacity(<span class="self">self</span>.columns);
         <span class="kw">let </span><span class="kw-2">mut </span>primary_keys = <span class="macro">vec!</span>[];
-        <span class="kw">let </span><span class="kw-2">mut </span>rng = rand::thread_rng();
+        <span class="kw">let </span>need_partible_column = <span class="self">self</span>.partition &gt; <span class="number">1</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>column_names = <span class="self">self</span>.name_generator.choose(rng, <span class="self">self</span>.columns);
 
-        <span class="comment">// Generates columns.
-        </span><span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="self">self</span>.columns {
-            <span class="kw">let </span><span class="kw-2">mut </span>column = rng.gen::&lt;Column&gt;();
-            <span class="kw">let </span>is_primary_key = column
-                .options
-                .iter()
-                .any(|option| option == <span class="kw-2">&amp;</span>ColumnOption::PrimaryKey);
-            <span class="kw">if </span>is_primary_key {
-                primary_keys.push(i);
+        <span class="kw">if </span><span class="self">self</span>.columns == <span class="number">1 </span>{
+            <span class="comment">// Generates the ts column.
+            // Safety: columns must large than 0.
+            </span><span class="kw">let </span>name = column_names.pop().unwrap();
+            <span class="kw">let </span>column = generate_columns(
+                rng,
+                <span class="macro">vec!</span>[name.to_string()],
+                <span class="self">self</span>.ts_column_type_generator.as_ref(),
+                <span class="self">self</span>.ts_column_options_generator.as_ref(),
+            )
+            .remove(<span class="number">0</span>);
+
+            <span class="kw">if </span>need_partible_column {
+                <span class="comment">// Generates partition bounds.
+                </span><span class="kw">let </span><span class="kw-2">mut </span>partition_bounds = Vec::with_capacity(<span class="self">self</span>.partition);
+                <span class="kw">for _ in </span><span class="number">0</span>..<span class="self">self</span>.partition - <span class="number">1 </span>{
+                    partition_bounds.push(PartitionBound::Value(generate_random_value(
+                        rng,
+                        <span class="kw-2">&amp;</span>column.column_type,
+                    )));
+                    partition_bounds.sort();
+                }
+                partition_bounds.push(PartitionBound::MaxValue);
+                builder.partition(PartitionDef::new(<span class="macro">vec!</span>[name], partition_bounds));
             }
+
             columns.push(column);
+        } <span class="kw">else </span>{
+            <span class="comment">// Generates the partible column.
+            </span><span class="kw">if </span>need_partible_column {
+                <span class="comment">// Safety: columns must large than 0.
+                </span><span class="kw">let </span>name = column_names.pop().unwrap();
+                <span class="kw">let </span>column = generate_columns(
+                    rng,
+                    <span class="macro">vec!</span>[name.to_string()],
+                    <span class="self">self</span>.partible_column_type_generator.as_ref(),
+                    <span class="self">self</span>.partible_column_options_generator.as_ref(),
+                )
+                .remove(<span class="number">0</span>);
+
+                <span class="comment">// Generates partition bounds.
+                </span><span class="kw">let </span><span class="kw-2">mut </span>partition_bounds = Vec::with_capacity(<span class="self">self</span>.partition);
+                <span class="kw">for _ in </span><span class="number">0</span>..<span class="self">self</span>.partition - <span class="number">1 </span>{
+                    partition_bounds.push(PartitionBound::Value(generate_random_value(
+                        rng,
+                        <span class="kw-2">&amp;</span>column.column_type,
+                    )));
+                    partition_bounds.sort();
+                }
+                partition_bounds.push(PartitionBound::MaxValue);
+                builder.partition(PartitionDef::new(<span class="macro">vec!</span>[name], partition_bounds));
+                columns.push(column);
+            }
+            <span class="comment">// Generates the ts column.
+            // Safety: columns must large than 1.
+            </span><span class="kw">let </span>name = column_names.pop().unwrap();
+            columns.extend(generate_columns(
+                rng,
+                <span class="macro">vec!</span>[name],
+                <span class="self">self</span>.ts_column_type_generator.as_ref(),
+                <span class="self">self</span>.ts_column_options_generator.as_ref(),
+            ));
+            <span class="comment">// Generates rest columns
+            </span>columns.extend(generate_columns(
+                rng,
+                column_names,
+                <span class="self">self</span>.column_type_generator.as_ref(),
+                <span class="self">self</span>.column_options_generator.as_ref(),
+            ));
         }
 
+        <span class="kw">for </span>(idx, column) <span class="kw">in </span>columns.iter().enumerate() {
+            <span class="kw">if </span>column.is_primary_key() {
+                primary_keys.push(idx);
+            }
+        }
         <span class="comment">// Shuffles the primary keys.
-        </span>primary_keys.shuffle(<span class="kw-2">&amp;mut </span>rng);
-        <span class="kw">let </span>partitions = <span class="kw">if </span><span class="self">self</span>.partition &gt; <span class="number">1 </span>{
-            <span class="comment">// Finds a partible primary keys.
-            </span><span class="kw">let </span>partible_primary_keys = primary_keys
-                .iter()
-                .flat_map(|i| {
-                    <span class="kw">if </span>PARTIBLE_DATA_TYPES.contains(<span class="kw-2">&amp;</span>columns[<span class="kw-2">*</span>i].column_type) {
-                        <span class="prelude-val">Some</span>(<span class="kw-2">*</span>i)
-                    } <span class="kw">else </span>{
-                        <span class="prelude-val">None
-                    </span>}
-                })
-                .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
-
-            <span class="comment">// Generates the partitions.
-            </span><span class="kw">if </span>partible_primary_keys.is_empty() {
-                columns.push(rng.gen::&lt;PartibleColumn&gt;().<span class="number">0</span>);
-                primary_keys.push(columns.len() - <span class="number">1</span>);
-            }
-            <span class="kw">let </span>primary_key_idx = primary_keys[rng.gen_range(<span class="number">0</span>..primary_keys.len())];
-            <span class="kw">let </span>primary_column = <span class="kw-2">&amp;</span>columns[primary_key_idx];
-
-            <span class="comment">// Generates partition bounds.
-            </span><span class="kw">let </span><span class="kw-2">mut </span>partition_bounds = Vec::with_capacity(<span class="self">self</span>.partition);
-            <span class="kw">for _ in </span><span class="number">0</span>..<span class="self">self</span>.partition - <span class="number">1 </span>{
-                partition_bounds.push(PartitionBound::Value(generate_random_value(
-                    <span class="kw-2">&amp;</span>primary_column.column_type,
-                )));
-                partition_bounds.sort();
-            }
-            partition_bounds.push(PartitionBound::MaxValue);
-
-            <span class="macro">vec!</span>[PartitionDef::new(
-                <span class="macro">vec!</span>[primary_column.name.to_string()],
-                partition_bounds,
-            )]
-        } <span class="kw">else </span>{
-            <span class="macro">vec!</span>[]
-        };
-        <span class="comment">// Generates ts column.
-        </span>columns.push(rng.gen::&lt;TsColumn&gt;().<span class="number">0</span>);
+        </span>primary_keys.shuffle(rng);
 
         builder.columns(columns);
         builder.primary_keys(primary_keys);
         builder.engine(<span class="self">self</span>.engine.to_string());
         builder.if_not_exists(<span class="self">self</span>.if_not_exists);
-        builder.name(rng.gen::&lt;Word&gt;().to_string());
-        builder.partitions(partitions);
+        <span class="kw">if </span><span class="self">self</span>.name.is_empty() {
+            builder.name(<span class="self">self</span>.name_generator.gen(rng));
+        } <span class="kw">else </span>{
+            builder.name(<span class="self">self</span>.name.to_string());
+        }
         builder.build().context(error::BuildCreateTableExprSnafu)
     }
 }
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
+    <span class="kw">use </span>rand::SeedableRng;
+
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_create_table_expr_generator() {
-        <span class="kw">let </span>expr = CreateTableExprGenerator::default()
+        <span class="kw">let </span><span class="kw-2">mut </span>rng = rand::thread_rng();
+
+        <span class="kw">let </span>expr = CreateTableExprGeneratorBuilder::default()
             .columns(<span class="number">10</span>)
-            .partitions(<span class="number">3</span>)
-            .create_is_not_exists(<span class="bool-val">true</span>)
+            .partition(<span class="number">3</span>)
+            .if_not_exists(<span class="bool-val">true</span>)
             .engine(<span class="string">"mito2"</span>)
-            .generate()
+            .build()
+            .unwrap()
+            .generate(<span class="kw-2">&amp;mut </span>rng)
             .unwrap();
         <span class="macro">assert_eq!</span>(expr.engine, <span class="string">"mito2"</span>);
         <span class="macro">assert!</span>(expr.if_not_exists);
-        <span class="macro">assert!</span>(expr.columns.len() &gt;= <span class="number">11</span>);
-        <span class="macro">assert_eq!</span>(expr.partitions[<span class="number">0</span>].partition_bounds().len(), <span class="number">3</span>);
+        <span class="macro">assert_eq!</span>(expr.columns.len(), <span class="number">10</span>);
+        <span class="macro">assert_eq!</span>(expr.partition.unwrap().partition_bounds().len(), <span class="number">3</span>);
 
-        <span class="kw">let </span>expr = CreateTableExprGenerator::default()
+        <span class="kw">let </span>expr = CreateTableExprGeneratorBuilder::default()
             .columns(<span class="number">10</span>)
-            .partitions(<span class="number">1</span>)
-            .generate()
+            .partition(<span class="number">1</span>)
+            .build()
+            .unwrap()
+            .generate(<span class="kw-2">&amp;mut </span>rng)
             .unwrap();
-        <span class="macro">assert_eq!</span>(expr.columns.len(), <span class="number">11</span>);
-        <span class="macro">assert_eq!</span>(expr.partitions.len(), <span class="number">0</span>);
+        <span class="macro">assert_eq!</span>(expr.columns.len(), <span class="number">10</span>);
+        <span class="macro">assert!</span>(expr.partition.is_none());
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>test_create_table_expr_generator_deterministic() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rng = rand_chacha::ChaCha8Rng::seed_from_u64(<span class="number">0</span>);
+        <span class="kw">let </span>expr = CreateTableExprGeneratorBuilder::default()
+            .columns(<span class="number">10</span>)
+            .partition(<span class="number">3</span>)
+            .if_not_exists(<span class="bool-val">true</span>)
+            .engine(<span class="string">"mito2"</span>)
+            .build()
+            .unwrap()
+            .generate(<span class="kw-2">&amp;mut </span>rng)
+            .unwrap();
+
+        <span class="kw">let </span>serialized = serde_json::to_string(<span class="kw-2">&amp;</span>expr).unwrap();
+        <span class="kw">let </span>expected = <span class="string">r#"{"name":"iN","columns":[{"name":"CUlpa","column_type":{"Int16":{}},"options":["PrimaryKey","NotNull"]},{"name":"dEBiTiS","column_type":{"Timestamp":{"Second":null}},"options":["TimeIndex"]},{"name":"HArum","column_type":{"Int16":{}},"options":["NotNull"]},{"name":"NObIS","column_type":{"Int32":{}},"options":["PrimaryKey"]},{"name":"IMPEDiT","column_type":{"Int16":{}},"options":[{"DefaultValue":{"Int16":-25151}}]},{"name":"bLanDITIis","column_type":{"Boolean":null},"options":[{"DefaultValue":{"Boolean":true}}]},{"name":"Dolores","column_type":{"Float32":{}},"options":["PrimaryKey"]},{"name":"eSt","column_type":{"Float32":{}},"options":[{"DefaultValue":{"Float32":0.9152612}}]},{"name":"INVentORE","column_type":{"Int64":{}},"options":["PrimaryKey"]},{"name":"aDIpiSci","column_type":{"Float64":{}},"options":["Null"]}],"if_not_exists":true,"partition":{"partition_columns":["CUlpa"],"partition_bounds":[{"Value":{"Int16":15966}},{"Value":{"Int16":31925}},"MaxValue"]},"engine":"mito2","options":{},"primary_keys":[6,0,8,3]}"#</span>;
+        <span class="macro">assert_eq!</span>(expected, serialized);
     }
 }
 </code></pre></div></section></main></body></html>

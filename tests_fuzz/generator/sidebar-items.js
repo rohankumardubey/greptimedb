@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["alter_expr","create_expr"],"trait":["Generator"],"type":["AlterTableExprGenerator","CreateTableExprGenerator"]};
+window.SIDEBAR_ITEMS = {"mod":["alter_expr","create_expr"],"trait":["Generator","Random"],"type":["AlterTableExprGenerator","ColumnOptionGenerator","ConcreteDataTypeGenerator","CreateTableExprGenerator"]};

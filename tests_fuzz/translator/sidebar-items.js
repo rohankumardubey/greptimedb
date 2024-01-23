@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"trait":["DslTranslator"]};
+window.SIDEBAR_ITEMS = {"mod":["greptime"],"trait":["DslTranslator"]};

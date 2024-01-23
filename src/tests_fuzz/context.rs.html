@@ -77,7 +77,7 @@
     <span class="kw">pub </span>columns: Vec&lt;Column&gt;,
 
     <span class="comment">// GreptimeDB specific options
-    </span><span class="kw">pub </span>partitions: Vec&lt;PartitionDef&gt;,
+    </span><span class="kw">pub </span>partition: <span class="prelude-ty">Option</span>&lt;PartitionDef&gt;,
     <span class="kw">pub </span>primary_keys: Vec&lt;usize&gt;,
 }
 
@@ -86,7 +86,7 @@
         CreateTableExpr {
             name,
             columns,
-            partitions,
+            partition,
             primary_keys,
             ..
         }: <span class="kw-2">&amp;</span>CreateTableExpr,
@@ -94,7 +94,7 @@
         <span class="self">Self </span>{
             name: name.to_string(),
             columns: columns.clone(),
-            partitions: partitions.clone(),
+            partition: partition.clone(),
             primary_keys: primary_keys.clone(),
         }
     }

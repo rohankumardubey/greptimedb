@@ -167,6 +167,20 @@
 <a href="#166" id="166">166</a>
 <a href="#167" id="167">167</a>
 <a href="#168" id="168">168</a>
+<a href="#169" id="169">169</a>
+<a href="#170" id="170">170</a>
+<a href="#171" id="171">171</a>
+<a href="#172" id="172">172</a>
+<a href="#173" id="173">173</a>
+<a href="#174" id="174">174</a>
+<a href="#175" id="175">175</a>
+<a href="#176" id="176">176</a>
+<a href="#177" id="177">177</a>
+<a href="#178" id="178">178</a>
+<a href="#179" id="179">179</a>
+<a href="#180" id="180">180</a>
+<a href="#181" id="181">181</a>
+<a href="#182" id="182">182</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -181,47 +195,41 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::f64::consts::E;
-<span class="kw">use </span>std::sync::Arc;
+</span><span class="kw">use </span>std::marker::PhantomData;
 
 <span class="kw">use </span>common_query::AddColumnLocation;
-<span class="kw">use </span>faker_rand::lorem::Word;
-<span class="kw">use </span>rand::{random, Rng};
+<span class="kw">use </span>derive_builder::Builder;
+<span class="kw">use </span>rand::Rng;
 <span class="kw">use </span>snafu::ensure;
 
 <span class="kw">use </span><span class="kw">crate</span>::context::TableContextRef;
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, Error, <span class="prelude-ty">Result</span>};
-<span class="kw">use </span><span class="kw">crate</span>::generator::Generator;
+<span class="kw">use </span><span class="kw">crate</span>::fake::WordGenerator;
+<span class="kw">use </span><span class="kw">crate</span>::generator::{ColumnOptionGenerator, ConcreteDataTypeGenerator, Generator, Random};
 <span class="kw">use </span><span class="kw">crate</span>::ir::alter_expr::{AlterTableExpr, AlterTableOperation};
-<span class="kw">use </span><span class="kw">crate</span>::ir::{droppable_columns, Column};
+<span class="kw">use </span><span class="kw">crate</span>::ir::{
+    column_options_generator, droppable_columns, generate_columns, ColumnTypeGenerator,
+};
 
 <span class="doccomment">/// Generates the [AlterTableOperation::AddColumn] of [AlterTableExpr].
-</span><span class="kw">pub struct </span>AlterExprAddColumnGenerator {
+</span><span class="attr">#[derive(Builder)]
+#[builder(pattern = <span class="string">"owned"</span>)]
+</span><span class="kw">pub struct </span>AlterExprAddColumnGenerator&lt;R: Rng + <span class="lifetime">'static</span>&gt; {
     table_ctx: TableContextRef,
-    location: bool,
+    <span class="attr">#[builder(default)]
+    </span>location: bool,
+    <span class="attr">#[builder(default = <span class="string">"Box::new(WordGenerator)"</span>)]
+    </span>name_generator: Box&lt;<span class="kw">dyn </span>Random&lt;String, R&gt;&gt;,
+    <span class="attr">#[builder(default = <span class="string">"Box::new(column_options_generator)"</span>)]
+    </span>column_options_generator: ColumnOptionGenerator&lt;R&gt;,
+    <span class="attr">#[builder(default = <span class="string">"Box::new(ColumnTypeGenerator)"</span>)]
+    </span>column_type_generator: ConcreteDataTypeGenerator&lt;R&gt;,
 }
 
-<span class="kw">impl </span>AlterExprAddColumnGenerator {
-    <span class="doccomment">/// Returns an [AlterExprAddColumnGenerator].
-    </span><span class="kw">pub fn </span>new(table_ctx: <span class="kw-2">&amp;</span>TableContextRef) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            table_ctx: table_ctx.clone(),
-            location: <span class="bool-val">false</span>,
-        }
-    }
-
-    <span class="doccomment">/// Sets true to generate alter expr with a specific location.
-    </span><span class="kw">pub fn </span>with_location(<span class="kw-2">mut </span><span class="self">self</span>, v: bool) -&gt; <span class="self">Self </span>{
-        <span class="self">self</span>.location = v;
-        <span class="self">self
-    </span>}
-}
-
-<span class="kw">impl </span>Generator&lt;AlterTableExpr&gt; <span class="kw">for </span>AlterExprAddColumnGenerator {
+<span class="kw">impl</span>&lt;R: Rng + <span class="lifetime">'static</span>&gt; Generator&lt;AlterTableExpr, R&gt; <span class="kw">for </span>AlterExprAddColumnGenerator&lt;R&gt; {
     <span class="kw">type </span>Error = Error;
 
-    <span class="kw">fn </span>generate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;AlterTableExpr&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>rng = rand::thread_rng();
+    <span class="kw">fn </span>generate(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; <span class="prelude-ty">Result</span>&lt;AlterTableExpr&gt; {
         <span class="kw">let </span>with_location = <span class="self">self</span>.location &amp;&amp; rng.gen::&lt;bool&gt;();
         <span class="kw">let </span>location = <span class="kw">if </span>with_location {
             <span class="kw">let </span>use_first = rng.gen::&lt;bool&gt;();
@@ -240,7 +248,14 @@
             <span class="prelude-val">None
         </span>};
 
-        <span class="kw">let </span>column = rng.gen::&lt;Column&gt;();
+        <span class="kw">let </span>name = <span class="self">self</span>.name_generator.gen(rng);
+        <span class="kw">let </span>column = generate_columns(
+            rng,
+            <span class="macro">vec!</span>[name],
+            <span class="self">self</span>.column_type_generator.as_ref(),
+            <span class="self">self</span>.column_options_generator.as_ref(),
+        )
+        .remove(<span class="number">0</span>);
         <span class="prelude-val">Ok</span>(AlterTableExpr {
             name: <span class="self">self</span>.table_ctx.name.to_string(),
             alter_options: AlterTableOperation::AddColumn { column, location },
@@ -249,24 +264,18 @@
 }
 
 <span class="doccomment">/// Generates the [AlterTableOperation::DropColumn] of [AlterTableExpr].
-</span><span class="kw">pub struct </span>AlterExprDropColumnGenerator {
+</span><span class="attr">#[derive(Builder)]
+#[builder(pattern = <span class="string">"owned"</span>)]
+</span><span class="kw">pub struct </span>AlterExprDropColumnGenerator&lt;R&gt; {
     table_ctx: TableContextRef,
+    <span class="attr">#[builder(default)]
+    </span>_phantom: PhantomData&lt;R&gt;,
 }
 
-<span class="kw">impl </span>AlterExprDropColumnGenerator {
-    <span class="doccomment">/// Returns an [AlterExprDropColumnGenerator].
-    </span><span class="kw">pub fn </span>new(table_ctx: <span class="kw-2">&amp;</span>TableContextRef) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            table_ctx: table_ctx.clone(),
-        }
-    }
-}
-
-<span class="kw">impl </span>Generator&lt;AlterTableExpr&gt; <span class="kw">for </span>AlterExprDropColumnGenerator {
+<span class="kw">impl</span>&lt;R: Rng&gt; Generator&lt;AlterTableExpr, R&gt; <span class="kw">for </span>AlterExprDropColumnGenerator&lt;R&gt; {
     <span class="kw">type </span>Error = Error;
 
-    <span class="kw">fn </span>generate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;AlterTableExpr&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>rng = rand::thread_rng();
+    <span class="kw">fn </span>generate(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; <span class="prelude-ty">Result</span>&lt;AlterTableExpr&gt; {
         <span class="kw">let </span>droppable = droppable_columns(<span class="kw-2">&amp;</span><span class="self">self</span>.table_ctx.columns);
         <span class="macro">ensure!</span>(!droppable.is_empty(), error::DroppableColumnsSnafu);
         <span class="kw">let </span>name = droppable[rng.gen_range(<span class="number">0</span>..droppable.len())]
@@ -279,25 +288,20 @@
     }
 }
 
-<span class="kw">pub struct </span>AlterExprRenameGenerator {
+<span class="doccomment">/// Generates the [AlterTableOperation::RenameTable] of [AlterTableExpr].
+</span><span class="attr">#[derive(Builder)]
+#[builder(pattern = <span class="string">"owned"</span>)]
+</span><span class="kw">pub struct </span>AlterExprRenameGenerator&lt;R: Rng&gt; {
     table_ctx: TableContextRef,
+    <span class="attr">#[builder(default = <span class="string">"Box::new(WordGenerator)"</span>)]
+    </span>name_generator: Box&lt;<span class="kw">dyn </span>Random&lt;String, R&gt;&gt;,
 }
 
-<span class="kw">impl </span>AlterExprRenameGenerator {
-    <span class="doccomment">/// Returns an [AlterExprRenameGenerator].
-    </span><span class="kw">pub fn </span>new(table_ctx: <span class="kw-2">&amp;</span>TableContextRef) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            table_ctx: table_ctx.clone(),
-        }
-    }
-}
-
-<span class="kw">impl </span>Generator&lt;AlterTableExpr&gt; <span class="kw">for </span>AlterExprRenameGenerator {
+<span class="kw">impl</span>&lt;R: Rng&gt; Generator&lt;AlterTableExpr, R&gt; <span class="kw">for </span>AlterExprRenameGenerator&lt;R&gt; {
     <span class="kw">type </span>Error = Error;
 
-    <span class="kw">fn </span>generate(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;AlterTableExpr&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>rng = rand::thread_rng();
-        <span class="kw">let </span><span class="kw-2">mut </span>new_table_name = rng.gen::&lt;Word&gt;().to_string();
+    <span class="kw">fn </span>generate(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; <span class="prelude-ty">Result</span>&lt;AlterTableExpr&gt; {
+        <span class="kw">let </span>new_table_name = <span class="self">self</span>.name_generator.gen(rng);
         <span class="prelude-val">Ok</span>(AlterTableExpr {
             name: <span class="self">self</span>.table_ctx.name.to_string(),
             alter_options: AlterTableOperation::RenameTable { new_table_name },
@@ -309,30 +313,54 @@
 </span><span class="kw">mod </span>tests {
     <span class="kw">use </span>std::sync::Arc;
 
+    <span class="kw">use </span>rand::SeedableRng;
+
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::context::TableContext;
-    <span class="kw">use </span><span class="kw">crate</span>::generator::create_expr::CreateTableExprGenerator;
+    <span class="kw">use </span><span class="kw">crate</span>::generator::create_expr::CreateTableExprGeneratorBuilder;
     <span class="kw">use </span><span class="kw">crate</span>::generator::Generator;
 
     <span class="attr">#[test]
-    </span><span class="kw">fn </span>test_alter_table_expr_generator() {
-        <span class="kw">let </span>create_expr = CreateTableExprGenerator::default()
+    </span><span class="kw">fn </span>test_alter_table_expr_generator_deterministic() {
+        <span class="kw">let </span><span class="kw-2">mut </span>rng = rand_chacha::ChaCha8Rng::seed_from_u64(<span class="number">0</span>);
+        <span class="kw">let </span>create_expr = CreateTableExprGeneratorBuilder::default()
             .columns(<span class="number">10</span>)
-            .generate()
+            .build()
+            .unwrap()
+            .generate(<span class="kw-2">&amp;mut </span>rng)
             .unwrap();
         <span class="kw">let </span>table_ctx = Arc::new(TableContext::from(<span class="kw-2">&amp;</span>create_expr));
 
-        <span class="kw">let </span>alter_expr = AlterExprAddColumnGenerator::new(<span class="kw-2">&amp;</span>table_ctx)
-            .generate()
+        <span class="kw">let </span>expr = AlterExprAddColumnGeneratorBuilder::default()
+            .table_ctx(table_ctx.clone())
+            .build()
+            .unwrap()
+            .generate(<span class="kw-2">&amp;mut </span>rng)
             .unwrap();
+        <span class="kw">let </span>serialized = serde_json::to_string(<span class="kw-2">&amp;</span>expr).unwrap();
+        <span class="kw">let </span>expected = <span class="string">r#"{"name":"DigNissIMOS","alter_options":{"AddColumn":{"column":{"name":"sit","column_type":{"Boolean":null},"options":["PrimaryKey"]},"location":null}}}"#</span>;
+        <span class="macro">assert_eq!</span>(expected, serialized);
 
-        <span class="kw">let </span>alter_expr = AlterExprRenameGenerator::new(<span class="kw-2">&amp;</span>table_ctx)
-            .generate()
+        <span class="kw">let </span>expr = AlterExprRenameGeneratorBuilder::default()
+            .table_ctx(table_ctx.clone())
+            .build()
+            .unwrap()
+            .generate(<span class="kw-2">&amp;mut </span>rng)
             .unwrap();
+        <span class="kw">let </span>serialized = serde_json::to_string(<span class="kw-2">&amp;</span>expr).unwrap();
+        <span class="kw">let </span>expected = <span class="string">r#"{"name":"DigNissIMOS","alter_options":{"RenameTable":{"new_table_name":"excepturi"}}}"#</span>;
+        <span class="macro">assert_eq!</span>(expected, serialized);
 
-        <span class="kw">let </span>alter_expr = AlterExprDropColumnGenerator::new(<span class="kw-2">&amp;</span>table_ctx)
-            .generate()
+        <span class="kw">let </span>expr = AlterExprDropColumnGeneratorBuilder::default()
+            .table_ctx(table_ctx)
+            .build()
+            .unwrap()
+            .generate(<span class="kw-2">&amp;mut </span>rng)
             .unwrap();
+        <span class="kw">let </span>serialized = serde_json::to_string(<span class="kw-2">&amp;</span>expr).unwrap();
+        <span class="kw">let </span>expected =
+            <span class="string">r#"{"name":"DigNissIMOS","alter_options":{"DropColumn":{"name":"INVentORE"}}}"#</span>;
+        <span class="macro">assert_eq!</span>(expected, serialized);
     }
 }
 </code></pre></div></section></main></body></html>

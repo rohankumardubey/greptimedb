@@ -36,13 +36,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>context;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>error;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>executor;
-<span class="comment">// TODO(weny): removes it.
-</span><span class="attr">#[allow(unused)]
-</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>generator;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>ir;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>table_creator;
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>translator;
+</span><span class="attr">#![feature(associated_type_bounds)]
+
+</span><span class="kw">pub mod </span>context;
+<span class="kw">pub mod </span>error;
+<span class="kw">pub mod </span>executor;
+<span class="kw">pub mod </span>fake;
+<span class="kw">pub mod </span>generator;
+<span class="kw">pub mod </span>ir;
+<span class="kw">pub mod </span>translator;
 </code></pre></div></section></main></body></html>
