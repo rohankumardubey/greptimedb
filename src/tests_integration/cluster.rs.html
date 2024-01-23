@@ -419,6 +419,9 @@
 <a href="#418" id="418">418</a>
 <a href="#419" id="419">419</a>
 <a href="#420" id="420">420</a>
+<a href="#421" id="421">421</a>
+<a href="#422" id="422">422</a>
+<a href="#423" id="423">423</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -474,6 +477,7 @@
 <span class="kw">use </span>tempfile::TempDir;
 <span class="kw">use </span>tonic::transport::Server;
 <span class="kw">use </span>tower::service_fn;
+<span class="kw">use </span>uuid::Uuid;
 
 <span class="kw">use </span><span class="kw">crate</span>::test_util::{
     <span class="self">self</span>, create_datanode_opts, create_tmp_dir_and_datanode_opts, FileDirGuard, StorageGuard,
@@ -517,7 +521,9 @@
             <span class="kw">let </span>backend = EtcdStore::with_endpoints(endpoints)
                 .<span class="kw">await
                 </span>.expect(<span class="string">"malformed endpoints"</span>);
-            Arc::new(ChrootKvBackend::new(cluster_name.into(), backend))
+            <span class="comment">// Each retry requires a new isolation namespace.
+            </span><span class="kw">let </span>chroot = <span class="macro">format!</span>(<span class="string">"{}{}"</span>, cluster_name, Uuid::new_v4());
+            Arc::new(ChrootKvBackend::new(chroot.into(), backend))
         };
 
         <span class="self">Self </span>{

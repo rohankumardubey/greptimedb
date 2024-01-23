@@ -473,6 +473,8 @@
 <a href="#472" id="472">472</a>
 <a href="#473" id="473">473</a>
 <a href="#474" id="474">474</a>
+<a href="#475" id="475">475</a>
+<a href="#476" id="476">476</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -707,12 +709,14 @@
         region_routes: <span class="kw-2">&amp;</span>[RegionRoute],
         request_builder: CreateRequestBuilder,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Status&gt; {
-        <span class="comment">// Registers opening regions
-        </span><span class="kw">let </span>guards = <span class="self">self
-            </span>.creator
-            .register_opening_regions(<span class="kw-2">&amp;</span><span class="self">self</span>.context, region_routes)<span class="question-mark">?</span>;
-        <span class="kw">if </span>!guards.is_empty() {
-            <span class="self">self</span>.creator.opening_regions = guards;
+        <span class="kw">if </span><span class="self">self</span>.creator.data.table_route.is_physical() {
+            <span class="comment">// Registers opening regions
+            </span><span class="kw">let </span>guards = <span class="self">self
+                </span>.creator
+                .register_opening_regions(<span class="kw-2">&amp;</span><span class="self">self</span>.context, region_routes)<span class="question-mark">?</span>;
+            <span class="kw">if </span>!guards.is_empty() {
+                <span class="self">self</span>.creator.opening_regions = guards;
+            }
         }
 
         <span class="kw">let </span>create_table_data = <span class="kw-2">&amp;</span><span class="self">self</span>.creator.data;
