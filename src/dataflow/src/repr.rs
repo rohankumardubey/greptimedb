@@ -24,7 +24,7 @@ use datatypes::data_type::ConcreteDataType;
 use datatypes::types::cast::CastOption;
 use datatypes::types::cast_with_opt;
 use datatypes::value::Value;
-pub(crate) use relation::{RelationDesc, RelationType};
+pub(crate) use relation::{RelationDesc, RelationType, ColumnType};
 use serde::{Deserialize, Serialize};
 
 use crate::expr::error::{CastValueSnafu, EvalError};

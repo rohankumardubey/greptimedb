@@ -2552,6 +2552,7 @@ dependencies = [
  "session",
  "snafu",
  "tokio",
+ "tokio-stream",
  "tonic 0.10.2",
 ]
 
