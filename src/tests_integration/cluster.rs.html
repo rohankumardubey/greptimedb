@@ -422,6 +422,28 @@
 <a href="#421" id="421">421</a>
 <a href="#422" id="422">422</a>
 <a href="#423" id="423">423</a>
+<a href="#424" id="424">424</a>
+<a href="#425" id="425">425</a>
+<a href="#426" id="426">426</a>
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a>
+<a href="#431" id="431">431</a>
+<a href="#432" id="432">432</a>
+<a href="#433" id="433">433</a>
+<a href="#434" id="434">434</a>
+<a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -486,7 +508,8 @@
 
 <span class="kw">pub struct </span>GreptimeDbCluster {
     <span class="kw">pub </span>storage_guards: Vec&lt;StorageGuard&gt;,
-    <span class="kw">pub </span>_dir_guards: Vec&lt;FileDirGuard&gt;,
+    <span class="kw">pub </span>dir_guards: Vec&lt;FileDirGuard&gt;,
+    <span class="kw">pub </span>datanode_options: Vec&lt;DatanodeOptions&gt;,
 
     <span class="kw">pub </span>datanode_instances: HashMap&lt;DatanodeId, Datanode&gt;,
     <span class="kw">pub </span>kv_backend: KvBackendRef,
@@ -494,8 +517,7 @@
     <span class="kw">pub </span>frontend: Arc&lt;FeInstance&gt;,
 }
 
-<span class="attr">#[derive(Clone)]
-</span><span class="kw">pub struct </span>GreptimeDbClusterBuilder {
+<span class="kw">pub struct </span>GreptimeDbClusterBuilder {
     cluster_name: String,
     kv_backend: KvBackendRef,
     store_config: <span class="prelude-ty">Option</span>&lt;ObjectStoreConfig&gt;,
@@ -581,9 +603,13 @@
         <span class="self">self
     </span>}
 
-    <span class="kw">pub async fn </span>build(<span class="self">self</span>) -&gt; GreptimeDbCluster {
-        <span class="kw">let </span>datanodes = <span class="self">self</span>.datanodes.unwrap_or(<span class="number">4</span>);
-
+    <span class="kw">pub async fn </span>build_with(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        datanode_options: Vec&lt;DatanodeOptions&gt;,
+        storage_guards: Vec&lt;StorageGuard&gt;,
+        dir_guards: Vec&lt;FileDirGuard&gt;,
+    ) -&gt; GreptimeDbCluster {
+        <span class="kw">let </span>datanodes = datanode_options.len();
         <span class="kw">let </span>channel_config = ChannelConfig::new().timeout(Duration::from_secs(<span class="number">20</span>));
         <span class="kw">let </span>datanode_clients = Arc::new(DatanodeClients::new(channel_config));
 
@@ -606,8 +632,9 @@
         )
         .<span class="kw">await</span>;
 
-        <span class="kw">let </span>(datanode_instances, storage_guards, dir_guards) =
-            <span class="self">self</span>.build_datanodes(meta_srv.clone(), datanodes).<span class="kw">await</span>;
+        <span class="kw">let </span>datanode_instances = <span class="self">self
+            </span>.build_datanodes_with_options(<span class="kw-2">&amp;</span>meta_srv, <span class="kw-2">&amp;</span>datanode_options)
+            .<span class="kw">await</span>;
 
         build_datanode_clients(datanode_clients.clone(), <span class="kw-2">&amp;</span>datanode_instances, datanodes).<span class="kw">await</span>;
 
@@ -623,8 +650,9 @@
         frontend.start().<span class="kw">await</span>.unwrap();
 
         GreptimeDbCluster {
+            datanode_options,
             storage_guards,
-            _dir_guards: dir_guards,
+            dir_guards,
             datanode_instances,
             kv_backend: <span class="self">self</span>.kv_backend.clone(),
             meta_srv: meta_srv.meta_srv,
@@ -632,16 +660,19 @@
         }
     }
 
-    <span class="kw">async fn </span>build_datanodes(
+    <span class="kw">pub async fn </span>build(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GreptimeDbCluster {
+        <span class="kw">let </span>datanodes = <span class="self">self</span>.datanodes.unwrap_or(<span class="number">4</span>);
+        <span class="kw">let </span>(datanode_options, storage_guards, dir_guards) =
+            <span class="self">self</span>.build_datanode_options_and_guards(datanodes).<span class="kw">await</span>;
+        <span class="self">self</span>.build_with(datanode_options, storage_guards, dir_guards)
+            .<span class="kw">await
+    </span>}
+
+    <span class="kw">async fn </span>build_datanode_options_and_guards(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        meta_srv: MockInfo,
         datanodes: u32,
-    ) -&gt; (
-        HashMap&lt;DatanodeId, Datanode&gt;,
-        Vec&lt;StorageGuard&gt;,
-        Vec&lt;FileDirGuard&gt;,
-    ) {
-        <span class="kw">let </span><span class="kw-2">mut </span>instances = HashMap::with_capacity(datanodes <span class="kw">as </span>usize);
+    ) -&gt; (Vec&lt;DatanodeOptions&gt;, Vec&lt;StorageGuard&gt;, Vec&lt;FileDirGuard&gt;) {
+        <span class="kw">let </span><span class="kw-2">mut </span>options = Vec::with_capacity(datanodes <span class="kw">as </span>usize);
         <span class="kw">let </span><span class="kw-2">mut </span>storage_guards = Vec::with_capacity(datanodes <span class="kw">as </span>usize);
         <span class="kw">let </span><span class="kw-2">mut </span>dir_guards = Vec::with_capacity(datanodes <span class="kw">as </span>usize);
 
@@ -682,28 +713,41 @@
             };
             opts.node_id = <span class="prelude-val">Some</span>(datanode_id);
 
-            <span class="kw">let </span>datanode = <span class="self">self</span>.create_datanode(opts, meta_srv.clone()).<span class="kw">await</span>;
-
-            instances.insert(datanode_id, datanode);
+            options.push(opts);
         }
         (
-            instances,
+            options,
             storage_guards.into_iter().flatten().collect(),
             dir_guards,
         )
     }
 
+    <span class="kw">async fn </span>build_datanodes_with_options(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        meta_srv: <span class="kw-2">&amp;</span>MockInfo,
+        options: <span class="kw-2">&amp;</span>[DatanodeOptions],
+    ) -&gt; HashMap&lt;DatanodeId, Datanode&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>instances = HashMap::with_capacity(options.len());
+
+        <span class="kw">for </span>opts <span class="kw">in </span>options {
+            <span class="kw">let </span>datanode = <span class="self">self</span>.create_datanode(opts.clone(), meta_srv.clone()).<span class="kw">await</span>;
+            instances.insert(opts.node_id.unwrap(), datanode);
+        }
+
+        instances
+    }
+
     <span class="kw">async fn </span>wait_datanodes_alive(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         meta_peer_client: <span class="kw-2">&amp;</span>MetaPeerClientRef,
-        expected_datanodes: u32,
+        expected_datanodes: usize,
     ) {
         <span class="kw">for _ in </span><span class="number">0</span>..<span class="number">10 </span>{
             <span class="kw">let </span>alive_datanodes =
                 meta_srv::lease::filter_datanodes(<span class="number">1000</span>, meta_peer_client, |<span class="kw">_</span>, <span class="kw">_</span>| <span class="bool-val">true</span>)
                     .<span class="kw">await
                     </span>.unwrap()
-                    .len() <span class="kw">as </span>u32;
+                    .len();
             <span class="kw">if </span>alive_datanodes == expected_datanodes {
                 <span class="kw">return</span>;
             }
@@ -779,7 +823,7 @@
 <span class="kw">async fn </span>build_datanode_clients(
     clients: Arc&lt;DatanodeClients&gt;,
     instances: <span class="kw-2">&amp;</span>HashMap&lt;DatanodeId, Datanode&gt;,
-    datanodes: u32,
+    datanodes: usize,
 ) {
     <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..datanodes {
         <span class="kw">let </span>datanode_id = i <span class="kw">as </span>u64 + <span class="number">1</span>;

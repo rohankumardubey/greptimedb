@@ -1070,7 +1070,7 @@ CREATE TABLE IF NOT EXISTS {table_name} (
             <span class="prelude-val">None</span>,
         )
         .with_metrics_handler(MetricsHandler)
-        .with_greptime_config_options(instance.datanode_opts.to_toml_string())
+        .with_greptime_config_options(instance.mix_options.datanode.to_toml_string())
         .build();
     (http_server.build(http_server.make_app()), instance.guard)
 }
@@ -1141,7 +1141,7 @@ CREATE TABLE IF NOT EXISTS {table_name} (
         )
         .with_prom_handler(frontend_ref.clone(), <span class="bool-val">true</span>)
         .with_prometheus_handler(frontend_ref)
-        .with_greptime_config_options(instance.datanode_opts.to_toml_string())
+        .with_greptime_config_options(instance.mix_options.datanode.to_toml_string())
         .build();
     <span class="kw">let </span>app = http_server.build(http_server.make_app());
     (app, instance.guard)
