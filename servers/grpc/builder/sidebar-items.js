@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":["add_service"],"struct":["GrpcServerBuilder"]};
+window.SIDEBAR_ITEMS = {"struct":["GrpcServerBuilder"]};

@@ -149,6 +149,8 @@
 <a href="#148" id="148">148</a>
 <a href="#149" id="149">149</a>
 <a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -171,6 +173,7 @@
 <span class="kw">use </span>common_meta::cache_invalidator::{CacheInvalidatorRef, DummyCacheInvalidator};
 <span class="kw">use </span>common_meta::datanode_manager::DatanodeManagerRef;
 <span class="kw">use </span>common_meta::ddl::DdlTaskExecutorRef;
+<span class="kw">use </span>common_meta::key::TableMetadataManager;
 <span class="kw">use </span>common_meta::kv_backend::KvBackendRef;
 <span class="kw">use </span>operator::delete::Deleter;
 <span class="kw">use </span>operator::insert::Inserter;
@@ -278,7 +281,7 @@
             catalog_manager.clone(),
             query_engine.clone(),
             <span class="self">self</span>.ddl_task_executor,
-            kv_backend,
+            kv_backend.clone(),
             catalog_manager.clone(),
             inserter.clone(),
         ));
@@ -296,6 +299,7 @@
             inserter,
             deleter,
             export_metrics_task: <span class="prelude-val">None</span>,
+            table_metadata_manager: Arc::new(TableMetadataManager::new(kv_backend)),
         })
     }
 }

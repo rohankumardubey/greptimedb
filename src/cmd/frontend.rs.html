@@ -505,6 +505,8 @@
 <a href="#504" id="504">504</a>
 <a href="#505" id="505">505</a>
 <a href="#506" id="506">506</a>
+<a href="#507" id="507">507</a>
+<a href="#508" id="508">508</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -552,6 +554,10 @@
 <span class="kw">impl </span>Instance {
     <span class="kw">fn </span>new(frontend: FeInstance) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ frontend }
+    }
+
+    <span class="kw">pub fn </span>mut_inner(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut </span>FeInstance {
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>.frontend
     }
 }
 
@@ -760,14 +766,12 @@
         .<span class="kw">await
         </span>.context(StartFrontendSnafu)<span class="question-mark">?</span>;
 
-        <span class="kw">let </span>servers = Services::new(plugins)
-            .build(opts.clone(), Arc::new(instance.clone()))
-            .<span class="kw">await
-            </span>.context(StartFrontendSnafu)<span class="question-mark">?</span>;
+        <span class="kw">let </span>servers = Services::new(opts.clone(), Arc::new(instance.clone()), plugins)
+            .build()
+            .context(StartFrontendSnafu)<span class="question-mark">?</span>;
         instance
             .build_servers(opts, servers)
-            .<span class="kw">await
-            </span>.context(StartFrontendSnafu)<span class="question-mark">?</span>;
+            .context(StartFrontendSnafu)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(Instance::new(instance))
     }

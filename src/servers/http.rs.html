@@ -998,28 +998,6 @@
 <a href="#997" id="997">997</a>
 <a href="#998" id="998">998</a>
 <a href="#999" id="999">999</a>
-<a href="#1000" id="1000">1000</a>
-<a href="#1001" id="1001">1001</a>
-<a href="#1002" id="1002">1002</a>
-<a href="#1003" id="1003">1003</a>
-<a href="#1004" id="1004">1004</a>
-<a href="#1005" id="1005">1005</a>
-<a href="#1006" id="1006">1006</a>
-<a href="#1007" id="1007">1007</a>
-<a href="#1008" id="1008">1008</a>
-<a href="#1009" id="1009">1009</a>
-<a href="#1010" id="1010">1010</a>
-<a href="#1011" id="1011">1011</a>
-<a href="#1012" id="1012">1012</a>
-<a href="#1013" id="1013">1013</a>
-<a href="#1014" id="1014">1014</a>
-<a href="#1015" id="1015">1015</a>
-<a href="#1016" id="1016">1016</a>
-<a href="#1017" id="1017">1017</a>
-<a href="#1018" id="1018">1018</a>
-<a href="#1019" id="1019">1019</a>
-<a href="#1020" id="1020">1020</a>
-<a href="#1021" id="1021">1021</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1036,6 +1014,7 @@
 
 </span><span class="kw">use </span>std::fmt::Display;
 <span class="kw">use </span>std::net::SocketAddr;
+<span class="kw">use </span>std::sync::Mutex <span class="kw">as </span>StdMutex;
 <span class="kw">use </span>std::time::{Duration, Instant};
 
 <span class="kw">use </span>aide::axum::{routing <span class="kw">as </span>apirouting, ApiRouter, IntoApiResponse};
@@ -1084,7 +1063,6 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::metrics_handler::MetricsHandler;
 <span class="kw">use </span><span class="kw">crate</span>::prometheus_handler::PrometheusHandlerRef;
-<span class="kw">use </span><span class="kw">crate</span>::query_handler::grpc::ServerGrpcQueryHandlerRef;
 <span class="kw">use </span><span class="kw">crate</span>::query_handler::sql::ServerSqlQueryHandlerRef;
 <span class="kw">use </span><span class="kw">crate</span>::query_handler::{
     InfluxdbLineProtocolHandlerRef, OpenTelemetryProtocolHandlerRef, OpentsdbProtocolHandlerRef,
@@ -1121,26 +1099,15 @@
 
 <span class="attr">#[derive(Default)]
 </span><span class="kw">pub struct </span>HttpServer {
-    <span class="comment">// server handlers
-    </span>sql_handler: <span class="prelude-ty">Option</span>&lt;ServerSqlQueryHandlerRef&gt;,
-    grpc_handler: <span class="prelude-ty">Option</span>&lt;ServerGrpcQueryHandlerRef&gt;,
-    influxdb_handler: <span class="prelude-ty">Option</span>&lt;InfluxdbLineProtocolHandlerRef&gt;,
-    opentsdb_handler: <span class="prelude-ty">Option</span>&lt;OpentsdbProtocolHandlerRef&gt;,
-    prom_handler: <span class="prelude-ty">Option</span>&lt;PromStoreProtocolHandlerRef&gt;,
-    prometheus_handler: <span class="prelude-ty">Option</span>&lt;PrometheusHandlerRef&gt;,
-    otlp_handler: <span class="prelude-ty">Option</span>&lt;OpenTelemetryProtocolHandlerRef&gt;,
-    script_handler: <span class="prelude-ty">Option</span>&lt;ScriptHandlerRef&gt;,
+    router: StdMutex&lt;Router&gt;,
     shutdown_tx: Mutex&lt;<span class="prelude-ty">Option</span>&lt;Sender&lt;()&gt;&gt;&gt;,
     user_provider: <span class="prelude-ty">Option</span>&lt;UserProviderRef&gt;,
-    metrics_handler: <span class="prelude-ty">Option</span>&lt;MetricsHandler&gt;,
 
     <span class="comment">// plugins
     </span>plugins: Plugins,
 
     <span class="comment">// server configs
     </span>options: HttpOptions,
-    greptime_config_options: <span class="prelude-ty">Option</span>&lt;String&gt;,
-    prom_store_with_metric_engine: bool,
 }
 
 <span class="attr">#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -1428,105 +1395,16 @@
 
 <span class="attr">#[derive(Default)]
 </span><span class="kw">pub struct </span>HttpServerBuilder {
-    inner: HttpServer,
+    options: HttpOptions,
+    plugins: Plugins,
+    user_provider: <span class="prelude-ty">Option</span>&lt;UserProviderRef&gt;,
+    api: OpenApi,
+    router: Router,
 }
 
 <span class="kw">impl </span>HttpServerBuilder {
     <span class="kw">pub fn </span>new(options: HttpOptions) -&gt; <span class="self">Self </span>{
-        <span class="self">Self </span>{
-            inner: HttpServer {
-                sql_handler: <span class="prelude-val">None</span>,
-                grpc_handler: <span class="prelude-val">None</span>,
-                options,
-                opentsdb_handler: <span class="prelude-val">None</span>,
-                influxdb_handler: <span class="prelude-val">None</span>,
-                prom_handler: <span class="prelude-val">None</span>,
-                prometheus_handler: <span class="prelude-val">None</span>,
-                otlp_handler: <span class="prelude-val">None</span>,
-                user_provider: <span class="prelude-val">None</span>,
-                script_handler: <span class="prelude-val">None</span>,
-                metrics_handler: <span class="prelude-val">None</span>,
-                shutdown_tx: Mutex::new(<span class="prelude-val">None</span>),
-                greptime_config_options: <span class="prelude-val">None</span>,
-                plugins: Default::default(),
-                prom_store_with_metric_engine: <span class="bool-val">false</span>,
-            },
-        }
-    }
-
-    <span class="kw">pub fn </span>with_sql_handler(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handler: ServerSqlQueryHandlerRef) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">let _ </span>= <span class="self">self</span>.inner.sql_handler.get_or_insert(handler);
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>with_grpc_handler(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handler: ServerGrpcQueryHandlerRef) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">let _ </span>= <span class="self">self</span>.inner.grpc_handler.get_or_insert(handler);
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>with_opentsdb_handler(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handler: OpentsdbProtocolHandlerRef) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">let _ </span>= <span class="self">self</span>.inner.opentsdb_handler.get_or_insert(handler);
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>with_script_handler(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handler: ScriptHandlerRef) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">let _ </span>= <span class="self">self</span>.inner.script_handler.get_or_insert(handler);
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>with_influxdb_handler(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handler: InfluxdbLineProtocolHandlerRef) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">let _ </span>= <span class="self">self</span>.inner.influxdb_handler.get_or_insert(handler);
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>with_prom_handler(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handler: PromStoreProtocolHandlerRef) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">let _ </span>= <span class="self">self</span>.inner.prom_handler.get_or_insert(handler);
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>with_prometheus_handler(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handler: PrometheusHandlerRef) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">let _ </span>= <span class="self">self</span>.inner.prometheus_handler.get_or_insert(handler);
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>with_otlp_handler(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handler: OpenTelemetryProtocolHandlerRef) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">let _ </span>= <span class="self">self</span>.inner.otlp_handler.get_or_insert(handler);
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>with_user_provider(<span class="kw-2">&amp;mut </span><span class="self">self</span>, user_provider: UserProviderRef) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">let _ </span>= <span class="self">self</span>.inner.user_provider.get_or_insert(user_provider);
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>with_metrics_handler(<span class="kw-2">&amp;mut </span><span class="self">self</span>, handler: MetricsHandler) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="kw">let _ </span>= <span class="self">self</span>.inner.metrics_handler.get_or_insert(handler);
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>with_plugins(<span class="kw-2">&amp;mut </span><span class="self">self</span>, plugins: Plugins) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.inner.plugins = plugins;
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>with_greptime_config_options(<span class="kw-2">&amp;mut </span><span class="self">self</span>, opts: String) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.inner.greptime_config_options = <span class="prelude-val">Some</span>(opts);
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>set_prom_store_with_metric_engine(<span class="kw-2">&amp;mut </span><span class="self">self</span>, with_metric_engine: bool) -&gt; <span class="kw-2">&amp;mut </span><span class="self">Self </span>{
-        <span class="self">self</span>.inner.prom_store_with_metric_engine = with_metric_engine;
-        <span class="self">self
-    </span>}
-
-    <span class="kw">pub fn </span>build(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; HttpServer {
-        std::mem::take(<span class="self">self</span>).inner
-    }
-}
-
-<span class="kw">impl </span>HttpServer {
-    <span class="kw">pub fn </span>make_app(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Router {
-        <span class="kw">let </span><span class="kw-2">mut </span>api = OpenApi {
+        <span class="kw">let </span>api = OpenApi {
             info: Info {
                 title: <span class="string">"GreptimeDB HTTP API"</span>.to_string(),
                 description: <span class="prelude-val">Some</span>(<span class="string">"HTTP APIs to interact with GreptimeDB"</span>.to_string()),
@@ -1539,71 +1417,148 @@
             }],
             ..OpenApi::default()
         };
-
-        <span class="kw">let </span><span class="kw-2">mut </span>router = Router::new();
-
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(sql_handler) = <span class="self">self</span>.sql_handler.clone() {
-            <span class="kw">let </span>sql_router = <span class="self">self
-                </span>.route_sql(ApiState {
-                    sql_handler,
-                    script_handler: <span class="self">self</span>.script_handler.clone(),
-                })
-                .finish_api(<span class="kw-2">&amp;mut </span>api)
-                .layer(Extension(api.clone()));
-            router = router.nest(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}"</span>), sql_router);
+        <span class="self">Self </span>{
+            options,
+            plugins: Plugins::default(),
+            user_provider: <span class="prelude-val">None</span>,
+            api,
+            router: Router::new(),
         }
+    }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(opentsdb_handler) = <span class="self">self</span>.opentsdb_handler.clone() {
-            router = router.nest(
+    <span class="kw">pub fn </span>with_sql_handler(
+        <span class="kw-2">mut </span><span class="self">self</span>,
+        sql_handler: ServerSqlQueryHandlerRef,
+        script_handler: <span class="prelude-ty">Option</span>&lt;ScriptHandlerRef&gt;,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>sql_router = HttpServer::route_sql(ApiState {
+            sql_handler,
+            script_handler,
+        })
+        .finish_api(<span class="kw-2">&amp;mut </span><span class="self">self</span>.api)
+        .layer(Extension(<span class="self">self</span>.api.clone()));
+
+        <span class="self">Self </span>{
+            router: <span class="self">self
+                </span>.router
+                .nest(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}"</span>), sql_router),
+            ..<span class="self">self
+        </span>}
+    }
+
+    <span class="kw">pub fn </span>with_opentsdb_handler(<span class="self">self</span>, handler: OpentsdbProtocolHandlerRef) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            router: <span class="self">self</span>.router.nest(
                 <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}/opentsdb"</span>),
-                <span class="self">self</span>.route_opentsdb(opentsdb_handler),
-            );
-        }
+                HttpServer::route_opentsdb(handler),
+            ),
+            ..<span class="self">self
+        </span>}
+    }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(influxdb_handler) = <span class="self">self</span>.influxdb_handler.clone() {
-            router = router.nest(
+    <span class="kw">pub fn </span>with_influxdb_handler(<span class="self">self</span>, handler: InfluxdbLineProtocolHandlerRef) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            router: <span class="self">self</span>.router.nest(
                 <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}/influxdb"</span>),
-                <span class="self">self</span>.route_influxdb(influxdb_handler),
-            );
-        }
+                HttpServer::route_influxdb(handler),
+            ),
+            ..<span class="self">self
+        </span>}
+    }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(prom_handler) = <span class="self">self</span>.prom_handler.clone() {
-            router = router.nest(
+    <span class="kw">pub fn </span>with_prom_handler(
+        <span class="self">self</span>,
+        handler: PromStoreProtocolHandlerRef,
+        prom_store_with_metric_engine: bool,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            router: <span class="self">self</span>.router.nest(
                 <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}/prometheus"</span>),
-                <span class="self">self</span>.route_prom(prom_handler),
-            );
-        }
+                HttpServer::route_prom(handler, prom_store_with_metric_engine),
+            ),
+            ..<span class="self">self
+        </span>}
+    }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(prometheus_handler) = <span class="self">self</span>.prometheus_handler.clone() {
-            router = router.nest(
+    <span class="kw">pub fn </span>with_prometheus_handler(<span class="self">self</span>, handler: PrometheusHandlerRef) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            router: <span class="self">self</span>.router.nest(
                 <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}/prometheus/api/v1"</span>),
-                <span class="self">self</span>.route_prometheus(prometheus_handler),
-            );
-        }
+                HttpServer::route_prometheus(handler),
+            ),
+            ..<span class="self">self
+        </span>}
+    }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(otlp_handler) = <span class="self">self</span>.otlp_handler.clone() {
-            router = router.nest(
+    <span class="kw">pub fn </span>with_otlp_handler(<span class="self">self</span>, handler: OpenTelemetryProtocolHandlerRef) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            router: <span class="self">self</span>.router.nest(
                 <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"/{HTTP_API_VERSION}/otlp"</span>),
-                <span class="self">self</span>.route_otlp(otlp_handler),
-            );
-        }
+                HttpServer::route_otlp(handler),
+            ),
+            ..<span class="self">self
+        </span>}
+    }
 
-        <span class="kw">if let </span><span class="prelude-val">Some</span>(metrics_handler) = <span class="self">self</span>.metrics_handler {
-            router = router.nest(<span class="string">""</span>, <span class="self">self</span>.route_metrics(metrics_handler));
+    <span class="kw">pub fn </span>with_user_provider(<span class="self">self</span>, user_provider: UserProviderRef) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            user_provider: <span class="prelude-val">Some</span>(user_provider),
+            ..<span class="self">self
+        </span>}
+    }
+
+    <span class="kw">pub fn </span>with_metrics_handler(<span class="self">self</span>, handler: MetricsHandler) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            router: <span class="self">self</span>.router.nest(<span class="string">""</span>, HttpServer::route_metrics(handler)),
+            ..<span class="self">self
+        </span>}
+    }
+
+    <span class="kw">pub fn </span>with_plugins(<span class="self">self</span>, plugins: Plugins) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ plugins, ..<span class="self">self </span>}
+    }
+
+    <span class="kw">pub fn </span>with_greptime_config_options(<span class="kw-2">mut </span><span class="self">self</span>, opts: String) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>config_router = HttpServer::route_config(GreptimeOptionsConfigState {
+            greptime_config_options: opts,
+        })
+        .finish_api(<span class="kw-2">&amp;mut </span><span class="self">self</span>.api);
+
+        <span class="self">Self </span>{
+            router: <span class="self">self</span>.router.nest(<span class="string">""</span>, config_router),
+            ..<span class="self">self
+        </span>}
+    }
+
+    <span class="kw">pub fn </span>with_extra_router(<span class="self">self</span>, router: Router) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            router: <span class="self">self</span>.router.nest(<span class="string">""</span>, router),
+            ..<span class="self">self
+        </span>}
+    }
+
+    <span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; HttpServer {
+        HttpServer {
+            options: <span class="self">self</span>.options,
+            user_provider: <span class="self">self</span>.user_provider,
+            shutdown_tx: Mutex::new(<span class="prelude-val">None</span>),
+            plugins: <span class="self">self</span>.plugins,
+            router: StdMutex::new(<span class="self">self</span>.router),
         }
+    }
+}
+
+<span class="kw">impl </span>HttpServer {
+    <span class="kw">pub fn </span>make_app(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Router {
+        <span class="kw">let </span><span class="kw-2">mut </span>router = {
+            <span class="kw">let </span>router = <span class="self">self</span>.router.lock().unwrap();
+            router.clone()
+        };
 
         router = router.route(
             <span class="string">"/health"</span>,
             routing::get(handler::health).post(handler::health),
         );
-
-        <span class="kw">let </span>config_router = <span class="self">self
-            </span>.route_config(GreptimeOptionsConfigState {
-                greptime_config_options: <span class="self">self</span>.greptime_config_options.clone().unwrap_or_default(),
-            })
-            .finish_api(<span class="kw-2">&amp;mut </span>api);
-
-        router = router.nest(<span class="string">""</span>, config_router);
 
         router = router.route(<span class="string">"/status"</span>, routing::get(handler::status));
 
@@ -1665,13 +1620,13 @@
             )
     }
 
-    <span class="kw">fn </span>route_metrics&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, metrics_handler: MetricsHandler) -&gt; Router&lt;S&gt; {
+    <span class="kw">fn </span>route_metrics&lt;S&gt;(metrics_handler: MetricsHandler) -&gt; Router&lt;S&gt; {
         Router::new()
             .route(<span class="string">"/metrics"</span>, routing::get(handler::metrics))
             .with_state(metrics_handler)
     }
 
-    <span class="kw">fn </span>route_sql&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, api_state: ApiState) -&gt; ApiRouter&lt;S&gt; {
+    <span class="kw">fn </span>route_sql&lt;S&gt;(api_state: ApiState) -&gt; ApiRouter&lt;S&gt; {
         ApiRouter::new()
             .api_route(
                 <span class="string">"/sql"</span>,
@@ -1690,7 +1645,7 @@
             .with_state(api_state)
     }
 
-    <span class="kw">fn </span>route_prometheus&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, prometheus_handler: PrometheusHandlerRef) -&gt; Router&lt;S&gt; {
+    <span class="kw">fn </span>route_prometheus&lt;S&gt;(prometheus_handler: PrometheusHandlerRef) -&gt; Router&lt;S&gt; {
         Router::new()
             .route(
                 <span class="string">"/format_query"</span>,
@@ -1707,9 +1662,12 @@
             .with_state(prometheus_handler)
     }
 
-    <span class="kw">fn </span>route_prom&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, prom_handler: PromStoreProtocolHandlerRef) -&gt; Router&lt;S&gt; {
+    <span class="kw">fn </span>route_prom&lt;S&gt;(
+        prom_handler: PromStoreProtocolHandlerRef,
+        prom_store_with_metric_engine: bool,
+    ) -&gt; Router&lt;S&gt; {
         <span class="kw">let </span><span class="kw-2">mut </span>router = Router::new().route(<span class="string">"/read"</span>, routing::post(prom_store::remote_read));
-        <span class="kw">if </span><span class="self">self</span>.prom_store_with_metric_engine {
+        <span class="kw">if </span>prom_store_with_metric_engine {
             router = router.route(<span class="string">"/write"</span>, routing::post(prom_store::remote_write));
         } <span class="kw">else </span>{
             router = router.route(
@@ -1720,7 +1678,7 @@
         router.with_state(prom_handler)
     }
 
-    <span class="kw">fn </span>route_influxdb&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, influxdb_handler: InfluxdbLineProtocolHandlerRef) -&gt; Router&lt;S&gt; {
+    <span class="kw">fn </span>route_influxdb&lt;S&gt;(influxdb_handler: InfluxdbLineProtocolHandlerRef) -&gt; Router&lt;S&gt; {
         Router::new()
             .route(<span class="string">"/write"</span>, routing::post(influxdb_write_v1))
             .route(<span class="string">"/api/v2/write"</span>, routing::post(influxdb_write_v2))
@@ -1729,20 +1687,20 @@
             .with_state(influxdb_handler)
     }
 
-    <span class="kw">fn </span>route_opentsdb&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, opentsdb_handler: OpentsdbProtocolHandlerRef) -&gt; Router&lt;S&gt; {
+    <span class="kw">fn </span>route_opentsdb&lt;S&gt;(opentsdb_handler: OpentsdbProtocolHandlerRef) -&gt; Router&lt;S&gt; {
         Router::new()
             .route(<span class="string">"/api/put"</span>, routing::post(opentsdb::put))
             .with_state(opentsdb_handler)
     }
 
-    <span class="kw">fn </span>route_otlp&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, otlp_handler: OpenTelemetryProtocolHandlerRef) -&gt; Router&lt;S&gt; {
+    <span class="kw">fn </span>route_otlp&lt;S&gt;(otlp_handler: OpenTelemetryProtocolHandlerRef) -&gt; Router&lt;S&gt; {
         Router::new()
             .route(<span class="string">"/v1/metrics"</span>, routing::post(otlp::metrics))
             .route(<span class="string">"/v1/traces"</span>, routing::post(otlp::traces))
             .with_state(otlp_handler)
     }
 
-    <span class="kw">fn </span>route_config&lt;S&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, state: GreptimeOptionsConfigState) -&gt; ApiRouter&lt;S&gt; {
+    <span class="kw">fn </span>route_config&lt;S&gt;(state: GreptimeOptionsConfigState) -&gt; ApiRouter&lt;S&gt; {
         ApiRouter::new()
             .route(<span class="string">"/config"</span>, apirouting::get(handler::config))
             .with_state(state)
@@ -1863,7 +1821,7 @@
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::error::Error;
-    <span class="kw">use </span><span class="kw">crate</span>::query_handler::grpc::{GrpcQueryHandler, ServerGrpcQueryHandlerAdapter};
+    <span class="kw">use </span><span class="kw">crate</span>::query_handler::grpc::GrpcQueryHandler;
     <span class="kw">use </span><span class="kw">crate</span>::query_handler::sql::{ServerSqlQueryHandlerAdapter, SqlQueryHandler};
 
     <span class="kw">struct </span>DummyInstance {
@@ -1931,10 +1889,8 @@
     <span class="kw">fn </span>make_test_app(tx: mpsc::Sender&lt;(String, Vec&lt;u8&gt;)&gt;) -&gt; Router {
         <span class="kw">let </span>instance = Arc::new(DummyInstance { _tx: tx });
         <span class="kw">let </span>sql_instance = ServerSqlQueryHandlerAdapter::arc(instance.clone());
-        <span class="kw">let </span>grpc_instance = ServerGrpcQueryHandlerAdapter::arc(instance);
         <span class="kw">let </span>server = HttpServerBuilder::new(HttpOptions::default())
-            .with_sql_handler(sql_instance)
-            .with_grpc_handler(grpc_instance)
+            .with_sql_handler(sql_instance, <span class="prelude-val">None</span>)
             .build();
         server.build(server.make_app()).route(
             <span class="string">"/test/timeout"</span>,

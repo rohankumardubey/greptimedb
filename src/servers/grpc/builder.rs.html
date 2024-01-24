@@ -141,6 +141,16 @@
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
 <a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -180,12 +190,18 @@
 <span class="kw">use </span><span class="kw">crate</span>::prometheus_handler::PrometheusHandlerRef;
 <span class="kw">use </span><span class="kw">crate</span>::query_handler::OpenTelemetryProtocolHandlerRef;
 
-<span class="macro">macro_rules! </span>add_service {
+<span class="doccomment">/// Add a gRPC service (`service`) to a `builder`([RoutesBuilder]).
+/// This macro will automatically add some gRPC properties to the service.
+</span><span class="attr">#[macro_export]
+</span><span class="macro">macro_rules! </span>add_service {
     (<span class="macro-nonterminal">$builder</span>: ident, <span class="macro-nonterminal">$service</span>: expr) =&gt; {
-        <span class="macro-nonterminal">$builder</span>.routes_builder.add_service(
+        <span class="kw">let </span>max_recv_message_size = <span class="macro-nonterminal">$builder</span>.config().max_recv_message_size;
+        <span class="kw">let </span>max_send_message_size = <span class="macro-nonterminal">$builder</span>.config().max_send_message_size;
+
+        <span class="macro-nonterminal">$builder</span>.routes_builder_mut().add_service(
             <span class="macro-nonterminal">$service
-                </span>.max_decoding_message_size(<span class="macro-nonterminal">$builder</span>.config.max_recv_message_size)
-                .max_encoding_message_size(<span class="macro-nonterminal">$builder</span>.config.max_send_message_size),
+                </span>.max_decoding_message_size(max_recv_message_size)
+                .max_encoding_message_size(max_send_message_size),
         )
     };
 }
@@ -203,6 +219,10 @@
             runtime,
             routes_builder: RoutesBuilder::default(),
         }
+    }
+
+    <span class="kw">pub fn </span>config(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>GrpcServerConfig {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.config
     }
 
     <span class="kw">pub fn </span>runtime(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Arc&lt;Runtime&gt; {

@@ -128,6 +128,8 @@
 <a href="#127" id="127">127</a>
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -177,6 +179,8 @@
 
 <span class="kw">pub async fn </span>start_app(<span class="kw-2">mut </span>app: Box&lt;<span class="kw">dyn </span>App&gt;) -&gt; error::Result&lt;()&gt; {
     <span class="kw">let </span>name = app.name().to_string();
+
+    app.pre_start()<span class="question-mark">?</span>;
 
     <span class="macro">tokio::select! </span>{
         result = app.start() =&gt; {
