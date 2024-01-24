@@ -307,6 +307,8 @@
 <a href="#306" id="306">306</a>
 <a href="#307" id="307">307</a>
 <a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -338,6 +340,7 @@
 <span class="kw">use </span>serde::{Deserialize, Serialize};
 <span class="kw">use </span>session::context::QueryContextRef;
 
+<span class="kw">use </span><span class="kw">crate</span>::http::arrow_result::ArrowResponse;
 <span class="kw">use </span><span class="kw">crate</span>::http::csv_result::CsvResponse;
 <span class="kw">use </span><span class="kw">crate</span>::http::error_result::ErrorResponse;
 <span class="kw">use </span><span class="kw">crate</span>::http::greptime_result_v1::GreptimedbV1Response;
@@ -420,6 +423,7 @@
     };
 
     <span class="kw">let </span>resp = <span class="kw">match </span>format {
+        ResponseFormat::Arrow =&gt; ArrowResponse::from_output(outputs).<span class="kw">await</span>,
         ResponseFormat::Csv =&gt; CsvResponse::from_output(outputs).<span class="kw">await</span>,
         ResponseFormat::GreptimedbV1 =&gt; GreptimedbV1Response::from_output(outputs).<span class="kw">await</span>,
         ResponseFormat::InfluxdbV1 =&gt; InfluxdbV1Response::from_output(outputs, epoch).<span class="kw">await</span>,

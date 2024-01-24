@@ -3,7 +3,7 @@
 "auth":[["impl ErrorCompat for <a class=\"enum\" href=\"auth/error/enum.Error.html\" title=\"enum auth::error::Error\">Error</a>"]],
 "catalog":[["impl ErrorCompat for <a class=\"enum\" href=\"catalog/error/enum.Error.html\" title=\"enum catalog::error::Error\">Error</a>"]],
 "client":[["impl ErrorCompat for <a class=\"enum\" href=\"client/error/enum.Error.html\" title=\"enum client::error::Error\">Error</a>"]],
-"cmd":[["impl ErrorCompat for <a class=\"enum\" href=\"cmd/error/enum.Error.html\" title=\"enum cmd::error::Error\">Error</a>"],["impl ErrorCompat for <a class=\"enum\" href=\"cmd/cli/upgrade/v1_helper/err/enum.Error.html\" title=\"enum cmd::cli::upgrade::v1_helper::err::Error\">Error</a>"]],
+"cmd":[["impl ErrorCompat for <a class=\"enum\" href=\"cmd/cli/upgrade/v1_helper/err/enum.Error.html\" title=\"enum cmd::cli::upgrade::v1_helper::err::Error\">Error</a>"],["impl ErrorCompat for <a class=\"enum\" href=\"cmd/error/enum.Error.html\" title=\"enum cmd::error::Error\">Error</a>"]],
 "common_base":[["impl ErrorCompat for <a class=\"enum\" href=\"common_base/buffer/enum.Error.html\" title=\"enum common_base::buffer::Error\">Error</a>"]],
 "common_catalog":[["impl ErrorCompat for <a class=\"enum\" href=\"common_catalog/error/enum.Error.html\" title=\"enum common_catalog::error::Error\">Error</a>"]],
 "common_datasource":[["impl ErrorCompat for <a class=\"enum\" href=\"common_datasource/error/enum.Error.html\" title=\"enum common_datasource::error::Error\">Error</a>"]],

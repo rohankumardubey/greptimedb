@@ -998,6 +998,39 @@
 <a href="#997" id="997">997</a>
 <a href="#998" id="998">998</a>
 <a href="#999" id="999">999</a>
+<a href="#1000" id="1000">1000</a>
+<a href="#1001" id="1001">1001</a>
+<a href="#1002" id="1002">1002</a>
+<a href="#1003" id="1003">1003</a>
+<a href="#1004" id="1004">1004</a>
+<a href="#1005" id="1005">1005</a>
+<a href="#1006" id="1006">1006</a>
+<a href="#1007" id="1007">1007</a>
+<a href="#1008" id="1008">1008</a>
+<a href="#1009" id="1009">1009</a>
+<a href="#1010" id="1010">1010</a>
+<a href="#1011" id="1011">1011</a>
+<a href="#1012" id="1012">1012</a>
+<a href="#1013" id="1013">1013</a>
+<a href="#1014" id="1014">1014</a>
+<a href="#1015" id="1015">1015</a>
+<a href="#1016" id="1016">1016</a>
+<a href="#1017" id="1017">1017</a>
+<a href="#1018" id="1018">1018</a>
+<a href="#1019" id="1019">1019</a>
+<a href="#1020" id="1020">1020</a>
+<a href="#1021" id="1021">1021</a>
+<a href="#1022" id="1022">1022</a>
+<a href="#1023" id="1023">1023</a>
+<a href="#1024" id="1024">1024</a>
+<a href="#1025" id="1025">1025</a>
+<a href="#1026" id="1026">1026</a>
+<a href="#1027" id="1027">1027</a>
+<a href="#1028" id="1028">1028</a>
+<a href="#1029" id="1029">1029</a>
+<a href="#1030" id="1030">1030</a>
+<a href="#1031" id="1031">1031</a>
+<a href="#1032" id="1032">1032</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1050,6 +1083,7 @@
 <span class="kw">use </span><span class="self">self</span>::authorize::AuthState;
 <span class="kw">use </span><span class="kw">crate</span>::configurator::ConfiguratorRef;
 <span class="kw">use </span><span class="kw">crate</span>::error::{AlreadyStartedSnafu, Error, <span class="prelude-ty">Result</span>, StartHttpSnafu, ToJsonSnafu};
+<span class="kw">use </span><span class="kw">crate</span>::http::arrow_result::ArrowResponse;
 <span class="kw">use </span><span class="kw">crate</span>::http::csv_result::CsvResponse;
 <span class="kw">use </span><span class="kw">crate</span>::http::error_result::ErrorResponse;
 <span class="kw">use </span><span class="kw">crate</span>::http::greptime_result_v1::GreptimedbV1Response;
@@ -1082,6 +1116,7 @@
 <span class="kw">pub mod </span>prometheus;
 <span class="kw">pub mod </span>script;
 
+<span class="kw">pub mod </span>arrow_result;
 <span class="kw">pub mod </span>csv_result;
 <span class="attr">#[cfg(feature = <span class="string">"dashboard"</span>)]
 </span><span class="kw">mod </span>dashboard;
@@ -1247,6 +1282,7 @@
 <span class="doccomment">/// It allows the results of SQL queries to be presented in different formats.
 </span><span class="attr">#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 </span><span class="kw">pub enum </span>ResponseFormat {
+    Arrow,
     Csv,
     <span class="attr">#[default]
     </span>GreptimedbV1,
@@ -1256,6 +1292,7 @@
 <span class="kw">impl </span>ResponseFormat {
     <span class="kw">pub fn </span>parse(s: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">match </span>s {
+            <span class="string">"arrow" </span>=&gt; <span class="prelude-val">Some</span>(ResponseFormat::Arrow),
             <span class="string">"csv" </span>=&gt; <span class="prelude-val">Some</span>(ResponseFormat::Csv),
             <span class="string">"greptimedb_v1" </span>=&gt; <span class="prelude-val">Some</span>(ResponseFormat::GreptimedbV1),
             <span class="string">"influxdb_v1" </span>=&gt; <span class="prelude-val">Some</span>(ResponseFormat::InfluxdbV1),
@@ -1265,6 +1302,7 @@
 
     <span class="kw">pub fn </span>as_str(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'static </span>str {
         <span class="kw">match </span><span class="self">self </span>{
+            ResponseFormat::Arrow =&gt; <span class="string">"arrow"</span>,
             ResponseFormat::Csv =&gt; <span class="string">"csv"</span>,
             ResponseFormat::GreptimedbV1 =&gt; <span class="string">"greptimedb_v1"</span>,
             ResponseFormat::InfluxdbV1 =&gt; <span class="string">"influxdb_v1"</span>,
@@ -1318,6 +1356,7 @@
 
 <span class="attr">#[derive(Serialize, Deserialize, Debug, JsonSchema)]
 </span><span class="kw">pub enum </span>HttpResponse {
+    Arrow(ArrowResponse),
     Csv(CsvResponse),
     Error(ErrorResponse),
     GreptimedbV1(GreptimedbV1Response),
@@ -1327,6 +1366,7 @@
 <span class="kw">impl </span>HttpResponse {
     <span class="kw">pub fn </span>with_execution_time(<span class="self">self</span>, execution_time: u64) -&gt; <span class="self">Self </span>{
         <span class="kw">match </span><span class="self">self </span>{
+            HttpResponse::Arrow(resp) =&gt; resp.with_execution_time(execution_time).into(),
             HttpResponse::Csv(resp) =&gt; resp.with_execution_time(execution_time).into(),
             HttpResponse::GreptimedbV1(resp) =&gt; resp.with_execution_time(execution_time).into(),
             HttpResponse::InfluxdbV1(resp) =&gt; resp.with_execution_time(execution_time).into(),
@@ -1338,6 +1378,7 @@
 <span class="kw">impl </span>IntoResponse <span class="kw">for </span>HttpResponse {
     <span class="kw">fn </span>into_response(<span class="self">self</span>) -&gt; Response {
         <span class="kw">match </span><span class="self">self </span>{
+            HttpResponse::Arrow(resp) =&gt; resp.into_response(),
             HttpResponse::Csv(resp) =&gt; resp.into_response(),
             HttpResponse::GreptimedbV1(resp) =&gt; resp.into_response(),
             HttpResponse::InfluxdbV1(resp) =&gt; resp.into_response(),
@@ -1348,6 +1389,12 @@
 
 <span class="kw">impl </span>OperationOutput <span class="kw">for </span>HttpResponse {
     <span class="kw">type </span>Inner = Response;
+}
+
+<span class="kw">impl </span>From&lt;ArrowResponse&gt; <span class="kw">for </span>HttpResponse {
+    <span class="kw">fn </span>from(value: ArrowResponse) -&gt; <span class="self">Self </span>{
+        HttpResponse::Arrow(value)
+    }
 }
 
 <span class="kw">impl </span>From&lt;CsvResponse&gt; <span class="kw">for </span>HttpResponse {
@@ -1801,9 +1848,12 @@
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
     <span class="kw">use </span>std::future::pending;
+    <span class="kw">use </span>std::io::Cursor;
     <span class="kw">use </span>std::sync::Arc;
 
     <span class="kw">use </span>api::v1::greptime_request::Request;
+    <span class="kw">use </span>arrow_ipc::reader::FileReader;
+    <span class="kw">use </span>arrow_schema::DataType;
     <span class="kw">use </span>axum::handler::Handler;
     <span class="kw">use </span>axum::http::StatusCode;
     <span class="kw">use </span>axum::routing::get;
@@ -1942,11 +1992,13 @@
             ResponseFormat::GreptimedbV1,
             ResponseFormat::InfluxdbV1,
             ResponseFormat::Csv,
+            ResponseFormat::Arrow,
         ] {
             <span class="kw">let </span>recordbatches =
                 RecordBatches::try_new(schema.clone(), <span class="macro">vec!</span>[recordbatch.clone()]).unwrap();
             <span class="kw">let </span>outputs = <span class="macro">vec!</span>[<span class="prelude-val">Ok</span>(Output::RecordBatches(recordbatches))];
             <span class="kw">let </span>json_resp = <span class="kw">match </span>format {
+                ResponseFormat::Arrow =&gt; ArrowResponse::from_output(outputs).<span class="kw">await</span>,
                 ResponseFormat::Csv =&gt; CsvResponse::from_output(outputs).<span class="kw">await</span>,
                 ResponseFormat::GreptimedbV1 =&gt; GreptimedbV1Response::from_output(outputs).<span class="kw">await</span>,
                 ResponseFormat::InfluxdbV1 =&gt; InfluxdbV1Response::from_output(outputs, <span class="prelude-val">None</span>).<span class="kw">await</span>,
@@ -1991,6 +2043,20 @@
                     } <span class="kw">else </span>{
                         <span class="macro">panic!</span>(<span class="string">"invalid output type"</span>);
                     }
+                }
+                HttpResponse::Arrow(resp) =&gt; {
+                    <span class="kw">let </span>output = resp.data;
+                    <span class="kw">let </span><span class="kw-2">mut </span>reader =
+                        FileReader::try_new(Cursor::new(output), <span class="prelude-val">None</span>).expect(<span class="string">"Arrow reader error"</span>);
+                    <span class="kw">let </span>schema = reader.schema();
+                    <span class="macro">assert_eq!</span>(schema.fields[<span class="number">0</span>].name(), <span class="string">"numbers"</span>);
+                    <span class="macro">assert_eq!</span>(schema.fields[<span class="number">0</span>].data_type(), <span class="kw-2">&amp;</span>DataType::UInt32);
+                    <span class="macro">assert_eq!</span>(schema.fields[<span class="number">1</span>].name(), <span class="string">"strings"</span>);
+                    <span class="macro">assert_eq!</span>(schema.fields[<span class="number">1</span>].data_type(), <span class="kw-2">&amp;</span>DataType::Utf8);
+
+                    <span class="kw">let </span>rb = reader.next().unwrap().expect(<span class="string">"read record batch failed"</span>);
+                    <span class="macro">assert_eq!</span>(rb.num_columns(), <span class="number">2</span>);
+                    <span class="macro">assert_eq!</span>(rb.num_rows(), <span class="number">4</span>);
                 }
                 HttpResponse::Error(err) =&gt; <span class="macro">unreachable!</span>(<span class="string">"{err:?}"</span>),
             }
