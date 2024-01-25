@@ -562,6 +562,11 @@
 <a href="#561" id="561">561</a>
 <a href="#562" id="562">562</a>
 <a href="#563" id="563">563</a>
+<a href="#564" id="564">564</a>
+<a href="#565" id="565">565</a>
+<a href="#566" id="566">566</a>
+<a href="#567" id="567">567</a>
+<a href="#568" id="568">568</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -579,7 +584,7 @@
 </span><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use </span>common_procedure::{watcher, ProcedureId, ProcedureManagerRef, ProcedureWithId};
+<span class="kw">use </span>common_procedure::{watcher, Output, ProcedureId, ProcedureManagerRef, ProcedureWithId};
 <span class="kw">use </span>common_telemetry::tracing_context::{FutureExt, TracingContext};
 <span class="kw">use </span>common_telemetry::{info, tracing};
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
@@ -727,7 +732,7 @@
         alter_table_task: AlterTableTask,
         table_info_value: DeserializedValueWithBytes&lt;TableInfoValue&gt;,
         physical_table_info: <span class="prelude-ty">Option</span>&lt;(TableId, TableName)&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ProcedureId&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(ProcedureId, <span class="prelude-ty">Option</span>&lt;Output&gt;)&gt; {
         <span class="kw">let </span>context = <span class="self">self</span>.create_context();
 
         <span class="kw">let </span>procedure = AlterTableProcedure::new(
@@ -751,7 +756,7 @@
         create_table_task: CreateTableTask,
         table_route: TableRouteValue,
         region_wal_options: HashMap&lt;RegionNumber, String&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ProcedureId&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(ProcedureId, <span class="prelude-ty">Option</span>&lt;Output&gt;)&gt; {
         <span class="kw">let </span>context = <span class="self">self</span>.create_context();
 
         <span class="kw">let </span>procedure = CreateTableProcedure::new(
@@ -775,7 +780,7 @@
         drop_table_task: DropTableTask,
         table_info_value: DeserializedValueWithBytes&lt;TableInfoValue&gt;,
         table_route_value: DeserializedValueWithBytes&lt;TableRouteValue&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ProcedureId&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(ProcedureId, <span class="prelude-ty">Option</span>&lt;Output&gt;)&gt; {
         <span class="kw">let </span>context = <span class="self">self</span>.create_context();
 
         <span class="kw">let </span>procedure = DropTableProcedure::new(
@@ -799,7 +804,7 @@
         truncate_table_task: TruncateTableTask,
         table_info_value: DeserializedValueWithBytes&lt;TableInfoValue&gt;,
         region_routes: Vec&lt;RegionRoute&gt;,
-    ) -&gt; <span class="prelude-ty">Result</span>&lt;ProcedureId&gt; {
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(ProcedureId, <span class="prelude-ty">Option</span>&lt;Output&gt;)&gt; {
         <span class="kw">let </span>context = <span class="self">self</span>.create_context();
         <span class="kw">let </span>procedure = TruncateTableProcedure::new(
             cluster_id,
@@ -814,7 +819,10 @@
         <span class="self">self</span>.submit_procedure(procedure_with_id).<span class="kw">await
     </span>}
 
-    <span class="kw">async fn </span>submit_procedure(<span class="kw-2">&amp;</span><span class="self">self</span>, procedure_with_id: ProcedureWithId) -&gt; <span class="prelude-ty">Result</span>&lt;ProcedureId&gt; {
+    <span class="kw">async fn </span>submit_procedure(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        procedure_with_id: ProcedureWithId,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(ProcedureId, <span class="prelude-ty">Option</span>&lt;Output&gt;)&gt; {
         <span class="kw">let </span>procedure_id = procedure_with_id.id;
 
         <span class="kw">let </span><span class="kw-2">mut </span>watcher = <span class="self">self
@@ -823,11 +831,11 @@
             .<span class="kw">await
             </span>.context(SubmitProcedureSnafu)<span class="question-mark">?</span>;
 
-        watcher::wait(<span class="kw-2">&amp;mut </span>watcher)
+        <span class="kw">let </span>output = watcher::wait(<span class="kw-2">&amp;mut </span>watcher)
             .<span class="kw">await
             </span>.context(WaitProcedureSnafu)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(procedure_id)
+        <span class="prelude-val">Ok</span>((procedure_id, output))
     }
 }
 
@@ -852,7 +860,7 @@
 
     <span class="kw">let </span>table_route = table_route_value.into_inner().region_routes()<span class="question-mark">?</span>.clone();
 
-    <span class="kw">let </span>id = ddl_manager
+    <span class="kw">let </span>(id, <span class="kw">_</span>) = ddl_manager
         .submit_truncate_table_task(
             cluster_id,
             truncate_table_task,
@@ -927,7 +935,7 @@
         ))
     };
 
-    <span class="kw">let </span>id = ddl_manager
+    <span class="kw">let </span>(id, <span class="kw">_</span>) = ddl_manager
         .submit_alter_table_task(
             cluster_id,
             alter_table_task,
@@ -969,7 +977,7 @@
     <span class="kw">let </span>table_route_value =
         DeserializedValueWithBytes::from_inner(TableRouteValue::Physical(table_route_value));
 
-    <span class="kw">let </span>id = ddl_manager
+    <span class="kw">let </span>(id, <span class="kw">_</span>) = ddl_manager
         .submit_drop_table_task(
             cluster_id,
             drop_table_task,
@@ -1007,7 +1015,7 @@
 
     create_table_task.table_info.ident.table_id = table_id;
 
-    <span class="kw">let </span>id = ddl_manager
+    <span class="kw">let </span>(id, output) = ddl_manager
         .submit_create_table_task(
             cluster_id,
             create_table_task,
@@ -1015,8 +1023,10 @@
             region_wal_options,
         )
         .<span class="kw">await</span><span class="question-mark">?</span>;
+    <span class="kw">let </span>output = output.context(error::ProcedureOutputSnafu)<span class="question-mark">?</span>;
 
-    <span class="macro">info!</span>(<span class="string">"Table: {table_id:?} is created via procedure_id {id:?}"</span>);
+    <span class="kw">let </span>table_id = <span class="kw-2">*</span>(output.downcast_ref::&lt;u32&gt;().unwrap());
+    <span class="macro">info!</span>(<span class="string">"Table: {table_id} is created via procedure_id {id:?}"</span>);
 
     <span class="prelude-val">Ok</span>(SubmitDdlTaskResponse {
         key: id.to_string().into(),

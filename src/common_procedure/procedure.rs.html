@@ -504,9 +504,9 @@
     }
 
     <span class="doccomment">/// Returns a [Status::Done] with output.
-    </span><span class="kw">pub fn </span>done_with_output(output: Output) -&gt; Status {
+    </span><span class="kw">pub fn </span>done_with_output&lt;T: Any + Send + Sync&gt;(output: T) -&gt; Status {
         Status::Done {
-            output: <span class="prelude-val">Some</span>(output),
+            output: <span class="prelude-val">Some</span>(Arc::new(output)),
         }
     }
     <span class="doccomment">/// Returns `true` if the procedure is done.

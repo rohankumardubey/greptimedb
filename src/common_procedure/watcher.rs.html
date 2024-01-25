@@ -208,7 +208,7 @@
                     <span class="self">self</span>.error = !<span class="self">self</span>.error;
                     <span class="prelude-val">Err</span>(Error::retry_later(MockError::new(StatusCode::Internal)))
                 } <span class="kw">else </span>{
-                    <span class="prelude-val">Ok</span>(Status::done_with_output(Arc::new(<span class="string">"hello"</span>)))
+                    <span class="prelude-val">Ok</span>(Status::done_with_output(<span class="string">"hello"</span>))
                 }
             }
 

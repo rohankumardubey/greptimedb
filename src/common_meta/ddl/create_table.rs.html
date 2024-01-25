@@ -475,6 +475,7 @@
 <a href="#474" id="474">474</a>
 <a href="#475" id="475">475</a>
 <a href="#476" id="476">476</a>
+<a href="#477" id="477">477</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -581,18 +582,18 @@
     <span class="doccomment">/// Checks whether the table exists.
     </span><span class="kw">async fn </span>on_prepare(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Status&gt; {
         <span class="kw">let </span>expr = <span class="kw-2">&amp;</span><span class="self">self</span>.creator.data.task.create_table;
-        <span class="kw">let </span>exist = <span class="self">self
+        <span class="kw">let </span>table_name_value = <span class="self">self
             </span>.context
             .table_metadata_manager
             .table_name_manager()
-            .exists(TableNameKey::new(
+            .get(TableNameKey::new(
                 <span class="kw-2">&amp;</span>expr.catalog_name,
                 <span class="kw-2">&amp;</span>expr.schema_name,
                 <span class="kw-2">&amp;</span>expr.table_name,
             ))
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
-        <span class="kw">if </span>exist {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = table_name_value {
             <span class="macro">ensure!</span>(
                 <span class="self">self</span>.creator.data.task.create_table.create_if_not_exists,
                 error::TableAlreadyExistsSnafu {
@@ -600,7 +601,8 @@
                 }
             );
 
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(Status::done());
+            <span class="kw">let </span>table_id = value.table_id();
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(Status::done_with_output(table_id));
         }
 
         <span class="self">self</span>.creator.data.state = CreateTableState::DatanodeCreateRegions;
@@ -792,7 +794,7 @@
             .<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="macro">info!</span>(<span class="string">"Created table metadata for table {table_id}"</span>);
 
-        <span class="prelude-val">Ok</span>(Status::done())
+        <span class="prelude-val">Ok</span>(Status::done_with_output(table_id))
     }
 }
 
