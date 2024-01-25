@@ -1031,6 +1031,28 @@
 <a href="#1030" id="1030">1030</a>
 <a href="#1031" id="1031">1031</a>
 <a href="#1032" id="1032">1032</a>
+<a href="#1033" id="1033">1033</a>
+<a href="#1034" id="1034">1034</a>
+<a href="#1035" id="1035">1035</a>
+<a href="#1036" id="1036">1036</a>
+<a href="#1037" id="1037">1037</a>
+<a href="#1038" id="1038">1038</a>
+<a href="#1039" id="1039">1039</a>
+<a href="#1040" id="1040">1040</a>
+<a href="#1041" id="1041">1041</a>
+<a href="#1042" id="1042">1042</a>
+<a href="#1043" id="1043">1043</a>
+<a href="#1044" id="1044">1044</a>
+<a href="#1045" id="1045">1045</a>
+<a href="#1046" id="1046">1046</a>
+<a href="#1047" id="1047">1047</a>
+<a href="#1048" id="1048">1048</a>
+<a href="#1049" id="1049">1049</a>
+<a href="#1050" id="1050">1050</a>
+<a href="#1051" id="1051">1051</a>
+<a href="#1052" id="1052">1052</a>
+<a href="#1053" id="1053">1053</a>
+<a href="#1054" id="1054">1054</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1069,6 +1091,7 @@
 <span class="kw">use </span>common_time::timestamp::TimeUnit;
 <span class="kw">use </span>common_time::Timestamp;
 <span class="kw">use </span>datatypes::data_type::DataType;
+<span class="kw">use </span>datatypes::schema::SchemaRef;
 <span class="kw">use </span>futures::FutureExt;
 <span class="kw">use </span>schemars::JsonSchema;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
@@ -1183,21 +1206,36 @@
 }
 
 <span class="attr">#[derive(Debug, Serialize, Deserialize, JsonSchema, Eq, PartialEq)]
-</span><span class="kw">pub struct </span>Schema {
+</span><span class="kw">pub struct </span>OutputSchema {
     column_schemas: Vec&lt;ColumnSchema&gt;,
 }
 
-<span class="kw">impl </span>Schema {
-    <span class="kw">pub fn </span>new(columns: Vec&lt;ColumnSchema&gt;) -&gt; Schema {
-        Schema {
+<span class="kw">impl </span>OutputSchema {
+    <span class="kw">pub fn </span>new(columns: Vec&lt;ColumnSchema&gt;) -&gt; OutputSchema {
+        OutputSchema {
             column_schemas: columns,
+        }
+    }
+}
+
+<span class="kw">impl </span>From&lt;SchemaRef&gt; <span class="kw">for </span>OutputSchema {
+    <span class="kw">fn </span>from(schema: SchemaRef) -&gt; OutputSchema {
+        OutputSchema {
+            column_schemas: schema
+                .column_schemas()
+                .iter()
+                .map(|cs| ColumnSchema {
+                    name: cs.name.clone(),
+                    data_type: cs.data_type.name(),
+                })
+                .collect(),
         }
     }
 }
 
 <span class="attr">#[derive(Debug, Serialize, Deserialize, JsonSchema, Eq, PartialEq)]
 </span><span class="kw">pub struct </span>HttpRecordsOutput {
-    schema: <span class="prelude-ty">Option</span>&lt;Schema&gt;,
+    schema: OutputSchema,
     rows: Vec&lt;Vec&lt;Value&gt;&gt;,
 }
 
@@ -1207,14 +1245,11 @@
     }
 
     <span class="kw">pub fn </span>num_cols(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
-        <span class="self">self</span>.schema
-            .as_ref()
-            .map(|x| x.column_schemas.len())
-            .unwrap_or(<span class="number">0</span>)
+        <span class="self">self</span>.schema.column_schemas.len()
     }
 
-    <span class="kw">pub fn </span>schema(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Schema&gt; {
-        <span class="self">self</span>.schema.as_ref()
+    <span class="kw">pub fn </span>schema(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>OutputSchema {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.schema
     }
 
     <span class="kw">pub fn </span>rows(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Vec&lt;Vec&lt;Value&gt;&gt; {
@@ -1222,33 +1257,17 @@
     }
 }
 
-<span class="kw">impl </span>TryFrom&lt;Vec&lt;RecordBatch&gt;&gt; <span class="kw">for </span>HttpRecordsOutput {
-    <span class="kw">type </span>Error = Error;
-
-    <span class="comment">// TODO(sunng87): use schema from recordstreams when #366 fixed
-    </span><span class="kw">fn </span>try_from(
+<span class="kw">impl </span>HttpRecordsOutput {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>try_new(
+        schema: SchemaRef,
         recordbatches: Vec&lt;RecordBatch&gt;,
-    ) -&gt; std::result::Result&lt;HttpRecordsOutput, <span class="self">Self</span>::Error&gt; {
+    ) -&gt; std::result::Result&lt;HttpRecordsOutput, Error&gt; {
         <span class="kw">if </span>recordbatches.is_empty() {
             <span class="prelude-val">Ok</span>(HttpRecordsOutput {
-                schema: <span class="prelude-val">None</span>,
+                schema: OutputSchema::from(schema),
                 rows: <span class="macro">vec!</span>[],
             })
         } <span class="kw">else </span>{
-            <span class="comment">// safety ensured by previous empty check
-            </span><span class="kw">let </span>first = <span class="kw-2">&amp;</span>recordbatches[<span class="number">0</span>];
-            <span class="kw">let </span>schema = Schema {
-                column_schemas: first
-                    .schema
-                    .column_schemas()
-                    .iter()
-                    .map(|cs| ColumnSchema {
-                        name: cs.name.clone(),
-                        data_type: cs.data_type.name(),
-                    })
-                    .collect(),
-            };
-
             <span class="kw">let </span><span class="kw-2">mut </span>rows =
                 Vec::with_capacity(recordbatches.iter().map(|r| r.num_rows()).sum::&lt;usize&gt;());
 
@@ -1265,7 +1284,7 @@
             }
 
             <span class="prelude-val">Ok</span>(HttpRecordsOutput {
-                schema: <span class="prelude-val">Some</span>(schema),
+                schema: OutputSchema::from(schema),
                 rows,
             })
         }
@@ -1971,6 +1990,33 @@
     }
 
     <span class="attr">#[tokio::test]
+    </span><span class="kw">async fn </span>test_schema_for_empty_response() {
+        <span class="kw">let </span>column_schemas = <span class="macro">vec!</span>[
+            ColumnSchema::new(<span class="string">"numbers"</span>, ConcreteDataType::uint32_datatype(), <span class="bool-val">false</span>),
+            ColumnSchema::new(<span class="string">"strings"</span>, ConcreteDataType::string_datatype(), <span class="bool-val">true</span>),
+        ];
+        <span class="kw">let </span>schema = Arc::new(Schema::new(column_schemas));
+
+        <span class="kw">let </span>recordbatches = RecordBatches::try_new(schema.clone(), <span class="macro">vec!</span>[]).unwrap();
+        <span class="kw">let </span>outputs = <span class="macro">vec!</span>[<span class="prelude-val">Ok</span>(Output::RecordBatches(recordbatches))];
+
+        <span class="kw">let </span>json_resp = GreptimedbV1Response::from_output(outputs).<span class="kw">await</span>;
+        <span class="kw">if let </span>HttpResponse::GreptimedbV1(json_resp) = json_resp {
+            <span class="kw">let </span>json_output = <span class="kw-2">&amp;</span>json_resp.output[<span class="number">0</span>];
+            <span class="kw">if let </span>GreptimeQueryOutput::Records(r) = json_output {
+                <span class="macro">assert_eq!</span>(r.num_rows(), <span class="number">0</span>);
+                <span class="macro">assert_eq!</span>(r.num_cols(), <span class="number">2</span>);
+                <span class="macro">assert_eq!</span>(r.schema.column_schemas[<span class="number">0</span>].name, <span class="string">"numbers"</span>);
+                <span class="macro">assert_eq!</span>(r.schema.column_schemas[<span class="number">0</span>].data_type, <span class="string">"UInt32"</span>);
+            } <span class="kw">else </span>{
+                <span class="macro">panic!</span>(<span class="string">"invalid output type"</span>);
+            }
+        } <span class="kw">else </span>{
+            <span class="macro">panic!</span>(<span class="string">"invalid format"</span>)
+        }
+    }
+
+    <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_recordbatches_conversion() {
         <span class="kw">let </span>column_schemas = <span class="macro">vec!</span>[
             ColumnSchema::new(<span class="string">"numbers"</span>, ConcreteDataType::uint32_datatype(), <span class="bool-val">false</span>),
@@ -2010,9 +2056,8 @@
                     <span class="kw">if let </span>GreptimeQueryOutput::Records(r) = json_output {
                         <span class="macro">assert_eq!</span>(r.num_rows(), <span class="number">4</span>);
                         <span class="macro">assert_eq!</span>(r.num_cols(), <span class="number">2</span>);
-                        <span class="kw">let </span>schema = r.schema.as_ref().unwrap();
-                        <span class="macro">assert_eq!</span>(schema.column_schemas[<span class="number">0</span>].name, <span class="string">"numbers"</span>);
-                        <span class="macro">assert_eq!</span>(schema.column_schemas[<span class="number">0</span>].data_type, <span class="string">"UInt32"</span>);
+                        <span class="macro">assert_eq!</span>(r.schema.column_schemas[<span class="number">0</span>].name, <span class="string">"numbers"</span>);
+                        <span class="macro">assert_eq!</span>(r.schema.column_schemas[<span class="number">0</span>].data_type, <span class="string">"UInt32"</span>);
                         <span class="macro">assert_eq!</span>(r.rows[<span class="number">0</span>][<span class="number">0</span>], serde_json::Value::from(<span class="number">1</span>));
                         <span class="macro">assert_eq!</span>(r.rows[<span class="number">0</span>][<span class="number">1</span>], serde_json::Value::Null);
                     } <span class="kw">else </span>{
@@ -2035,9 +2080,8 @@
                     <span class="kw">if let </span>GreptimeQueryOutput::Records(r) = output {
                         <span class="macro">assert_eq!</span>(r.num_rows(), <span class="number">4</span>);
                         <span class="macro">assert_eq!</span>(r.num_cols(), <span class="number">2</span>);
-                        <span class="kw">let </span>schema = r.schema.as_ref().unwrap();
-                        <span class="macro">assert_eq!</span>(schema.column_schemas[<span class="number">0</span>].name, <span class="string">"numbers"</span>);
-                        <span class="macro">assert_eq!</span>(schema.column_schemas[<span class="number">0</span>].data_type, <span class="string">"UInt32"</span>);
+                        <span class="macro">assert_eq!</span>(r.schema.column_schemas[<span class="number">0</span>].name, <span class="string">"numbers"</span>);
+                        <span class="macro">assert_eq!</span>(r.schema.column_schemas[<span class="number">0</span>].data_type, <span class="string">"UInt32"</span>);
                         <span class="macro">assert_eq!</span>(r.rows[<span class="number">0</span>][<span class="number">0</span>], serde_json::Value::from(<span class="number">1</span>));
                         <span class="macro">assert_eq!</span>(r.rows[<span class="number">0</span>][<span class="number">1</span>], serde_json::Value::Null);
                     } <span class="kw">else </span>{
