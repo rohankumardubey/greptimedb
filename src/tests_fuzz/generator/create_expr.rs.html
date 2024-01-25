@@ -255,7 +255,7 @@
 
 <span class="kw">use </span><span class="kw">super</span>::Generator;
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, Error, <span class="prelude-ty">Result</span>};
-<span class="kw">use </span><span class="kw">crate</span>::fake::{random_capitalize_map, MapWordGenerator};
+<span class="kw">use </span><span class="kw">crate</span>::fake::{random_capitalize_map, MappedGenerator, WordGenerator};
 <span class="kw">use </span><span class="kw">crate</span>::generator::{ColumnOptionGenerator, ConcreteDataTypeGenerator, Random};
 <span class="kw">use </span><span class="kw">crate</span>::ir::create_expr::CreateTableExprBuilder;
 <span class="kw">use </span><span class="kw">crate</span>::ir::{
@@ -293,7 +293,7 @@
             if_not_exists: <span class="bool-val">false</span>,
             partition: <span class="number">0</span>,
             name: String::new(),
-            name_generator: Box::new(MapWordGenerator::new(Box::new(random_capitalize_map))),
+            name_generator: Box::new(MappedGenerator::new(WordGenerator, random_capitalize_map)),
             ts_column_type_generator: Box::new(TsColumnTypeGenerator),
             column_type_generator: Box::new(ColumnTypeGenerator),
             partible_column_type_generator: Box::new(PartibleColumnTypeGenerator),

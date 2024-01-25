@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["greptime"],"trait":["DslTranslator"]};
+window.SIDEBAR_ITEMS = {"mod":["mysql","postgres"],"trait":["DslTranslator"]};
