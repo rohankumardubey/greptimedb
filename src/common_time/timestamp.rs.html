@@ -1301,6 +1301,13 @@
 <a href="#1300" id="1300">1300</a>
 <a href="#1301" id="1301">1301</a>
 <a href="#1302" id="1302">1302</a>
+<a href="#1303" id="1303">1303</a>
+<a href="#1304" id="1304">1304</a>
+<a href="#1305" id="1305">1305</a>
+<a href="#1306" id="1306">1306</a>
+<a href="#1307" id="1307">1307</a>
+<a href="#1308" id="1308">1308</a>
+<a href="#1309" id="1309">1309</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -2556,28 +2563,32 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_from_naive_date_time() {
-        <span class="kw">let </span>min_sec = Timestamp::new_second(-<span class="number">8334632851200</span>);
-        <span class="kw">let </span>max_sec = Timestamp::new_second(<span class="number">8210298412799</span>);
+        <span class="kw">let </span>naive_date_time_min = NaiveDateTime::MIN;
+        <span class="kw">let </span>naive_date_time_max = NaiveDateTime::MAX;
+
+        <span class="kw">let </span>min_sec = Timestamp::new_second(naive_date_time_min.timestamp());
+        <span class="kw">let </span>max_sec = Timestamp::new_second(naive_date_time_max.timestamp());
         check_conversion(min_sec, <span class="bool-val">true</span>);
         check_conversion(Timestamp::new_second(min_sec.value - <span class="number">1</span>), <span class="bool-val">false</span>);
         check_conversion(max_sec, <span class="bool-val">true</span>);
         check_conversion(Timestamp::new_second(max_sec.value + <span class="number">1</span>), <span class="bool-val">false</span>);
 
-        <span class="kw">let </span>min_millis = Timestamp::new_millisecond(-<span class="number">8334632851200000</span>);
-        <span class="kw">let </span>max_millis = Timestamp::new_millisecond(<span class="number">8210298412799999</span>);
+        <span class="kw">let </span>min_millis = Timestamp::new_millisecond(naive_date_time_min.timestamp_millis());
+        <span class="kw">let </span>max_millis = Timestamp::new_millisecond(naive_date_time_max.timestamp_millis());
         check_conversion(min_millis, <span class="bool-val">true</span>);
         check_conversion(Timestamp::new_millisecond(min_millis.value - <span class="number">1</span>), <span class="bool-val">false</span>);
         check_conversion(max_millis, <span class="bool-val">true</span>);
         check_conversion(Timestamp::new_millisecond(max_millis.value + <span class="number">1</span>), <span class="bool-val">false</span>);
 
-        <span class="kw">let </span>min_micros = Timestamp::new_microsecond(-<span class="number">8334632851200000000</span>);
-        <span class="kw">let </span>max_micros = Timestamp::new_microsecond(<span class="number">8210298412799999999</span>);
+        <span class="kw">let </span>min_micros = Timestamp::new_microsecond(naive_date_time_min.timestamp_micros());
+        <span class="kw">let </span>max_micros = Timestamp::new_microsecond(naive_date_time_max.timestamp_micros());
         check_conversion(min_micros, <span class="bool-val">true</span>);
         check_conversion(Timestamp::new_microsecond(min_micros.value - <span class="number">1</span>), <span class="bool-val">false</span>);
         check_conversion(max_micros, <span class="bool-val">true</span>);
         check_conversion(Timestamp::new_microsecond(max_micros.value + <span class="number">1</span>), <span class="bool-val">false</span>);
 
-        <span class="kw">let </span>min_nanos = Timestamp::new_nanosecond(-<span class="number">9223372036854775000</span>);
+        <span class="comment">// the min time that can be represented by nanoseconds is: 1677-09-21T00:12:43.145224192
+        </span><span class="kw">let </span>min_nanos = Timestamp::new_nanosecond(-<span class="number">9223372036854775000</span>);
         <span class="kw">let </span>max_nanos = Timestamp::new_nanosecond(i64::MAX);
         check_conversion(min_nanos, <span class="bool-val">true</span>);
         check_conversion(Timestamp::new_nanosecond(min_nanos.value - <span class="number">1</span>), <span class="bool-val">false</span>);
@@ -2586,13 +2597,16 @@
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_parse_timestamp_range() {
+        <span class="kw">let </span>datetime_min = NaiveDateTime::MIN.format(<span class="string">"%Y-%m-%d %H:%M:%SZ"</span>).to_string();
+        <span class="macro">assert_eq!</span>(<span class="string">"-262143-01-01 00:00:00Z"</span>, datetime_min);
+        <span class="kw">let </span>datetime_max = NaiveDateTime::MAX.format(<span class="string">"%Y-%m-%d %H:%M:%SZ"</span>).to_string();
+        <span class="macro">assert_eq!</span>(<span class="string">"+262142-12-31 23:59:59Z"</span>, datetime_max);
+
         <span class="kw">let </span>valid_strings = <span class="macro">vec!</span>[
-            <span class="string">"-262144-01-01 00:00:00Z"</span>,
-            <span class="string">"+262143-12-31 23:59:59Z"</span>,
-            <span class="string">"-262144-01-01 00:00:00Z"</span>,
-            <span class="string">"+262143-12-31 23:59:59.999Z"</span>,
-            <span class="string">"-262144-01-01 00:00:00Z"</span>,
-            <span class="string">"+262143-12-31 23:59:59.999999Z"</span>,
+            <span class="string">"-262143-01-01 00:00:00Z"</span>,
+            <span class="string">"+262142-12-31 23:59:59Z"</span>,
+            <span class="string">"+262142-12-31 23:59:59.999Z"</span>,
+            <span class="string">"+262142-12-31 23:59:59.999999Z"</span>,
             <span class="string">"1677-09-21 00:12:43.145225Z"</span>,
             <span class="string">"2262-04-11 23:47:16.854775807Z"</span>,
             <span class="string">"+100000-01-01 00:00:01.5Z"</span>,
