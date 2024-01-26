@@ -659,9 +659,6 @@
 <a href="#658" id="658">658</a>
 <a href="#659" id="659">659</a>
 <a href="#660" id="660">660</a>
-<a href="#661" id="661">661</a>
-<a href="#662" id="662">662</a>
-<a href="#663" id="663">663</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -840,10 +837,7 @@
             cache_manager: <span class="self">self</span>.cache_manager.clone(),
         };
 
-        <span class="kw">let </span>metrics = Metrics {
-            build_cost: start.elapsed(),
-            ..Default::default()
-        };
+        metrics.build_cost = start.elapsed();
 
         <span class="kw">let </span>predicate = <span class="kw">if let </span><span class="prelude-val">Some</span>(p) = <span class="kw-2">&amp;</span><span class="self">self</span>.predicate {
             p.exprs()
