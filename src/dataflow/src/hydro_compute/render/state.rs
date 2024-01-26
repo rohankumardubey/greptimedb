@@ -1,25 +1,91 @@
 //! various states using in streaming operator
 //!
 
+use std::cell::RefCell;
 use std::collections::btree_map::Entry;
 use std::collections::{BTreeMap, BTreeSet};
+use std::rc::Rc;
 
 use common_time::time::Time;
 
 use crate::expr::error::EvalError;
-use crate::expr::ScalarExpr;
-use crate::repr::{value2internal_ts, Diff, Row, Timestamp};
+use crate::expr::{GlobalId, ScalarExpr};
+use crate::hydro_compute::types::{Delta, DiffRow, RawRecvOkErr, RawSendOkErr};
+use crate::repr::{self, value2internal_ts, Diff, Row, Timestamp};
 use crate::utils::{ts_to_duration, DiffMap};
+
+pub struct StateId(usize);
+
+/// Worker-local state that is maintained across dataflows.
+/// input/output of a dataflow
+/// TODO: use broadcast channel recv for input instead
+pub struct ComputeState {
+    /// vec in case of muiltple dataflow needed to be construct at once
+    pub input_recv: BTreeMap<GlobalId, Vec<RawRecvOkErr>>,
+    /// vec in case of muiltple dataflow needed to be construct at once
+    pub output_send: BTreeMap<GlobalId, Vec<RawSendOkErr>>,
+    /// current time, updated before run tick to progress dataflow
+    pub current_time: Rc<RefCell<repr::Timestamp>>,
+}
+
+impl ComputeState {
+    pub fn new() -> Self {
+        Self {
+            input_recv: Default::default(),
+            output_send: Default::default(),
+            current_time: Rc::new(RefCell::new(0)),
+        }
+    }
+    pub fn add_input(&mut self, id: GlobalId) -> RawSendOkErr {
+        let (input_ok, ok_recv) = hydroflow::util::unbounded_channel::<DiffRow>();
+        let (input_err, err_recv) = hydroflow::util::unbounded_channel::<Delta<EvalError>>();
+
+        let recv = (ok_recv, err_recv);
+        if let Some(recv_list) = self.input_recv.get_mut(&id) {
+            recv_list.push(recv);
+        } else if let Some(v) = self.input_recv.insert(id, vec![recv]) {
+            panic!("Can't add input more than once for each id {id:?}")
+        }
+
+        (input_ok, input_err)
+    }
+
+    pub fn add_output(&mut self, id: GlobalId) -> RawRecvOkErr {
+        let (send_ok, mut output_ok) = hydroflow::util::unbounded_channel::<DiffRow>();
+        let (send_err, output_err) = hydroflow::util::unbounded_channel::<Delta<EvalError>>();
+
+        let send = (send_ok, send_err);
+        if let Some(send_list) = self.output_send.get_mut(&id) {
+            send_list.push(send);
+        } else if let Some(v) = self.output_send.insert(id, vec![send]) {
+            panic!("Can't add output more than once for each id {id:?}")
+        }
+        (output_ok, output_err)
+    }
+}
+
+/// State need to be schedule after certain time
+pub trait ScheduledAction {
+    /// Schedule next run at given time
+    fn schd_at(&self, now: repr::Timestamp) -> Option<repr::Timestamp>;
+}
 
 /// including all the future action to insert/remove rows(because current rows are send forward therefore no need to store)
 ///
 /// Only store row since EvalError should be sent immediately
+#[derive(Debug, Default)]
 pub struct TemporalFilterState {
     pub spine: BTreeMap<Timestamp, BTreeMap<Row, Diff>>,
 }
 
+impl ScheduledAction for TemporalFilterState{
+    fn schd_at(&self, now: repr::Timestamp) -> Option<repr::Timestamp> {
+        self.spine.iter().next().map(|e|*e.0)
+    }
+}
+
 impl TemporalFilterState {
-    pub fn append_delta_row(&mut self, rows: impl Iterator<Item = (Row, Timestamp, Diff)>) {
+    pub fn append_delta_row(&mut self, rows: impl IntoIterator<Item = (Row, Timestamp, Diff)>) {
         for (row, time, diff) in rows {
             let this_time = self.spine.entry(time).or_default();
             let mut row_entry = this_time.entry(row);
@@ -36,14 +102,14 @@ impl TemporalFilterState {
     }
 
     /// trunc all the rows before(including) given time, and send them back
-    pub fn trunc_until(&mut self, time: Timestamp) -> impl Iterator<Item = (Row, Timestamp, Diff)> {
+    pub fn trunc_until(&mut self, time: Timestamp) -> Vec<(Row, Timestamp, Diff)> {
         let mut ret = Vec::new();
         for (t, rows) in self.spine.range_mut(..=time) {
             for (row, diff) in std::mem::take(rows).into_iter() {
                 ret.push((row, *t, diff));
             }
         }
-        ret.into_iter()
+        ret
     }
 }
 
@@ -58,6 +124,12 @@ pub struct ReduceState {
     pub expire_period: Timestamp,
     /// using this to get timestamp from key row
     pub ts_from_row: ScalarExpr,
+}
+
+impl ScheduledAction for ReduceState{
+    fn schd_at(&self, now: repr::Timestamp) -> Option<repr::Timestamp> {
+        self.time2key.iter().next().map(|kv|*kv.0+self.expire_period)
+    }
 }
 
 impl ReduceState {

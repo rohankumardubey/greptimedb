@@ -72,7 +72,7 @@ impl<K: Ord, V> DiffMap<K, V> {
     }
 
     /// generate diff since last call of this function
-    pub fn gen_diff(&mut self, tick: usize) -> Vec<((K, V), usize, Diff)>
+    pub fn gen_diff(&mut self, tick: repr::Timestamp) -> Vec<((K, V), repr::Timestamp, Diff)>
     where
         K: Clone,
     {

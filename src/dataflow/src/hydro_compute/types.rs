@@ -12,11 +12,11 @@ use tokio_stream::wrappers::UnboundedReceiverStream;
 use crate::expr::error::EvalError;
 use crate::expr::GlobalId;
 use crate::plan::{Plan, TypedPlan};
-use crate::repr::{Diff, RelationType, Row};
+use crate::repr::{self, Diff, RelationType, Row};
 use crate::utils::DiffMap;
 
 /// (Data, Tick, Diff)
-pub type Delta<T> = (T, usize, Diff);
+pub type Delta<T> = (T, repr::Timestamp, Diff);
 pub type DiffRow = Delta<Row>;
 pub type Hoff = VecHandoff<DiffRow>;
 pub type Erroff = VecHandoff<Delta<EvalError>>;
@@ -27,7 +27,7 @@ pub type OkErrSendPort<T = DiffRow> = (Port<SEND, VecHandoff<T>>, Port<SEND, Err
 /// Recv Port for both (ok, err) using `T` as Handoff to store
 pub type OkErrRecvPort<T = DiffRow> = (Port<RECV, VecHandoff<T>>, Port<RECV, Erroff>);
 
-pub type RowMap = Rc<RefCell<DiffMap<Row, Row>>>;
+pub type RowMap = DiffMap<Row, Row>;
 
 pub type RawRecvOkErr = (
     UnboundedReceiverStream<DiffRow>,
@@ -48,14 +48,16 @@ pub struct DataflowDescription {
     pub objects_to_build: Vec<BuildDesc>,
     pub inputs: Vec<GlobalId>,
     pub outputs: Vec<GlobalId>,
+    pub name: String
 }
 
 impl DataflowDescription {
-    pub fn new() -> Self {
+    pub fn new(name:String) -> Self {
         Self {
             objects_to_build: Vec::new(),
             inputs: Vec::new(),
             outputs: Vec::new(),
+            name
         }
     }
     pub fn new_object(&mut self, id: GlobalId, plan: TypedPlan) {
