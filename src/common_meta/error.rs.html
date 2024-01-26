@@ -461,6 +461,15 @@
 <a href="#460" id="460">460</a>
 <a href="#461" id="461">461</a>
 <a href="#462" id="462">462</a>
+<a href="#463" id="463">463</a>
+<a href="#464" id="464">464</a>
+<a href="#465" id="465">465</a>
+<a href="#466" id="466">466</a>
+<a href="#467" id="467">467</a>
+<a href="#468" id="468">468</a>
+<a href="#469" id="469">469</a>
+<a href="#470" id="470">470</a>
+<a href="#471" id="471">471</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -575,14 +584,20 @@
         source: common_procedure::Error,
     },
 
+    <span class="attr">#[snafu(display(
+        <span class="string">"Failed to get procedure output, procedure id: {procedure_id}, error: {err_msg}"
+    </span>))]
+    </span>ProcedureOutput {
+        procedure_id: String,
+        err_msg: String,
+        location: Location,
+    },
+
     <span class="attr">#[snafu(display(<span class="string">"Failed to convert RawTableInfo into TableInfo"</span>))]
     </span>ConvertRawTableInfo {
         location: Location,
         source: datatypes::Error,
     },
-
-    <span class="attr">#[snafu(display(<span class="string">"Failed to get procedure output"</span>))]
-    </span>ProcedureOutput { location: Location },
 
     <span class="attr">#[snafu(display(<span class="string">"Primary key '{key}' not found when creating region request"</span>))]
     </span>PrimaryKeyNotFound { key: String, location: Location },
@@ -820,6 +835,9 @@
 
     <span class="attr">#[snafu(display(<span class="string">"Unexpected table route type: {}"</span>, err_msg))]
     </span>UnexpectedLogicalRouteTable { location: Location, err_msg: String },
+
+    <span class="attr">#[snafu(display(<span class="string">"The tasks of create tables cannot be empty"</span>))]
+    </span>EmptyCreateTableTasks { location: Location },
 }
 
 <span class="kw">pub type </span><span class="prelude-ty">Result</span>&lt;T&gt; = std::result::Result&lt;T, Error&gt;;
@@ -889,7 +907,7 @@
             InvalidCatalogValue { source, .. } =&gt; source.status_code(),
             ConvertAlterTableRequest { source, .. } =&gt; source.status_code(),
 
-            InvalidNumTopics { .. } =&gt; StatusCode::InvalidArguments,
+            InvalidNumTopics { .. } | EmptyCreateTableTasks { .. } =&gt; StatusCode::InvalidArguments,
         }
     }
 

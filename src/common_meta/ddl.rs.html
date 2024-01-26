@@ -73,6 +73,8 @@
 <a href="#72" id="72">72</a>
 <a href="#73" id="73">73</a>
 <a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -102,7 +104,9 @@
 <span class="kw">use </span><span class="kw">crate</span>::rpc::ddl::{SubmitDdlTaskRequest, SubmitDdlTaskResponse};
 
 <span class="kw">pub mod </span>alter_table;
+<span class="kw">pub mod </span>create_logical_tables;
 <span class="kw">pub mod </span>create_table;
+<span class="kw">mod </span>create_table_template;
 <span class="kw">pub mod </span>drop_table;
 <span class="kw">pub mod </span>table_meta;
 <span class="kw">pub mod </span>truncate_table;

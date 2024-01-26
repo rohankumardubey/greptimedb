@@ -299,6 +299,32 @@
 <a href="#298" id="298">298</a>
 <a href="#299" id="299">299</a>
 <a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
+<a href="#302" id="302">302</a>
+<a href="#303" id="303">303</a>
+<a href="#304" id="304">304</a>
+<a href="#305" id="305">305</a>
+<a href="#306" id="306">306</a>
+<a href="#307" id="307">307</a>
+<a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
+<a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -313,7 +339,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::sync::Arc;
+</span><span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::sync::Arc;
 
 <span class="kw">use </span>futures_util::stream::BoxStream;
 <span class="kw">use </span>serde::{Deserialize, Serialize};
@@ -327,11 +354,11 @@
 <span class="kw">use </span><span class="kw">crate</span>::kv_backend::txn::{Txn, TxnOp};
 <span class="kw">use </span><span class="kw">crate</span>::kv_backend::KvBackendRef;
 <span class="kw">use </span><span class="kw">crate</span>::range_stream::{PaginationStream, DEFAULT_PAGE_SIZE};
-<span class="kw">use </span><span class="kw">crate</span>::rpc::store::RangeRequest;
+<span class="kw">use </span><span class="kw">crate</span>::rpc::store::{BatchGetRequest, RangeRequest};
 <span class="kw">use </span><span class="kw">crate</span>::rpc::KeyValue;
 <span class="kw">use </span><span class="kw">crate</span>::table_name::TableName;
 
-<span class="attr">#[derive(Debug, Clone, Copy)]
+<span class="attr">#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 </span><span class="kw">pub struct </span>TableNameKey&lt;<span class="lifetime">'a</span>&gt; {
     <span class="kw">pub </span>catalog: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
     <span class="kw">pub </span>schema: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
@@ -519,6 +546,31 @@
             .<span class="kw">await</span><span class="question-mark">?
             </span>.map(|x| TableNameValue::try_from_raw_value(<span class="kw-2">&amp;</span>x.value))
             .transpose()
+    }
+
+    <span class="kw">pub async fn </span>batch_get(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        keys: Vec&lt;TableNameKey&lt;<span class="lifetime">'_</span>&gt;&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="prelude-ty">Option</span>&lt;TableNameValue&gt;&gt;&gt; {
+        <span class="kw">let </span>raw_keys = keys
+            .into_iter()
+            .map(|key| key.as_raw_key())
+            .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+        <span class="kw">let </span>req = BatchGetRequest::new().with_keys(raw_keys.clone());
+        <span class="kw">let </span>res = <span class="self">self</span>.kv_backend.batch_get(req).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="kw">let </span>kvs = res
+            .kvs
+            .into_iter()
+            .map(|kv| (kv.key, kv.value))
+            .collect::&lt;HashMap&lt;<span class="kw">_</span>, <span class="kw">_</span>&gt;&gt;();
+        <span class="kw">let </span><span class="kw-2">mut </span>array = <span class="macro">vec!</span>[<span class="prelude-val">None</span>; raw_keys.len()];
+        <span class="kw">for </span>(i, key) <span class="kw">in </span>raw_keys.into_iter().enumerate() {
+            <span class="kw">let </span>v = kvs.get(<span class="kw-2">&amp;</span>key);
+            array[i] = v
+                .map(|v| TableNameValue::try_from_raw_value(v))
+                .transpose()<span class="question-mark">?</span>;
+        }
+        <span class="prelude-val">Ok</span>(array)
     }
 
     <span class="kw">pub async fn </span>exists(<span class="kw-2">&amp;</span><span class="self">self</span>, key: TableNameKey&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
