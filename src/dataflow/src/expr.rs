@@ -24,7 +24,7 @@ mod scalar;
 use std::collections::{BTreeMap, BTreeSet};
 
 pub(crate) use id::{GlobalId, Id, LocalId};
-pub(crate) use linear::{MapFilterProject, SafeMfpPlan, MfpPlan};
+pub(crate) use linear::{MapFilterProject, MfpPlan, SafeMfpPlan};
 pub(crate) use relation::{AggregateExpr, AggregateFunc};
 use serde::{Deserialize, Serialize};
 

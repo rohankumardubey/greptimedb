@@ -48,16 +48,16 @@ pub struct DataflowDescription {
     pub objects_to_build: Vec<BuildDesc>,
     pub inputs: Vec<GlobalId>,
     pub outputs: Vec<GlobalId>,
-    pub name: String
+    pub name: String,
 }
 
 impl DataflowDescription {
-    pub fn new(name:String) -> Self {
+    pub fn new(name: String) -> Self {
         Self {
             objects_to_build: Vec::new(),
             inputs: Vec::new(),
             outputs: Vec::new(),
-            name
+            name,
         }
     }
     pub fn new_object(&mut self, id: GlobalId, plan: TypedPlan) {

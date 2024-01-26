@@ -64,6 +64,7 @@ pub fn build_compute_dataflow(
         let mut ctx = Context::new(
             id,
             &mut df,
+            compute_state,
             &mut edge_man,
             compute_state.current_time.clone(),
         );
@@ -149,6 +150,7 @@ fn recv_stream2source(df: &mut Hydroflow, input_okerr_receiver: RawRecvOkErr) ->
 pub struct Context<'a> {
     pub id: GlobalId,
     pub df: &'a mut Hydroflow,
+    pub compute_state: &'a mut ComputeState,
     /// multiple ports if this operator is used by dst operator multiple times
     /// key being None means this operator is sink
     send_ports: BTreeMap<Option<GlobalId>, Vec<OkErrSendPort>>,
@@ -170,12 +172,14 @@ impl<'a> Context<'a> {
     fn new(
         id: GlobalId,
         df: &'a mut Hydroflow,
+        state: &'a mut ComputeState,
         edge_man: &mut EdgeManager,
         time: Rc<RefCell<repr::Timestamp>>,
     ) -> Self {
         Self {
             id,
             df,
+            compute_state: state,
             send_ports: edge_man.take_all_send_port(id),
             recv_ports: edge_man.take_all_recv_port(id),
             local_scope: Default::default(),
@@ -949,6 +953,7 @@ fn build_df() {
         input_recv: BTreeMap::from([(GlobalId::User(0), vec![(ok_recv, err_recv)])]),
         output_send: BTreeMap::from([(GlobalId::User(1), vec![(send_ok, send_err)])]),
         current_time: Rc::new(RefCell::new(0)),
+        ..Default::default()
     };
     let sum = AggregateExpr {
         func: AggregateFunc::SumUInt16,

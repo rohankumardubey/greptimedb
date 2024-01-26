@@ -7,6 +7,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 
 use common_time::time::Time;
+use hydroflow::scheduled::SubgraphId;
 
 use crate::expr::error::EvalError;
 use crate::expr::{GlobalId, ScalarExpr};
@@ -19,6 +20,7 @@ pub struct StateId(usize);
 /// Worker-local state that is maintained across dataflows.
 /// input/output of a dataflow
 /// TODO: use broadcast channel recv for input instead
+#[derive(Default)]
 pub struct ComputeState {
     /// vec in case of muiltple dataflow needed to be construct at once
     pub input_recv: BTreeMap<GlobalId, Vec<RawRecvOkErr>>,
@@ -26,15 +28,13 @@ pub struct ComputeState {
     pub output_send: BTreeMap<GlobalId, Vec<RawSendOkErr>>,
     /// current time, updated before run tick to progress dataflow
     pub current_time: Rc<RefCell<repr::Timestamp>>,
+    pub state_to_subgraph: BTreeMap<StateId, SubgraphId>,
+    pub scheduled_actions: BTreeMap<repr::Timestamp, BTreeSet<SubgraphId>>,
 }
 
 impl ComputeState {
     pub fn new() -> Self {
-        Self {
-            input_recv: Default::default(),
-            output_send: Default::default(),
-            current_time: Rc::new(RefCell::new(0)),
-        }
+        Self::default()
     }
     pub fn add_input(&mut self, id: GlobalId) -> RawSendOkErr {
         let (input_ok, ok_recv) = hydroflow::util::unbounded_channel::<DiffRow>();
@@ -78,9 +78,9 @@ pub struct TemporalFilterState {
     pub spine: BTreeMap<Timestamp, BTreeMap<Row, Diff>>,
 }
 
-impl ScheduledAction for TemporalFilterState{
+impl ScheduledAction for TemporalFilterState {
     fn schd_at(&self, now: repr::Timestamp) -> Option<repr::Timestamp> {
-        self.spine.iter().next().map(|e|*e.0)
+        self.spine.iter().next().map(|e| *e.0)
     }
 }
 
@@ -126,9 +126,12 @@ pub struct ReduceState {
     pub ts_from_row: ScalarExpr,
 }
 
-impl ScheduledAction for ReduceState{
+impl ScheduledAction for ReduceState {
     fn schd_at(&self, now: repr::Timestamp) -> Option<repr::Timestamp> {
-        self.time2key.iter().next().map(|kv|*kv.0+self.expire_period)
+        self.time2key
+            .iter()
+            .next()
+            .map(|kv| *kv.0 + self.expire_period)
     }
 }
 
