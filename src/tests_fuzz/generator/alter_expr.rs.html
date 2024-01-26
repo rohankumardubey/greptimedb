@@ -257,7 +257,7 @@
         )
         .remove(<span class="number">0</span>);
         <span class="prelude-val">Ok</span>(AlterTableExpr {
-            name: <span class="self">self</span>.table_ctx.name.to_string(),
+            table_name: <span class="self">self</span>.table_ctx.name.to_string(),
             alter_options: AlterTableOperation::AddColumn { column, location },
         })
     }
@@ -282,7 +282,7 @@
             .name
             .to_string();
         <span class="prelude-val">Ok</span>(AlterTableExpr {
-            name: <span class="self">self</span>.table_ctx.name.to_string(),
+            table_name: <span class="self">self</span>.table_ctx.name.to_string(),
             alter_options: AlterTableOperation::DropColumn { name },
         })
     }
@@ -303,7 +303,7 @@
     <span class="kw">fn </span>generate(<span class="kw-2">&amp;</span><span class="self">self</span>, rng: <span class="kw-2">&amp;mut </span>R) -&gt; <span class="prelude-ty">Result</span>&lt;AlterTableExpr&gt; {
         <span class="kw">let </span>new_table_name = <span class="self">self</span>.name_generator.gen(rng);
         <span class="prelude-val">Ok</span>(AlterTableExpr {
-            name: <span class="self">self</span>.table_ctx.name.to_string(),
+            table_name: <span class="self">self</span>.table_ctx.name.to_string(),
             alter_options: AlterTableOperation::RenameTable { new_table_name },
         })
     }
@@ -338,7 +338,7 @@
             .generate(<span class="kw-2">&amp;mut </span>rng)
             .unwrap();
         <span class="kw">let </span>serialized = serde_json::to_string(<span class="kw-2">&amp;</span>expr).unwrap();
-        <span class="kw">let </span>expected = <span class="string">r#"{"name":"DigNissIMOS","alter_options":{"AddColumn":{"column":{"name":"sit","column_type":{"Boolean":null},"options":["PrimaryKey"]},"location":null}}}"#</span>;
+        <span class="kw">let </span>expected = <span class="string">r#"{"table_name":"DigNissIMOS","alter_options":{"AddColumn":{"column":{"name":"sit","column_type":{"Boolean":null},"options":["PrimaryKey"]},"location":null}}}"#</span>;
         <span class="macro">assert_eq!</span>(expected, serialized);
 
         <span class="kw">let </span>expr = AlterExprRenameGeneratorBuilder::default()
@@ -348,7 +348,7 @@
             .generate(<span class="kw-2">&amp;mut </span>rng)
             .unwrap();
         <span class="kw">let </span>serialized = serde_json::to_string(<span class="kw-2">&amp;</span>expr).unwrap();
-        <span class="kw">let </span>expected = <span class="string">r#"{"name":"DigNissIMOS","alter_options":{"RenameTable":{"new_table_name":"excepturi"}}}"#</span>;
+        <span class="kw">let </span>expected = <span class="string">r#"{"table_name":"DigNissIMOS","alter_options":{"RenameTable":{"new_table_name":"excepturi"}}}"#</span>;
         <span class="macro">assert_eq!</span>(expected, serialized);
 
         <span class="kw">let </span>expr = AlterExprDropColumnGeneratorBuilder::default()
@@ -359,7 +359,7 @@
             .unwrap();
         <span class="kw">let </span>serialized = serde_json::to_string(<span class="kw-2">&amp;</span>expr).unwrap();
         <span class="kw">let </span>expected =
-            <span class="string">r#"{"name":"DigNissIMOS","alter_options":{"DropColumn":{"name":"INVentORE"}}}"#</span>;
+            <span class="string">r#"{"table_name":"DigNissIMOS","alter_options":{"DropColumn":{"name":"INVentORE"}}}"#</span>;
         <span class="macro">assert_eq!</span>(expected, serialized);
     }
 }

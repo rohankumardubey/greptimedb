@@ -237,6 +237,17 @@
 <a href="#236" id="236">236</a>
 <a href="#237" id="237">237</a>
 <a href="#238" id="238">238</a>
+<a href="#239" id="239">239</a>
+<a href="#240" id="240">240</a>
+<a href="#241" id="241">241</a>
+<a href="#242" id="242">242</a>
+<a href="#243" id="243">243</a>
+<a href="#244" id="244">244</a>
+<a href="#245" id="245">245</a>
+<a href="#246" id="246">246</a>
+<a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -255,6 +266,8 @@
 
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>alter_expr;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>create_expr;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>insert_expr;
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>select_expr;
 
 <span class="kw">pub use </span>alter_expr::AlterTableExpr;
 <span class="kw">pub use </span>create_expr::CreateTableExpr;
@@ -310,7 +323,11 @@
 <span class="kw">pub struct </span>PartibleColumnTypeGenerator;
 
 <span class="doccomment">/// Generates a random [Value].
-</span><span class="kw">pub fn </span>generate_random_value&lt;R: Rng&gt;(rng: <span class="kw-2">&amp;mut </span>R, datatype: <span class="kw-2">&amp;</span>ConcreteDataType) -&gt; Value {
+</span><span class="kw">pub fn </span>generate_random_value&lt;R: Rng&gt;(
+    rng: <span class="kw-2">&amp;mut </span>R,
+    datatype: <span class="kw-2">&amp;</span>ConcreteDataType,
+    random_str: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="kw">dyn </span>Random&lt;String, R&gt;&gt;,
+) -&gt; Value {
     <span class="kw">match </span>datatype {
         <span class="kw-2">&amp;</span>ConcreteDataType::Boolean(<span class="kw">_</span>) =&gt; Value::from(rng.gen::&lt;bool&gt;()),
         ConcreteDataType::Int16(<span class="kw">_</span>) =&gt; Value::from(rng.gen::&lt;i16&gt;()),
@@ -318,9 +335,13 @@
         ConcreteDataType::Int64(<span class="kw">_</span>) =&gt; Value::from(rng.gen::&lt;i64&gt;()),
         ConcreteDataType::Float32(<span class="kw">_</span>) =&gt; Value::from(rng.gen::&lt;f32&gt;()),
         ConcreteDataType::Float64(<span class="kw">_</span>) =&gt; Value::from(rng.gen::&lt;f64&gt;()),
-        ConcreteDataType::String(<span class="kw">_</span>) =&gt; Value::from(rng.gen::&lt;char&gt;().to_string()),
+        ConcreteDataType::String(<span class="kw">_</span>) =&gt; <span class="kw">match </span>random_str {
+            <span class="prelude-val">Some</span>(random) =&gt; Value::from(random.gen(rng)),
+            <span class="prelude-val">None </span>=&gt; Value::from(rng.gen::&lt;char&gt;().to_string()),
+        },
         ConcreteDataType::Date(<span class="kw">_</span>) =&gt; Value::from(rng.gen::&lt;i32&gt;()),
         ConcreteDataType::DateTime(<span class="kw">_</span>) =&gt; Value::from(rng.gen::&lt;i64&gt;()),
+        <span class="kw-2">&amp;</span>ConcreteDataType::Timestamp(<span class="kw">_</span>) =&gt; Value::from(rng.gen::&lt;u64&gt;()),
 
         <span class="kw">_ </span>=&gt; <span class="macro">unimplemented!</span>(<span class="string">"unsupported type: {datatype}"</span>),
     }
@@ -381,6 +402,7 @@
         <span class="number">2 </span>=&gt; <span class="macro">vec!</span>[ColumnOption::DefaultValue(generate_random_value(
             rng,
             column_type,
+            <span class="prelude-val">None</span>,
         ))],
         <span class="number">3 </span>=&gt; <span class="macro">vec!</span>[ColumnOption::PrimaryKey],
         <span class="kw">_ </span>=&gt; <span class="macro">vec!</span>[],
@@ -402,7 +424,7 @@
         <span class="number">1 </span>=&gt; <span class="macro">vec!</span>[ColumnOption::PrimaryKey, ColumnOption::NotNull],
         <span class="number">2 </span>=&gt; <span class="macro">vec!</span>[
             ColumnOption::PrimaryKey,
-            ColumnOption::DefaultValue(generate_random_value(rng, column_type)),
+            ColumnOption::DefaultValue(generate_random_value(rng, column_type, <span class="prelude-val">None</span>)),
         ],
         <span class="number">3 </span>=&gt; <span class="macro">vec!</span>[ColumnOption::PrimaryKey],
         <span class="kw">_ </span>=&gt; <span class="macro">unreachable!</span>(),

@@ -117,7 +117,7 @@
 </span><span class="attr">#[derive(Debug, Builder, Clone, Serialize, Deserialize)]
 </span><span class="kw">pub struct </span>CreateTableExpr {
     <span class="attr">#[builder(setter(into))]
-    </span><span class="kw">pub </span>name: String,
+    </span><span class="kw">pub </span>table_name: String,
     <span class="kw">pub </span>columns: Vec&lt;Column&gt;,
     <span class="attr">#[builder(default)]
     </span><span class="kw">pub </span>if_not_exists: bool,

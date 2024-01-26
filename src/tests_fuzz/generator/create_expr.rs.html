@@ -233,6 +233,8 @@
 <a href="#232" id="232">232</a>
 <a href="#233" id="233">233</a>
 <a href="#234" id="234">234</a>
+<a href="#235" id="235">235</a>
+<a href="#236" id="236">236</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -341,6 +343,7 @@
                     partition_bounds.push(PartitionBound::Value(generate_random_value(
                         rng,
                         <span class="kw-2">&amp;</span>column.column_type,
+                        <span class="prelude-val">None</span>,
                     )));
                     partition_bounds.sort();
                 }
@@ -368,6 +371,7 @@
                     partition_bounds.push(PartitionBound::Value(generate_random_value(
                         rng,
                         <span class="kw-2">&amp;</span>column.column_type,
+                        <span class="prelude-val">None</span>,
                     )));
                     partition_bounds.sort();
                 }
@@ -406,9 +410,9 @@
         builder.engine(<span class="self">self</span>.engine.to_string());
         builder.if_not_exists(<span class="self">self</span>.if_not_exists);
         <span class="kw">if </span><span class="self">self</span>.name.is_empty() {
-            builder.name(<span class="self">self</span>.name_generator.gen(rng));
+            builder.table_name(<span class="self">self</span>.name_generator.gen(rng));
         } <span class="kw">else </span>{
-            builder.name(<span class="self">self</span>.name.to_string());
+            builder.table_name(<span class="self">self</span>.name.to_string());
         }
         builder.build().context(error::BuildCreateTableExprSnafu)
     }
@@ -463,7 +467,7 @@
             .unwrap();
 
         <span class="kw">let </span>serialized = serde_json::to_string(<span class="kw-2">&amp;</span>expr).unwrap();
-        <span class="kw">let </span>expected = <span class="string">r#"{"name":"iN","columns":[{"name":"CUlpa","column_type":{"Int16":{}},"options":["PrimaryKey","NotNull"]},{"name":"dEBiTiS","column_type":{"Timestamp":{"Second":null}},"options":["TimeIndex"]},{"name":"HArum","column_type":{"Int16":{}},"options":["NotNull"]},{"name":"NObIS","column_type":{"Int32":{}},"options":["PrimaryKey"]},{"name":"IMPEDiT","column_type":{"Int16":{}},"options":[{"DefaultValue":{"Int16":-25151}}]},{"name":"bLanDITIis","column_type":{"Boolean":null},"options":[{"DefaultValue":{"Boolean":true}}]},{"name":"Dolores","column_type":{"Float32":{}},"options":["PrimaryKey"]},{"name":"eSt","column_type":{"Float32":{}},"options":[{"DefaultValue":{"Float32":0.9152612}}]},{"name":"INVentORE","column_type":{"Int64":{}},"options":["PrimaryKey"]},{"name":"aDIpiSci","column_type":{"Float64":{}},"options":["Null"]}],"if_not_exists":true,"partition":{"partition_columns":["CUlpa"],"partition_bounds":[{"Value":{"Int16":15966}},{"Value":{"Int16":31925}},"MaxValue"]},"engine":"mito2","options":{},"primary_keys":[6,0,8,3]}"#</span>;
+        <span class="kw">let </span>expected = <span class="string">r#"{"table_name":"iN","columns":[{"name":"CUlpa","column_type":{"Int16":{}},"options":["PrimaryKey","NotNull"]},{"name":"dEBiTiS","column_type":{"Timestamp":{"Second":null}},"options":["TimeIndex"]},{"name":"HArum","column_type":{"Int16":{}},"options":["NotNull"]},{"name":"NObIS","column_type":{"Int32":{}},"options":["PrimaryKey"]},{"name":"IMPEDiT","column_type":{"Int16":{}},"options":[{"DefaultValue":{"Int16":-25151}}]},{"name":"bLanDITIis","column_type":{"Boolean":null},"options":[{"DefaultValue":{"Boolean":true}}]},{"name":"Dolores","column_type":{"Float32":{}},"options":["PrimaryKey"]},{"name":"eSt","column_type":{"Float32":{}},"options":[{"DefaultValue":{"Float32":0.9152612}}]},{"name":"INVentORE","column_type":{"Int64":{}},"options":["PrimaryKey"]},{"name":"aDIpiSci","column_type":{"Float64":{}},"options":["Null"]}],"if_not_exists":true,"partition":{"partition_columns":["CUlpa"],"partition_bounds":[{"Value":{"Int16":15966}},{"Value":{"Int16":31925}},"MaxValue"]},"engine":"mito2","options":{},"primary_keys":[6,0,8,3]}"#</span>;
         <span class="macro">assert_eq!</span>(expected, serialized);
     }
 }

@@ -190,11 +190,11 @@
     <span class="kw">fn </span>translate(<span class="kw-2">&amp;</span><span class="self">self</span>, input: <span class="kw-2">&amp;</span>AlterTableExpr) -&gt; <span class="prelude-ty">Result</span>&lt;String&gt; {
         <span class="prelude-val">Ok</span>(<span class="kw">match </span><span class="kw-2">&amp;</span>input.alter_options {
             AlterTableOperation::AddColumn { column, location } =&gt; {
-                <span class="self">Self</span>::format_add_column(<span class="kw-2">&amp;</span>input.name, column, location)
+                <span class="self">Self</span>::format_add_column(<span class="kw-2">&amp;</span>input.table_name, column, location)
             }
-            AlterTableOperation::DropColumn { name } =&gt; <span class="self">Self</span>::format_drop(<span class="kw-2">&amp;</span>input.name, name),
+            AlterTableOperation::DropColumn { name } =&gt; <span class="self">Self</span>::format_drop(<span class="kw-2">&amp;</span>input.table_name, name),
             AlterTableOperation::RenameTable { new_table_name } =&gt; {
-                <span class="self">Self</span>::format_rename(<span class="kw-2">&amp;</span>input.name, new_table_name)
+                <span class="self">Self</span>::format_rename(<span class="kw-2">&amp;</span>input.table_name, new_table_name)
             }
         })
     }
@@ -279,7 +279,7 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_alter_table_expr() {
         <span class="kw">let </span>alter_expr = AlterTableExpr {
-            name: <span class="string">"test"</span>.to_string(),
+            table_name: <span class="string">"test"</span>.to_string(),
             alter_options: AlterTableOperation::AddColumn {
                 column: Column {
                     name: <span class="string">"host"</span>.to_string(),
@@ -297,7 +297,7 @@
         );
 
         <span class="kw">let </span>alter_expr = AlterTableExpr {
-            name: <span class="string">"test"</span>.to_string(),
+            table_name: <span class="string">"test"</span>.to_string(),
             alter_options: AlterTableOperation::RenameTable {
                 new_table_name: <span class="string">"foo"</span>.to_string(),
             },
@@ -307,7 +307,7 @@
         <span class="macro">assert_eq!</span>(<span class="string">"ALTER TABLE test RENAME foo;"</span>, output);
 
         <span class="kw">let </span>alter_expr = AlterTableExpr {
-            name: <span class="string">"test"</span>.to_string(),
+            table_name: <span class="string">"test"</span>.to_string(),
             alter_options: AlterTableOperation::DropColumn {
                 name: <span class="string">"foo"</span>.to_string(),
             },

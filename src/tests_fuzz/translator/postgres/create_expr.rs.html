@@ -126,7 +126,7 @@
         <span class="prelude-val">Ok</span>(<span class="macro">format!</span>(
             <span class="string">"CREATE TABLE{}{}(\n{}\n);"</span>,
             <span class="self">Self</span>::create_if_not_exists(input),
-            input.name,
+            input.table_name,
             <span class="self">Self</span>::format_columns(input),
         ))
     }
