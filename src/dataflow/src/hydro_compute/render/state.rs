@@ -6,7 +6,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use common_time::time::Time;
 
-use crate::adapter::error::EvalError;
+use crate::expr::error::EvalError;
 use crate::expr::ScalarExpr;
 use crate::repr::{value2internal_ts, Diff, Row, Timestamp};
 use crate::utils::{ts_to_duration, DiffMap};

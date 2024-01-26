@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc::UnboundedSender;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
-use crate::adapter::error::{DataflowError, EvalError};
+use crate::expr::error::EvalError;
 use crate::expr::GlobalId;
 use crate::plan::{Plan, TypedPlan};
 use crate::repr::{Diff, RelationType, Row};

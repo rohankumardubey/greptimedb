@@ -22,7 +22,7 @@ use tokio::sync::mpsc::error::TryRecvError;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
 use super::types::{Delta, OkErrRecvPort, OkErrSendPort, RawRecvOkErr, RawSendOkErr};
-use crate::adapter::error::{DataflowError, EvalError};
+use crate::expr::error::EvalError;
 use crate::expr::{
     AggregateExpr, AggregateFunc, GlobalId, Id, LocalId, MapFilterProject, SafeMfpPlan, ScalarExpr,
 };

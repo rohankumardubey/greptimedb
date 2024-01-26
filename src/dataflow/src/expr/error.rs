@@ -40,4 +40,7 @@ pub enum EvalError {
     Internal { reason: String },
     #[snafu(display("Optimize error: {}", reason))]
     Optimize { reason: String },
+    /// TODO(discord9): add source information
+    #[snafu(display("Data arrived too late by {} seconds, discard now.", duration.as_secs()))]
+    LateDataDiscarded { duration: std::time::Duration },
 }

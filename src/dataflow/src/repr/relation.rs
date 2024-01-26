@@ -134,7 +134,7 @@ pub struct ColumnType {
     pub nullable: bool,
 }
 
-impl ColumnType{
+impl ColumnType {
     pub fn new(typ: ConcreteDataType, nullable: bool) -> Self {
         Self {
             scalar_type: typ,

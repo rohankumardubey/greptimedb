@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::adapter::error::EvalError;
+use crate::expr::error::EvalError;
 use crate::repr::{self, Diff, Row};
 
 pub fn ts_to_duration(ts: repr::Timestamp) -> std::time::Duration {
