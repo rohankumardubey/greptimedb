@@ -396,6 +396,8 @@
 <a href="#395" id="395">395</a>
 <a href="#396" id="396">396</a>
 <a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
+<a href="#399" id="399">399</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -560,9 +562,11 @@
             manager.create_logic_tables_metadata(tables_data).<span class="kw">await</span><span class="question-mark">?</span>;
         }
 
-        <span class="macro">info!</span>(<span class="string">"Created {num_tables} tables metadata for physical table {physical_table_id}"</span>);
+        <span class="kw">let </span>table_ids = <span class="self">self</span>.creator.data.real_table_ids();
 
-        <span class="prelude-val">Ok</span>(Status::done_with_output(<span class="self">self</span>.creator.data.real_table_ids()))
+        <span class="macro">info!</span>(<span class="string">"Created {num_tables} tables {table_ids:?} metadata for physical table {physical_table_id}"</span>);
+
+        <span class="prelude-val">Ok</span>(Status::done_with_output(table_ids))
     }
 
     <span class="kw">fn </span>create_region_request_builder(

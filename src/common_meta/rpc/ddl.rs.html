@@ -581,6 +581,11 @@
 <a href="#580" id="580">580</a>
 <a href="#581" id="581">581</a>
 <a href="#582" id="582">582</a>
+<a href="#583" id="583">583</a>
+<a href="#584" id="584">584</a>
+<a href="#585" id="585">585</a>
+<a href="#586" id="586">586</a>
+<a href="#587" id="587">587</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -786,7 +791,7 @@
 
     <span class="kw">fn </span>try_from(resp: PbSubmitDdlTaskResponse) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>table_id = resp.table_id.map(|t| t.id);
-        <span class="kw">let </span>table_ids = resp.table_ids.iter().map(|t| t.id).collect();
+        <span class="kw">let </span>table_ids = resp.table_ids.into_iter().map(|t| t.id).collect();
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
             key: resp.key,
             table_id,
@@ -802,6 +807,11 @@
             table_id: val
                 .table_id
                 .map(|table_id| api::v1::meta::TableId { id: table_id }),
+            table_ids: val
+                .table_ids
+                .into_iter()
+                .map(|id| api::v1::meta::TableId { id })
+                .collect(),
             ..Default::default()
         }
     }
