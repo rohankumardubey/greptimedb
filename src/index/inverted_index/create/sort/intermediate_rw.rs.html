@@ -140,6 +140,18 @@
 <a href="#139" id="139">139</a>
 <a href="#140" id="140">140</a>
 <a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
+<a href="#145" id="145">145</a>
+<a href="#146" id="146">146</a>
+<a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
+<a href="#149" id="149">149</a>
+<a href="#150" id="150">150</a>
+<a href="#151" id="151">151</a>
+<a href="#152" id="152">152</a>
+<a href="#153" id="153">153</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -191,10 +203,14 @@
 
         <span class="kw">let </span>value_stream = stream::iter(values.into_iter().map(<span class="prelude-val">Ok</span>));
         <span class="kw">let </span>frame_write = FramedWrite::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.writer, encoder);
-        value_stream.forward(frame_write).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="comment">// `forward()` will flush and close the writer when the stream ends
+        </span><span class="kw">if let </span><span class="prelude-val">Err</span>(e) = value_stream.forward(frame_write).<span class="kw">await </span>{
+            <span class="self">self</span>.writer.flush().<span class="kw">await</span>.context(FlushSnafu)<span class="question-mark">?</span>;
+            <span class="self">self</span>.writer.close().<span class="kw">await</span>.context(CloseSnafu)<span class="question-mark">?</span>;
+            <span class="kw">return </span><span class="prelude-val">Err</span>(e);
+        }
 
-        <span class="self">self</span>.writer.flush().<span class="kw">await</span>.context(FlushSnafu)<span class="question-mark">?</span>;
-        <span class="self">self</span>.writer.close().<span class="kw">await</span>.context(CloseSnafu)
+        <span class="prelude-val">Ok</span>(())
     }
 }
 
@@ -227,24 +243,32 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>tests {
-    <span class="kw">use </span>futures::io::Cursor;
+    <span class="kw">use </span>std::io::{Seek, SeekFrom};
+
+    <span class="kw">use </span>futures::io::{AllowStdIo, Cursor};
+    <span class="kw">use </span>tempfile::tempfile;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::inverted_index::error::Error;
 
     <span class="attr">#[tokio::test]
     </span><span class="kw">async fn </span>test_intermediate_read_write_basic() {
-        <span class="kw">let </span><span class="kw-2">mut </span>buf = <span class="macro">vec!</span>[];
+        <span class="kw">let </span>file_r = tempfile().unwrap();
+        <span class="kw">let </span>file_w = file_r.try_clone().unwrap();
+        <span class="kw">let </span><span class="kw-2">mut </span>buf_r = AllowStdIo::new(file_r);
+        <span class="kw">let </span>buf_w = AllowStdIo::new(file_w);
 
         <span class="kw">let </span>values = BTreeMap::from_iter([
             (Bytes::from(<span class="string">"a"</span>), BitVec::from_slice(<span class="kw-2">&amp;</span>[<span class="number">0b10101010</span>])),
             (Bytes::from(<span class="string">"b"</span>), BitVec::from_slice(<span class="kw-2">&amp;</span>[<span class="number">0b01010101</span>])),
         ]);
 
-        <span class="kw">let </span>writer = IntermediateWriter::new(<span class="kw-2">&amp;mut </span>buf);
+        <span class="kw">let </span>writer = IntermediateWriter::new(buf_w);
         writer.write_all(values.clone()).<span class="kw">await</span>.unwrap();
+        <span class="comment">// reset the handle
+        </span>buf_r.seek(SeekFrom::Start(<span class="number">0</span>)).unwrap();
 
-        <span class="kw">let </span>reader = IntermediateReader::new(Cursor::new(buf));
+        <span class="kw">let </span>reader = IntermediateReader::new(buf_r);
         <span class="kw">let </span><span class="kw-2">mut </span>stream = reader.into_stream().<span class="kw">await</span>.unwrap();
 
         <span class="kw">let </span>a = stream.next().<span class="kw">await</span>.unwrap().unwrap();
