@@ -271,7 +271,6 @@
 <a href="#270" id="270">270</a>
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
-<a href="#273" id="273">273</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -325,9 +324,9 @@
 
     <span class="doccomment">/// Submit an alter request to underlying physical region.
     ///
-    /// This method will change the semantic type of those given columns.
-    /// [SemanticType::Tag] will become [SemanticType::Field]. The procedure framework
-    /// ensures there is no concurrent conflict.
+    /// This method will change the nullability of those given columns.
+    /// [SemanticType::Tag] will become nullable column as it's shared between
+    /// logical regions.
     ///
     /// Invoker don't need to set up or verify the column id. This method will adjust
     /// it using underlying schema.
@@ -398,7 +397,6 @@
             .map(|(delta, c)| {
                 <span class="kw">let </span><span class="kw-2">mut </span>c = c.clone();
                 <span class="kw">if </span>c.semantic_type == SemanticType::Tag {
-                    c.semantic_type = SemanticType::Field;
                     <span class="kw">if </span>!c.column_schema.data_type.is_string() {
                         <span class="kw">return </span>ColumnTypeMismatchSnafu {
                             column_type: c.column_schema.data_type,
