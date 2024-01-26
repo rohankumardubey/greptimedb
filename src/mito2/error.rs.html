@@ -648,6 +648,16 @@
 <a href="#647" id="647">647</a>
 <a href="#648" id="648">648</a>
 <a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1038,6 +1048,13 @@
         location: Location,
     },
 
+    <span class="attr">#[snafu(display(<span class="string">"Schema version doesn't match. Expect {} but gives {}"</span>, expect, actual))]
+    </span>InvalidRegionRequestSchemaVersion {
+        expect: u64,
+        actual: u64,
+        location: Location,
+    },
+
     <span class="attr">#[snafu(display(<span class="string">"Region {} is read only"</span>, region_id))]
     </span>RegionReadonly {
         region_id: RegionId,
@@ -1241,6 +1258,9 @@
             | ConvertColumnDataType { .. }
             | ColumnNotFound { .. }
             | InvalidMetadata { .. } =&gt; StatusCode::InvalidArguments,
+
+            InvalidRegionRequestSchemaVersion { .. } =&gt; StatusCode::RequestOutdated,
+
             RegionMetadataNotFound { .. }
             | Join { .. }
             | WorkerStopped { .. }

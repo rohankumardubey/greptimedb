@@ -535,6 +535,14 @@
 <a href="#534" id="534">534</a>
 <a href="#535" id="535">535</a>
 <a href="#536" id="536">536</a>
+<a href="#537" id="537">537</a>
+<a href="#538" id="538">538</a>
+<a href="#539" id="539">539</a>
+<a href="#540" id="540">540</a>
+<a href="#541" id="541">541</a>
+<a href="#542" id="542">542</a>
+<a href="#543" id="543">543</a>
+<a href="#544" id="544">544</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -558,6 +566,8 @@
 };
 <span class="kw">use </span>api::v1::{AlterExpr, RenameTable};
 <span class="kw">use </span>async_trait::async_trait;
+<span class="kw">use </span>common_error::ext::ErrorExt;
+<span class="kw">use </span>common_error::status_code::StatusCode;
 <span class="kw">use </span>common_grpc_expr::alter_expr_to_request;
 <span class="kw">use </span>common_procedure::error::{FromJsonSnafu, <span class="prelude-ty">Result </span><span class="kw">as </span>ProcedureResult, ToJsonSnafu};
 <span class="kw">use </span>common_procedure::{
@@ -755,8 +765,14 @@
                 <span class="kw">let </span>requester = requester.clone();
 
                 alter_region_tasks.push(<span class="kw">async move </span>{
-                    <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = requester.handle(request).<span class="kw">await </span>{
-                        <span class="kw">return </span><span class="prelude-val">Err</span>(handle_operate_region_error(datanode)(e));
+                    <span class="kw">if let </span><span class="prelude-val">Err</span>(err) = requester.handle(request).<span class="kw">await </span>{
+                        <span class="kw">if </span>err.status_code() != StatusCode::RequestOutdated {
+                            <span class="comment">// Treat request outdated as success.
+                            // The engine will throw this code when the schema version not match.
+                            // As this procedure has locked the table, the only reason for this error
+                            // is procedure is succeeded before and is retrying.
+                            </span><span class="kw">return </span><span class="prelude-val">Err</span>(handle_operate_region_error(datanode)(err));
+                        }
                     }
                     <span class="prelude-val">Ok</span>(())
                 });

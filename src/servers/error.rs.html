@@ -664,6 +664,8 @@
 <a href="#663" id="663">663</a>
 <a href="#664" id="664">664</a>
 <a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1231,7 +1233,9 @@
         | StatusCode::Internal
         | StatusCode::PlanQuery
         | StatusCode::EngineExecuteQuery =&gt; Code::Internal,
-        StatusCode::InvalidArguments | StatusCode::InvalidSyntax =&gt; Code::InvalidArgument,
+        StatusCode::InvalidArguments | StatusCode::InvalidSyntax | StatusCode::RequestOutdated =&gt; {
+            Code::InvalidArgument
+        }
         StatusCode::Cancelled =&gt; Code::Cancelled,
         StatusCode::TableAlreadyExists
         | StatusCode::TableColumnExists

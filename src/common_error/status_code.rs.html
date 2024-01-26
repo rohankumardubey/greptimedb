@@ -253,6 +253,10 @@
 <a href="#252" id="252">252</a>
 <a href="#253" id="253">253</a>
 <a href="#254" id="254">254</a>
+<a href="#255" id="255">255</a>
+<a href="#256" id="256">256</a>
+<a href="#257" id="257">257</a>
+<a href="#258" id="258">258</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -323,6 +327,8 @@
     // ====== Begin of storage related status code =====
     </span><span class="doccomment">/// Storage is temporarily unable to handle the request
     </span>StorageUnavailable = <span class="number">5000</span>,
+    <span class="doccomment">/// Request is outdated, e.g., version mismatch
+    </span>RequestOutdated = <span class="number">5001</span>,
     <span class="comment">// ====== End of storage related status code =======
 
     // ====== Begin of server related status code =====
@@ -390,7 +396,8 @@
             | StatusCode::AuthHeaderNotFound
             | StatusCode::InvalidAuthHeader
             | StatusCode::AccessDenied
-            | StatusCode::PermissionDenied =&gt; <span class="bool-val">false</span>,
+            | StatusCode::PermissionDenied
+            | StatusCode::RequestOutdated =&gt; <span class="bool-val">false</span>,
         }
     }
 
@@ -427,7 +434,8 @@
             | StatusCode::AuthHeaderNotFound
             | StatusCode::InvalidAuthHeader
             | StatusCode::AccessDenied
-            | StatusCode::PermissionDenied =&gt; <span class="bool-val">false</span>,
+            | StatusCode::PermissionDenied
+            | StatusCode::RequestOutdated =&gt; <span class="bool-val">false</span>,
         }
     }
 
