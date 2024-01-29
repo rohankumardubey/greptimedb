@@ -284,11 +284,11 @@ impl<'a> Context<'a> {
             err_send,
             move |ctx, ok, err, ok_send, err_send| {
                 let state_handle = ctx.state_ref(state);
-
                 let as_of = as_of.clone();
                 let now = *as_of.borrow();
 
-                // emit all row before now that's save in state
+                // emit all row before now
+                ok_send.give(state_handle.borrow_mut().trunc_until(now));
 
                 ok_send.give(handoff::Iter(
                     state_handle.borrow_mut().trunc_until(now).into_iter(),
@@ -542,124 +542,210 @@ impl<'a> Context<'a> {
     }
 }
 
-#[test]
-fn build_df() {
-    use datatypes::prelude::ConcreteDataType;
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::expr::{BinaryFunc, UnmaterializableFunc};
 
-    use crate::plan::TypedPlan;
-    use crate::repr::{ColumnType, RelationType};
+    #[test]
+    fn test_temporal_filter() {
+        use datatypes::prelude::ConcreteDataType;
 
-    let (input_ok, ok_recv) = hydroflow::util::unbounded_channel::<DiffRow>();
-    let (input_err, err_recv) = hydroflow::util::unbounded_channel::<Delta<EvalError>>();
+        use crate::plan::TypedPlan;
+        use crate::repr::{ColumnType, RelationType};
 
-    let (send_ok, mut output_ok) = hydroflow::util::unbounded_channel::<DiffRow>();
-    let (send_err, output_err) = hydroflow::util::unbounded_channel::<Delta<EvalError>>();
+        let (input_ok, ok_recv) = hydroflow::util::unbounded_channel::<DiffRow>();
+        let (input_err, err_recv) = hydroflow::util::unbounded_channel::<Delta<EvalError>>();
 
-    let mut compute_state = ComputeState {
-        input_recv: BTreeMap::from([(GlobalId::User(0), vec![(ok_recv, err_recv)])]),
-        output_send: BTreeMap::from([(GlobalId::User(1), vec![(send_ok, send_err)])]),
-        current_time: Rc::new(RefCell::new(0)),
-        ..Default::default()
-    };
-    let sum = AggregateExpr {
-        func: AggregateFunc::SumUInt16,
-        expr: ScalarExpr::Column(0),
-        distinct: false,
-    };
+        let (send_ok, mut output_ok) = hydroflow::util::unbounded_channel::<DiffRow>();
+        let (send_err, output_err) = hydroflow::util::unbounded_channel::<Delta<EvalError>>();
 
-    let plan = Plan::Reduce {
-        input: Box::new(Plan::Get {
-            id: Id::Global(GlobalId::User(0)),
-        }),
-        key_val_plan: KeyValPlan {
-            key_plan: SafeMfpPlan {
-                mfp: MapFilterProject::new(2).project([0]),
+        let mut compute_state = ComputeState {
+            input_recv: BTreeMap::from([(GlobalId::User(0), vec![(ok_recv, err_recv)])]),
+            output_send: BTreeMap::from([(GlobalId::User(1), vec![(send_ok, send_err)])]),
+            current_time: Rc::new(RefCell::new(0)),
+            ..Default::default()
+        };
+
+        // a simple plan that only retain row with time >= now() - 1
+        // input is (ts: i64, val: String)
+
+        let time_add_one = ScalarExpr::Column(0).call_binary(
+            ScalarExpr::literal(Ok(Value::from(1i64)), ConcreteDataType::int64_datatype()),
+            BinaryFunc::AddInt64,
+        );
+        let cmp = time_add_one.call_binary(
+            ScalarExpr::CallUnmaterializable(UnmaterializableFunc::Now),
+            BinaryFunc::Gte,
+        );
+
+        let plan = Plan::Mfp {
+            input: Box::new(Plan::Get {
+                id: Id::Global(GlobalId::User(0)),
+            }),
+            mfp: MapFilterProject::new(2).filter([cmp]),
+        };
+        let typ = RelationType::new(vec![
+            ColumnType::new(ConcreteDataType::int64_datatype(), true),
+            ColumnType::new(ConcreteDataType::string_datatype(), true),
+        ]);
+
+        let dd = DataflowDescription {
+            inputs: vec![GlobalId::User(0)],
+            outputs: vec![GlobalId::User(1)],
+            objects_to_build: vec![BuildDesc {
+                id: GlobalId::User(1),
+                plan: TypedPlan { plan, typ },
+            }],
+            name: "test_temporal".to_string(),
+        };
+
+        let mut df = build_compute_dataflow(dd, &mut compute_state);
+
+        let input_sheet = vec![
+            (Row::new(vec![Value::Int64(0), Value::from("old0")]), 0, 1),
+            (Row::new(vec![Value::Int64(0), Value::from("old1")]), 0, 1),
+            (Row::new(vec![Value::Int64(1), Value::from("new0")]), 0, 1),
+            (Row::new(vec![Value::Int64(1), Value::from("new1")]), 0, 1),
+        ];
+        for row in input_sheet {
+            input_ok.send(row);
+        }
+        df.run_available();
+
+        compute_state.current_time.replace(1);
+        df.run_available();
+
+        compute_state.current_time.replace(2);
+        df.run_available();
+
+        let mut result = vec![];
+        while let Ok(data) = output_ok.as_mut().try_recv() {
+            result.push(data)
+        }
+
+        dbg!(result);
+    }
+
+    #[test]
+    fn build_df() {
+        use datatypes::prelude::ConcreteDataType;
+
+        use crate::plan::TypedPlan;
+        use crate::repr::{ColumnType, RelationType};
+
+        let (input_ok, ok_recv) = hydroflow::util::unbounded_channel::<DiffRow>();
+        let (input_err, err_recv) = hydroflow::util::unbounded_channel::<Delta<EvalError>>();
+
+        let (send_ok, mut output_ok) = hydroflow::util::unbounded_channel::<DiffRow>();
+        let (send_err, output_err) = hydroflow::util::unbounded_channel::<Delta<EvalError>>();
+
+        let mut compute_state = ComputeState {
+            input_recv: BTreeMap::from([(GlobalId::User(0), vec![(ok_recv, err_recv)])]),
+            output_send: BTreeMap::from([(GlobalId::User(1), vec![(send_ok, send_err)])]),
+            current_time: Rc::new(RefCell::new(0)),
+            ..Default::default()
+        };
+        let sum = AggregateExpr {
+            func: AggregateFunc::SumUInt16,
+            expr: ScalarExpr::Column(0),
+            distinct: false,
+        };
+
+        let plan = Plan::Reduce {
+            input: Box::new(Plan::Get {
+                id: Id::Global(GlobalId::User(0)),
+            }),
+            key_val_plan: KeyValPlan {
+                key_plan: SafeMfpPlan {
+                    mfp: MapFilterProject::new(2).project([0]),
+                },
+                val_plan: SafeMfpPlan {
+                    mfp: MapFilterProject::new(2).project([1]),
+                },
             },
-            val_plan: SafeMfpPlan {
-                mfp: MapFilterProject::new(2).project([1]),
-            },
-        },
-        reduce_plan: ReducePlan::Accumulable(AccumulablePlan {
-            full_aggrs: vec![sum.clone()],
-            simple_aggrs: vec![(0, 0, sum)],
-            distinct_aggrs: vec![],
-        }),
-    };
-    let typ = RelationType::new(vec![ColumnType::new(
-        ConcreteDataType::uint64_datatype(),
-        true,
-    )]);
+            reduce_plan: ReducePlan::Accumulable(AccumulablePlan {
+                full_aggrs: vec![sum.clone()],
+                simple_aggrs: vec![(0, 0, sum)],
+                distinct_aggrs: vec![],
+            }),
+        };
+        let typ = RelationType::new(vec![ColumnType::new(
+            ConcreteDataType::uint64_datatype(),
+            true,
+        )]);
 
-    let dd = DataflowDescription {
-        inputs: vec![GlobalId::User(0)],
-        outputs: vec![GlobalId::User(1)],
-        objects_to_build: vec![BuildDesc {
-            id: GlobalId::User(1),
-            plan: TypedPlan { plan, typ },
-        }],
-        name: "test_sum".to_string(),
-    };
-    let mut df = build_compute_dataflow(dd, &mut compute_state);
+        let dd = DataflowDescription {
+            inputs: vec![GlobalId::User(0)],
+            outputs: vec![GlobalId::User(1)],
+            objects_to_build: vec![BuildDesc {
+                id: GlobalId::User(1),
+                plan: TypedPlan { plan, typ },
+            }],
+            name: "test_sum".to_string(),
+        };
+        let mut df = build_compute_dataflow(dd, &mut compute_state);
 
-    let input_sheet = vec![
-        (Row::new(vec![Value::UInt64(0), Value::UInt16(1)]), 0, 1),
-        (Row::new(vec![Value::UInt64(0), Value::UInt16(2)]), 0, 1),
-        (Row::new(vec![Value::UInt64(0), Value::UInt16(3)]), 0, 1),
-    ];
-    for row in input_sheet {
-        input_ok.send(row);
+        let input_sheet = vec![
+            (Row::new(vec![Value::UInt64(0), Value::UInt16(1)]), 0, 1),
+            (Row::new(vec![Value::UInt64(0), Value::UInt16(2)]), 0, 1),
+            (Row::new(vec![Value::UInt64(0), Value::UInt16(3)]), 0, 1),
+        ];
+        for row in input_sheet {
+            input_ok.send(row);
+        }
+        df.run_available();
+
+        let input_sheet = vec![
+            (Row::new(vec![Value::UInt64(0), Value::UInt16(1)]), 1, -1),
+            (Row::new(vec![Value::UInt64(1), Value::UInt16(4)]), 1, 1),
+            (Row::new(vec![Value::UInt64(1), Value::UInt16(5)]), 1, 1),
+            (Row::new(vec![Value::UInt64(1), Value::UInt16(6)]), 1, 1),
+        ];
+        for row in input_sheet {
+            input_ok.send(row);
+        }
+
+        compute_state.current_time.replace(1);
+        df.run_available();
+
+        let mut result = vec![];
+
+        while let Ok(data) = output_ok.as_mut().try_recv() {
+            result.push(data)
+        }
+        assert_eq!(
+            result,
+            [
+                (
+                    Row {
+                        inner: vec![Value::UInt64(0), Value::UInt64(6)],
+                    },
+                    0,
+                    1,
+                ),
+                (
+                    Row {
+                        inner: vec![Value::UInt64(0), Value::UInt64(6)]
+                    },
+                    1,
+                    -1
+                ),
+                (
+                    Row {
+                        inner: vec![Value::UInt64(0), Value::UInt64(5)]
+                    },
+                    1,
+                    1
+                ),
+                (
+                    Row {
+                        inner: vec![Value::UInt64(1), Value::UInt64(15)],
+                    },
+                    1,
+                    1,
+                ),
+            ]
+        );
     }
-    df.run_available();
-
-    let input_sheet = vec![
-        (Row::new(vec![Value::UInt64(0), Value::UInt16(1)]), 1, -1),
-        (Row::new(vec![Value::UInt64(1), Value::UInt16(4)]), 1, 1),
-        (Row::new(vec![Value::UInt64(1), Value::UInt16(5)]), 1, 1),
-        (Row::new(vec![Value::UInt64(1), Value::UInt16(6)]), 1, 1),
-    ];
-    for row in input_sheet {
-        input_ok.send(row);
-    }
-
-    compute_state.current_time.replace(1);
-    df.run_available();
-
-    let mut result = vec![];
-
-    while let Ok(data) = output_ok.as_mut().try_recv() {
-        result.push(data)
-    }
-    assert_eq!(
-        result,
-        [
-            (
-                Row {
-                    inner: vec![Value::UInt64(0), Value::UInt64(6)],
-                },
-                0,
-                1,
-            ),
-            (
-                Row {
-                    inner: vec![Value::UInt64(0), Value::UInt64(6)]
-                },
-                1,
-                -1
-            ),
-            (
-                Row {
-                    inner: vec![Value::UInt64(0), Value::UInt64(5)]
-                },
-                1,
-                1
-            ),
-            (
-                Row {
-                    inner: vec![Value::UInt64(1), Value::UInt64(15)],
-                },
-                1,
-                1,
-            ),
-        ]
-    );
 }
