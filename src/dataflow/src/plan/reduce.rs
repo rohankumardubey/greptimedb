@@ -17,7 +17,7 @@ pub enum ReducePlan {
     Accumulable(AccumulablePlan),
 }
 
-/// TODO: support distinct aggrs
+/// TODO: support distinct aggrs& state config
 #[derive(Clone, Debug, Eq, PartialEq, Deserialize, Serialize)]
 pub struct AccumulablePlan {
     /// All of the aggregations we were asked to compute, stored

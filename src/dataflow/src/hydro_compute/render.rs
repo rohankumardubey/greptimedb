@@ -22,16 +22,17 @@ use itertools::Itertools;
 use tokio::sync::mpsc::error::TryRecvError;
 use tokio_stream::wrappers::UnboundedReceiverStream;
 
-use self::state::{ScheduledAction, StateId, TemporalFilterState};
-use super::types::{Delta, OkErrRecvPort, OkErrSendPort, RawRecvOkErr, RawSendOkErr};
 use crate::expr::error::{EvalError, InternalSnafu};
 use crate::expr::{
     AggregateExpr, AggregateFunc, GlobalId, Id, LocalId, MapFilterProject, MfpPlan, SafeMfpPlan,
     ScalarExpr,
 };
-use crate::hydro_compute::render::state::ComputeState;
+use crate::hydro_compute::render::state::{
+    ComputeState, ExpiringKeyValueStore, ScheduledAction, StateId, TemporalFilterState,
+};
 use crate::hydro_compute::types::{
-    BuildDesc, DataflowDescription, DiffRow, Erroff, Hoff, RowMap, VecDiff,
+    BuildDesc, DataflowDescription, Delta, DiffRow, Erroff, Hoff, OkErrRecvPort, OkErrSendPort,
+    RawRecvOkErr, RawSendOkErr, RowMap, VecDiff,
 };
 use crate::plan::{AccumulablePlan, KeyValPlan, Plan, ReducePlan};
 use crate::repr::{self, Diff, Row};
@@ -189,7 +190,7 @@ impl<'a> Context<'a> {
 
     /// TODO: shared state between operators Or
     /// At least a way to manage state for multiple operator
-    fn add_state<T: std::any::Any>(
+    fn add_state<T: std::any::Any + ScheduledAction>(
         &mut self,
         init: T,
     ) -> (
@@ -197,13 +198,16 @@ impl<'a> Context<'a> {
         StateId,
     ) {
         // TODO(discord9): register trigger in ComputeState
-        let state = self.df.add_state(init);
-        todo!()
+        let state = self.df.add_state(RefCell::new(init));
+        let state_id = self.compute_state.alloc_next_state_id();
+        (state, state_id)
     }
 
-    /// Link this state to subgraph, so manager know when to schedule this subgraph if state require it
-    fn register_id(&mut self, state: StateId, subgraph_id: SubgraphId) {
-        todo!()
+    /// Register this state under given subgraph, so manager know when to schedule this subgraph if state require it
+    fn register_state_to_subgraph(&mut self, state: StateId, subgraph_id: SubgraphId) {
+        if let Some(v) = self.compute_state.register_state(state, subgraph_id) {
+            panic!("Repeat state id found, indicate using id in different Hydroflow")
+        }
     }
 
     /// Send to all `send_ports` the content of `bundle`
@@ -452,6 +456,7 @@ impl<'a> Context<'a> {
         input: CollectionBundle,
         mfp: MapFilterProject,
     ) -> CollectionBundle {
+        // TODO(discord9): not call add_state if no temporal filter
         let (state, state_id) = self.add_state(TemporalFilterState::default());
 
         let df = &mut self.df;
@@ -476,6 +481,8 @@ impl<'a> Context<'a> {
 
                 let as_of = as_of.clone();
                 let now = *as_of.borrow();
+
+                // emit all row before now that's save in state
 
                 ok_send.give(handoff::Iter(
                     state_handle.borrow_mut().trunc_until(now).into_iter(),
@@ -525,7 +532,7 @@ impl<'a> Context<'a> {
                 err_send.give(res_err);
             },
         );
-        self.register_id(state_id, sub_id);
+        self.register_state_to_subgraph(state_id, sub_id);
 
         CollectionBundle::from_ok_err(ok_recv, err_recv)
     }
@@ -607,7 +614,7 @@ impl<'a> Context<'a> {
         accum_plan: AccumulablePlan,
         (ok, err): OkErrRecvPort<Delta<(Row, Row)>>,
     ) -> CollectionBundle {
-        let (reduce_handle, id) = self.add_state::<RowMap>(Default::default());
+        let (reduce_handle, id) = self.add_state::<ExpiringKeyValueStore>(Default::default());
 
         let now = self.as_of.clone();
 
@@ -666,7 +673,7 @@ impl<'a> Context<'a> {
                     }
                     // build new_val and send it to reduce_state
                     let new_val_row = Row::new(new_val.into_values().collect_vec());
-                    reduce_state.insert(cur_key_row, new_val_row);
+                    reduce_state.insert(now, cur_key_row, new_val_row);
                 }
                 let out = reduce_state
                     .gen_diff(now)
@@ -675,6 +682,8 @@ impl<'a> Context<'a> {
                         k.extend(v.into_iter());
                         (k, t, d)
                     });
+                // expire keys
+                reduce_state.trunc_expired(now);
                 send_ok.give(handoff::Iter(out));
                 // always resend existing errors(if any)
                 send_err.give(err_recv.take_inner());

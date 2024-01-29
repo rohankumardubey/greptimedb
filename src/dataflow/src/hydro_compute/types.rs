@@ -48,6 +48,7 @@ pub struct DataflowDescription {
     pub objects_to_build: Vec<BuildDesc>,
     pub inputs: Vec<GlobalId>,
     pub outputs: Vec<GlobalId>,
+    /// name of the dataflow, assigned by user using `CREATE TASK <name>`
     pub name: String,
 }
 

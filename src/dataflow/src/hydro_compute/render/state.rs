@@ -7,6 +7,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
 
 use common_time::time::Time;
+use datatypes::data_type::ConcreteDataType;
+use datatypes::value::Value;
 use hydroflow::scheduled::SubgraphId;
 
 use crate::expr::error::EvalError;
@@ -15,10 +17,12 @@ use crate::hydro_compute::types::{Delta, DiffRow, RawRecvOkErr, RawSendOkErr};
 use crate::repr::{self, value2internal_ts, Diff, Row, Timestamp};
 use crate::utils::{ts_to_duration, DiffMap};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct StateId(usize);
 
 /// Worker-local state that is maintained across dataflows.
 /// input/output of a dataflow
+/// One `ComputeState` manage the input/output/schedule of one `Hydroflow`
 /// TODO: use broadcast channel recv for input instead
 #[derive(Default)]
 pub struct ComputeState {
@@ -28,7 +32,7 @@ pub struct ComputeState {
     pub output_send: BTreeMap<GlobalId, Vec<RawSendOkErr>>,
     /// current time, updated before run tick to progress dataflow
     pub current_time: Rc<RefCell<repr::Timestamp>>,
-    pub state_to_subgraph: BTreeMap<StateId, SubgraphId>,
+    pub state_to_subgraph: BTreeMap<StateId, Option<SubgraphId>>,
     pub scheduled_actions: BTreeMap<repr::Timestamp, BTreeSet<SubgraphId>>,
 }
 
@@ -36,6 +40,22 @@ impl ComputeState {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn alloc_next_state_id(&mut self) -> StateId {
+        let mut id = StateId(self.state_to_subgraph.len());
+        while self.state_to_subgraph.contains_key(&id) {
+            id.0 += 1;
+        }
+        self.state_to_subgraph.insert(id, None);
+        id
+    }
+
+    pub fn register_state(&mut self, id: StateId, subgraph_id: SubgraphId) -> Option<SubgraphId> {
+        self.state_to_subgraph
+            .insert(id, Some(subgraph_id))
+            .and_then(|v| v)
+    }
+
     pub fn add_input(&mut self, id: GlobalId) -> RawSendOkErr {
         let (input_ok, ok_recv) = hydroflow::util::unbounded_channel::<DiffRow>();
         let (input_err, err_recv) = hydroflow::util::unbounded_channel::<Delta<EvalError>>();
@@ -104,9 +124,15 @@ impl TemporalFilterState {
     /// trunc all the rows before(including) given time, and send them back
     pub fn trunc_until(&mut self, time: Timestamp) -> Vec<(Row, Timestamp, Diff)> {
         let mut ret = Vec::new();
-        for (t, rows) in self.spine.range_mut(..=time) {
-            for (row, diff) in std::mem::take(rows).into_iter() {
-                ret.push((row, *t, diff));
+        // drain all keys that are <= time
+        let mut gt_time = self.spine.split_off(&(time + 1));
+        // swap(both are basically raw ptr so should be fast)
+        std::mem::swap(&mut self.spine, &mut gt_time);
+        let lte_time = gt_time;
+
+        for (t, rows) in lte_time {
+            for (row, diff) in rows {
+                ret.push((row, t, diff));
             }
         }
         ret
@@ -118,33 +144,53 @@ impl TemporalFilterState {
 /// Any keys that are not updated for a long time will be removed from the state
 /// and not sending any delta to downstream, since they are simple not used anymore
 #[derive(Debug)]
-pub struct ReduceState {
-    pub inner: DiffMap<Row, Row>,
-    pub time2key: BTreeMap<Timestamp, BTreeSet<Row>>,
-    pub expire_period: Timestamp,
+pub struct ExpiringKeyValueStore {
+    inner: DiffMap<Row, Row>,
+    time2key: BTreeMap<Timestamp, BTreeSet<Row>>,
+    /// duration after which a key is considered expired, and will be removed from state
+    key_expiration_duration: Option<Timestamp>,
     /// using this to get timestamp from key row
-    pub ts_from_row: ScalarExpr,
+    event_timestamp_from_row: ScalarExpr,
 }
 
-impl ScheduledAction for ReduceState {
+impl Default for ExpiringKeyValueStore {
+    fn default() -> Self {
+        Self {
+            inner: DiffMap::default(),
+            time2key: BTreeMap::new(),
+            key_expiration_duration: None,
+            event_timestamp_from_row: ScalarExpr::literal(
+                Ok(Value::from(0i64)),
+                ConcreteDataType::int64_datatype(),
+            ),
+        }
+    }
+}
+
+impl ScheduledAction for ExpiringKeyValueStore {
     fn schd_at(&self, now: repr::Timestamp) -> Option<repr::Timestamp> {
         self.time2key
             .iter()
             .next()
-            .map(|kv| *kv.0 + self.expire_period)
+            .and_then(|kv| self.key_expiration_duration.map(|v| v + *kv.0))
     }
 }
 
-impl ReduceState {
-    pub fn get_ts_from_row(&self, row: &Row) -> Result<Timestamp, EvalError> {
-        let ts = value2internal_ts(self.ts_from_row.eval(&row.inner)?)?;
+impl ExpiringKeyValueStore {
+    pub fn extract_event_ts(&self, row: &Row) -> Result<Timestamp, EvalError> {
+        let ts = value2internal_ts(self.event_timestamp_from_row.eval(&row.inner)?)?;
         Ok(ts)
     }
-    pub fn get_expire_time(&self, current: Timestamp) -> Timestamp {
-        current - self.expire_period
+    pub fn get_expire_time(&self, current: Timestamp) -> Option<Timestamp> {
+        self.key_expiration_duration.map(|d| current - d)
     }
     pub fn trunc_expired(&mut self, cur_time: Timestamp) {
-        let expire_time = self.get_expire_time(cur_time);
+        let expire_time = if let Some(t) = self.get_expire_time(cur_time) {
+            t
+        } else {
+            return;
+        };
+        // TODO(discord9): determine if include/exclude expire_time itself
         let mut after = self.time2key.split_off(&expire_time);
         // swap
         std::mem::swap(&mut self.time2key, &mut after);
@@ -164,11 +210,11 @@ impl ReduceState {
 
     /// if key row is expired then return expire error
     pub fn insert(&mut self, current: Timestamp, k: Row, v: Row) -> Result<Option<Row>, EvalError> {
-        let ts = self.get_ts_from_row(&k)?;
+        let ts = self.extract_event_ts(&k)?;
         let expire_at = self.get_expire_time(current);
-        if ts < expire_at {
+        if Some(ts) < expire_at {
             return Err(EvalError::LateDataDiscarded {
-                duration: ts_to_duration(expire_at - ts),
+                duration: ts_to_duration(expire_at.unwrap() - ts),
             });
         }
 
@@ -179,14 +225,18 @@ impl ReduceState {
     }
 
     pub fn remove(&mut self, current: Timestamp, k: &Row) -> Result<Option<Row>, EvalError> {
-        let ts = self.get_ts_from_row(k)?;
+        let ts = self.extract_event_ts(k)?;
         let expire_at = self.get_expire_time(current);
-        if ts < expire_at {
+        if Some(ts) < expire_at {
             return Err(EvalError::LateDataDiscarded {
-                duration: ts_to_duration(expire_at - ts),
+                duration: ts_to_duration(expire_at.unwrap() - ts),
             });
         }
         self.time2key.entry(ts).or_default().remove(k);
         Ok(self.inner.remove(k))
+    }
+
+    pub fn gen_diff(&mut self, tick: repr::Timestamp) -> Vec<((Row, Row), repr::Timestamp, Diff)> {
+        self.inner.gen_diff(tick)
     }
 }
