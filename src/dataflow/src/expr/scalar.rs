@@ -265,18 +265,18 @@ impl ScalarExpr {
         contains
     }
 
-    /// extract lower or upper bound of `Now` for expr,
+    /// extract lower or upper bound of `Now` for expr, where `lower bound <= expr < upper bound`
     ///
     /// returned bool indicates whether the bound is upper bound:
     ///
     /// false for lower bound, true for upper bound
     /// TODO(discord9): allow simple transform like `now() + a < b` to `now() < b - a`
     pub fn extract_bound(&self) -> Result<(Option<Self>, Option<Self>), String> {
-        let unsupported_err = || {
+        let unsupported_err = |msg: &str| {
             Err(format!(
-                "Unsupported temporal predicate. Use `now()` in direct comparison: {:?}",
-                self
-            ))
+                    "Unsupported temporal predicate: {msg}. NOTE: Use `now()` in direct comparison: {:?}",
+                    self
+                ))
         };
         if let Self::CallBinary {
             mut func,
@@ -284,8 +284,8 @@ impl ScalarExpr {
             mut expr2,
         } = self.clone()
         {
-            if expr1.contains_temporal() ^ expr2.contains_temporal() {
-                return unsupported_err();
+            if !(expr1.contains_temporal() ^ expr2.contains_temporal()) {
+                return unsupported_err("one side of the comparsion must be `now()`");
             }
             if !expr1.contains_temporal()
                 && *expr2 == ScalarExpr::CallUnmaterializable(UnmaterializableFunc::Now)
@@ -299,7 +299,7 @@ impl ScalarExpr {
                     BinaryFunc::Gt => BinaryFunc::Lt,
                     BinaryFunc::Gte => BinaryFunc::Lte,
                     _ => {
-                        return unsupported_err();
+                        return unsupported_err("The top level operator must be comparison");
                     }
                 };
             }
@@ -307,7 +307,7 @@ impl ScalarExpr {
             if expr2.contains_temporal()
                 || *expr1 != ScalarExpr::CallUnmaterializable(UnmaterializableFunc::Now)
             {
-                return unsupported_err();
+                return unsupported_err("None of the sides of the comparsion is `now()`");
             }
             let step = |expr: ScalarExpr| expr.call_unary(UnaryFunc::StepTimestamp);
             match func {
@@ -316,10 +316,109 @@ impl ScalarExpr {
                 BinaryFunc::Lte => Ok((None, Some(step(*expr2)))),
                 BinaryFunc::Gt => Ok((Some(step(*expr2)), None)),
                 BinaryFunc::Gte => Ok((Some(*expr2), None)),
-                _ => unsupported_err(),
+                _ => unreachable!("Already checked"),
             }
         } else {
-            unsupported_err()
+            unsupported_err("None of the sides of the comparsion is `now()`")
         }
     }
+}
+
+#[test]
+fn test_extract_bound() {
+    /// col(0) == now
+    let expr = ScalarExpr::CallBinary {
+        func: BinaryFunc::Eq,
+        expr1: Box::new(ScalarExpr::CallUnmaterializable(UnmaterializableFunc::Now)),
+        expr2: Box::new(ScalarExpr::Column(0)),
+    };
+    assert!(expr.contains_temporal());
+    assert_eq!(
+        expr.extract_bound(),
+        Ok((
+            Some(ScalarExpr::Column(0)),
+            Some(ScalarExpr::CallUnary {
+                func: UnaryFunc::StepTimestamp,
+                expr: Box::new(ScalarExpr::Column(0)),
+            },),
+        ),)
+    );
+
+    /// now < col(0)
+    let expr = ScalarExpr::CallBinary {
+        func: BinaryFunc::Lt,
+        expr1: Box::new(ScalarExpr::CallUnmaterializable(UnmaterializableFunc::Now)),
+        expr2: Box::new(ScalarExpr::Column(0)),
+    };
+    assert!(expr.contains_temporal());
+    assert_eq!(
+        expr.extract_bound(),
+        Ok((None, Some(ScalarExpr::Column(0)),),)
+    );
+
+    /// col(0) <= now
+    let expr = ScalarExpr::CallBinary {
+        func: BinaryFunc::Lte,
+        expr1: Box::new(ScalarExpr::CallUnmaterializable(UnmaterializableFunc::Now)),
+        expr2: Box::new(ScalarExpr::Column(0)),
+    };
+    assert!(expr.contains_temporal());
+    assert_eq!(
+        expr.extract_bound(),
+        Ok((
+            None,
+            Some(ScalarExpr::CallUnary {
+                func: UnaryFunc::StepTimestamp,
+                expr: Box::new(ScalarExpr::Column(0)),
+            },),
+        ),)
+    );
+
+    /// now > col(0) -> now >= col(0) + 1
+    let expr = ScalarExpr::CallBinary {
+        func: BinaryFunc::Gt,
+        expr1: Box::new(ScalarExpr::CallUnmaterializable(UnmaterializableFunc::Now)),
+        expr2: Box::new(ScalarExpr::Column(0)),
+    };
+    assert!(expr.contains_temporal());
+    assert_eq!(
+        expr.extract_bound(),
+        Ok((
+            Some(ScalarExpr::CallUnary {
+                func: UnaryFunc::StepTimestamp,
+                expr: Box::new(ScalarExpr::Column(0)),
+            },),
+            None
+        ),)
+    );
+
+    /// now >= col(0)
+    let expr = ScalarExpr::CallBinary {
+        func: BinaryFunc::Gte,
+        expr1: Box::new(ScalarExpr::CallUnmaterializable(UnmaterializableFunc::Now)),
+        expr2: Box::new(ScalarExpr::Column(0)),
+    };
+    assert!(expr.contains_temporal());
+    assert_eq!(
+        expr.extract_bound(),
+        Ok((Some(ScalarExpr::Column(0)), None),)
+    );
+
+    /// col(0) == now
+    let expr = ScalarExpr::CallBinary {
+        func: BinaryFunc::Eq,
+        expr2: Box::new(ScalarExpr::Column(0)),
+        expr1: Box::new(ScalarExpr::CallUnmaterializable(UnmaterializableFunc::Now)),
+    };
+    assert!(expr.contains_temporal());
+    assert_eq!(
+        expr.extract_bound(),
+        Ok((
+            Some(ScalarExpr::Column(0)),
+            Some(ScalarExpr::CallUnary {
+                func: UnaryFunc::StepTimestamp,
+                expr: Box::new(ScalarExpr::Column(0)),
+            })
+        ),)
+    );
 }
