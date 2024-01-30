@@ -337,7 +337,7 @@
                         <span class="comment">// TODO(weny): supports to create multiple region table.
                         </span><span class="kw">let _ </span>= <span class="self">self
                             </span>.statement_executor
-                            .create_table_inner(<span class="kw-2">&amp;mut </span>expr, <span class="prelude-val">None</span>)
+                            .create_table_inner(<span class="kw-2">&amp;mut </span>expr, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>ctx)
                             .<span class="kw">await</span><span class="question-mark">?</span>;
                         Output::AffectedRows(<span class="number">0</span>)
                     }

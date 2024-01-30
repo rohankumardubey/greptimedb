@@ -85,7 +85,7 @@
         stmt: DescribeTable,
         query_ctx: QueryContextRef,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;Output&gt; {
-        <span class="kw">let </span>(catalog, schema, table) = table_idents_to_full_name(stmt.name(), query_ctx)
+        <span class="kw">let </span>(catalog, schema, table) = table_idents_to_full_name(stmt.name(), <span class="kw-2">&amp;</span>query_ctx)
             .map_err(BoxedError::new)
             .context(ExternalSnafu)<span class="question-mark">?</span>;
 

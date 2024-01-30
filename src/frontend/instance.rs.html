@@ -1138,7 +1138,7 @@
 }
 
 <span class="kw">fn </span>validate_param(name: <span class="kw-2">&amp;</span>ObjectName, query_ctx: <span class="kw-2">&amp;</span>QueryContextRef) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
-    <span class="kw">let </span>(catalog, schema, <span class="kw">_</span>) = table_idents_to_full_name(name, query_ctx.clone())
+    <span class="kw">let </span>(catalog, schema, <span class="kw">_</span>) = table_idents_to_full_name(name, query_ctx)
         .map_err(BoxedError::new)
         .context(ExternalSnafu)<span class="question-mark">?</span>;
 

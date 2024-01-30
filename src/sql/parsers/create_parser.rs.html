@@ -1680,6 +1680,8 @@
 <a href="#1679" id="1679">1679</a>
 <a href="#1680" id="1680">1680</a>
 <a href="#1681" id="1681">1681</a>
+<a href="#1682" id="1682">1682</a>
+<a href="#1683" id="1683">1683</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -2468,8 +2470,10 @@
                         }
                     }
 
-                    <span class="kw">let </span>x = sql_value_to_value(column_name, <span class="kw-2">&amp;</span>cdt, x)<span class="question-mark">?</span>;
-                    <span class="kw">let </span>y = sql_value_to_value(column_name, <span class="kw-2">&amp;</span>cdt, y)<span class="question-mark">?</span>;
+                    <span class="comment">// We only want to comnpare the `x` and `y` values,
+                    // so the `timezone` can be ignored.
+                    </span><span class="kw">let </span>x = sql_value_to_value(column_name, <span class="kw-2">&amp;</span>cdt, x, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
+                    <span class="kw">let </span>y = sql_value_to_value(column_name, <span class="kw-2">&amp;</span>cdt, y, <span class="prelude-val">None</span>)<span class="question-mark">?</span>;
                     <span class="kw">match </span>x.cmp(<span class="kw-2">&amp;</span>y) {
                         Ordering::Less =&gt; <span class="kw">break</span>,
                         Ordering::Equal =&gt; equal_tuples += <span class="number">1</span>,

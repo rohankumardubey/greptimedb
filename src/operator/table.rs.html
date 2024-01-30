@@ -128,16 +128,16 @@
 </span><span class="doccomment">/// Converts maybe fully-qualified table name (`&lt;catalog&gt;.&lt;schema&gt;.&lt;table&gt;`) to tuple.
 </span><span class="kw">pub fn </span>table_idents_to_full_name(
     obj_name: <span class="kw-2">&amp;</span>ObjectName,
-    query_ctx: QueryContextRef,
+    query_ctx: <span class="kw-2">&amp;</span>QueryContextRef,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(String, String, String)&gt; {
     <span class="kw">match </span><span class="kw-2">&amp;</span>obj_name.<span class="number">0</span>[..] {
         [table] =&gt; <span class="prelude-val">Ok</span>((
-            query_ctx.current_catalog().to_owned(),
-            query_ctx.current_schema().to_owned(),
+            query_ctx.current_catalog().to_string(),
+            query_ctx.current_schema().to_string(),
             table.value.clone(),
         )),
         [schema, table] =&gt; <span class="prelude-val">Ok</span>((
-            query_ctx.current_catalog().to_owned(),
+            query_ctx.current_catalog().to_string(),
             schema.value.clone(),
             table.value.clone(),
         )),

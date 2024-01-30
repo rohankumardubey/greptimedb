@@ -826,6 +826,14 @@
 <a href="#825" id="825">825</a>
 <a href="#826" id="826">826</a>
 <a href="#827" id="827">827</a>
+<a href="#828" id="828">828</a>
+<a href="#829" id="829">829</a>
+<a href="#830" id="830">830</a>
+<a href="#831" id="831">831</a>
+<a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
+<a href="#834" id="834">834</a>
+<a href="#835" id="835">835</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -897,8 +905,9 @@
 
     <span class="attr">#[tracing::instrument(skip_all)]
     </span><span class="kw">pub async fn </span>create_table(<span class="kw-2">&amp;</span><span class="self">self</span>, stmt: CreateTable, ctx: QueryContextRef) -&gt; <span class="prelude-ty">Result</span>&lt;TableRef&gt; {
-        <span class="kw">let </span>create_expr = <span class="kw-2">&amp;mut </span>expr_factory::create_to_expr(<span class="kw-2">&amp;</span>stmt, ctx)<span class="question-mark">?</span>;
-        <span class="self">self</span>.create_table_inner(create_expr, stmt.partitions).<span class="kw">await
+        <span class="kw">let </span>create_expr = <span class="kw-2">&amp;mut </span>expr_factory::create_to_expr(<span class="kw-2">&amp;</span>stmt, ctx.clone())<span class="question-mark">?</span>;
+        <span class="self">self</span>.create_table_inner(create_expr, stmt.partitions, <span class="kw-2">&amp;</span>ctx)
+            .<span class="kw">await
     </span>}
 
     <span class="attr">#[tracing::instrument(skip_all)]
@@ -907,14 +916,15 @@
         create_expr: CreateExternalTable,
         ctx: QueryContextRef,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;TableRef&gt; {
-        <span class="kw">let </span>create_expr = <span class="kw-2">&amp;mut </span>expr_factory::create_external_expr(create_expr, ctx).<span class="kw">await</span><span class="question-mark">?</span>;
-        <span class="self">self</span>.create_table_inner(create_expr, <span class="prelude-val">None</span>).<span class="kw">await
+        <span class="kw">let </span>create_expr = <span class="kw-2">&amp;mut </span>expr_factory::create_external_expr(create_expr, ctx.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
+        <span class="self">self</span>.create_table_inner(create_expr, <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>ctx).<span class="kw">await
     </span>}
 
     <span class="kw">pub async fn </span>create_table_inner(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         create_table: <span class="kw-2">&amp;mut </span>CreateTableExpr,
         partitions: <span class="prelude-ty">Option</span>&lt;Partitions&gt;,
+        query_ctx: <span class="kw-2">&amp;</span>QueryContextRef,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;TableRef&gt; {
         <span class="kw">let </span>_timer = <span class="kw">crate</span>::metrics::DIST_CREATE_TABLE.start_timer();
         <span class="kw">let </span>schema = <span class="self">self
@@ -972,7 +982,7 @@
             <span class="kw-2">&amp;</span>create_table.table_name,
         );
 
-        <span class="kw">let </span>(partitions, partition_cols) = parse_partitions(create_table, partitions)<span class="question-mark">?</span>;
+        <span class="kw">let </span>(partitions, partition_cols) = parse_partitions(create_table, partitions, query_ctx)<span class="question-mark">?</span>;
 
         validate_partition_columns(create_table, <span class="kw-2">&amp;</span>partition_cols)<span class="question-mark">?</span>;
 
@@ -1393,11 +1403,13 @@
 <span class="kw">fn </span>parse_partitions(
     create_table: <span class="kw-2">&amp;</span>CreateTableExpr,
     partitions: <span class="prelude-ty">Option</span>&lt;Partitions&gt;,
+    query_ctx: <span class="kw-2">&amp;</span>QueryContextRef,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(Vec&lt;MetaPartition&gt;, Vec&lt;String&gt;)&gt; {
     <span class="comment">// If partitions are not defined by user, use the timestamp column (which has to be existed) as
     // the partition column, and create only one partition.
     </span><span class="kw">let </span>partition_columns = find_partition_columns(<span class="kw-2">&amp;</span>partitions)<span class="question-mark">?</span>;
-    <span class="kw">let </span>partition_entries = find_partition_entries(create_table, <span class="kw-2">&amp;</span>partitions, <span class="kw-2">&amp;</span>partition_columns)<span class="question-mark">?</span>;
+    <span class="kw">let </span>partition_entries =
+        find_partition_entries(create_table, <span class="kw-2">&amp;</span>partitions, <span class="kw-2">&amp;</span>partition_columns, query_ctx)<span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>((
         partition_entries
@@ -1514,6 +1526,7 @@
     create_table: <span class="kw-2">&amp;</span>CreateTableExpr,
     partitions: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span>&lt;Partitions&gt;,
     partition_columns: <span class="kw-2">&amp;</span>[String],
+    query_ctx: <span class="kw-2">&amp;</span>QueryContextRef,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;Vec&lt;PartitionBound&gt;&gt;&gt; {
     <span class="kw">let </span>entries = <span class="kw">if let </span><span class="prelude-val">Some</span>(partitions) = partitions {
         <span class="kw">let </span>column_defs = partition_columns
@@ -1546,7 +1559,8 @@
                 <span class="kw">let </span>v = <span class="kw">match </span>v {
                     SqlValue::Number(n, <span class="kw">_</span>) <span class="kw">if </span>n == MAXVALUE =&gt; PartitionBound::MaxValue,
                     <span class="kw">_ </span>=&gt; PartitionBound::Value(
-                        sql_value_to_value(column_name, data_type, v).context(ParseSqlSnafu)<span class="question-mark">?</span>,
+                        sql_value_to_value(column_name, data_type, v, <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>query_ctx.timezone()))
+                            .context(ParseSqlSnafu)<span class="question-mark">?</span>,
                     ),
                 };
                 values.push(v);
@@ -1567,7 +1581,7 @@
 
 <span class="attr">#[cfg(test)]
 </span><span class="kw">mod </span>test {
-    <span class="kw">use </span>session::context::QueryContext;
+    <span class="kw">use </span>session::context::{QueryContext, QueryContextBuilder};
     <span class="kw">use </span>sql::dialect::GreptimeDbDialect;
     <span class="kw">use </span>sql::parser::{ParseOptions, ParserContext};
     <span class="kw">use </span>sql::statements::statement::Statement;
@@ -1634,6 +1648,7 @@ ENGINE=mito"</span>,
                 <span class="string">r#"[{"column_list":["b","a"],"value_list":["{\"Value\":{\"String\":\"hz\"}}","{\"Value\":{\"Int32\":10}}"]},{"column_list":["b","a"],"value_list":["{\"Value\":{\"String\":\"sh\"}}","{\"Value\":{\"Int32\":20}}"]},{"column_list":["b","a"],"value_list":["\"MaxValue\"","\"MaxValue\""]}]"#</span>,
             ),
         ];
+        <span class="kw">let </span>ctx = QueryContextBuilder::default().build();
         <span class="kw">for </span>(sql, expected) <span class="kw">in </span>cases {
             <span class="kw">let </span>result = ParserContext::create_with_dialect(
                 sql,
@@ -1644,7 +1659,8 @@ ENGINE=mito"</span>,
             <span class="kw">match </span><span class="kw-2">&amp;</span>result[<span class="number">0</span>] {
                 Statement::CreateTable(c) =&gt; {
                     <span class="kw">let </span>expr = expr_factory::create_to_expr(c, QueryContext::arc()).unwrap();
-                    <span class="kw">let </span>(partitions, <span class="kw">_</span>) = parse_partitions(<span class="kw-2">&amp;</span>expr, c.partitions.clone()).unwrap();
+                    <span class="kw">let </span>(partitions, <span class="kw">_</span>) =
+                        parse_partitions(<span class="kw-2">&amp;</span>expr, c.partitions.clone(), <span class="kw-2">&amp;</span>ctx).unwrap();
                     <span class="kw">let </span>json = serde_json::to_string(<span class="kw-2">&amp;</span>partitions).unwrap();
                     <span class="macro">assert_eq!</span>(json, expected);
                 }
