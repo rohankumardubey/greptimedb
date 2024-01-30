@@ -246,6 +246,11 @@
 <a href="#245" id="245">245</a>
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
+<a href="#248" id="248">248</a>
+<a href="#249" id="249">249</a>
+<a href="#250" id="250">250</a>
+<a href="#251" id="251">251</a>
+<a href="#252" id="252">252</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -283,7 +288,8 @@
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>HANDLE_REQUEST_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
             <span class="string">"greptime_mito_handle_request_elapsed"</span>,
             <span class="string">"mito handle request elapsed"</span>,
-            <span class="kw-2">&amp;</span>[TYPE_LABEL]
+            <span class="kw-2">&amp;</span>[TYPE_LABEL],
+            <span class="macro">vec!</span>[<span class="number">0.005</span>, <span class="number">0.01</span>, <span class="number">0.05</span>, <span class="number">0.1</span>, <span class="number">0.5</span>, <span class="number">1.0</span>, <span class="number">2.5</span>, <span class="number">5.0</span>, <span class="number">10.0</span>, <span class="number">60.0</span>, <span class="number">300.0</span>]
         )
         .unwrap();
 
@@ -303,7 +309,8 @@
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>FLUSH_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
             <span class="string">"greptime_mito_flush_elapsed"</span>,
             <span class="string">"mito flush elapsed"</span>,
-            <span class="kw-2">&amp;</span>[TYPE_LABEL]
+            <span class="kw-2">&amp;</span>[TYPE_LABEL],
+            <span class="macro">vec!</span>[<span class="number">0.005</span>, <span class="number">0.01</span>, <span class="number">0.05</span>, <span class="number">0.1</span>, <span class="number">0.5</span>, <span class="number">1.0</span>, <span class="number">5.0</span>, <span class="number">10.0</span>, <span class="number">60.0</span>, <span class="number">300.0</span>]
         )
         .unwrap();
     <span class="doccomment">/// Histogram of flushed bytes.
@@ -323,7 +330,8 @@
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>WRITE_STAGE_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
             <span class="string">"greptime_mito_write_stage_elapsed"</span>,
             <span class="string">"mito write stage elapsed"</span>,
-            <span class="kw-2">&amp;</span>[STAGE_LABEL]
+            <span class="kw-2">&amp;</span>[STAGE_LABEL],
+            <span class="macro">vec!</span>[<span class="number">0.005</span>, <span class="number">0.01</span>, <span class="number">0.05</span>, <span class="number">0.1</span>, <span class="number">0.5</span>, <span class="number">1.0</span>, <span class="number">5.0</span>, <span class="number">10.0</span>, <span class="number">60.0</span>, <span class="number">300.0</span>]
         )
         .unwrap();
     <span class="doccomment">/// Counter of rows to write.
@@ -341,7 +349,8 @@
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>COMPACTION_STAGE_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
         <span class="string">"greptime_mito_compaction_stage_elapsed"</span>,
         <span class="string">"mito compaction stage elapsed"</span>,
-        <span class="kw-2">&amp;</span>[STAGE_LABEL]
+        <span class="kw-2">&amp;</span>[STAGE_LABEL],
+        <span class="macro">vec!</span>[<span class="number">0.005</span>, <span class="number">0.01</span>, <span class="number">0.05</span>, <span class="number">0.1</span>, <span class="number">0.5</span>, <span class="number">1.0</span>, <span class="number">5.0</span>, <span class="number">10.0</span>, <span class="number">60.0</span>, <span class="number">300.0</span>]
     )
     .unwrap();
     <span class="doccomment">/// Timer of whole compaction task.
@@ -360,7 +369,8 @@
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>READ_STAGE_ELAPSED: HistogramVec = <span class="macro">register_histogram_vec!</span>(
         <span class="string">"greptime_mito_read_stage_elapsed"</span>,
         <span class="string">"mito read stage elapsed"</span>,
-        <span class="kw-2">&amp;</span>[STAGE_LABEL]
+        <span class="kw-2">&amp;</span>[STAGE_LABEL],
+        <span class="macro">vec!</span>[<span class="number">0.005</span>, <span class="number">0.01</span>, <span class="number">0.05</span>, <span class="number">0.1</span>, <span class="number">0.5</span>, <span class="number">1.0</span>, <span class="number">5.0</span>, <span class="number">10.0</span>, <span class="number">60.0</span>, <span class="number">300.0</span>]
     )
     .unwrap();
     <span class="doccomment">/// Counter of rows read.

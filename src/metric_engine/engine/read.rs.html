@@ -316,6 +316,15 @@
 <a href="#315" id="315">315</a>
 <a href="#316" id="316">316</a>
 <a href="#317" id="317">317</a>
+<a href="#318" id="318">318</a>
+<a href="#319" id="319">319</a>
+<a href="#320" id="320">320</a>
+<a href="#321" id="321">321</a>
+<a href="#322" id="322">322</a>
+<a href="#323" id="323">323</a>
+<a href="#324" id="324">324</a>
+<a href="#325" id="325">325</a>
+<a href="#326" id="326">326</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -348,6 +357,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     InvalidMetadataSnafu, LogicalRegionNotFoundSnafu, MitoReadOperationSnafu, <span class="prelude-ty">Result</span>,
 };
+<span class="kw">use </span><span class="kw">crate</span>::metrics::MITO_OPERATION_ELAPSED;
 <span class="kw">use </span><span class="kw">crate</span>::utils;
 
 <span class="kw">impl </span>MetricEngineInner {
@@ -375,6 +385,10 @@
         region_id: RegionId,
         request: ScanRequest,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt; {
+        <span class="kw">let </span>_timer = MITO_OPERATION_ELAPSED
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"read_physical"</span>])
+            .start_timer();
+
         <span class="self">self</span>.mito
             .handle_query(region_id, request)
             .<span class="kw">await
@@ -386,6 +400,10 @@
         logical_region_id: RegionId,
         request: ScanRequest,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt; {
+        <span class="kw">let </span>_timer = MITO_OPERATION_ELAPSED
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"read"</span>])
+            .start_timer();
+
         <span class="kw">let </span>physical_region_id = <span class="self">self</span>.get_physical_region_id(logical_region_id).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="kw">let </span>data_region_id = utils::to_data_region_id(physical_region_id);
         <span class="kw">let </span>request = <span class="self">self

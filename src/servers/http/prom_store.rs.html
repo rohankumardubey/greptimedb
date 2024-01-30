@@ -146,6 +146,7 @@
 <a href="#145" id="145">145</a>
 <a href="#146" id="146">146</a>
 <a href="#147" id="147">147</a>
+<a href="#148" id="148">148</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -207,12 +208,12 @@
     Extension(query_ctx): Extension&lt;QueryContextRef&gt;,
     RawBody(body): RawBody,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(StatusCode, ())&gt; {
-    <span class="kw">let </span>request = decode_remote_write_request(body).<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="kw">let </span>db = params.db.clone().unwrap_or_default();
     <span class="kw">let </span>_timer = <span class="kw">crate</span>::metrics::METRIC_HTTP_PROM_STORE_WRITE_ELAPSED
         .with_label_values(<span class="kw-2">&amp;</span>[db.as_str()])
         .start_timer();
 
+    <span class="kw">let </span>request = decode_remote_write_request(body).<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="comment">// reject if physical table is specified when metric engine is disabled
     </span><span class="kw">if </span>params.physical_table.is_some() {
         <span class="kw">return </span>UnexpectedPhysicalTableSnafu {}.fail();
@@ -229,17 +230,17 @@
     Extension(<span class="kw-2">mut </span>query_ctx): Extension&lt;QueryContextRef&gt;,
     RawBody(body): RawBody,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;(StatusCode, ())&gt; {
-    <span class="kw">let </span>request = decode_remote_write_request(body).<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="kw">let </span>db = params.db.clone().unwrap_or_default();
+    <span class="kw">let </span>_timer = <span class="kw">crate</span>::metrics::METRIC_HTTP_PROM_STORE_WRITE_ELAPSED
+        .with_label_values(<span class="kw-2">&amp;</span>[db.as_str()])
+        .start_timer();
+
+    <span class="kw">let </span>request = decode_remote_write_request(body).<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="kw">if let </span><span class="prelude-val">Some</span>(physical_table) = params.physical_table {
         <span class="kw">let </span><span class="kw-2">mut </span>new_query_ctx = query_ctx.as_ref().clone();
         new_query_ctx.set_extension(PHYSICAL_TABLE_PARAM, physical_table);
         query_ctx = Arc::new(new_query_ctx);
     }
-
-    <span class="kw">let </span>_timer = <span class="kw">crate</span>::metrics::METRIC_HTTP_PROM_STORE_WRITE_ELAPSED
-        .with_label_values(<span class="kw-2">&amp;</span>[db.as_str()])
-        .start_timer();
 
     handler.write(request, query_ctx, <span class="bool-val">true</span>).<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="prelude-val">Ok</span>((StatusCode::NO_CONTENT, ()))
@@ -265,12 +266,13 @@
     Extension(query_ctx): Extension&lt;QueryContextRef&gt;,
     RawBody(body): RawBody,
 ) -&gt; <span class="prelude-ty">Result</span>&lt;PromStoreResponse&gt; {
-    <span class="kw">let </span>request = decode_remote_read_request(body).<span class="kw">await</span><span class="question-mark">?</span>;
     <span class="kw">let </span>db = params.db.clone().unwrap_or_default();
-
     <span class="kw">let </span>_timer = <span class="kw">crate</span>::metrics::METRIC_HTTP_PROM_STORE_READ_ELAPSED
         .with_label_values(<span class="kw-2">&amp;</span>[db.as_str()])
         .start_timer();
+
+    <span class="kw">let </span>request = decode_remote_read_request(body).<span class="kw">await</span><span class="question-mark">?</span>;
+
     handler.read(request, query_ctx).<span class="kw">await
 </span>}
 

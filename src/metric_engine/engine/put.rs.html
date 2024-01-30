@@ -329,6 +329,10 @@
 <a href="#328" id="328">328</a>
 <a href="#329" id="329">329</a>
 <a href="#330" id="330">330</a>
+<a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -359,7 +363,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     ColumnNotFoundSnafu, ForbiddenPhysicalAlterSnafu, LogicalRegionNotFoundSnafu, <span class="prelude-ty">Result</span>,
 };
-<span class="kw">use </span><span class="kw">crate</span>::metrics::FORBIDDEN_OPERATION_COUNT;
+<span class="kw">use </span><span class="kw">crate</span>::metrics::{FORBIDDEN_OPERATION_COUNT, MITO_OPERATION_ELAPSED};
 <span class="kw">use </span><span class="kw">crate</span>::utils::{to_data_region_id, to_metadata_region_id};
 
 <span class="comment">// A random number
@@ -396,6 +400,10 @@
         logical_region_id: RegionId,
         <span class="kw-2">mut </span>request: RegionPutRequest,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;AffectedRows&gt; {
+        <span class="kw">let </span>_timer = MITO_OPERATION_ELAPSED
+            .with_label_values(<span class="kw-2">&amp;</span>[<span class="string">"put"</span>])
+            .start_timer();
+
         <span class="kw">let </span>physical_region_id = <span class="kw-2">*</span><span class="self">self
             </span>.state
             .read()
