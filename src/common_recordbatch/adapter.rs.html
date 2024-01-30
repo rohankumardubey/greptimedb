@@ -434,6 +434,26 @@
 <a href="#433" id="433">433</a>
 <a href="#434" id="434">434</a>
 <a href="#435" id="435">435</a>
+<a href="#436" id="436">436</a>
+<a href="#437" id="437">437</a>
+<a href="#438" id="438">438</a>
+<a href="#439" id="439">439</a>
+<a href="#440" id="440">440</a>
+<a href="#441" id="441">441</a>
+<a href="#442" id="442">442</a>
+<a href="#443" id="443">443</a>
+<a href="#444" id="444">444</a>
+<a href="#445" id="445">445</a>
+<a href="#446" id="446">446</a>
+<a href="#447" id="447">447</a>
+<a href="#448" id="448">448</a>
+<a href="#449" id="449">449</a>
+<a href="#450" id="450">450</a>
+<a href="#451" id="451">451</a>
+<a href="#452" id="452">452</a>
+<a href="#453" id="453">453</a>
+<a href="#454" id="454">454</a>
+<a href="#455" id="455">455</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -449,6 +469,7 @@
 // limitations under the License.
 
 </span><span class="kw">use </span>std::future::Future;
+<span class="kw">use </span>std::marker::PhantomData;
 <span class="kw">use </span>std::pin::Pin;
 <span class="kw">use </span>std::sync::Arc;
 <span class="kw">use </span>std::task::{Context, Poll};
@@ -456,12 +477,13 @@
 <span class="kw">use </span>datafusion::arrow::compute::cast;
 <span class="kw">use </span>datafusion::arrow::datatypes::SchemaRef <span class="kw">as </span>DfSchemaRef;
 <span class="kw">use </span>datafusion::error::Result <span class="kw">as </span>DfResult;
-<span class="kw">use </span>datafusion::parquet::arrow::async_reader::{AsyncFileReader, ParquetRecordBatchStream};
 <span class="kw">use </span>datafusion::physical_plan::metrics::{BaselineMetrics, MetricValue};
 <span class="kw">use </span>datafusion::physical_plan::{ExecutionPlan, RecordBatchStream <span class="kw">as </span>DfRecordBatchStream};
+<span class="kw">use </span>datafusion_common::arrow::error::ArrowError;
 <span class="kw">use </span>datafusion_common::DataFusionError;
 <span class="kw">use </span>datatypes::schema::{Schema, SchemaRef};
 <span class="kw">use </span>futures::ready;
+<span class="kw">use </span>pin_project::pin_project;
 <span class="kw">use </span>snafu::ResultExt;
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{<span class="self">self</span>, <span class="prelude-ty">Result</span>};
@@ -473,56 +495,76 @@
 <span class="kw">type </span>FutureStream =
     Pin&lt;Box&lt;<span class="kw">dyn </span>std::future::Future&lt;Output = <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt;&gt; + Send&gt;&gt;;
 
-<span class="doccomment">/// ParquetRecordBatchStream -&gt; DataFusion RecordBatchStream
-</span><span class="kw">pub struct </span>ParquetRecordBatchStreamAdapter&lt;T&gt; {
-    stream: ParquetRecordBatchStream&lt;T&gt;,
-    output_schema: DfSchemaRef,
+<span class="doccomment">/// Casts the `RecordBatch`es of `stream` against the `output_schema`.
+</span><span class="attr">#[pin_project]
+</span><span class="kw">pub struct </span>RecordBatchStreamTypeAdapter&lt;T, E&gt; {
+    <span class="attr">#[pin]
+    </span>stream: T,
+    projected_schema: DfSchemaRef,
     projection: Vec&lt;usize&gt;,
+    phantom: PhantomData&lt;E&gt;,
 }
 
-<span class="kw">impl</span>&lt;T: Unpin + AsyncFileReader + Send + <span class="lifetime">'static</span>&gt; ParquetRecordBatchStreamAdapter&lt;T&gt; {
-    <span class="kw">pub fn </span>new(
-        output_schema: DfSchemaRef,
-        stream: ParquetRecordBatchStream&lt;T&gt;,
-        projection: <span class="prelude-ty">Option</span>&lt;Vec&lt;usize&gt;&gt;,
-    ) -&gt; <span class="self">Self </span>{
+<span class="kw">impl</span>&lt;T, E&gt; RecordBatchStreamTypeAdapter&lt;T, E&gt;
+<span class="kw">where
+    </span>T: Stream&lt;Item = std::result::Result&lt;DfRecordBatch, E&gt;&gt;,
+    E: std::error::Error + Send + Sync + <span class="lifetime">'static</span>,
+{
+    <span class="kw">pub fn </span>new(projected_schema: DfSchemaRef, stream: T, projection: <span class="prelude-ty">Option</span>&lt;Vec&lt;usize&gt;&gt;) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>projection = <span class="kw">if let </span><span class="prelude-val">Some</span>(projection) = projection {
             projection
         } <span class="kw">else </span>{
-            (<span class="number">0</span>..output_schema.fields().len()).collect()
+            (<span class="number">0</span>..projected_schema.fields().len()).collect()
         };
 
         <span class="self">Self </span>{
             stream,
-            output_schema,
+            projected_schema,
             projection,
+            phantom: Default::default(),
         }
     }
 }
 
-<span class="kw">impl</span>&lt;T: Unpin + AsyncFileReader + Send + <span class="lifetime">'static</span>&gt; DfRecordBatchStream
-    <span class="kw">for </span>ParquetRecordBatchStreamAdapter&lt;T&gt;
+<span class="kw">impl</span>&lt;T, E&gt; DfRecordBatchStream <span class="kw">for </span>RecordBatchStreamTypeAdapter&lt;T, E&gt;
+<span class="kw">where
+    </span>T: Stream&lt;Item = std::result::Result&lt;DfRecordBatch, E&gt;&gt;,
+    E: std::error::Error + Send + Sync + <span class="lifetime">'static</span>,
 {
     <span class="kw">fn </span>schema(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; DfSchemaRef {
-        <span class="self">self</span>.stream.schema().clone()
+        <span class="self">self</span>.projected_schema.clone()
     }
 }
 
-<span class="kw">impl</span>&lt;T: Unpin + AsyncFileReader + Send + <span class="lifetime">'static</span>&gt; Stream <span class="kw">for </span>ParquetRecordBatchStreamAdapter&lt;T&gt; {
+<span class="kw">impl</span>&lt;T, E&gt; Stream <span class="kw">for </span>RecordBatchStreamTypeAdapter&lt;T, E&gt;
+<span class="kw">where
+    </span>T: Stream&lt;Item = std::result::Result&lt;DfRecordBatch, E&gt;&gt;,
+    E: std::error::Error + Send + Sync + <span class="lifetime">'static</span>,
+{
     <span class="kw">type </span>Item = DfResult&lt;DfRecordBatch&gt;;
 
-    <span class="kw">fn </span>poll_next(<span class="kw-2">mut </span><span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {
-        <span class="kw">let </span>batch = <span class="macro">futures::ready!</span>(Pin::new(<span class="kw-2">&amp;mut </span><span class="self">self</span>.stream).poll_next(cx))
+    <span class="kw">fn </span>poll_next(<span class="self">self</span>: Pin&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt;, cx: <span class="kw-2">&amp;mut </span>Context&lt;<span class="lifetime">'_</span>&gt;) -&gt; Poll&lt;<span class="prelude-ty">Option</span>&lt;<span class="self">Self</span>::Item&gt;&gt; {
+        <span class="kw">let </span>this = <span class="self">self</span>.project();
+
+        <span class="kw">let </span>batch = <span class="macro">futures::ready!</span>(this.stream.poll_next(cx))
             .map(|r| r.map_err(|e| DataFusionError::External(Box::new(e))));
 
-        <span class="kw">let </span>projected_schema = <span class="self">self</span>.output_schema.project(<span class="kw-2">&amp;</span><span class="self">self</span>.projection)<span class="question-mark">?</span>;
+        <span class="kw">let </span>projected_schema = this.projected_schema.clone();
+        <span class="kw">let </span>projection = this.projection.clone();
         <span class="kw">let </span>batch = batch.map(|b| {
             b.and_then(|b| {
-                <span class="kw">let </span><span class="kw-2">mut </span>columns = Vec::with_capacity(<span class="self">self</span>.projection.len());
-                <span class="kw">for </span>idx <span class="kw">in </span><span class="self">self</span>.projection.iter() {
-                    <span class="kw">let </span>column = b.column(<span class="kw-2">*</span>idx);
-                    <span class="kw">let </span>field = <span class="self">self</span>.output_schema.field(<span class="kw-2">*</span>idx);
+                <span class="kw">let </span>projected_column = b.project(<span class="kw-2">&amp;</span>projection)<span class="question-mark">?</span>;
+                <span class="kw">if </span>projected_column.schema().fields.len() != projected_schema.fields.len() {
+                   <span class="kw">return </span><span class="prelude-val">Err</span>(DataFusionError::ArrowError(ArrowError::SchemaError(<span class="macro">format!</span>(
+                        <span class="string">"Trying to cast a RecordBatch into an incompatible schema. RecordBatch: {}, Target: {}"</span>,
+                        projected_column.schema(),
+                        projected_schema,
+                    ))));
+                }
 
+                <span class="kw">let </span><span class="kw-2">mut </span>columns = Vec::with_capacity(projected_schema.fields.len());
+                <span class="kw">for </span>(idx,field) <span class="kw">in </span>projected_schema.fields.iter().enumerate() {
+                    <span class="kw">let </span>column = projected_column.column(idx);
                     <span class="kw">if </span>column.data_type() != field.data_type() {
                         <span class="kw">let </span>output = cast(<span class="kw-2">&amp;</span>column, field.data_type())<span class="question-mark">?</span>;
                         columns.push(output)
@@ -530,9 +572,7 @@
                         columns.push(column.clone())
                     }
                 }
-
-                <span class="kw">let </span>record_batch = DfRecordBatch::try_new(projected_schema.into(), columns)<span class="question-mark">?</span>;
-
+                <span class="kw">let </span>record_batch = DfRecordBatch::try_new(projected_schema, columns)<span class="question-mark">?</span>;
                 <span class="prelude-val">Ok</span>(record_batch)
             })
         });
