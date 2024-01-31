@@ -98,6 +98,14 @@
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
 <a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -162,6 +170,11 @@
     /// from starting a kafka cluster, and use the given endpoint as kafka backend.
     </span><span class="attr">#[clap(short, long)]
     </span>kafka_wal_broker_endpoints: <span class="prelude-ty">Option</span>&lt;String&gt;,
+
+    <span class="doccomment">/// The path to the directory where GreptimeDB's binaries resides.
+    /// If not set, sqlness will build GreptimeDB on the fly.
+    </span><span class="attr">#[clap(long)]
+    </span>bins_dir: <span class="prelude-ty">Option</span>&lt;PathBuf&gt;,
 }
 
 <span class="attr">#[tokio::main]
@@ -194,7 +207,10 @@
         },
     };
 
-    <span class="kw">let </span>runner = Runner::new(config, Env::new(data_home, args.server_addr, wal));
+    <span class="kw">let </span>runner = Runner::new(
+        config,
+        Env::new(data_home, args.server_addr, wal, args.bins_dir),
+    );
     runner.run().<span class="kw">await</span>.unwrap();
 }
 </code></pre></div></section></main></body></html>
