@@ -347,7 +347,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>std::hash::{BuildHasher, Hash, Hasher};
+</span><span class="kw">use </span>std::hash::Hash;
 
 <span class="kw">use </span>api::v1::value::ValueData;
 <span class="kw">use </span>api::v1::{ColumnDataType, ColumnSchema, Row, Rows, SemanticType};
@@ -364,7 +364,7 @@
     ColumnNotFoundSnafu, ForbiddenPhysicalAlterSnafu, LogicalRegionNotFoundSnafu, <span class="prelude-ty">Result</span>,
 };
 <span class="kw">use </span><span class="kw">crate</span>::metrics::{FORBIDDEN_OPERATION_COUNT, MITO_OPERATION_ELAPSED};
-<span class="kw">use </span><span class="kw">crate</span>::utils::{to_data_region_id, to_metadata_region_id};
+<span class="kw">use </span><span class="kw">crate</span>::utils::to_data_region_id;
 
 <span class="comment">// A random number
 </span><span class="kw">const </span>TSID_HASH_SEED: u32 = <span class="number">846793005</span>;
@@ -419,6 +419,7 @@
             .<span class="kw">await</span><span class="question-mark">?</span>;
 
         <span class="comment">// write to data region
+
         // TODO: retrieve table name
         </span><span class="self">self</span>.modify_rows(logical_region_id.table_id(), <span class="kw-2">&amp;mut </span>request.rows)<span class="question-mark">?</span>;
         <span class="self">self</span>.data_region.write_data(data_region_id, request).<span class="kw">await
@@ -436,8 +437,7 @@
         request: <span class="kw-2">&amp;</span>RegionPutRequest,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="comment">// check if the region exists
-        </span><span class="kw">let </span>metadata_region_id = to_metadata_region_id(physical_region_id);
-        <span class="kw">let </span>data_region_id = to_data_region_id(physical_region_id);
+        </span><span class="kw">let </span>data_region_id = to_data_region_id(physical_region_id);
         <span class="kw">let </span>state = <span class="self">self</span>.state.read().unwrap();
         <span class="kw">if </span>!state.is_logical_region_exist(logical_region_id) {
             <span class="macro">error!</span>(<span class="string">"Trying to write to an nonexistent region {logical_region_id}"</span>);

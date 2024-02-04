@@ -344,7 +344,6 @@
 <a href="#343" id="343">343</a>
 <a href="#344" id="344">344</a>
 <a href="#345" id="345">345</a>
-<a href="#346" id="346">346</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -375,7 +374,6 @@
 <span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>common_error::ext::{BoxedError, ErrorExt};
 <span class="kw">use </span>common_error::status_code::StatusCode;
-<span class="kw">use </span>common_query::Output;
 <span class="kw">use </span>common_recordbatch::SendableRecordBatchStream;
 <span class="kw">use </span>mito2::engine::MitoEngine;
 <span class="kw">use </span>store_api::metadata::RegionMetadataRef;
@@ -480,7 +478,7 @@
             RegionRequest::Flush(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
             RegionRequest::Compact(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
             RegionRequest::Truncate(<span class="kw">_</span>) =&gt; <span class="macro">todo!</span>(),
-            <span class="doccomment">/// It always Ok(0), all data is latest.
+            <span class="comment">// It always Ok(0), all data is the latest.
             </span>RegionRequest::Catchup(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="number">0</span>),
         };
 

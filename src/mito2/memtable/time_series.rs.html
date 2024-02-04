@@ -1174,29 +1174,6 @@
 <a href="#1173" id="1173">1173</a>
 <a href="#1174" id="1174">1174</a>
 <a href="#1175" id="1175">1175</a>
-<a href="#1176" id="1176">1176</a>
-<a href="#1177" id="1177">1177</a>
-<a href="#1178" id="1178">1178</a>
-<a href="#1179" id="1179">1179</a>
-<a href="#1180" id="1180">1180</a>
-<a href="#1181" id="1181">1181</a>
-<a href="#1182" id="1182">1182</a>
-<a href="#1183" id="1183">1183</a>
-<a href="#1184" id="1184">1184</a>
-<a href="#1185" id="1185">1185</a>
-<a href="#1186" id="1186">1186</a>
-<a href="#1187" id="1187">1187</a>
-<a href="#1188" id="1188">1188</a>
-<a href="#1189" id="1189">1189</a>
-<a href="#1190" id="1190">1190</a>
-<a href="#1191" id="1191">1191</a>
-<a href="#1192" id="1192">1192</a>
-<a href="#1193" id="1193">1193</a>
-<a href="#1194" id="1194">1194</a>
-<a href="#1195" id="1195">1195</a>
-<a href="#1196" id="1196">1196</a>
-<a href="#1197" id="1197">1197</a>
-<a href="#1198" id="1198">1198</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1219,17 +1196,14 @@
 <span class="kw">use </span>std::time::{Duration, Instant};
 
 <span class="kw">use </span>api::v1::OpType;
-<span class="kw">use </span>common_telemetry::{debug, error, trace};
+<span class="kw">use </span>common_recordbatch::filter::SimpleFilterEvaluator;
+<span class="kw">use </span>common_telemetry::{debug, error};
 <span class="kw">use </span>common_time::Timestamp;
-<span class="kw">use </span>datafusion::physical_plan::PhysicalExpr;
-<span class="kw">use </span>datafusion_common::ScalarValue;
-<span class="kw">use </span>datafusion_expr::ColumnarValue;
 <span class="kw">use </span>datatypes::arrow;
-<span class="kw">use </span>datatypes::arrow::array::{ArrayRef, BooleanArray};
-<span class="kw">use </span>datatypes::arrow::record_batch::RecordBatch;
+<span class="kw">use </span>datatypes::arrow::array::ArrayRef;
 <span class="kw">use </span>datatypes::data_type::{ConcreteDataType, DataType};
 <span class="kw">use </span>datatypes::prelude::{MutableVector, ScalarVectorBuilder, Vector, VectorRef};
-<span class="kw">use </span>datatypes::value::ValueRef;
+<span class="kw">use </span>datatypes::value::{Value, ValueRef};
 <span class="kw">use </span>datatypes::vectors::{
     Helper, UInt64Vector, UInt64VectorBuilder, UInt8Vector, UInt8VectorBuilder,
 };
@@ -1238,10 +1212,7 @@
 <span class="kw">use </span>store_api::storage::ColumnId;
 <span class="kw">use </span>table::predicate::Predicate;
 
-<span class="kw">use </span><span class="kw">crate</span>::error::{
-    ComputeArrowSnafu, ConvertVectorSnafu, NewRecordBatchSnafu, PrimaryKeyLengthMismatchSnafu,
-    <span class="prelude-ty">Result</span>,
-};
+<span class="kw">use </span><span class="kw">crate</span>::error::{ComputeArrowSnafu, ConvertVectorSnafu, PrimaryKeyLengthMismatchSnafu, <span class="prelude-ty">Result</span>};
 <span class="kw">use </span><span class="kw">crate</span>::flush::WriteBufferManagerRef;
 <span class="kw">use </span><span class="kw">crate</span>::memtable::{
     AllocTracker, BoxedBatchIterator, KeyValues, Memtable, MemtableBuilder, MemtableId,
@@ -1504,48 +1475,39 @@
 
     <span class="doccomment">/// Iterates all series in [SeriesSet].
     </span><span class="kw">fn </span>iter_series(<span class="kw-2">&amp;</span><span class="self">self</span>, projection: HashSet&lt;ColumnId&gt;, predicate: <span class="prelude-ty">Option</span>&lt;Predicate&gt;) -&gt; Iter {
-        <span class="kw">let </span>(primary_key_builders, primary_key_schema) =
-            primary_key_builders(<span class="kw-2">&amp;</span><span class="self">self</span>.region_metadata, <span class="number">1</span>);
+        <span class="kw">let </span>primary_key_schema = primary_key_schema(<span class="kw-2">&amp;</span><span class="self">self</span>.region_metadata);
+        <span class="kw">let </span>primary_key_datatypes = <span class="self">self
+            </span>.region_metadata
+            .primary_key_columns()
+            .map(|pk| pk.column_schema.data_type.clone())
+            .collect();
 
-        <span class="kw">let </span>physical_exprs: Vec&lt;<span class="kw">_</span>&gt; = predicate
-            .and_then(|p| p.to_physical_exprs(<span class="kw-2">&amp;</span>primary_key_schema).ok())
-            .unwrap_or_default();
-
-        Iter {
-            metadata: <span class="self">self</span>.region_metadata.clone(),
-            series: <span class="self">self</span>.series.clone(),
+        Iter::new(
+            <span class="self">self</span>.region_metadata.clone(),
+            <span class="self">self</span>.series.clone(),
             projection,
-            last_key: <span class="prelude-val">None</span>,
-            predicate: physical_exprs,
-            pk_schema: primary_key_schema,
-            primary_key_builders,
-            codec: <span class="self">self</span>.codec.clone(),
-            metrics: Metrics::default(),
-        }
+            predicate,
+            primary_key_schema,
+            primary_key_datatypes,
+            <span class="self">self</span>.codec.clone(),
+        )
     }
 }
 
-<span class="doccomment">/// Creates primary key array builders and arrow's schema for primary keys of given region schema.
-</span><span class="kw">fn </span>primary_key_builders(
-    region_metadata: <span class="kw-2">&amp;</span>RegionMetadataRef,
-    num_pk_rows: usize,
-) -&gt; (Vec&lt;Box&lt;<span class="kw">dyn </span>MutableVector&gt;&gt;, arrow::datatypes::SchemaRef) {
-    <span class="kw">let </span>(builders, fields): (<span class="kw">_</span>, Vec&lt;<span class="kw">_</span>&gt;) = region_metadata
+<span class="doccomment">/// Creates an arrow [SchemaRef](arrow::datatypes::SchemaRef) that only contains primary keys
+/// of given region schema
+</span><span class="kw">fn </span>primary_key_schema(region_metadata: <span class="kw-2">&amp;</span>RegionMetadataRef) -&gt; arrow::datatypes::SchemaRef {
+    <span class="kw">let </span>fields = region_metadata
         .primary_key_columns()
         .map(|pk| {
-            (
-                pk.column_schema
-                    .data_type
-                    .create_mutable_vector(num_pk_rows),
-                arrow::datatypes::Field::new(
-                    pk.column_schema.name.clone(),
-                    pk.column_schema.data_type.as_arrow_type(),
-                    pk.column_schema.is_nullable(),
-                ),
+            arrow::datatypes::Field::new(
+                pk.column_schema.name.clone(),
+                pk.column_schema.data_type.as_arrow_type(),
+                pk.column_schema.is_nullable(),
             )
         })
-        .unzip();
-    (builders, Arc::new(arrow::datatypes::Schema::new(fields)))
+        .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();
+    Arc::new(arrow::datatypes::Schema::new(fields))
 }
 
 <span class="doccomment">/// Metrics for reading the memtable.
@@ -1568,11 +1530,43 @@
     series: Arc&lt;SeriesRwLockMap&gt;,
     projection: HashSet&lt;ColumnId&gt;,
     last_key: <span class="prelude-ty">Option</span>&lt;Vec&lt;u8&gt;&gt;,
-    predicate: Vec&lt;Arc&lt;<span class="kw">dyn </span>PhysicalExpr&gt;&gt;,
+    predicate: Vec&lt;SimpleFilterEvaluator&gt;,
     pk_schema: arrow::datatypes::SchemaRef,
-    primary_key_builders: Vec&lt;Box&lt;<span class="kw">dyn </span>MutableVector&gt;&gt;,
+    pk_datatypes: Vec&lt;ConcreteDataType&gt;,
     codec: Arc&lt;McmpRowCodec&gt;,
     metrics: Metrics,
+}
+
+<span class="kw">impl </span>Iter {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(
+        metadata: RegionMetadataRef,
+        series: Arc&lt;SeriesRwLockMap&gt;,
+        projection: HashSet&lt;ColumnId&gt;,
+        predicate: <span class="prelude-ty">Option</span>&lt;Predicate&gt;,
+        pk_schema: arrow::datatypes::SchemaRef,
+        pk_datatypes: Vec&lt;ConcreteDataType&gt;,
+        codec: Arc&lt;McmpRowCodec&gt;,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="kw">let </span>simple_filters = predicate
+            .map(|p| {
+                p.exprs()
+                    .iter()
+                    .filter_map(|f| SimpleFilterEvaluator::try_new(f.df_expr()))
+                    .collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;()
+            })
+            .unwrap_or_default();
+        <span class="self">Self </span>{
+            metadata,
+            series,
+            projection,
+            last_key: <span class="prelude-val">None</span>,
+            predicate: simple_filters,
+            pk_schema,
+            pk_datatypes,
+            codec,
+            metrics: Metrics::default(),
+        }
+    }
 }
 
 <span class="kw">impl </span>Drop <span class="kw">for </span>Iter {
@@ -1614,7 +1608,7 @@
                     <span class="kw-2">&amp;</span><span class="self">self</span>.codec,
                     primary_key.as_slice(),
                     <span class="kw-2">&amp;mut </span>series,
-                    <span class="kw-2">&amp;mut </span><span class="self">self</span>.primary_key_builders,
+                    <span class="kw-2">&amp;</span><span class="self">self</span>.pk_datatypes,
                     <span class="self">self</span>.pk_schema.clone(),
                     <span class="kw-2">&amp;</span><span class="self">self</span>.predicate,
                 )
@@ -1645,88 +1639,48 @@
     codec: <span class="kw-2">&amp;</span>Arc&lt;McmpRowCodec&gt;,
     pk: <span class="kw-2">&amp;</span>[u8],
     series: <span class="kw-2">&amp;mut </span>Series,
-    builders: <span class="kw-2">&amp;mut </span>[Box&lt;<span class="kw">dyn </span>MutableVector&gt;],
+    datatypes: <span class="kw-2">&amp;</span>[ConcreteDataType],
     pk_schema: arrow::datatypes::SchemaRef,
-    predicate: <span class="kw-2">&amp;</span>[Arc&lt;<span class="kw">dyn </span>PhysicalExpr&gt;],
+    predicates: <span class="kw-2">&amp;</span>[SimpleFilterEvaluator],
 ) -&gt; bool {
     <span class="comment">// no primary key, we simply return true.
     </span><span class="kw">if </span>pk_schema.fields().is_empty() {
         <span class="kw">return </span><span class="bool-val">true</span>;
     }
 
-    <span class="kw">if let </span><span class="prelude-val">Some</span>(rb) = series.pk_cache.as_ref() {
-        prune_inner(predicate, rb).unwrap_or(<span class="bool-val">true</span>)
+    <span class="comment">// retrieve primary key values from cache or decode from bytes.
+    </span><span class="kw">let </span>pk_values = <span class="kw">if let </span><span class="prelude-val">Some</span>(pk_values) = series.pk_cache.as_ref() {
+        pk_values
     } <span class="kw">else </span>{
-        <span class="kw">let </span>rb = <span class="kw">match </span>pk_to_record_batch(codec, pk, builders, pk_schema) {
-            <span class="prelude-val">Ok</span>(rb) =&gt; rb,
-            <span class="prelude-val">Err</span>(e) =&gt; {
-                <span class="macro">error!</span>(e; <span class="string">"Failed to build record batch from primary keys"</span>);
-                <span class="kw">return </span><span class="bool-val">true</span>;
-            }
-        };
-        <span class="kw">let </span>res = prune_inner(predicate, <span class="kw-2">&amp;</span>rb).unwrap_or(<span class="bool-val">true</span>);
-        series.update_pk_cache(rb);
-        res
-    }
-}
+        <span class="kw">let </span>pk_values = codec.decode(pk);
+        <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = pk_values {
+            <span class="macro">error!</span>(e; <span class="string">"Failed to decode primary key"</span>);
+            <span class="kw">return </span><span class="bool-val">true</span>;
+        }
+        series.update_pk_cache(pk_values.unwrap());
+        series.pk_cache.as_ref().unwrap()
+    };
 
-<span class="kw">fn </span>prune_inner(predicates: <span class="kw-2">&amp;</span>[Arc&lt;<span class="kw">dyn </span>PhysicalExpr&gt;], primary_key: <span class="kw-2">&amp;</span>RecordBatch) -&gt; <span class="prelude-ty">Result</span>&lt;bool&gt; {
-    <span class="kw">for </span>expr <span class="kw">in </span>predicates {
-        <span class="comment">// evaluate every filter against primary key
-        </span><span class="kw">let </span><span class="prelude-val">Ok</span>(eva) = expr.evaluate(primary_key) <span class="kw">else </span>{
+    <span class="comment">// evaluate predicates against primary key values
+    </span><span class="kw">let </span><span class="kw-2">mut </span>result = <span class="bool-val">true</span>;
+    <span class="kw">for </span>predicate <span class="kw">in </span>predicates {
+        <span class="comment">// ignore predicates that are not referencing primary key columns
+        </span><span class="kw">let </span><span class="prelude-val">Ok</span>(index) = pk_schema.index_of(predicate.column_name()) <span class="kw">else </span>{
             <span class="kw">continue</span>;
         };
-        <span class="kw">let </span>result = <span class="kw">match </span>eva {
-            ColumnarValue::Array(array) =&gt; {
-                <span class="kw">let </span>predicate_array = array.as_any().downcast_ref::&lt;BooleanArray&gt;().unwrap();
-                predicate_array
-                    .into_iter()
-                    .map(|x| x.unwrap_or(<span class="bool-val">true</span>))
-                    .next()
-                    .unwrap_or(<span class="bool-val">true</span>)
-            }
-            <span class="comment">// result was a column
-            </span>ColumnarValue::Scalar(ScalarValue::Boolean(v)) =&gt; v.unwrap_or(<span class="bool-val">true</span>),
-            <span class="kw">_ </span>=&gt; {
-                <span class="macro">unreachable!</span>(<span class="string">"Unexpected primary key record batch evaluation result: {:?}, primary key: {:?}"</span>, eva, primary_key);
-            }
-        };
-        <span class="macro">trace!</span>(
-            <span class="string">"Evaluate primary key {:?} against filter: {:?}, result: {:?}"</span>,
-            primary_key,
-            expr,
-            result
-        );
-        <span class="kw">if </span>!result {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
-        }
+        <span class="comment">// Safety: arrow schema and datatypes are constructed from the same source.
+        </span><span class="kw">let </span>scalar_value = pk_values[index]
+            .try_to_scalar_value(<span class="kw-2">&amp;</span>datatypes[index])
+            .unwrap();
+        result &amp;= predicate.evaluate_scalar(<span class="kw-2">&amp;</span>scalar_value).unwrap_or(<span class="bool-val">true</span>);
     }
-    <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
-}
 
-<span class="kw">fn </span>pk_to_record_batch(
-    codec: <span class="kw-2">&amp;</span>Arc&lt;McmpRowCodec&gt;,
-    bytes: <span class="kw-2">&amp;</span>[u8],
-    builders: <span class="kw-2">&amp;mut </span>[Box&lt;<span class="kw">dyn </span>MutableVector&gt;],
-    pk_schema: arrow::datatypes::SchemaRef,
-) -&gt; <span class="prelude-ty">Result</span>&lt;RecordBatch&gt; {
-    <span class="kw">let </span>pk_values = codec.decode(bytes).unwrap();
-
-    <span class="kw">let </span>arrays = builders
-        .iter_mut()
-        .zip(pk_values.iter())
-        .map(|(builder, pk_value)| {
-            builder.push_value_ref(pk_value.as_value_ref());
-            builder.to_vector().to_arrow_array()
-        })
-        .collect();
-
-    RecordBatch::try_new(pk_schema, arrays).context(NewRecordBatchSnafu)
+    result
 }
 
 <span class="doccomment">/// A `Series` holds a list of field values of some given primary key.
 </span><span class="kw">struct </span>Series {
-    pk_cache: <span class="prelude-ty">Option</span>&lt;RecordBatch&gt;,
+    pk_cache: <span class="prelude-ty">Option</span>&lt;Vec&lt;Value&gt;&gt;,
     active: ValueBuilder,
     frozen: Vec&lt;Values&gt;,
 }
@@ -1745,8 +1699,8 @@
         <span class="self">self</span>.active.push(ts, sequence, op_type <span class="kw">as </span>u8, values);
     }
 
-    <span class="kw">fn </span>update_pk_cache(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pk_batch: RecordBatch) {
-        <span class="self">self</span>.pk_cache = <span class="prelude-val">Some</span>(pk_batch);
+    <span class="kw">fn </span>update_pk_cache(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pk_values: Vec&lt;Value&gt;) {
+        <span class="self">self</span>.pk_cache = <span class="prelude-val">Some</span>(pk_values);
     }
 
     <span class="doccomment">/// Freezes the active part and push it to `frozen`.

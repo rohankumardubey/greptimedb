@@ -322,9 +322,6 @@
 <a href="#321" id="321">321</a>
 <a href="#322" id="322">322</a>
 <a href="#323" id="323">323</a>
-<a href="#324" id="324">324</a>
-<a href="#325" id="325">325</a>
-<a href="#326" id="326">326</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -347,10 +344,9 @@
 <span class="kw">use </span>common_telemetry::{error, info, tracing};
 <span class="kw">use </span>datafusion::logical_expr;
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
-<span class="kw">use </span>store_api::metadata::{RegionMetadata, RegionMetadataBuilder, RegionMetadataRef};
+<span class="kw">use </span>store_api::metadata::{RegionMetadataBuilder, RegionMetadataRef};
 <span class="kw">use </span>store_api::metric_engine_consts::DATA_SCHEMA_TABLE_ID_COLUMN_NAME;
 <span class="kw">use </span>store_api::region_engine::RegionEngine;
-<span class="kw">use </span>store_api::storage::consts::ReservedColumnId;
 <span class="kw">use </span>store_api::storage::{RegionId, ScanRequest};
 
 <span class="kw">use </span><span class="kw">crate</span>::engine::MetricEngineInner;
@@ -586,7 +582,6 @@
     <span class="kw">use </span>store_api::region_request::RegionRequest;
 
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use </span><span class="kw">crate</span>::engine::alter;
     <span class="kw">use </span><span class="kw">crate</span>::test_util::{
         alter_logical_region_add_tag_columns, create_logical_region_request, TestEnv,
     };
@@ -598,7 +593,6 @@
 
         <span class="kw">let </span>logical_region_id = env.default_logical_region_id();
         <span class="kw">let </span>physical_region_id = env.default_physical_region_id();
-        <span class="kw">let </span>data_region_id = utils::to_data_region_id(physical_region_id);
 
         <span class="comment">// create another logical region
         </span><span class="kw">let </span>logical_region_id2 = RegionId::new(<span class="number">1112345678</span>, <span class="number">999</span>);
@@ -618,7 +612,7 @@
             </span>.unwrap();
 
         <span class="comment">// check explicit projection
-        </span><span class="kw">let </span><span class="kw-2">mut </span>scan_req = ScanRequest {
+        </span><span class="kw">let </span>scan_req = ScanRequest {
             projection: <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>]),
             filters: <span class="macro">vec!</span>[],
             ..Default::default()
@@ -641,7 +635,7 @@
         );
 
         <span class="comment">// check default projection
-        </span><span class="kw">let </span><span class="kw-2">mut </span>scan_req = ScanRequest::default();
+        </span><span class="kw">let </span>scan_req = ScanRequest::default();
         <span class="kw">let </span>scan_req = env
             .metric()
             .inner

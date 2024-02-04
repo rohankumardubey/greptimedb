@@ -129,14 +129,6 @@
 <a href="#128" id="128">128</a>
 <a href="#129" id="129">129</a>
 <a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
-<a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
-<a href="#134" id="134">134</a>
-<a href="#135" id="135">135</a>
-<a href="#136" id="136">136</a>
-<a href="#137" id="137">137</a>
-<a href="#138" id="138">138</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -153,25 +145,17 @@
 
 </span><span class="doccomment">//! Drop a metric region
 
-</span><span class="kw">use </span>mito2::engine::MITO_ENGINE_NAME;
-<span class="kw">use </span>object_store::util::join_dir;
-<span class="kw">use </span>snafu::{OptionExt, ResultExt};
-<span class="kw">use </span>store_api::metric_engine_consts::{
-    DATA_REGION_SUBDIR, METADATA_REGION_SUBDIR, PHYSICAL_TABLE_METADATA_KEY,
-};
+</span><span class="kw">use </span>snafu::ResultExt;
 <span class="kw">use </span>store_api::region_engine::RegionEngine;
-<span class="kw">use </span>store_api::region_request::{
-    AffectedRows, RegionDropRequest, RegionOpenRequest, RegionRequest,
-};
+<span class="kw">use </span>store_api::region_request::{AffectedRows, RegionDropRequest, RegionRequest};
 <span class="kw">use </span>store_api::storage::RegionId;
 
 <span class="kw">use </span><span class="kw">super</span>::MetricEngineInner;
 <span class="kw">use </span><span class="kw">crate</span>::error::{
-    CloseMitoRegionSnafu, Error, LogicalRegionNotFoundSnafu, OpenMitoRegionSnafu,
-    PhysicalRegionBusySnafu, PhysicalRegionNotFoundSnafu, <span class="prelude-ty">Result</span>,
+    CloseMitoRegionSnafu, LogicalRegionNotFoundSnafu, PhysicalRegionBusySnafu, <span class="prelude-ty">Result</span>,
 };
 <span class="kw">use </span><span class="kw">crate</span>::metrics::PHYSICAL_REGION_COUNT;
-<span class="kw">use crate</span>::{metadata_region, utils};
+<span class="kw">use </span><span class="kw">crate</span>::utils;
 
 <span class="kw">impl </span>MetricEngineInner {
     <span class="kw">pub async fn </span>drop_region(
