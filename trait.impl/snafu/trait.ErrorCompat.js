@@ -21,7 +21,7 @@
 "datanode":[["impl ErrorCompat for <a class=\"enum\" href=\"datanode/error/enum.Error.html\" title=\"enum datanode::error::Error\">Error</a>"]],
 "datatypes":[["impl ErrorCompat for <a class=\"enum\" href=\"datatypes/error/enum.Error.html\" title=\"enum datatypes::error::Error\">Error</a>"]],
 "file_engine":[["impl ErrorCompat for <a class=\"enum\" href=\"file_engine/error/enum.Error.html\" title=\"enum file_engine::error::Error\">Error</a>"]],
-"flow":[["impl ErrorCompat for <a class=\"enum\" href=\"flow/adapter/error/enum.Error.html\" title=\"enum flow::adapter::error::Error\">Error</a>"],["impl ErrorCompat for <a class=\"enum\" href=\"flow/expr/error/enum.EvalError.html\" title=\"enum flow::expr::error::EvalError\">EvalError</a>"]],
+"flow":[["impl ErrorCompat for <a class=\"enum\" href=\"flow/expr/error/enum.EvalError.html\" title=\"enum flow::expr::error::EvalError\">EvalError</a>"],["impl ErrorCompat for <a class=\"enum\" href=\"flow/adapter/error/enum.Error.html\" title=\"enum flow::adapter::error::Error\">Error</a>"]],
 "frontend":[["impl ErrorCompat for <a class=\"enum\" href=\"frontend/error/enum.Error.html\" title=\"enum frontend::error::Error\">Error</a>"]],
 "index":[["impl ErrorCompat for <a class=\"enum\" href=\"index/inverted_index/error/enum.Error.html\" title=\"enum index::inverted_index::error::Error\">Error</a>"]],
 "log_store":[["impl ErrorCompat for <a class=\"enum\" href=\"log_store/error/enum.Error.html\" title=\"enum log_store::error::Error\">Error</a>"]],

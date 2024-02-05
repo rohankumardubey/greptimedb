@@ -91,7 +91,7 @@
 #[stack_trace_debug]
 </span><span class="kw">pub enum </span>EvalError {
     <span class="attr">#[snafu(display(<span class="string">"Division by zero"</span>))]
-    </span>DivisionByZero,
+    </span>DivisionByZero { location: Location },
 
     <span class="attr">#[snafu(display(<span class="string">"Type mismatch: expected {expected}, actual {actual}"</span>))]
     </span>TypeMismatch {
