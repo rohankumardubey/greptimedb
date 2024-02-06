@@ -755,6 +755,10 @@
 <a href="#754" id="754">754</a>
 <a href="#755" id="755">755</a>
 <a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -969,6 +973,10 @@
             .start()
             .<span class="kw">await
             </span>.context(StartWalOptionsAllocatorSnafu)<span class="question-mark">?</span>;
+
+        plugins::start_frontend_plugins(<span class="self">self</span>.frontend.plugins().clone())
+            .<span class="kw">await
+            </span>.context(StartFrontendSnafu)<span class="question-mark">?</span>;
 
         <span class="self">self</span>.frontend.start().<span class="kw">await</span>.context(StartFrontendSnafu)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(())
