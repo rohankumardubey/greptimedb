@@ -271,6 +271,19 @@
 <a href="#270" id="270">270</a>
 <a href="#271" id="271">271</a>
 <a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -305,7 +318,7 @@
 <span class="kw">use </span>tokio_util::compat::{TokioAsyncReadCompatExt, TokioAsyncWriteCompatExt};
 
 <span class="kw">use </span><span class="kw">crate</span>::error::{
-    IndexFinishSnafu, OperateAbortedIndexSnafu, PuffinAddBlobSnafu, PuffinFinishSnafu,
+    BiSnafu, IndexFinishSnafu, OperateAbortedIndexSnafu, PuffinAddBlobSnafu, PuffinFinishSnafu,
     PushIndexValueSnafu, <span class="prelude-ty">Result</span>,
 };
 <span class="kw">use </span><span class="kw">crate</span>::metrics::{
@@ -522,8 +535,21 @@
             <span class="self">self</span>.index_creator.finish(<span class="kw-2">&amp;mut </span>index_writer),
             puffin_writer.add_blob(blob)
         );
-        index_finish.context(IndexFinishSnafu)<span class="question-mark">?</span>;
-        puffin_add_blob.context(PuffinAddBlobSnafu)<span class="question-mark">?</span>;
+
+        <span class="kw">match </span>(
+            puffin_add_blob.context(PuffinAddBlobSnafu),
+            index_finish.context(IndexFinishSnafu),
+        ) {
+            (<span class="prelude-val">Err</span>(e1), <span class="prelude-val">Err</span>(e2)) =&gt; BiSnafu {
+                first: Box::new(e1),
+                second: Box::new(e2),
+            }
+            .fail()<span class="question-mark">?</span>,
+
+            (<span class="prelude-val">Ok</span>(<span class="kw">_</span>), e @ <span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; e<span class="question-mark">?</span>,
+            (e @ <span class="prelude-val">Err</span>(<span class="kw">_</span>), <span class="prelude-val">Ok</span>(<span class="kw">_</span>)) =&gt; e<span class="question-mark">?</span>,
+            <span class="kw">_ </span>=&gt; {}
+        }
 
         <span class="kw">let </span>byte_count = puffin_writer.finish().<span class="kw">await</span>.context(PuffinFinishSnafu)<span class="question-mark">?</span>;
         guard.inc_byte_count(byte_count);
