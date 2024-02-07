@@ -370,7 +370,7 @@
         index_store: ObjectStore,
         intermediate_manager: IntermediateManager,
         memory_usage_threshold: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-        row_group_size: NonZeroUsize,
+        segment_row_count: NonZeroUsize,
     ) -&gt; <span class="self">Self </span>{
         <span class="comment">// `memory_usage_threshold` is the total memory usage threshold of the index creation,
         // so we need to divide it by the number of columns
@@ -382,7 +382,7 @@
             intermediate_manager,
         ));
         <span class="kw">let </span>sorter = ExternalSorter::factory(temp_file_provider.clone() <span class="kw">as _</span>, memory_threshold);
-        <span class="kw">let </span>index_creator = Box::new(SortIndexCreator::new(sorter, row_group_size));
+        <span class="kw">let </span>index_creator = Box::new(SortIndexCreator::new(sorter, segment_row_count));
 
         <span class="kw">let </span>codec = IndexValuesCodec::from_tag_columns(metadata.primary_key_columns());
         <span class="self">Self </span>{

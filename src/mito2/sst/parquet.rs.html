@@ -399,6 +399,12 @@
 <a href="#398" id="398">398</a>
 <a href="#399" id="399">399</a>
 <a href="#400" id="400">400</a>
+<a href="#401" id="401">401</a>
+<a href="#402" id="402">402</a>
+<a href="#403" id="403">403</a>
+<a href="#404" id="404">404</a>
+<a href="#405" id="405">405</a>
+<a href="#406" id="406">406</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -421,6 +427,7 @@
 <span class="kw">mod </span>page_reader;
 <span class="kw">pub mod </span>reader;
 <span class="kw">pub mod </span>row_group;
+<span class="kw">mod </span>row_selection;
 <span class="kw">mod </span>stats;
 <span class="kw">pub mod </span>writer;
 
@@ -439,6 +446,8 @@
 </span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const </span>DEFAULT_READ_BATCH_SIZE: usize = <span class="number">1024</span>;
 <span class="doccomment">/// Default row group size for parquet files.
 </span><span class="kw">const </span>DEFAULT_ROW_GROUP_SIZE: usize = <span class="number">100 </span>* DEFAULT_READ_BATCH_SIZE;
+<span class="doccomment">/// Default segment row count for inverted index.
+</span><span class="kw">const </span>DEFAULT_INDEX_SEGMENT_ROW_COUNT: usize = <span class="number">1024</span>;
 
 <span class="doccomment">/// Parquet write options.
 </span><span class="attr">#[derive(Debug)]
@@ -447,6 +456,8 @@
     </span><span class="kw">pub </span>write_buffer_size: ReadableSize,
     <span class="doccomment">/// Row group size.
     </span><span class="kw">pub </span>row_group_size: usize,
+    <span class="doccomment">/// Segment row count for inverted index.
+    </span><span class="kw">pub </span>index_segment_row_count: usize,
 }
 
 <span class="kw">impl </span>Default <span class="kw">for </span>WriteOptions {
@@ -454,6 +465,7 @@
         WriteOptions {
             write_buffer_size: DEFAULT_WRITE_BUFFER_SIZE,
             row_group_size: DEFAULT_ROW_GROUP_SIZE,
+            index_segment_row_count: DEFAULT_INDEX_SEGMENT_ROW_COUNT,
         }
     }
 }

@@ -216,6 +216,7 @@
 <a href="#215" id="215">215</a>
 <a href="#216" id="216">216</a>
 <a href="#217" id="217">217</a>
+<a href="#218" id="218">218</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -357,6 +358,7 @@
                 file_id,
                 file_path: index_file_path,
                 metadata: <span class="kw-2">&amp;</span>request.metadata,
+                segment_row_count: write_opts.index_segment_row_count,
                 row_group_size: write_opts.row_group_size,
                 object_store: <span class="self">self</span>.object_store.clone(),
                 intermediate_manager: <span class="self">self</span>.intermediate_manager.clone(),

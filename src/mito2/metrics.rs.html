@@ -251,6 +251,8 @@
 <a href="#250" id="250">250</a>
 <a href="#251" id="251">251</a>
 <a href="#252" id="252">252</a>
+<a href="#253" id="253">253</a>
+<a href="#254" id="254">254</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -385,6 +387,8 @@
     <span class="doccomment">/// Counter of filtered rows by precise filter.
     </span><span class="kw">pub static </span><span class="kw-2">ref </span>PRECISE_FILTER_ROWS_TOTAL: IntCounterVec =
         <span class="macro">register_int_counter_vec!</span>(<span class="string">"greptime_mito_precise_filter_rows_total"</span>, <span class="string">"mito precise filter rows total"</span>, <span class="kw-2">&amp;</span>[TYPE_LABEL]).unwrap();
+    <span class="kw">pub static </span><span class="kw-2">ref </span>READ_ROWS_IN_ROW_GROUP_TOTAL: IntCounterVec =
+        <span class="macro">register_int_counter_vec!</span>(<span class="string">"greptime_mito_read_rows_in_row_group_total"</span>, <span class="string">"mito read rows in row group total"</span>, <span class="kw-2">&amp;</span>[TYPE_LABEL]).unwrap();
     <span class="comment">// ------- End of query metrics.
 
     // Cache related metrics.

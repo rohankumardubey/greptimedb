@@ -330,6 +330,24 @@
 <a href="#329" id="329">329</a>
 <a href="#330" id="330">330</a>
 <a href="#331" id="331">331</a>
+<a href="#332" id="332">332</a>
+<a href="#333" id="333">333</a>
+<a href="#334" id="334">334</a>
+<a href="#335" id="335">335</a>
+<a href="#336" id="336">336</a>
+<a href="#337" id="337">337</a>
+<a href="#338" id="338">338</a>
+<a href="#339" id="339">339</a>
+<a href="#340" id="340">340</a>
+<a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -461,6 +479,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) file_path: String,
     <span class="kw">pub</span>(<span class="kw">crate</span>) metadata: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>RegionMetadataRef,
     <span class="kw">pub</span>(<span class="kw">crate</span>) row_group_size: usize,
+    <span class="kw">pub</span>(<span class="kw">crate</span>) segment_row_count: usize,
     <span class="kw">pub</span>(<span class="kw">crate</span>) object_store: ObjectStore,
     <span class="kw">pub</span>(<span class="kw">crate</span>) intermediate_manager: IntermediateManager,
 }
@@ -485,6 +504,14 @@
             <span class="kw">return </span>Indexer::default();
         }
 
+        <span class="kw">let </span><span class="prelude-val">Some</span>(<span class="kw-2">mut </span>segment_row_count) = NonZeroUsize::new(<span class="self">self</span>.segment_row_count) <span class="kw">else </span>{
+            <span class="macro">warn!</span>(
+                <span class="string">"Segment row count is 0, skip creating index, region_id: {}, file_id: {}"</span>,
+                <span class="self">self</span>.metadata.region_id, <span class="self">self</span>.file_id,
+            );
+            <span class="kw">return </span>Indexer::default();
+        };
+
         <span class="kw">let </span><span class="prelude-val">Some</span>(row_group_size) = NonZeroUsize::new(<span class="self">self</span>.row_group_size) <span class="kw">else </span>{
             <span class="macro">warn!</span>(
                 <span class="string">"Row group size is 0, skip creating index, region_id: {}, file_id: {}"</span>,
@@ -493,6 +520,11 @@
             <span class="kw">return </span>Indexer::default();
         };
 
+        <span class="comment">// if segment row count not aligned with row group size, adjust it to be aligned.
+        </span><span class="kw">if </span>row_group_size.get() % segment_row_count.get() != <span class="number">0 </span>{
+            segment_row_count = row_group_size;
+        }
+
         <span class="kw">let </span>creator = SstIndexCreator::new(
             <span class="self">self</span>.file_path,
             <span class="self">self</span>.file_id,
@@ -500,7 +532,7 @@
             <span class="self">self</span>.object_store,
             <span class="self">self</span>.intermediate_manager,
             <span class="self">self</span>.mem_threshold_index_create,
-            row_group_size,
+            segment_row_count,
         )
         .with_buffer_size(<span class="self">self</span>.write_buffer_size);
 
@@ -595,6 +627,7 @@
             file_id: FileId::random(),
             file_path: <span class="string">"test"</span>.to_string(),
             metadata: <span class="kw-2">&amp;</span>metadata,
+            segment_row_count: <span class="number">16</span>,
             row_group_size: <span class="number">1024</span>,
             object_store: mock_object_store(),
             intermediate_manager: mock_intm_mgr(),
@@ -614,6 +647,7 @@
             file_id: FileId::random(),
             file_path: <span class="string">"test"</span>.to_string(),
             metadata: <span class="kw-2">&amp;</span>metadata,
+            segment_row_count: <span class="number">16</span>,
             row_group_size: <span class="number">1024</span>,
             object_store: mock_object_store(),
             intermediate_manager: mock_intm_mgr(),
@@ -633,6 +667,7 @@
             file_id: FileId::random(),
             file_path: <span class="string">"test"</span>.to_string(),
             metadata: <span class="kw-2">&amp;</span>metadata,
+            segment_row_count: <span class="number">16</span>,
             row_group_size: <span class="number">1024</span>,
             object_store: mock_object_store(),
             intermediate_manager: mock_intm_mgr(),
@@ -652,6 +687,7 @@
             file_id: FileId::random(),
             file_path: <span class="string">"test"</span>.to_string(),
             metadata: <span class="kw-2">&amp;</span>metadata,
+            segment_row_count: <span class="number">0</span>,
             row_group_size: <span class="number">0</span>,
             object_store: mock_object_store(),
             intermediate_manager: mock_intm_mgr(),

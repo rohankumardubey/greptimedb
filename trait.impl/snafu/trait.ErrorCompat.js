@@ -28,7 +28,7 @@
 "meta_client":[["impl ErrorCompat for <a class=\"enum\" href=\"meta_client/error/enum.Error.html\" title=\"enum meta_client::error::Error\">Error</a>"]],
 "meta_srv":[["impl ErrorCompat for <a class=\"enum\" href=\"meta_srv/error/enum.Error.html\" title=\"enum meta_srv::error::Error\">Error</a>"]],
 "metric_engine":[["impl ErrorCompat for <a class=\"enum\" href=\"metric_engine/error/enum.Error.html\" title=\"enum metric_engine::error::Error\">Error</a>"]],
-"mito2":[["impl ErrorCompat for <a class=\"enum\" href=\"mito2/error/enum.Error.html\" title=\"enum mito2::error::Error\">Error</a>"],["impl ErrorCompat for <a class=\"struct\" href=\"mito2/sst/file/struct.ParseIdError.html\" title=\"struct mito2::sst::file::ParseIdError\">ParseIdError</a>"]],
+"mito2":[["impl ErrorCompat for <a class=\"struct\" href=\"mito2/sst/file/struct.ParseIdError.html\" title=\"struct mito2::sst::file::ParseIdError\">ParseIdError</a>"],["impl ErrorCompat for <a class=\"enum\" href=\"mito2/error/enum.Error.html\" title=\"enum mito2::error::Error\">Error</a>"]],
 "operator":[["impl ErrorCompat for <a class=\"enum\" href=\"operator/error/enum.Error.html\" title=\"enum operator::error::Error\">Error</a>"]],
 "partition":[["impl ErrorCompat for <a class=\"enum\" href=\"partition/error/enum.Error.html\" title=\"enum partition::error::Error\">Error</a>"]],
 "promql":[["impl ErrorCompat for <a class=\"enum\" href=\"promql/error/enum.Error.html\" title=\"enum promql::error::Error\">Error</a>"]],
