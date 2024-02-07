@@ -796,6 +796,16 @@
 <a href="#795" id="795">795</a>
 <a href="#796" id="796">796</a>
 <a href="#797" id="797">797</a>
+<a href="#798" id="798">798</a>
+<a href="#799" id="799">799</a>
+<a href="#800" id="800">800</a>
+<a href="#801" id="801">801</a>
+<a href="#802" id="802">802</a>
+<a href="#803" id="803">803</a>
+<a href="#804" id="804">804</a>
+<a href="#805" id="805">805</a>
+<a href="#806" id="806">806</a>
+<a href="#807" id="807">807</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1276,6 +1286,15 @@
         source: common_procedure::Error,
     },
 
+    <span class="attr">#[snafu(display(<span class="string">"Failed to query procedure state"</span>))]
+    </span>QueryProcedure {
+        location: Location,
+        source: common_procedure::Error,
+    },
+
+    <span class="attr">#[snafu(display(<span class="string">"Procedure not found: {pid}"</span>))]
+    </span>ProcedureNotFound { location: Location, pid: String },
+
     <span class="attr">#[snafu(display(<span class="string">"Failed to submit procedure"</span>))]
     </span>SubmitProcedure {
         location: Location,
@@ -1504,6 +1523,7 @@
             | Error::InvalidArguments { .. }
             | Error::InitExportMetricsTask { .. }
             | Error::InvalidHeartbeatRequest { .. }
+            | Error::ProcedureNotFound { .. }
             | Error::TooManyPartitions { .. } =&gt; StatusCode::InvalidArguments,
             Error::LeaseKeyFromUtf8 { .. }
             | Error::LeaseValueFromUtf8 { .. }
@@ -1529,9 +1549,9 @@
             Error::RequestDatanode { source, .. } =&gt; source.status_code(),
             Error::InvalidCatalogValue { source, .. }
             | Error::InvalidFullTableName { source, .. } =&gt; source.status_code(),
-            Error::SubmitProcedure { source, .. } | Error::WaitProcedure { source, .. } =&gt; {
-                source.status_code()
-            }
+            Error::SubmitProcedure { source, .. }
+            | Error::WaitProcedure { source, .. }
+            | Error::QueryProcedure { source, .. } =&gt; source.status_code(),
             Error::ShutdownServer { source, .. } | Error::StartHttp { source, .. } =&gt; {
                 source.status_code()
             }

@@ -831,6 +831,7 @@
 <a href="#830" id="830">830</a>
 <a href="#831" id="831">831</a>
 <a href="#832" id="832">832</a>
+<a href="#833" id="833">833</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -846,10 +847,10 @@
 // limitations under the License.
 
 </span><span class="kw">mod </span>ask_leader;
-<span class="kw">mod </span>ddl;
 <span class="kw">mod </span>heartbeat;
 <span class="kw">mod </span>load_balance;
 <span class="kw">mod </span>lock;
+<span class="kw">mod </span>procedure;
 
 <span class="kw">mod </span>store;
 
@@ -866,9 +867,9 @@
     DeleteRangeResponse, PutRequest, PutResponse, RangeRequest, RangeResponse,
 };
 <span class="kw">use </span>common_telemetry::info;
-<span class="kw">use </span>ddl::Client <span class="kw">as </span>DdlClient;
 <span class="kw">use </span>heartbeat::Client <span class="kw">as </span>HeartbeatClient;
 <span class="kw">use </span>lock::Client <span class="kw">as </span>LockClient;
+<span class="kw">use </span>procedure::Client <span class="kw">as </span>ProcedureClient;
 <span class="kw">use </span>snafu::{OptionExt, ResultExt};
 <span class="kw">use </span>store::Client <span class="kw">as </span>StoreClient;
 
@@ -990,7 +991,7 @@
         }
         <span class="kw">if </span><span class="self">self</span>.enable_ddl {
             <span class="kw">let </span>mgr = <span class="self">self</span>.ddl_channel_manager.unwrap_or(mgr);
-            client.ddl = <span class="prelude-val">Some</span>(DdlClient::new(
+            client.ddl = <span class="prelude-val">Some</span>(ProcedureClient::new(
                 <span class="self">self</span>.id,
                 <span class="self">self</span>.role,
                 mgr,
@@ -1009,7 +1010,7 @@
     heartbeat: <span class="prelude-ty">Option</span>&lt;HeartbeatClient&gt;,
     store: <span class="prelude-ty">Option</span>&lt;StoreClient&gt;,
     lock: <span class="prelude-ty">Option</span>&lt;LockClient&gt;,
-    ddl: <span class="prelude-ty">Option</span>&lt;DdlClient&gt;,
+    ddl: <span class="prelude-ty">Option</span>&lt;ProcedureClient&gt;,
 }
 
 <span class="attr">#[async_trait::async_trait]
@@ -1161,7 +1162,8 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub async fn </span>submit_ddl_task(
+    <span class="doccomment">/// Submit a DDL task
+    </span><span class="kw">pub async fn </span>submit_ddl_task(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         req: SubmitDdlTaskRequest,
     ) -&gt; <span class="prelude-ty">Result</span>&lt;SubmitDdlTaskResponse&gt; {
@@ -1197,7 +1199,7 @@
     }
 
     <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>ddl_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;DdlClient&gt; {
+    </span><span class="kw">pub fn </span>ddl_client(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;ProcedureClient&gt; {
         <span class="self">self</span>.ddl
             .clone()
             .context(error::NotStartedSnafu { name: <span class="string">"ddl_client" </span>})

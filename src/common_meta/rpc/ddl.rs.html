@@ -602,13 +602,13 @@
 
 </span><span class="kw">use </span>std::result;
 
-<span class="kw">use </span>api::v1::meta::submit_ddl_task_request::Task;
+<span class="kw">use </span>api::v1::meta::ddl_task_request::Task;
 <span class="kw">use </span>api::v1::meta::{
     AlterTableTask <span class="kw">as </span>PbAlterTableTask, AlterTableTasks <span class="kw">as </span>PbAlterTableTasks,
     CreateTableTask <span class="kw">as </span>PbCreateTableTask, CreateTableTasks <span class="kw">as </span>PbCreateTableTasks,
-    DropTableTask <span class="kw">as </span>PbDropTableTask, DropTableTasks <span class="kw">as </span>PbDropTableTasks, Partition,
-    SubmitDdlTaskRequest <span class="kw">as </span>PbSubmitDdlTaskRequest,
-    SubmitDdlTaskResponse <span class="kw">as </span>PbSubmitDdlTaskResponse, TruncateTableTask <span class="kw">as </span>PbTruncateTableTask,
+    DdlTaskRequest <span class="kw">as </span>PbDdlTaskRequest, DdlTaskResponse <span class="kw">as </span>PbDdlTaskResponse,
+    DropTableTask <span class="kw">as </span>PbDropTableTask, DropTableTasks <span class="kw">as </span>PbDropTableTasks, Partition, ProcedureId,
+    TruncateTableTask <span class="kw">as </span>PbTruncateTableTask,
 };
 <span class="kw">use </span>api::v1::{AlterExpr, CreateTableExpr, DropTableExpr, TruncateTableExpr};
 <span class="kw">use </span>base64::engine::general_purpose;
@@ -734,7 +734,7 @@
     <span class="kw">pub </span>task: DdlTask,
 }
 
-<span class="kw">impl </span>TryFrom&lt;SubmitDdlTaskRequest&gt; <span class="kw">for </span>PbSubmitDdlTaskRequest {
+<span class="kw">impl </span>TryFrom&lt;SubmitDdlTaskRequest&gt; <span class="kw">for </span>PbDdlTaskRequest {
     <span class="kw">type </span>Error = error::Error;
 
     <span class="kw">fn </span>try_from(request: SubmitDdlTaskRequest) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
@@ -786,24 +786,24 @@
     </span><span class="kw">pub </span>table_ids: Vec&lt;TableId&gt;,
 }
 
-<span class="kw">impl </span>TryFrom&lt;PbSubmitDdlTaskResponse&gt; <span class="kw">for </span>SubmitDdlTaskResponse {
+<span class="kw">impl </span>TryFrom&lt;PbDdlTaskResponse&gt; <span class="kw">for </span>SubmitDdlTaskResponse {
     <span class="kw">type </span>Error = error::Error;
 
-    <span class="kw">fn </span>try_from(resp: PbSubmitDdlTaskResponse) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
+    <span class="kw">fn </span>try_from(resp: PbDdlTaskResponse) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
         <span class="kw">let </span>table_id = resp.table_id.map(|t| t.id);
         <span class="kw">let </span>table_ids = resp.table_ids.into_iter().map(|t| t.id).collect();
         <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
-            key: resp.key,
+            key: resp.pid.map(|pid| pid.key).unwrap_or_default(),
             table_id,
             table_ids,
         })
     }
 }
 
-<span class="kw">impl </span>From&lt;SubmitDdlTaskResponse&gt; <span class="kw">for </span>PbSubmitDdlTaskResponse {
+<span class="kw">impl </span>From&lt;SubmitDdlTaskResponse&gt; <span class="kw">for </span>PbDdlTaskResponse {
     <span class="kw">fn </span>from(val: SubmitDdlTaskResponse) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
-            key: val.key,
+            pid: <span class="prelude-val">Some</span>(ProcedureId { key: val.key }),
             table_id: val
                 .table_id
                 .map(|table_id| api::v1::meta::TableId { id: table_id }),

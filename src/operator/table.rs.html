@@ -95,6 +95,19 @@
 <a href="#94" id="94">94</a>
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
+<a href="#97" id="97">97</a>
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -109,11 +122,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-</span><span class="kw">use </span>async_trait::async_trait;
+</span><span class="kw">use </span>std::time::Duration;
+
+<span class="kw">use </span>async_trait::async_trait;
 <span class="kw">use </span>common_error::ext::BoxedError;
-<span class="kw">use </span>query::error <span class="kw">as </span>query_error;
-<span class="kw">use </span>query::error::Result <span class="kw">as </span>QueryResult;
-<span class="kw">use </span>query::table_mutation::{AffectedRows, TableMutationHandler};
+<span class="kw">use </span>common_function::handlers::{AffectedRows, TableMutationHandler};
+<span class="kw">use </span>common_query::error <span class="kw">as </span>query_error;
+<span class="kw">use </span>common_query::error::Result <span class="kw">as </span>QueryResult;
 <span class="kw">use </span>session::context::QueryContextRef;
 <span class="kw">use </span>snafu::ResultExt;
 <span class="kw">use </span>sqlparser::ast::ObjectName;
@@ -189,6 +204,17 @@
             .<span class="kw">await
             </span>.map_err(BoxedError::new)
             .context(query_error::TableMutationSnafu)
+    }
+
+    <span class="kw">async fn </span>migrate_region(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        _region_id: u64,
+        _from_peer: u64,
+        _to_peer: u64,
+        _replay_timeout: Duration,
+    ) -&gt; QueryResult&lt;String&gt; {
+        <span class="comment">// FIXME(dennis): implemented in the following PR.
+        </span><span class="macro">todo!</span>();
     }
 }
 </code></pre></div></section></main></body></html>

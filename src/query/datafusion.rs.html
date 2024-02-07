@@ -755,6 +755,8 @@
 <a href="#754" id="754">754</a>
 <a href="#755" id="755">755</a>
 <a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -812,7 +814,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::error::{
     CatalogSnafu, CreateRecordBatchSnafu, CreateSchemaSnafu, DataFusionSnafu,
     MissingTableMutationHandlerSnafu, MissingTimestampColumnSnafu, QueryExecutionSnafu, <span class="prelude-ty">Result</span>,
-    TableNotFoundSnafu, UnimplementedSnafu, UnsupportedExprSnafu,
+    TableMutationSnafu, TableNotFoundSnafu, UnimplementedSnafu, UnsupportedExprSnafu,
 };
 <span class="kw">use </span><span class="kw">crate</span>::executor::QueryExecutor;
 <span class="kw">use </span><span class="kw">crate</span>::logical_optimizer::LogicalOptimizer;
@@ -947,7 +949,8 @@
             .context(MissingTableMutationHandlerSnafu)<span class="question-mark">?
             </span>.delete(request, query_ctx)
             .<span class="kw">await
-    </span>}
+            </span>.context(TableMutationSnafu)
+    }
 
     <span class="attr">#[tracing::instrument(skip_all)]
     </span><span class="kw">async fn </span>insert&lt;<span class="lifetime">'a</span>&gt;(
@@ -968,7 +971,8 @@
             .context(MissingTableMutationHandlerSnafu)<span class="question-mark">?
             </span>.insert(request, query_ctx)
             .<span class="kw">await
-    </span>}
+            </span>.context(TableMutationSnafu)
+    }
 
     <span class="kw">async fn </span>find_table(<span class="kw-2">&amp;</span><span class="self">self</span>, table_name: <span class="kw-2">&amp;</span>ResolvedTableReference&lt;<span class="lifetime">'_</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;TableRef&gt; {
         <span class="kw">let </span>catalog_name = table_name.catalog.as_ref();

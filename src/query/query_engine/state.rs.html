@@ -264,6 +264,19 @@
 <a href="#263" id="263">263</a>
 <a href="#264" id="264">264</a>
 <a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
+<a href="#271" id="271">271</a>
+<a href="#272" id="272">272</a>
+<a href="#273" id="273">273</a>
+<a href="#274" id="274">274</a>
+<a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -286,7 +299,9 @@
 <span class="kw">use </span>catalog::CatalogManagerRef;
 <span class="kw">use </span>common_base::Plugins;
 <span class="kw">use </span>common_function::function::FunctionRef;
+<span class="kw">use </span>common_function::handlers::{MetaServiceHandlerRef, TableMutationHandlerRef};
 <span class="kw">use </span>common_function::scalars::aggregate::AggregateFunctionMetaRef;
+<span class="kw">use </span>common_function::state::FunctionState;
 <span class="kw">use </span>common_query::physical_plan::SessionContext;
 <span class="kw">use </span>common_query::prelude::ScalarUdf;
 <span class="kw">use </span>common_telemetry::warn;
@@ -314,7 +329,6 @@
 <span class="kw">use </span><span class="kw">crate</span>::query_engine::options::QueryOptions;
 <span class="kw">use </span><span class="kw">crate</span>::range_select::planner::RangeSelectPlanner;
 <span class="kw">use </span><span class="kw">crate</span>::region_query::RegionQueryHandlerRef;
-<span class="kw">use </span><span class="kw">crate</span>::table_mutation::TableMutationHandlerRef;
 <span class="kw">use </span><span class="kw">crate</span>::QueryEngineContext;
 
 <span class="doccomment">/// Query engine global state
@@ -325,7 +339,7 @@
 </span><span class="kw">pub struct </span>QueryEngineState {
     df_context: SessionContext,
     catalog_manager: CatalogManagerRef,
-    table_mutation_handler: <span class="prelude-ty">Option</span>&lt;TableMutationHandlerRef&gt;,
+    function_state: Arc&lt;FunctionState&gt;,
     udf_functions: Arc&lt;RwLock&lt;HashMap&lt;String, FunctionRef&gt;&gt;&gt;,
     aggregate_functions: Arc&lt;RwLock&lt;HashMap&lt;String, AggregateFunctionMetaRef&gt;&gt;&gt;,
     extension_rules: Vec&lt;Arc&lt;<span class="kw">dyn </span>ExtensionAnalyzerRule + Send + Sync&gt;&gt;,
@@ -383,7 +397,11 @@
         <span class="self">Self </span>{
             df_context,
             catalog_manager: catalog_list,
-            table_mutation_handler,
+            function_state: Arc::new(FunctionState {
+                table_mutation_handler,
+                <span class="comment">// FIXME(dennis): implemented in the following PR.
+                </span>meta_service_handler: <span class="prelude-val">None</span>,
+            }),
             aggregate_functions: Arc::new(RwLock::new(HashMap::new())),
             extension_rules,
             plugins,
@@ -467,14 +485,22 @@
         </span>);
     }
 
-    <span class="attr">#[inline]
-    </span><span class="kw">pub fn </span>catalog_manager(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>CatalogManagerRef {
+    <span class="kw">pub fn </span>catalog_manager(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>CatalogManagerRef {
         <span class="kw-2">&amp;</span><span class="self">self</span>.catalog_manager
     }
 
-    <span class="attr">#[inline]
+    <span class="kw">pub fn </span>function_state(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;FunctionState&gt; {
+        <span class="self">self</span>.function_state.clone()
+    }
+
+    <span class="doccomment">/// Returns the [`TableMutationHandlerRef`] in state.
     </span><span class="kw">pub fn </span>table_mutation_handler(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>TableMutationHandlerRef&gt; {
-        <span class="self">self</span>.table_mutation_handler.as_ref()
+        <span class="self">self</span>.function_state.table_mutation_handler.as_ref()
+    }
+
+    <span class="doccomment">/// Returns the [`MetaServiceHandlerRef`] in state.
+    </span><span class="kw">pub fn </span>meta_service_handler(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>MetaServiceHandlerRef&gt; {
+        <span class="self">self</span>.function_state.meta_service_handler.as_ref()
     }
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>disallow_cross_catalog_query(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["function","function_registry","helper","scalars","system"]};
+window.SIDEBAR_ITEMS = {"mod":["function","function_registry","handlers","helper","scalars","state","system","table"]};
