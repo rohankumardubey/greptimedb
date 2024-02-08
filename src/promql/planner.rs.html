@@ -2737,6 +2737,9 @@
 <a href="#2736" id="2736">2736</a>
 <a href="#2737" id="2737">2737</a>
 <a href="#2738" id="2738">2738</a>
+<a href="#2739" id="2739">2739</a>
+<a href="#2740" id="2740">2740</a>
+<a href="#2741" id="2741">2741</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -3031,14 +3034,16 @@
                     </span>(<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; {
                         <span class="kw">let </span>left_input = <span class="self">self</span>.prom_expr_to_plan(<span class="kw-2">*</span>lhs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
                         <span class="kw">let </span>left_field_columns = <span class="self">self</span>.ctx.field_columns.clone();
-                        <span class="kw">let </span><span class="kw-2">mut </span>left_table_ref: OwnedTableReference =
-                            <span class="self">self</span>.ctx.table_name.clone().unwrap_or_default().into();
+                        <span class="kw">let </span><span class="kw-2">mut </span>left_table_ref = OwnedTableReference::bare(
+                            <span class="self">self</span>.ctx.table_name.clone().unwrap_or_default(),
+                        );
                         <span class="kw">let </span>left_context = <span class="self">self</span>.ctx.clone();
 
                         <span class="kw">let </span>right_input = <span class="self">self</span>.prom_expr_to_plan(<span class="kw-2">*</span>rhs.clone()).<span class="kw">await</span><span class="question-mark">?</span>;
                         <span class="kw">let </span>right_field_columns = <span class="self">self</span>.ctx.field_columns.clone();
-                        <span class="kw">let </span><span class="kw-2">mut </span>right_table_ref: OwnedTableReference =
-                            <span class="self">self</span>.ctx.table_name.clone().unwrap_or_default().into();
+                        <span class="kw">let </span><span class="kw-2">mut </span>right_table_ref = OwnedTableReference::bare(
+                            <span class="self">self</span>.ctx.table_name.clone().unwrap_or_default(),
+                        );
                         <span class="kw">let </span>right_context = <span class="self">self</span>.ctx.clone();
 
                         <span class="comment">// TODO(ruihang): avoid join if left and right are the same table
@@ -3311,6 +3316,7 @@
                     .context(NoMetricMatcherSnafu)<span class="question-mark">?</span>,
             );
         }
+
         <span class="self">self</span>.ctx.table_name = metric_name;
 
         <span class="kw">let </span><span class="kw-2">mut </span>matchers = HashSet::new();
@@ -4622,7 +4628,7 @@
             .chain(<span class="self">self</span>.ctx.time_index_column.iter())
             .map(|col| {
                 <span class="prelude-val">Ok</span>(DfExpr::Column(Column::new(
-                    <span class="self">self</span>.ctx.table_name.clone(),
+                    <span class="self">self</span>.ctx.table_name.clone().map(TableReference::bare),
                     col,
                 )))
             });
