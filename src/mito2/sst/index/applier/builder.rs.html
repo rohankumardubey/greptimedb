@@ -340,6 +340,26 @@
 <a href="#339" id="339">339</a>
 <a href="#340" id="340">340</a>
 <a href="#341" id="341">341</a>
+<a href="#342" id="342">342</a>
+<a href="#343" id="343">343</a>
+<a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
+<a href="#346" id="346">346</a>
+<a href="#347" id="347">347</a>
+<a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
+<a href="#352" id="352">352</a>
+<a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
+<a href="#357" id="357">357</a>
+<a href="#358" id="358">358</a>
+<a href="#359" id="359">359</a>
+<a href="#360" id="360">360</a>
+<a href="#361" id="361">361</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -360,7 +380,7 @@
 <span class="kw">mod </span>in_list;
 <span class="kw">mod </span>regex_match;
 
-<span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::collections::{HashMap, HashSet};
 
 <span class="kw">use </span>api::v1::SemanticType;
 <span class="kw">use </span>common_query::logical_plan::Expr;
@@ -396,6 +416,9 @@
     <span class="doccomment">/// Metadata of the region, used to get metadata like column type.
     </span>metadata: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>RegionMetadata,
 
+    <span class="doccomment">/// Column ids to ignore.
+    </span>ignore_column_ids: HashSet&lt;ColumnId&gt;,
+
     <span class="doccomment">/// Stores predicates during traversal on the Expr tree.
     </span>output: HashMap&lt;ColumnId, Vec&lt;Predicate&gt;&gt;,
 }
@@ -407,12 +430,14 @@
         object_store: ObjectStore,
         file_cache: <span class="prelude-ty">Option</span>&lt;FileCacheRef&gt;,
         metadata: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>RegionMetadata,
+        ignore_column_ids: HashSet&lt;ColumnId&gt;,
     ) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             region_dir,
             object_store,
             file_cache,
             metadata,
+            ignore_column_ids,
             output: HashMap::default(),
         }
     }
@@ -480,7 +505,7 @@
     }
 
     <span class="doccomment">/// Helper function to get the column id and the column type of a tag column.
-    /// Returns `None` if the column is not a tag column.
+    /// Returns `None` if the column is not a tag column or if the column is ignored.
     </span><span class="kw">fn </span>tag_column_id_and_type(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         column_name: <span class="kw-2">&amp;</span>str,
@@ -492,8 +517,18 @@
                 column: column_name,
             })<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>((column.semantic_type == SemanticType::Tag)
-            .then(|| (column.column_id, column.column_schema.data_type.clone())))
+        <span class="kw">if </span><span class="self">self</span>.ignore_column_ids.contains(<span class="kw-2">&amp;</span>column.column_id) {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+        }
+
+        <span class="kw">if </span>column.semantic_type != SemanticType::Tag {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+        }
+
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>((
+            column.column_id,
+            column.column_schema.data_type.clone(),
+        )))
     }
 
     <span class="doccomment">/// Helper function to get a non-null literal.
@@ -635,8 +670,13 @@
     <span class="attr">#[test]
     </span><span class="kw">fn </span>test_collect_and_basic() {
         <span class="kw">let </span>metadata = test_region_metadata();
-        <span class="kw">let </span><span class="kw-2">mut </span>builder =
-            SstIndexApplierBuilder::new(<span class="string">"test"</span>.to_string(), test_object_store(), <span class="prelude-val">None</span>, <span class="kw-2">&amp;</span>metadata);
+        <span class="kw">let </span><span class="kw-2">mut </span>builder = SstIndexApplierBuilder::new(
+            <span class="string">"test"</span>.to_string(),
+            test_object_store(),
+            <span class="prelude-val">None</span>,
+            <span class="kw-2">&amp;</span>metadata,
+            HashSet::default(),
+        );
 
         <span class="kw">let </span>expr = DfExpr::BinaryExpr(BinaryExpr {
             left: Box::new(DfExpr::BinaryExpr(BinaryExpr {

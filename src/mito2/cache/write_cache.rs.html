@@ -393,6 +393,10 @@
 <a href="#392" id="392">392</a>
 <a href="#393" id="393">393</a>
 <a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -513,6 +517,7 @@
             row_group_size: write_opts.row_group_size,
             object_store: <span class="self">self</span>.file_cache.local_store(),
             intermediate_manager: <span class="self">self</span>.intermediate_manager.clone(),
+            index_options: write_request.index_options,
         }
         .build();
 
@@ -630,6 +635,7 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
     <span class="kw">use </span><span class="kw">crate</span>::cache::test_util::new_fs_store;
     <span class="kw">use </span><span class="kw">crate</span>::cache::CacheManager;
+    <span class="kw">use </span><span class="kw">crate</span>::region::options::IndexOptions;
     <span class="kw">use </span><span class="kw">crate</span>::sst::file::FileId;
     <span class="kw">use </span><span class="kw">crate</span>::sst::location::{index_file_path, sst_file_path};
     <span class="kw">use </span><span class="kw">crate</span>::sst::parquet::reader::ParquetReaderBuilder;
@@ -674,6 +680,7 @@
             mem_threshold_index_create: <span class="prelude-val">None</span>,
             index_write_buffer_size: <span class="prelude-val">None</span>,
             cache_manager: Default::default(),
+            index_options: IndexOptions::default(),
         };
 
         <span class="kw">let </span>upload_request = SstUploadRequest {
@@ -758,6 +765,7 @@
             mem_threshold_index_create: <span class="prelude-val">None</span>,
             index_write_buffer_size: <span class="prelude-val">None</span>,
             cache_manager: cache_manager.clone(),
+            index_options: IndexOptions::default(),
         };
         <span class="kw">let </span>write_opts = WriteOptions {
             row_group_size: <span class="number">512</span>,

@@ -284,6 +284,21 @@
 <a href="#283" id="283">283</a>
 <a href="#284" id="284">284</a>
 <a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -301,7 +316,7 @@
 </span><span class="kw">mod </span>statistics;
 <span class="kw">mod </span>temp_provider;
 
-<span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::collections::{HashMap, HashSet};
 <span class="kw">use </span>std::num::NonZeroUsize;
 <span class="kw">use </span>std::sync::Arc;
 
@@ -326,7 +341,7 @@
 };
 <span class="kw">use </span><span class="kw">crate</span>::read::Batch;
 <span class="kw">use </span><span class="kw">crate</span>::sst::file::FileId;
-<span class="kw">use </span><span class="kw">crate</span>::sst::index::codec::{IndexValueCodec, IndexValuesCodec};
+<span class="kw">use </span><span class="kw">crate</span>::sst::index::codec::{ColumnId, IndexValueCodec, IndexValuesCodec};
 <span class="kw">use </span><span class="kw">crate</span>::sst::index::creator::statistics::Statistics;
 <span class="kw">use </span><span class="kw">crate</span>::sst::index::creator::temp_provider::TempFileProvider;
 <span class="kw">use </span><span class="kw">crate</span>::sst::index::intermediate::{IntermediateLocation, IntermediateManager};
@@ -358,6 +373,9 @@
     </span>stats: Statistics,
     <span class="doccomment">/// Whether the index creation is aborted.
     </span>aborted: bool,
+
+    <span class="doccomment">/// Ignore column IDs for index creation.
+    </span>ignore_column_ids: HashSet&lt;ColumnId&gt;,
 }
 
 <span class="kw">impl </span>SstIndexCreator {
@@ -396,12 +414,20 @@
 
             stats: Statistics::default(),
             aborted: <span class="bool-val">false</span>,
+
+            ignore_column_ids: HashSet::default(),
         }
     }
 
     <span class="doccomment">/// Sets the write buffer size of the store.
     </span><span class="kw">pub fn </span>with_buffer_size(<span class="kw-2">mut </span><span class="self">self</span>, write_buffer_size: <span class="prelude-ty">Option</span>&lt;usize&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">self</span>.store = <span class="self">self</span>.store.with_write_buffer_size(write_buffer_size);
+        <span class="self">self
+    </span>}
+
+    <span class="doccomment">/// Sets the ignore column IDs for index creation.
+    </span><span class="kw">pub fn </span>with_ignore_column_ids(<span class="kw-2">mut </span><span class="self">self</span>, ignore_column_ids: HashSet&lt;ColumnId&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.ignore_column_ids = ignore_column_ids;
         <span class="self">self
     </span>}
 
@@ -475,6 +501,10 @@
         guard.inc_row_count(n);
 
         <span class="kw">for </span>(column_id, field, value) <span class="kw">in </span><span class="self">self</span>.codec.decode(batch.primary_key())<span class="question-mark">? </span>{
+            <span class="kw">if </span><span class="self">self</span>.ignore_column_ids.contains(column_id) {
+                <span class="kw">continue</span>;
+            }
+
             <span class="kw">if let </span><span class="prelude-val">Some</span>(value) = value.as_ref() {
                 <span class="self">self</span>.value_buf.clear();
                 IndexValueCodec::encode_value(value.as_value_ref(), field, <span class="kw-2">&amp;mut </span><span class="self">self</span>.value_buf)<span class="question-mark">?</span>;

@@ -777,6 +777,12 @@
 <a href="#776" id="776">776</a>
 <a href="#777" id="777">777</a>
 <a href="#778" id="778">778</a>
+<a href="#779" id="779">779</a>
+<a href="#780" id="780">780</a>
+<a href="#781" id="781">781</a>
+<a href="#782" id="782">782</a>
+<a href="#783" id="783">783</a>
+<a href="#784" id="784">784</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -816,6 +822,7 @@
 <span class="kw">use </span><span class="kw">crate</span>::read::projection::ProjectionMapper;
 <span class="kw">use </span><span class="kw">crate</span>::read::seq_scan::SeqScan;
 <span class="kw">use </span><span class="kw">crate</span>::read::{BoxedBatchReader, Source};
+<span class="kw">use </span><span class="kw">crate</span>::region::options::IndexOptions;
 <span class="kw">use </span><span class="kw">crate</span>::request::{
     BackgroundNotify, CompactionFailed, CompactionFinished, OutputTx, WorkerRequest,
 };
@@ -965,6 +972,7 @@
             start_time,
             cache_manager,
             storage: current_version.options.storage.clone(),
+            index_options: current_version.options.index_options.clone(),
         };
         <span class="prelude-val">Some</span>(Box::new(task))
     }
@@ -1030,6 +1038,8 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) cache_manager: CacheManagerRef,
     <span class="doccomment">/// Target storage of the region.
     </span><span class="kw">pub</span>(<span class="kw">crate</span>) storage: <span class="prelude-ty">Option</span>&lt;String&gt;,
+    <span class="doccomment">/// Index options of the region.
+    </span><span class="kw">pub</span>(<span class="kw">crate</span>) index_options: IndexOptions,
 }
 
 <span class="kw">impl </span>Debug <span class="kw">for </span>TwcsCompactionTask {
@@ -1106,6 +1116,7 @@
             <span class="kw">let </span>file_id = output.output_file_id;
             <span class="kw">let </span>cache_manager = <span class="self">self</span>.cache_manager.clone();
             <span class="kw">let </span>storage = <span class="self">self</span>.storage.clone();
+            <span class="kw">let </span>index_options = <span class="self">self</span>.index_options.clone();
             futs.push(<span class="kw">async move </span>{
                 <span class="kw">let </span>reader =
                     build_sst_reader(metadata.clone(), sst_layer.clone(), <span class="kw-2">&amp;</span>output.inputs).<span class="kw">await</span><span class="question-mark">?</span>;
@@ -1120,6 +1131,7 @@
                             create_inverted_index,
                             mem_threshold_index_create,
                             index_write_buffer_size,
+                            index_options,
                         },
                         <span class="kw-2">&amp;</span>write_opts,
                     )
