@@ -307,6 +307,14 @@
 <a href="#306" id="306">306</a>
 <a href="#307" id="307">307</a>
 <a href="#308" id="308">308</a>
+<a href="#309" id="309">309</a>
+<a href="#310" id="310">310</a>
+<a href="#311" id="311">311</a>
+<a href="#312" id="312">312</a>
+<a href="#313" id="313">313</a>
+<a href="#314" id="314">314</a>
+<a href="#315" id="315">315</a>
+<a href="#316" id="316">316</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -601,6 +609,14 @@
     <span class="kw">pub fn </span>sanitize(<span class="kw-2">&amp;mut </span><span class="self">self</span>, data_home: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;()&gt; {
         <span class="kw">if </span><span class="self">self</span>.intermediate_path.is_empty() {
             <span class="self">self</span>.intermediate_path = join_dir(data_home, <span class="string">"index_intermediate"</span>);
+        }
+
+        <span class="kw">if </span><span class="self">self</span>.write_buffer_size &lt; MULTIPART_UPLOAD_MINIMUM_SIZE {
+            <span class="self">self</span>.write_buffer_size = MULTIPART_UPLOAD_MINIMUM_SIZE;
+            <span class="macro">warn!</span>(
+                <span class="string">"Sanitize index write buffer size to {}"</span>,
+                <span class="self">self</span>.write_buffer_size
+            );
         }
 
         <span class="prelude-val">Ok</span>(())
