@@ -205,7 +205,7 @@
 <span class="kw">use </span>arrow_flight::FlightData;
 <span class="kw">use </span>common_grpc::flight::{FlightEncoder, FlightMessage};
 <span class="kw">use </span>common_recordbatch::SendableRecordBatchStream;
-<span class="kw">use </span>common_telemetry::tracing::info_span;
+<span class="kw">use </span>common_telemetry::tracing::{info_span, Instrument};
 <span class="kw">use </span>common_telemetry::tracing_context::{FutureExt, TracingContext};
 <span class="kw">use </span>common_telemetry::warn;
 <span class="kw">use </span>futures::channel::mpsc;
@@ -253,7 +253,7 @@
             <span class="kw">return</span>;
         }
 
-        <span class="kw">while let </span><span class="prelude-val">Some</span>(batch_or_err) = recordbatches.next().<span class="kw">await </span>{
+        <span class="kw">while let </span><span class="prelude-val">Some</span>(batch_or_err) = recordbatches.next().in_current_span().<span class="kw">await </span>{
             <span class="kw">match </span>batch_or_err {
                 <span class="prelude-val">Ok</span>(recordbatch) =&gt; {
                     <span class="kw">if let </span><span class="prelude-val">Err</span>(e) = tx.send(<span class="prelude-val">Ok</span>(FlightMessage::Recordbatch(recordbatch))).<span class="kw">await </span>{

@@ -72,6 +72,12 @@
 <a href="#71" id="71">71</a>
 <a href="#72" id="72">72</a>
 <a href="#73" id="73">73</a>
+<a href="#74" id="74">74</a>
+<a href="#75" id="75">75</a>
+<a href="#76" id="76">76</a>
+<a href="#77" id="77">77</a>
+<a href="#78" id="78">78</a>
+<a href="#79" id="79">79</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -88,6 +94,7 @@
 
 </span><span class="kw">use </span>std::sync::Arc;
 
+<span class="kw">use </span>common_telemetry::tracing_context::TracingContext;
 <span class="kw">use </span>datafusion::execution::context::{SessionState, TaskContext};
 <span class="kw">use </span>session::context::QueryContextRef;
 
@@ -115,9 +122,14 @@
     <span class="kw">pub fn </span>build_task_ctx(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Arc&lt;TaskContext&gt; {
         <span class="kw">let </span>dbname = <span class="self">self</span>.query_ctx.get_db_string();
         <span class="kw">let </span>state = <span class="kw-2">&amp;</span><span class="self">self</span>.state;
+        <span class="kw">let </span>tracing_context = TracingContext::from_current_span();
+
+        <span class="comment">// pass tracing context in session_id
+        </span><span class="kw">let </span>session_id = tracing_context.to_json();
+
         Arc::new(TaskContext::new(
             <span class="prelude-val">Some</span>(dbname),
-            state.session_id().to_string(),
+            session_id,
             state.config().clone(),
             state.scalar_functions().clone(),
             state.aggregate_functions().clone(),

@@ -343,6 +343,7 @@
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
 <a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -366,7 +367,7 @@
 <span class="kw">use </span>common_error::ext::BoxedError;
 <span class="kw">use </span>common_recordbatch::error::ExternalSnafu;
 <span class="kw">use </span>common_recordbatch::{RecordBatch, RecordBatchStreamWrapper, SendableRecordBatchStream};
-<span class="kw">use </span>common_telemetry::{debug, error};
+<span class="kw">use </span>common_telemetry::{debug, error, tracing};
 <span class="kw">use </span>common_time::range::TimestampRange;
 <span class="kw">use </span>snafu::ResultExt;
 <span class="kw">use </span>table::predicate::Predicate;
@@ -631,6 +632,7 @@
     }
 
     <span class="doccomment">/// Fetch a batch from the reader and convert it into a record batch.
+    </span><span class="attr">#[tracing::instrument(skip_all, level = <span class="string">"trace"</span>)]
     </span><span class="kw">async fn </span>fetch_record_batch(
         reader: <span class="kw-2">&amp;mut </span><span class="kw">dyn </span>BatchReader,
         mapper: <span class="kw-2">&amp;</span>ProjectionMapper,

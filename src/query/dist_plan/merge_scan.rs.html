@@ -356,9 +356,6 @@
 <a href="#355" id="355">355</a>
 <a href="#356" id="356">356</a>
 <a href="#357" id="357">357</a>
-<a href="#358" id="358">358</a>
-<a href="#359" id="359">359</a>
-<a href="#360" id="360">360</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -390,7 +387,6 @@
     DfSendableRecordBatchStream, RecordBatch, RecordBatchStreamWrapper, SendableRecordBatchStream,
 };
 <span class="kw">use </span>common_telemetry::tracing_context::TracingContext;
-<span class="kw">use </span>common_telemetry::{tracing, warn};
 <span class="kw">use </span>datafusion::physical_plan::metrics::{
     Count, ExecutionPlanMetricsSet, MetricBuilder, MetricsSet, Time,
 };
@@ -519,8 +515,7 @@
         })
     }
 
-    <span class="attr">#[tracing::instrument(skip_all)]
-    </span><span class="kw">pub fn </span>to_stream(<span class="kw-2">&amp;</span><span class="self">self</span>, context: Arc&lt;TaskContext&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt; {
+    <span class="kw">pub fn </span>to_stream(<span class="kw-2">&amp;</span><span class="self">self</span>, context: Arc&lt;TaskContext&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;SendableRecordBatchStream&gt; {
         <span class="kw">let </span>substrait_plan = <span class="self">self</span>.substrait_plan.to_vec();
         <span class="kw">let </span>regions = <span class="self">self</span>.regions.clone();
         <span class="kw">let </span>region_query_handler = <span class="self">self</span>.region_query_handler.clone();
@@ -528,8 +523,7 @@
         <span class="kw">let </span>schema = <span class="self">Self</span>::arrow_schema_to_schema(<span class="self">self</span>.schema())<span class="question-mark">?</span>;
 
         <span class="kw">let </span>dbname = context.task_id().unwrap_or_default();
-
-        <span class="kw">let </span>tracing_context = TracingContext::from_current_span().to_w3c();
+        <span class="kw">let </span>tracing_context = TracingContext::from_json(context.session_id().as_str());
 
         <span class="kw">let </span>stream = Box::pin(<span class="macro">stream!</span>({
             METRIC_MERGE_SCAN_REGIONS.observe(regions.len() <span class="kw">as </span>f64);
@@ -540,7 +534,7 @@
             <span class="kw">for </span>region_id <span class="kw">in </span>regions {
                 <span class="kw">let </span>request = QueryRequest {
                     header: <span class="prelude-val">Some</span>(RegionRequestHeader {
-                        tracing_context: tracing_context.clone(),
+                        tracing_context: tracing_context.to_w3c(),
                         dbname: dbname.clone(),
                     }),
                     region_id: region_id.into(),

@@ -1227,10 +1227,6 @@
 <a href="#1226" id="1226">1226</a>
 <a href="#1227" id="1227">1227</a>
 <a href="#1228" id="1228">1228</a>
-<a href="#1229" id="1229">1229</a>
-<a href="#1230" id="1230">1230</a>
-<a href="#1231" id="1231">1231</a>
-<a href="#1232" id="1232">1232</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -1356,7 +1352,8 @@
             })
     }
 
-    <span class="kw">pub async fn </span>handle_request(
+    <span class="attr">#[tracing::instrument(skip_all, fields(request_type = request.request_type()))]
+    </span><span class="kw">pub async fn </span>handle_request(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         region_id: RegionId,
         request: RegionRequest,
@@ -1459,6 +1456,7 @@
             .map_err(BoxedError::new)
             .context(ExecuteGrpcRequestSnafu)<span class="question-mark">?</span>;
         <span class="kw">let </span>tracing_context = TracingContext::from_current_span();
+
         <span class="kw">let </span>results = <span class="kw">if </span>is_parallel {
             <span class="kw">let </span>join_tasks = requests.into_iter().map(|(region_id, req)| {
                 <span class="kw">let </span>self_to_move = <span class="self">self</span>.clone();
@@ -1721,17 +1719,11 @@
             CurrentEngine::EarlyReturn(rows) =&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(rows),
         };
 
-        <span class="kw">let </span>engine_type = engine.name();
-
         <span class="comment">// Sets corresponding region status to registering/deregistering before the operation.
         </span><span class="self">self</span>.set_region_status_not_ready(region_id, <span class="kw-2">&amp;</span>engine, <span class="kw-2">&amp;</span>region_change);
 
         <span class="kw">match </span>engine
             .handle_request(region_id, request)
-            .trace(<span class="macro">info_span!</span>(
-                <span class="string">"RegionEngine::handle_region_request"</span>,
-                engine_type
-            ))
             .<span class="kw">await
             </span>.with_context(|<span class="kw">_</span>| HandleRegionRequestSnafu { region_id })
         {

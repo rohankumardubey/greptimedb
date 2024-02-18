@@ -274,6 +274,12 @@
 <a href="#273" id="273">273</a>
 <a href="#274" id="274">274</a>
 <a href="#275" id="275">275</a>
+<a href="#276" id="276">276</a>
+<a href="#277" id="277">277</a>
+<a href="#278" id="278">278</a>
+<a href="#279" id="279">279</a>
+<a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -304,6 +310,7 @@
 <span class="kw">use </span>common_recordbatch::error::ExternalSnafu;
 <span class="kw">use </span>common_recordbatch::{RecordBatchStreamWrapper, SendableRecordBatchStream};
 <span class="kw">use </span>common_telemetry::error;
+<span class="kw">use </span>common_telemetry::tracing_context::TracingContext;
 <span class="kw">use </span>prost::Message;
 <span class="kw">use </span>snafu::{location, Location, OptionExt, ResultExt};
 <span class="kw">use </span>tokio_stream::StreamExt;
@@ -401,7 +408,12 @@
         <span class="kw">let </span>metrics_str = Arc::new(ArcSwapOption::from(<span class="prelude-val">None</span>));
         <span class="kw">let </span>ref_str = metrics_str.clone();
 
+        <span class="kw">let </span>tracing_context = TracingContext::from_current_span();
+
         <span class="kw">let </span>stream = Box::pin(<span class="macro">stream!</span>({
+            <span class="kw">let </span>_span = tracing_context.attach(<span class="macro">common_telemetry::tracing::info_span!</span>(
+                <span class="string">"poll_flight_data_stream"
+            </span>));
             <span class="kw">while let </span><span class="prelude-val">Some</span>(flight_message) = flight_message_stream.next().<span class="kw">await </span>{
                 <span class="kw">let </span>flight_message = flight_message
                     .map_err(BoxedError::new)

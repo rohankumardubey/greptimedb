@@ -501,6 +501,7 @@
 <a href="#500" id="500">500</a>
 <a href="#501" id="501">501</a>
 <a href="#502" id="502">502</a>
+<a href="#503" id="503">503</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -595,7 +596,7 @@
         }
     }
 
-    <span class="attr">#[tracing::instrument(skip_all)]
+    <span class="attr">#[tracing::instrument(skip_all, name = <span class="string">"mysql::do_query"</span>)]
     </span><span class="kw">async fn </span>do_query(<span class="kw-2">&amp;</span><span class="self">self</span>, query: <span class="kw-2">&amp;</span>str, query_ctx: QueryContextRef) -&gt; Vec&lt;<span class="prelude-ty">Result</span>&lt;Output&gt;&gt; {
         <span class="kw">if let </span><span class="prelude-val">Some</span>(output) =
             <span class="kw">crate</span>::mysql::federated::check(query, query_ctx.clone(), <span class="self">self</span>.session.clone())
@@ -838,7 +839,8 @@
         <span class="kw">let _ </span>= guard.remove(<span class="kw-2">&amp;</span>stmt_id);
     }
 
-    <span class="kw">async fn </span>on_query&lt;<span class="lifetime">'a</span>&gt;(
+    <span class="attr">#[tracing::instrument(skip_all)]
+    </span><span class="kw">async fn </span>on_query&lt;<span class="lifetime">'a</span>&gt;(
         <span class="kw-2">&amp;</span><span class="lifetime">'a </span><span class="kw-2">mut </span><span class="self">self</span>,
         query: <span class="kw-2">&amp;</span><span class="lifetime">'a </span>str,
         writer: QueryResultWriter&lt;<span class="lifetime">'a</span>, W&gt;,
