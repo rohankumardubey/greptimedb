@@ -459,11 +459,6 @@
 <a href="#458" id="458">458</a>
 <a href="#459" id="459">459</a>
 <a href="#460" id="460">460</a>
-<a href="#461" id="461">461</a>
-<a href="#462" id="462">462</a>
-<a href="#463" id="463">463</a>
-<a href="#464" id="464">464</a>
-<a href="#465" id="465">465</a>
 </pre></div><pre class="rust"><code><span class="comment">// Copyright 2023 Greptime Team
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -486,8 +481,6 @@
 <span class="kw">use </span>datatypes::vectors::{Int64Vector, StringVector};
 
 <span class="kw">use </span><span class="kw">crate</span>::information_schema::table_names::<span class="kw-2">*</span>;
-
-<span class="kw">const </span>UNKNOWN: <span class="kw-2">&amp;</span>str = <span class="string">"unknown"</span>;
 
 <span class="doccomment">/// Find the schema and columns by the table_name, only valid for memory tables.
 /// Safety: the user MUST ensure the table schema exists, panic otherwise.
@@ -538,30 +531,27 @@
             ],
         ),
 
-        BUILD_INFO =&gt; (
-            string_columns(<span class="kw-2">&amp;</span>[
-                <span class="string">"GIT_BRANCH"</span>,
-                <span class="string">"GIT_COMMIT"</span>,
-                <span class="string">"GIT_COMMIT_SHORT"</span>,
-                <span class="string">"GIT_DIRTY"</span>,
-                <span class="string">"PKG_VERSION"</span>,
-            ]),
-            <span class="macro">vec!</span>[
-                Arc::new(StringVector::from(<span class="macro">vec!</span>[
-                    build_data::get_git_branch().unwrap_or_else(|<span class="kw">_</span>| UNKNOWN.to_string())
-                ])),
-                Arc::new(StringVector::from(<span class="macro">vec!</span>[
-                    build_data::get_git_commit().unwrap_or_else(|<span class="kw">_</span>| UNKNOWN.to_string())
-                ])),
-                Arc::new(StringVector::from(<span class="macro">vec!</span>[
-                    build_data::get_git_commit_short().unwrap_or_else(|<span class="kw">_</span>| UNKNOWN.to_string())
-                ])),
-                Arc::new(StringVector::from(<span class="macro">vec!</span>[
-                    build_data::get_git_dirty().map_or(UNKNOWN.to_string(), |v| v.to_string())
-                ])),
-                Arc::new(StringVector::from(<span class="macro">vec!</span>[<span class="macro">option_env!</span>(<span class="string">"CARGO_PKG_VERSION"</span>)])),
-            ],
-        ),
+        BUILD_INFO =&gt; {
+            <span class="kw">let </span>build_info = common_version::build_info();
+            (
+                string_columns(<span class="kw-2">&amp;</span>[
+                    <span class="string">"GIT_BRANCH"</span>,
+                    <span class="string">"GIT_COMMIT"</span>,
+                    <span class="string">"GIT_COMMIT_SHORT"</span>,
+                    <span class="string">"GIT_DIRTY"</span>,
+                    <span class="string">"PKG_VERSION"</span>,
+                ]),
+                <span class="macro">vec!</span>[
+                    Arc::new(StringVector::from(<span class="macro">vec!</span>[build_info.branch.to_string()])),
+                    Arc::new(StringVector::from(<span class="macro">vec!</span>[build_info.commit.to_string()])),
+                    Arc::new(StringVector::from(<span class="macro">vec!</span>[build_info
+                        .commit_short
+                        .to_string()])),
+                    Arc::new(StringVector::from(<span class="macro">vec!</span>[build_info.dirty.to_string()])),
+                    Arc::new(StringVector::from(<span class="macro">vec!</span>[build_info.version.to_string()])),
+                ],
+            )
+        }
 
         CHARACTER_SETS =&gt; (
             <span class="macro">vec!</span>[
